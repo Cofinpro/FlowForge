@@ -113,11 +113,70 @@ flowchart LR
 `bpmn-to-agentic-workflow` ist der Einstieg und führt die fünf Stufen samt Rücksprüngen. Ändert sich
 das Diagramm später, fragt ein neuer Lauf nur nach neuen oder geänderten Elementen.
 
-Grob übersetzt: Lane → Agent, `serviceTask` → Skill, `userTask` → menschlicher Prüfpunkt,
-`scriptTask`/mechanische Regel → Skript, Prüfung mit Urteil (INVEST, DoR) → Skill-Text, Hook nur, wenn
-ein Tool-Aufruf wirklich blockiert werden muss,
-Gateways und Schleifen → Steuerlogik mit Obergrenze, Datenobjekt → Artefaktvertrag. Die vollständigen
-Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
+Was aus welchem BPMN-Element wird, steht im nächsten Abschnitt.
+
+## Vom BPMN-Element zum Skill, Agenten und Workflow
+
+Die Pipeline liest ein Diagramm nach festen Regeln, den **Rubriken**. `mapping-rubric.md` entscheidet
+je Element, was daraus wird; `pattern-rubric.md` wählt, wie die Teile zusammenspielen. Das Ergebnis
+legt `bpmn2agent-design` dir als Mapping-Plan zur Bestätigung vor, bevor etwas erzeugt wird.
+
+### Was jedes Element bedeutet
+
+| Du zeichnest | bedeutet im Prozess | wird zu |
+|---|---|---|
+| **Lane** | eine Rolle (PO, UX, Entwicklung, QA …) | eine Rolle; ein eigener Agent nur beim Muster Orchestrator-Agent, sonst eine Perspektive in den Skills |
+| **Service Task** | Arbeit, die ein Agent erledigt | ein **Skill**, wenn der Schritt Vorlage, Checkliste oder Fachwissen braucht, wiederverwendet wird oder ein eigenes Artefakt liefert; sonst ein Schritt in einem Skill |
+| **User Task** / **Manual Task** | ein Mensch entscheidet oder bestätigt | ein **Prüfpunkt**: der Ablauf hält an und fragt mit Optionen und Empfehlung |
+| **Script Task** | deterministisch, gleiche Eingabe gibt immer das gleiche Ergebnis | ein **Skript** im Skill der Lane, eine Datei mit Node-Bordmitteln, ohne Installation |
+| **Business Rule Task** | eine Prüfung gegen eine Regel | mechanische Regel (Schwelle, Pflichtfeld) → Skript; Prüfung mit Urteil (INVEST, Definition of Ready) → Checkliste im Skill; ein **Hook** nur, wenn ein Tool-Aufruf wirklich blockiert werden muss |
+| **Task** ohne Typ | unklar | eine Rückfrage an dich; besser gleich typisieren |
+| **Exklusives Gateway** | eine Entscheidung | eine Verzweigung im Ablauf; verlangt sie ein Urteil, schlägt der Ablauf den Zweig mit Begründung vor, Ausgänge und Rücksprünge bestätigst du |
+| **Paralleles / inklusives Gateway** | mehrere Dinge gleichzeitig | parallele Schritte, im geführten Ablauf als getrennte Perspektiven nacheinander |
+| **Schleife** (Rückfluss über ein Merge-Gateway) | Nacharbeit | eine Wiederholung mit Obergrenze (Standard 3); an der Grenze geht es mit Risikohinweis weiter oder der Ablauf fragt dich |
+| **Start- / Endereignis** | Auslöser und Ergebnis | Einstieg bzw. Abschluss; ein vorzeitiges Ende hinterlässt eine Übergabenotiz |
+| **Zugeklappter Teilprozess** / **Call Activity** | eine Phase mit eigenem Innenleben | ein wiederverwendbarer Skill oder ein eigener Teil-Workflow |
+| **Mehrfachinstanz** | dasselbe je Element einer Menge | ein Schritt je Element, z. B. je Epic |
+| **Datenobjekt** | ein Arbeitsergebnis | ein **Artefaktvertrag**: fester Ablageort und Kopfdaten (`status`, `version`), über die die Schritte sich übergeben und ein Lauf fortgesetzt werden kann |
+| **Fehler-Randereignis** | ein Fehlerpfad | ein Fehlerzweig in der Steuerlogik |
+
+Noch nicht unterstützt: Pools mit Nachrichtenflüssen, Timer- und Nachrichtenereignisse,
+Event-Teilprozesse, Kompensation. `bpmn2agent-analyze` meldet sie und schlägt einen Umbau vor
+(z. B. „bis zu 3 Versuche“ statt eines Timers). Bleibst du dabei, wird das Element eine bewusste,
+grau markierte Lücke.
+
+### Wie die Teile zusammenspielen
+
+`pattern-rubric.md` zählt im Diagramm menschliche Aufgaben, Parallelität, Mehrfachinstanzen,
+Schleifen und Entscheidungen, die ein Urteil verlangen, und wählt daraus ein Muster:
+
+| Muster | passt, wenn | du bekommst |
+|---|---|---|
+| **Skill-Kette** | ein Mensch begleitet den Ablauf, der fast linear ist | einen Einstiegs-Skill, der die Schritte der Reihe nach aufruft und an den Prüfpunkten anhält |
+| **Workflow-Skript** | der Ablauf läuft unbeaufsichtigt, mit echter Parallelität und klaren Regeln | ein Skript für das Workflow-Werkzeug von Claude Code; es startet nur, wenn du es startest |
+| **Orchestrator-Agent** | Verzweigungen verlangen im Einzelfall ein Urteil, ohne dass ein Mensch dabei ist | einen koordinierenden Agenten, der Fall für Fall an Spezialisten-Agenten je Lane übergibt |
+| **gemischt** | Phasen haben deutlich verschiedene Form | je Phase eines der drei Muster, mit klarer Übergabe |
+
+Im Zweifel gewinnt das einfachere Muster.
+
+### So zeichnest du, damit es gut wird
+
+- **Lanes für Rollen**, und jedes Element in eine Lane.
+- **Aufgaben typisieren**: Service, User, Script oder Business Rule Task statt eines leeren Tasks.
+- **Gateways als Frage benennen** („Definition of Ready erfüllt?“) und jeden ausgehenden Fluss
+  beschriften („Ja“, „Kriterien unklar“). Einen Standardfluss setzen, wenn es einen normalen Weg
+  gibt.
+- **Schleifen über ein eigenes Merge-Gateway** zurückführen.
+- **`Input: … Output: …` in die Dokumentation** jeder Aufgabe schreiben und die wichtigen
+  Arbeitsergebnisse als **Datenobjekte** einzeichnen. Daraus werden Eingaben, Ausgaben und
+  Ablageorte.
+- **Labels in deiner Sprache**: sie bleiben wörtlich erhalten und tauchen in den Skills wieder auf.
+
+`bpmn-authoring` hilft beim Zeichnen und prüft das Diagramm gegen XSD, bpmn-moddle und bpmnlint.
+Die vollständigen Regeln stehen in
+[`mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md) und
+[`pattern-rubric.md`](.agents/skills/bpmn2agent-design/references/pattern-rubric.md), knapp
+zusammengefasst in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
 
 ## Fachwissen aus Gemini-Notebooks
 

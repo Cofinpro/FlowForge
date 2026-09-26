@@ -89,11 +89,11 @@ Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinande
 
 | BPMN | wird zu |
 |---|---|
-| Lane | Agent-Rolle |
+| Lane | Rolle; eigener Agent nur beim Muster Orchestrator-Agent |
 | `serviceTask` | Skill (wiederverwendet, braucht Material, eigenes Artefakt) oder Checklistenpunkt des Agenten |
 | `userTask` / `manualTask` | menschlicher Prüfpunkt (`AskUserQuestion`) |
 | `scriptTask` | Skript im Skill der Lane |
-| `businessRuleTask`, Bedingung | Skript; Hook nur, wenn ein Tool-Aufruf physisch blockiert werden muss |
+| `businessRuleTask`, Bedingung | mechanische Regel → Skript; Prüfung mit Urteil (INVEST, DoR) → Checkliste im Skill; Hook nur, wenn ein Tool-Aufruf physisch blockiert werden muss |
 | Gateway, Schleife, Start/Ende | Steuerlogik im Orchestrierungsmuster, keine eigene Datei |
 | aufgeklappter Teilprozess / Call Activity | wiederverwendbarer Skill oder eigener Teil-Workflow |
 | Datenobjekt | Artefaktvertrag |
