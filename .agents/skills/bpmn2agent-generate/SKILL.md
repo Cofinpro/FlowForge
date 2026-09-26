@@ -1,6 +1,6 @@
 ---
 name: bpmn2agent-generate
-description: Writes the confirmed workflow-spec.yaml out as real files — agents, skills, scripts, hooks, an orchestrator (skill chain / Claude Code Workflow script / orchestrator agent, per the confirmed pattern), a README with install instructions, and a mapping report — the fifth step of the bpmn-to-agentic-workflow pipeline (analyze → knowledge → design → generate → verify). Everything is written under generated/<workflow>/ only, never into .agents/ or .claude/ directly. Every generated file carries bpmn: {file, elements} traceability (frontmatter for Markdown, a header comment for scripts). Use right after bpmn2agent-design has confirmed the spec with the business user, before bpmn2agent-verify.
+description: Writes the confirmed workflow-spec.yaml out as real files — agents, skills, hooks, the few scripts the diagram really needs, an orchestrator (skill chain / Claude Code Workflow script / orchestrator agent, per the confirmed pattern), a README with the one-line install, and a mapping report — the fifth step of the bpmn-to-agentic-workflow pipeline (analyze → knowledge → design → generate → verify). Installable files go to generated/<workflow>/.claude/ in the exact layout of a project's .claude/ folder (one settings.json for the hooks), so installing is a single copy; review material (spec, mapping, knowledge) stays next to it. Never writes into a real .agents/ or .claude/. Every generated file carries bpmn: {file, elements} traceability (frontmatter for Markdown, a header comment for scripts). Use right after bpmn2agent-design has confirmed the spec with the business user, before bpmn2agent-verify.
 bpmn:
   file: docs/planning/bpmn-to-agentic-workflow.bpmn
   elements:
@@ -19,8 +19,34 @@ Fifth step of the `bpmn-to-agentic-workflow` pipeline. Input is the **confirmed*
 `generated/<workflow>/workflow-spec.yaml` — every element has a concrete `kind`, `pattern.chosen`
 is set, roles/artifacts are filled in. This skill only materializes what the spec already decided;
 it never makes a mapping or pattern call itself (that's `bpmn2agent-design`'s job) and it never
-writes outside `generated/<workflow>/` — installing into `.agents/`/`.claude/`/`.codex/` is a
-manual step the generated `README.md` walks the user through, not something this skill does.
+writes outside `generated/<workflow>/` — installing is one copy command the generated `README.md`
+gives the user, not something this skill does.
+
+## Output layout
+
+With `meta.outputLayout: claude-dir` (every new spec) the output splits into what the user copies
+and what they review:
+
+```text
+generated/<workflow>/
+  .claude/                              ← the whole installable payload, copied as-is
+    agents/<name>.md
+    skills/<name>/SKILL.md              (+ references/, assets/, scripts/ only where design put a script)
+    hooks/<name>.mjs                    (only for kind: hook)
+    workflows/<workflow>.workflow.mjs   (workflow-script pattern only)
+    settings.json                       (only when there are hooks: registers every hook)
+  README.md                             ← install + what was generated (meta.language)
+  workflow-spec.yaml  knowledge/  mapping/   ← review material, never copied
+```
+
+Hook commands and script calls address files as they will be after the copy:
+`"$CLAUDE_PROJECT_DIR"/.claude/hooks/<name>.mjs` in `settings.json`, `${CLAUDE_SKILL_DIR}/scripts/<x>.mjs`
+inside a `SKILL.md`. Never `${CLAUDE_PLUGIN_ROOT}`, never a path into `generated/`.
+
+A spec without `outputLayout` is on the **legacy** layout (the dark-factory example): the same
+steps, but `skills/`, `agents/`, `<workflow>.workflow.mjs` sit directly under
+`generated/<workflow>/` and each hook gets a `<name>.hook.settings.json` snippet instead of the
+shared `settings.json`. Don't convert a legacy spec on your own; ask first.
 
 ## 1. Read and sanity-check the spec
 
@@ -70,13 +96,10 @@ skill wrapping several scripts). Three concrete forms, by file type:
   ```
   For the Workflow script this line still comes *before* the required `export const meta = {...}`
   — a leading comment doesn't violate "script must begin with `export const meta`".
-- **JSON files that must stay clean, mergeable config** (a hook's `*.settings.json` snippet — see
-  step 6): JSON has no comment syntax and this file gets spliced verbatim into the user's own
-  `settings.json`, so it carries **no** frontmatter of its own. Traceability instead flows through
-  the paired hook script (same basename, e.g. `check-threshold.hook.mjs` +
-  `check-threshold.hook.settings.json`) — the mapping report's row for that element names both
-  paths together so the pairing is explicit on the page a reader (or `bpmn2agent-verify`) actually
-  looks at.
+- **`.claude/settings.json`** (step 6): JSON has no comment syntax and the file is copied into the
+  user's project, so it carries **no** frontmatter. Traceability flows through the hook scripts it
+  registers; `bpmn2agent-verify` checks that it registers exactly the scripts under
+  `.claude/hooks/`.
 
 BPMN element labels are quoted **verbatim** (source language) everywhere they appear in a
 generated file's prose — headings, checklist items, mapping-report rows. Everything else in a
@@ -88,7 +111,9 @@ generated `SKILL.md`/agent/script is **English** (the pipeline's language rule),
 Before writing anything, decide per `roles.<id>` what gets materialized, from that role's elements
 (`elements.<id>.lane == roleId`):
 
-- **Lane skill** (`generated/<workflow>/skills/<agentName>/`): generated whenever the lane has
+Paths below are written for the claude-dir layout (`.claude/…` under `generated/<workflow>/`).
+
+- **Lane skill** (`generated/<workflow>/.claude/skills/<agentName>/`): generated whenever the lane has
   **any** `kind: script` element — every such element's script lives here
   (`scripts/<name>.mjs`, wherever its own `generatedPaths` entry actually points), wrapped in a
   minimal `SKILL.md` (step 5) naming the scripts it bundles. This is the case the plan calls out
@@ -97,7 +122,7 @@ Before writing anything, decide per `roles.<id>` what gets materialized, from th
   produces a file of its own) gets nothing but this — no agent, no chain file of its own; it's
   invoked as a step from whichever file owns the overall sequence (the top-level chain/Workflow-
   script/orchestrator file from step 7).
-- **Specialist agent** (`generated/<workflow>/agents/<agentName>.md`): generated **only** when
+- **Specialist agent** (`generated/<workflow>/.claude/agents/<agentName>.md`): generated **only** when
   `pattern.chosen` is `orchestrator-agent` (or a `mixed` phase using that pattern) **and** the lane
   has at least one `kind: human-checkpoint`, `kind: orchestrator`, or `kind: agent-checklist`
   element — these are the "roster" specialists the orchestrator dispatches to via the `Agent` tool
@@ -105,7 +130,7 @@ Before writing anything, decide per `roles.<id>` what gets materialized, from th
   `workflow-script` — those patterns have no delegation step, so a persona file per lane would be
   dead weight; the lane's human-checkpoint/orchestrator logic instead lives inline in the one
   top-level file step 7 produces.
-- **Reusable skill** (`generated/<workflow>/skills/<name>/`, one per `kind: skill` element, or one
+- **Reusable skill** (`generated/<workflow>/.claude/skills/<name>/`, one per `kind: skill` element, or one
   shared dir when the rubric grouped several reused elements together): generated regardless of
   pattern — write to exactly the element's own `generatedPaths` entry. When the element is a
   collapsed `subProcess`/`callActivity` that mapping-rubric.md's "Inner elements of a skill-backed
@@ -113,7 +138,7 @@ Before writing anything, decide per `roles.<id>` what gets materialized, from th
   skill: inner `serviceTask`/`userTask`/`businessRuleTask` steps share this element's own
   `generatedPaths` (their content becomes more `## Procedure` steps + more ids in this file's
   `bpmn:` header, per step 2's superset rule), an inner `scriptTask` still gets its own bundled
-  file at `generated/<workflow>/skills/<name>/scripts/<inner-name>.mjs` (step 4, just nested here
+  file at `generated/<workflow>/.claude/skills/<name>/scripts/<inner-name>.mjs` (step 4, just nested here
   instead of a lane skill), and inner start/end events produce nothing (already `kind:
   not-generated` from design). Don't generate a separate file per inner element — that's not what
   `bpmn2agent-verify`'s header/claim checks or `render-mapping.mjs`'s annotations expect.
@@ -132,6 +157,12 @@ header comment (step 2), then the deterministic rule itself — derive it from t
 any `elements.<id>.condition` text, and (if grounded) the copied knowledge note. A `businessRuleTask`
 that stayed `script` (not `hook`) per `mapping-rubric.md`'s decision — i.e. it doesn't gate a tool
 call — still just gets this treatment; don't second-guess the `kind` design already chose.
+
+Every script is one self-contained file using Node built-ins only: no npm imports, no `lib/`
+folder, no `package.json`, no install or setup step, JSON rather than YAML for structured input.
+Write no script that isn't some element's `generatedPaths` entry — no run-state, commit, trace or
+loader helpers; that bookkeeping belongs in the skill text. If a rule seems to need a package or a
+helper, it probably isn't mechanical: send it back to `bpmn2agent-design` as a skill instead.
 
 ## 5. Materialize skills (`kind: skill`, lane skills, and the skill-chain's top-level skill)
 
@@ -153,7 +184,7 @@ inputs, stop and escalation points, `tools`/`model` only where design decided th
   `scripts/<name>.mjs`"); usually no `## Domain knowledge` section (scripts rarely carry grounded
   content — omit the section rather than leaving it empty).
 - **Skill-chain top-level skill** (`skill-chain-hooks` pattern only, one per workflow):
-  `generated/<workflow>/skills/<workflow>/SKILL.md`. `elements` lists **every** element in the
+  `generated/<workflow>/.claude/skills/<workflow>/SKILL.md`. `elements` lists **every** element in the
   spec (this file is the spine the whole diagram runs through). Its `description` frontmatter
   names it as the entry point ("Runs the {{workflow}} workflow end to end — invoke this to start
   it"). `## Procedure` walks the **entire** flow in BPMN order, crossing lane boundaries exactly as
@@ -174,18 +205,20 @@ inputs, stop and escalation points, `tools`/`model` only where design decided th
 
 ## 6. Materialize hooks (`kind: hook`)
 
-For each such element, write **two** files at its `generatedPaths` entries (design records both —
-the script and the settings snippet):
+For each such element write its hook script at its `generatedPaths` entry
+(`.claude/hooks/<name>.mjs`) from `assets/templates/hook-script-template.mjs` — header comment
+(step 2), the event picked from `mapping-rubric.md`'s event table (`PreToolUse`/`PostToolUse`/
+`Stop`/`SubagentStop`, matching the reasoning the table records), and the gate condition itself
+from `elements.<id>.condition`/`gate.criteria`. Built-ins only, like every script (step 4).
 
-- `<...>.hook.mjs` from `assets/templates/hook-script-template.mjs` — header comment (step 2), the
-  event picked from `mapping-rubric.md`'s event table (`PreToolUse`/`PostToolUse`/`Stop`/
-  `SubagentStop`, matching the reasoning the table records), and the gate condition itself from
-  `elements.<id>.condition`/`gate.criteria`.
-- `<...>.hook.settings.json` (same basename) from `assets/templates/hook-settings-snippet-template.json`
-  — no frontmatter (step 2's JSON exception), just the mergeable `hooks.<Event>` fragment.
+Then write **one** `.claude/settings.json` from `assets/templates/settings-template.json` that
+registers every hook script: one entry per hook under `hooks.<Event>`, `matcher` for tool events,
+`"command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/<name>.mjs"`. Nothing else goes into this
+file (no permissions, no model, no env) — it has to be safe to copy, or to merge by its `hooks` key
+into a project that already has a `settings.json`. No hooks → no `settings.json`.
 
-Verify both files' basenames match before moving on — `bpmn2agent-verify` traces the JSON snippet
-through this pairing, not through its own (absent) header.
+(Legacy layout: a `<name>.hook.settings.json` snippet per hook next to `<name>.hook.mjs`, from the
+same template's `hooks` block.)
 
 ## 7. Materialize the one top-level orchestration file
 
@@ -194,7 +227,8 @@ Exactly one of these, by `pattern.chosen` (for `mixed`, one per phase — see th
 - **`skill-chain-hooks`**: already produced in step 5 (the skill-chain top-level skill) — nothing
   further here.
 - **`workflow-script`**: `assets/templates/workflow-script-template.mjs` →
-  `generated/<workflow>/<workflow>.workflow.mjs`. One `phase()` per contiguous run of elements;
+  `generated/<workflow>/.claude/workflows/<workflow>.workflow.mjs` (where Claude Code looks for
+  saved workflows, so the user can run it by name after the copy). One `phase()` per contiguous run of elements;
   `agent()` per `serviceTask`; `parallel()`/`pipeline()` for the fan-out a `parallelGateway`/
   `inclusiveGateway`/multi-instance marker represents (default `pipeline()` unless a later stage
   genuinely needs every result of the current one together, per `workflow-authoring`'s
@@ -202,7 +236,7 @@ Exactly one of these, by `pattern.chosen` (for `mixed`, one per phase — see th
   **This file is only ever a saved script — never invoke it.** Say so in the README (step 8); the
   business user runs it deliberately via the Workflow tool.
 - **`orchestrator-agent`**: `assets/templates/orchestrator-agent-template.md` →
-  `generated/<workflow>/agents/<workflow>-orchestrator.md`, roster = the specialist agents step 3
+  `generated/<workflow>/.claude/agents/<workflow>-orchestrator.md`, roster = the specialist agents step 3
   planned. It owns every `kind: orchestrator` element's decision and every `kind: human-checkpoint`
   element's pause-and-ask, dispatching via the `Agent` tool — the *only* generated file allowed to
   call `Agent` on another generated agent (same rule this repo's own `task-delegator` follows).
@@ -228,12 +262,13 @@ elements, no "Workflow script"/"Orchestrator agent" section for a pattern that d
 Must include, per the plan's settled decisions:
 
 - What was generated, with `generated/<workflow>/` named explicitly as the only place anything was
-  written.
-- Copy/symlink instructions for `.agents/` + `.claude/` (this repo's own canonical-plus-symlink
-  pairing, `cp -r` the skill then `ln -s ../../.agents/skills/<name> .claude/skills/<name>`),
-  `.codex/` (skills only — copy, since they're written runtime-neutral), and an explicit
-  **Claude-only** callout on hooks, the Workflow script, and any generated subagent — these have no
-  equivalent outside Claude Code.
+  written, and which part is the payload (`.claude/`) versus review material.
+- Installing is one copy: `cp -R generated/<workflow>/.claude/. <project>/.claude/`. The only
+  merge case is a project that already has a `.claude/settings.json`: then merge the `hooks` key
+  by hand (say which events). Name clashes with existing skills/agents are worth a look before
+  copying (`ls`). No install script, no `npm install`.
+- `.codex/` or other runtimes: skills only (copy `.claude/skills/*`), and an explicit
+  **Claude-only** callout on hooks, the Workflow script and any generated subagent.
 - The Workflow-script section (if any) stating plainly that it only ever runs when the user
   explicitly invokes it — never automatically, not even by this pipeline.
 - Every `openQuestions[]` entry with `answer: null`, so a reader doesn't have to open the YAML to
@@ -295,11 +330,15 @@ panning, a readable start zoom, no collapse at 390 px, and a working sidebar wit
   doesn't fix it either — that rejects the top-level `await` instead). Wrap everything **after**
   the `export const meta = {...}` block in `(async () => { ... })();` before checking — the export
   itself must stay at module top level, only the script body needs wrapping.
-- Every `*.settings.json` parses: `node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" <file>`.
+- `.claude/settings.json` (if any) parses and registers every `.claude/hooks/*.mjs`:
+  `node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" <file>`.
+- No `.mjs` under `.claude/` imports anything but `node:*` built-ins or relative files, and there is
+  no `package.json` in the payload.
 - Every path in every element's `generatedPaths` exists on disk, and nothing was written to a path
-  *not* traceable to a `generatedPaths` entry, the one top-level orchestration file from step 7, or
-  companion material bundled inside a generated `skills/<name>/` or `agents/<name>/` directory (e.g.
-  a skill's `references/*.md` — the same allowance `bpmn2agent-verify` makes).
+  *not* traceable to a `generatedPaths` entry, the one top-level orchestration file from step 7,
+  `.claude/settings.json`, or companion material bundled inside a generated `skills/<name>/` or
+  `agents/<name>/` directory (e.g. a skill's `references/*.md` — the same allowance
+  `bpmn2agent-verify` makes).
 - Nothing was written outside `generated/<workflow>/`.
 - Quality pass: delegate `generated/<workflow>/` to the `agentic-artifact-reviewer` agent (it runs
   the skill-authoring and agent-authoring review checklists). Apply findings routed `generate`
@@ -322,7 +361,7 @@ Report to the user: workflow name, pattern chosen, what was generated (counts of
 scripts/hooks + the one top-level file), whether the mapping view rendered (step 10) or was
 skipped and why, and every red (`kind: unresolved`) element from the mapping report — these need a
 decision (back to `bpmn2agent-design`, or the diagram itself) before `bpmn2agent-verify` can pass.
-Point at `README.md` for what to do next (install instructions) and `mapping/report.md` for the
+Point at `README.md` for what to do next (the one copy command) and `mapping/report.md` for the
 full trace.
 
 ## Reference files
@@ -333,8 +372,8 @@ full trace.
 - `assets/templates/skill-template.md` — reusable skill, lane skill, and the skill-chain's
   top-level skill (step 5).
 - `assets/templates/script-template.mjs` — `kind: script` (step 4).
-- `assets/templates/hook-script-template.mjs` + `assets/templates/hook-settings-snippet-template.json`
-  — `kind: hook`'s paired files (step 6).
+- `assets/templates/hook-script-template.mjs` — `kind: hook` scripts (step 6).
+- `assets/templates/settings-template.json` — the one `.claude/settings.json` registering them (step 6).
 - `assets/templates/workflow-script-template.mjs` — `workflow-script` pattern's one file (step 7);
   read the `workflow-authoring` skill (via the `Skill` tool) for the actual script API before
   filling this in — the template only sketches the shape.
@@ -348,5 +387,5 @@ full trace.
 - `scripts/check-mapping-view.mjs` — headless-browser check of the viewer (step 10).
 - `${CLAUDE_SKILL_DIR}/../skill-authoring/SKILL.md`, `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md` — how to
   fill the skill and agent templates well (steps 3, 5, 7).
-- `.agents/agents/agentic-artifact-reviewer.md` — the quality pass in step 11.
+- `agentic-artifact-reviewer` agent — the quality pass in step 11.
 - `${CLAUDE_SKILL_DIR}/../trim-the-fat/SKILL.md` — the optional trim in step 11 (user-invoked only).

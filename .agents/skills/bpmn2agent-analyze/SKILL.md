@@ -120,7 +120,9 @@ Write (or refresh — see step 7) `generated/<workflow>/workflow-spec.yaml`, con
 
 - **`meta`** — `workflowName`, `sourceBpmn.path`/`sha256` (from the inventory's `meta.sha256`),
   `language` (the user's language, from the interview), `generatorVersion` (this skill family's
-  version), `created`/`updated` timestamps.
+  version), `created`/`updated` timestamps, and `outputLayout: claude-dir` for every new spec
+  (installable files under `generated/<workflow>/.claude/`). On a re-run keep whatever the spec
+  already has; a spec without the field is on the legacy layout.
 - **`roles`** — one entry per lane (or per resolved documentation-fallback role from step 5),
   `bpmnLaneId`, `label` (verbatim lane name), `agentName` left as a reasonable kebab-case guess
   (`{workflow}-{role}`) for `bpmn2agent-design` to confirm or rename. Leave `modelTier`/`tools`

@@ -55,6 +55,17 @@
 //                          answer: null, and — only if it exists — mapping/workflow-mapped.bpmn
 //                          itself still passes validate.sh.
 //
+// ── Output layouts (spec.meta.outputLayout) ───────────────────────────────────────────────
+// - claude-dir: everything a user installs sits under <generatedDir>/.claude/ in the layout of a
+//   project's own .claude/ folder (skills/, agents/, hooks/, workflows/, settings.json), so
+//   installing is one copy. Extra checks: skill/script/hook generatedPaths must point inside
+//   .claude/; .claude/settings.json is valid JSON and references exactly the hook scripts under
+//   .claude/hooks/ (both directions); no *.hook.settings.json snippets; every .mjs under .claude/
+//   imports only Node built-ins or relative files (no npm packages, nothing to install); no
+//   package.json under .claude/.
+// - legacy (default when the field is absent, e.g. the dark-factory example): skills/, agents/,
+//   hooks/*.hook.settings.json snippets and <workflow>.workflow.mjs directly under <generatedDir>.
+//
 // ── Design notes / judgement calls (documented here so a reader doesn't have to reverse them) ──
 // - sha256 mismatch is a HARD FAIL, not a warning: every other check in this file assumes the
 //   recorded hash still describes what's on disk (the schema's own doc comment says a mismatch
@@ -85,7 +96,7 @@
 //   first byte to work as a shebang at all). workflow-script-template.mjs has no shebang (it's
 //   never executed directly — see its own template comment) and puts the header on line 1. This
 //   script accepts either: line 1, or line 2 if line 1 starts with "#!".
-import { createRequire } from 'node:module';
+import { builtinModules, createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -314,7 +325,8 @@ function wrapCheckWorkflowScript(content, tmpDir) {
 function walkFiles(dir, base = dir) {
   const out = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith('.')) continue; // skip dotfiles/.git/.DS_Store etc.
+    // skip dotfiles/.git/.DS_Store etc. — except the top-level .claude/ payload of the claude-dir layout
+    if (entry.name.startsWith('.') && !(entry.name === '.claude' && dir === base && entry.isDirectory())) continue;
     const abs = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...walkFiles(abs, base));
     else out.push(path.relative(base, abs).split(path.sep).join('/'));
@@ -362,6 +374,8 @@ const sourceCat = category('source-bpmn', 'Source .bpmn (hash + structural valid
 let inventory = null;
 let sourceBpmnAbsPath = null;
 const workflowName = spec?.meta?.workflowName;
+const outputLayout = spec?.meta?.outputLayout === 'claude-dir' ? 'claude-dir' : 'legacy';
+const payloadPrefix = outputLayout === 'claude-dir' ? '.claude/' : ''; // where skills/, agents/, ... live
 const sourceBpmnRelPath = spec?.meta?.sourceBpmn?.path;
 const recordedSha256 = spec?.meta?.sourceBpmn?.sha256;
 
@@ -418,7 +432,7 @@ if (!spec) {
 const elCat = category('element-to-artifact', 'Element -> artifact trace');
 // claimedBy: relPath (posix, relative to generatedDir) -> Set<elementId>
 const claimedBy = new Map();
-// skillRoots: 'skills/<name>' or 'agents/<name>' directory prefixes bundled files may live under
+// skillRoots: '[.claude/]skills/<name>' or '[.claude/]agents/<name>' directory prefixes bundled files may live under
 const skillRoots = new Set();
 const expectedPrefix = workflowName ? `generated/${workflowName}/` : null;
 
@@ -442,6 +456,7 @@ if (!spec || !inventory) {
 
   const flowNodeIds = new Set((inventory.flowNodes || []).map((n) => n.id));
   const needsGeneratedPaths = new Set(['skill', 'script', 'hook', 'artifact-contract']);
+  const payloadKinds = new Set(['skill', 'script', 'hook']);
 
   for (const [id, el] of Object.entries(specElements)) {
     if (!flowNodeIds.has(id)) {
@@ -464,9 +479,15 @@ if (!spec || !inventory) {
       const abs = path.join(generatedDir, rel);
       if (!claimedBy.has(rel)) claimedBy.set(rel, new Set());
       claimedBy.get(rel).add(id);
-      const segs = rel.split('/');
+      if (payloadPrefix && payloadKinds.has(el.kind) && !rel.startsWith(payloadPrefix)) {
+        elCat.fail(
+          `elements.${id} (kind: ${el.kind}) generatedPaths entry "${p}" is outside ${expectedPrefix}${payloadPrefix} — ` +
+          `with outputLayout claude-dir every installable file lives there so installing is one copy`
+        );
+      }
+      const segs = (payloadPrefix && rel.startsWith(payloadPrefix) ? rel.slice(payloadPrefix.length) : rel).split('/');
       if ((segs[0] === 'skills' || segs[0] === 'agents') && segs.length >= 2) {
-        skillRoots.add(`${segs[0]}/${segs[1]}`);
+        skillRoots.add(`${rel.startsWith(payloadPrefix) ? payloadPrefix : ''}${segs[0]}/${segs[1]}`);
       }
       if (!existsSync(abs)) {
         elCat.fail(`elements.${id} generatedPaths entry "${p}" does not exist on disk (expected at ${abs})`);
@@ -533,11 +554,14 @@ if (!spec) {
   const patternChosen = spec.pattern?.chosen;
   const expectedTopLevelPaths = workflowName
     ? {
-        'skill-chain-hooks': [`skills/${workflowName}/SKILL.md`],
-        'workflow-script': [`${workflowName}.workflow.mjs`],
-        'orchestrator-agent': [`agents/${workflowName}-orchestrator.md`],
+        'skill-chain-hooks': [`${payloadPrefix}skills/${workflowName}/SKILL.md`],
+        'workflow-script': [outputLayout === 'claude-dir' ? `.claude/workflows/${workflowName}.workflow.mjs` : `${workflowName}.workflow.mjs`],
+        'orchestrator-agent': [`${payloadPrefix}agents/${workflowName}-orchestrator.md`],
       }[patternChosen] || []
     : [];
+
+  // claude-dir: .claude/settings.json must reference exactly the hook scripts under .claude/hooks/.
+  const hookScripts = allFiles.filter((f) => f.startsWith('.claude/hooks/') && f.endsWith('.mjs'));
   const expectedTopLevelPathSet = new Set(expectedTopLevelPaths);
   const topLevelBudget = patternChosen === 'mixed' ? Infinity : 1;
   let topLevelUsed = 0;
@@ -553,7 +577,47 @@ if (!spec) {
       continue; // notebook Q&A audit log (bpmn2agent-knowledge notebook-faq.py) — verbatim answers, no header convention
     }
 
+    if (outputLayout === 'claude-dir' && relPath === '.claude/settings.json') {
+      let parsed = null;
+      try {
+        parsed = JSON.parse(readFileSync(path.join(generatedDir, relPath), 'utf8'));
+      } catch (e) {
+        artCat.fail(`"${relPath}" is not valid JSON: ${e.message}`);
+      }
+      if (parsed) {
+        if (!parsed.hooks || typeof parsed.hooks !== 'object') {
+          artCat.fail(`"${relPath}" has no top-level "hooks" object — it only exists to register the generated hooks`);
+        }
+        const commands = [];
+        for (const groups of Object.values(parsed.hooks || {})) {
+          for (const g of Array.isArray(groups) ? groups : []) {
+            for (const h of g.hooks || []) if (typeof h.command === 'string') commands.push(h.command);
+          }
+        }
+        const referenced = new Set(commands.flatMap((c) => c.match(/\.claude\/hooks\/[^"'\s]+/g) || []));
+        for (const r of referenced) {
+          if (!existsSync(path.join(generatedDir, r))) artCat.fail(`"${relPath}" runs "${r}", which does not exist`);
+        }
+        for (const h of hookScripts) {
+          if (!referenced.has(h)) artCat.fail(`"${h}" is not registered in "${relPath}" — the hook would never fire`);
+        }
+        for (const c of commands) {
+          if (/CLAUDE_PLUGIN_ROOT/.test(c)) artCat.fail(`"${relPath}": hook command "${c}" uses \${CLAUDE_PLUGIN_ROOT}; a project .claude/ needs $CLAUDE_PROJECT_DIR`);
+        }
+      }
+      continue;
+    }
+
+    if (outputLayout === 'claude-dir' && /(^|\/)package(-lock)?\.json$/.test(relPath) && relPath.startsWith('.claude/')) {
+      artCat.fail(`"${relPath}": no npm packages in the payload — generated scripts use Node built-ins only, nothing to install`);
+      continue;
+    }
+
     if (relPath.endsWith('.hook.settings.json')) {
+      if (outputLayout === 'claude-dir') {
+        artCat.fail(`"${relPath}": a per-hook settings snippet — with outputLayout claude-dir every hook is registered in .claude/settings.json instead`);
+        continue;
+      }
       const pairPath = relPath.slice(0, -'.settings.json'.length) + '.mjs';
       if (!existsSync(path.join(generatedDir, pairPath))) {
         artCat.fail(
@@ -649,6 +713,15 @@ if (!spec) {
 // ---------------------------------------------------------------------------------------------
 const lintCat = category('lint', 'Lint (frontmatter/JSON already checked above; scripts here)');
 const tmpDir = path.join(os.tmpdir(), 'bpmn2agent-verify');
+const builtins = new Set(builtinModules);
+for (const { relPath, content } of mjsFilesToLint) {
+  if (outputLayout !== 'claude-dir' || !relPath.startsWith('.claude/')) continue;
+  const specifiers = [...content.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*|\brequire\s*\(\s*)['"]([^'"]+)['"]/g)].map((m) => m[1]);
+  const external = specifiers.filter((s) => !s.startsWith('node:') && !s.startsWith('.') && !builtins.has(s.split('/')[0]));
+  if (external.length) {
+    lintCat.fail(`"${relPath}" imports npm package(s) [${[...new Set(external)].join(', ')}] — generated scripts use Node built-ins only, so installing stays a plain copy`);
+  }
+}
 for (const { relPath, abs, content } of mjsFilesToLint) {
   if (isWorkflowScriptShaped(content)) {
     try {

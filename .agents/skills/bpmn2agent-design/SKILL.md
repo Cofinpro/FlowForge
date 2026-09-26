@@ -86,9 +86,12 @@ once a subProcess/callActivity resolves to **reusable skill** — its own inner 
 becoming separate top-level artifacts). Record, per element:
 
 - `kind` — one of the schema's enum values.
-- `generatedPaths` — repo-relative paths under `generated/<workflow>/...` the chosen `kind` will
-  produce (a skill directory, a script file inside its owning skill, a hook config entry, the
-  agent-checklist section anchor). Leave empty for `kind: orchestrator`/`human-checkpoint` (control
+- `generatedPaths` — repo-relative paths the chosen `kind` will produce (a skill directory, a
+  script file inside its owning skill, a hook script, the agent-checklist section anchor). With
+  `meta.outputLayout: claude-dir` they sit under `generated/<workflow>/.claude/` exactly as they
+  will in the user's project: `.claude/skills/<name>/SKILL.md`, `.claude/skills/<name>/scripts/<x>.mjs`,
+  `.claude/agents/<name>.md`, `.claude/hooks/<name>.mjs` (the hook's registration goes into the one
+  `.claude/settings.json`, which no element claims). Leave empty for `kind: orchestrator`/`human-checkpoint` (control
   flow and interview steps live inside another element's generated file, not one of their own) and
   for `kind: not-generated`/`unresolved`.
 - `reason` — required by the schema for `not-generated`/`unresolved`; write it so it reads

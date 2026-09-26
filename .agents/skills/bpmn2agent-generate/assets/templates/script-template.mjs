@@ -6,7 +6,7 @@
 // output (mapping-rubric.md's scriptTask/businessRuleTask -> script decision).
 //
 // Usage: node {{scriptBasename}}.mjs {{argSketch}}
-{{importsIfAny}}
+{{node:* imports only, if any}}
 
 const [, , {{argNames}}] = process.argv;
 if ({{requiredArgCheck}}) {
@@ -29,9 +29,10 @@ Authoring notes for whoever fills this template (bpmn2agent-generate step 3):
   .mjs file (scripts, hooks, Workflow scripts). Keep it on its own line, before any other code.
 - Write to exactly the path in elements.<id>.generatedPaths, never a path this template invents.
 - A script living inside a "lane skill" (see skill-template.md's lane-skill note) sits at
-  generated/<workflow>/skills/<agentName>/scripts/<name>.mjs; a script reused across lanes gets
-  its own skill dir instead (mapping-rubric.md's scriptTask note).
-- Keep it dependency-free where possible; if it needs a package, resolve it the same way
-  bpmn-authoring's scripts do (createRequire against an out-of-repo cache) rather than adding to
-  this repo's own package.json — document the exact command in the owning skill's SKILL.md.
+  generated/<workflow>/.claude/skills/<agentName>/scripts/<name>.mjs; a script reused across lanes
+  gets its own skill dir instead (mapping-rubric.md's scriptTask note). The owning SKILL.md calls
+  it as `node ${CLAUDE_SKILL_DIR}/scripts/<name>.mjs …`.
+- Node built-ins only (node:fs, node:path, ...). No npm packages, no lib/ folder, no package.json,
+  no install step; read JSON, not YAML. If the rule can't be written that way, it isn't a script —
+  send it back to bpmn2agent-design as skill text.
 */

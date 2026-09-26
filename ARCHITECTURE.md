@@ -78,9 +78,9 @@ Mehrfachinstanzen, Schleifen, Urteils-Gateways) eines von vier Mustern:
 
 | Muster | passt, wenn | erzeugt |
 |---|---|---|
-| Skill-Kette + Hooks | ein Mensch ist dabei, Ablauf fast linear | `skills/<workflow>/SKILL.md` als Rückgrat |
-| Workflow-Skript | unbeaufsichtigt, echte Parallelität, deterministische Verzweigungen | `<workflow>.workflow.mjs` (wird nie automatisch gestartet) |
-| Orchestrator-Agent | Verzweigungen brauchen Urteil im Einzelfall | `agents/<workflow>-orchestrator.md` plus Spezialisten |
+| Skill-Kette + Hooks | ein Mensch ist dabei, Ablauf fast linear | `.claude/skills/<workflow>/SKILL.md` als Rückgrat |
+| Workflow-Skript | unbeaufsichtigt, echte Parallelität, deterministische Verzweigungen | `.claude/workflows/<workflow>.workflow.mjs` (wird nie automatisch gestartet) |
+| Orchestrator-Agent | Verzweigungen brauchen Urteil im Einzelfall | `.claude/agents/<workflow>-orchestrator.md` plus Spezialisten |
 | gemischt | Phasen haben unterschiedliche Form | je Phase eines der drei |
 
 Jede Schleife hat eine Obergrenze (`maxLoops`, Standard 3); ist sie erreicht, geht es mit einem
@@ -95,17 +95,24 @@ bewusste Lücke `not-generated`.
 
 ```text
 generated/<workflow>/
+  .claude/                   # Nutzlast im Aufbau eines Projekt-.claude/ (meta.outputLayout: claude-dir)
+    agents/  skills/         #   die Artefakte; skills/<x>/scripts/ nur für echte Skript-Elemente
+    hooks/*.mjs              #   nur bei kind: hook
+    settings.json            #   meldet jeden Hook an ("$CLAUDE_PROJECT_DIR"/.claude/hooks/…)
+    workflows/<workflow>.workflow.mjs  # nur beim Muster Workflow-Skript
   workflow-spec.yaml         # die Drehscheibe
-  README.md                  # Installationsanleitung für den Anwender
-  agents/  skills/  hooks/   # die Artefakte
-  <workflow>.workflow.mjs    # nur beim Muster Workflow-Skript
+  README.md                  # Installation: eine Kopie von .claude/
   knowledge/*.md             # destilliertes, belegtes Fachwissen je Element/Lane
   knowledge/faq/             # Notebook-Fragen im Wortlaut mit Belegstellen
   mapping/                   # report.md, workflow-mapped.bpmn (farbig), index.html, PNGs
 ```
 
-Die Pipeline schreibt nie direkt nach `.agents/` oder `.claude/`; installiert wird erst auf Wunsch
-des Anwenders nach `README.md`.
+Die Pipeline schreibt nie in ein echtes `.claude/`; installiert wird auf Wunsch des Anwenders mit
+`cp -R generated/<workflow>/.claude/. <projekt>/.claude/`. Skripte sind eine Datei mit
+Node-Bordmitteln, ohne npm-Pakete und ohne Installationsschritt; `verify.mjs` lässt eine
+claude-dir-Ausgabe durchfallen, die das bricht, oder deren `settings.json` nicht genau die Hooks
+anmeldet. Specs ohne `outputLayout` (das `dark-factory`-Beispiel) behalten den alten Aufbau mit
+`skills/`, `agents/`, `hooks/*.hook.settings.json` direkt unter `generated/<workflow>/`.
 
 Jede erzeugte Datei trägt `bpmn: {file, elements}` (Frontmatter bei Markdown, Kopfkommentar bei
 Skripten). `bpmn2agent-verify/scripts/verify.mjs` prüft das in beide Richtungen:
@@ -182,7 +189,7 @@ die Struktur des Diagramms).
 
 - `examples/dark-factory/` – vollständiger Lauf „Von der Produktvision zu User Stories“ als
   Schnappschuss. `generated/` wird nur über `tools/dark-factory-gen/regenerate.sh` erneuert.
-- `examples/user-story-refinement/` – neue User Story aus Feedback, noch nicht durch die Pipeline;
+- `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau;
   die Notebook-Frage dahinter liegt in `notebook-faq/`.
 
 ## Wo ändere ich was?

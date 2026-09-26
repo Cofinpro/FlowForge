@@ -237,7 +237,7 @@ try {
     const axeLoaded = await page.addScriptTag({ url: 'https://cdn.jsdelivr.net/npm/axe-core@4.10.2/axe.min.js' }).then(() => true, () => false);
     if (axeLoaded) {
       const violations = await page.evaluate(async () => (await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'] }))
-        .violations.map((v) => `${v.id} (${v.nodes.length})`));
+        .violations.map((v) => `${v.id} (${v.nodes.length}: ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')})`));
       check(!violations.length, `axe violations: ${violations.join(', ')}`);
     }
   }

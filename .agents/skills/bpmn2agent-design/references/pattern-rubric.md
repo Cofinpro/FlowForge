@@ -63,7 +63,8 @@ If two rows both plausibly apply, prefer the earliest one that fits before reach
 - **When**: fully unattended, real parallel/multi-instance structure, deterministic branching.
 - **When not**: any human checkpoint inside the flow (a Workflow script has no place to pause for
   `AskUserQuestion` mid-run), or branching that needs judgment a script condition can't express.
-- **Generated**: one `.mjs`-style Workflow script per `generated/<workflow>/`, using `agent()` for
+- **Generated**: one `.mjs`-style Workflow script per workflow (`.claude/workflows/<workflow>.workflow.mjs`
+  in the claude-dir layout, `<workflow>.workflow.mjs` in the legacy one), using `agent()` for
   LLM steps, `parallel()`/`pipeline()` for the fan-out the gateways/multi-instance markers represent,
   and plain JS for deterministic gateway conditions. **The script is only ever generated as a saved
   file — it must never be invoked by the generator itself, and the generated `README.md` says so
@@ -74,10 +75,8 @@ If two rows both plausibly apply, prefer the earliest one that fits before reach
   matching `elements.<id>.gate.maxLoops` from the spec.
 - **State/resume**: the Workflow tool's own resume mechanism (`resumeFromRunId`, replaying cached
   `agent()` results from its journal) is the actual resume backend — prefer it over hand-rolled state.
-  The generator additionally emits a human-readable `run.yaml` + `log/events.jsonl` sidecar (the
-  layout dark-factory proposed, `docs/planning/dark-factory-spaeter.md` §2/§8) purely for
-  explainability: a non-technical operator can open `run.yaml` and see where the run got to without
-  understanding Workflow's internal transcript format.
+  No hand-rolled run-state scripts or sidecar files: the Workflow tool's own journal is the record
+  (the legacy dark-factory layout added a `run.yaml` + `log/events.jsonl` sidecar; new specs don't).
 
 ### Orchestrator agent
 
@@ -86,12 +85,12 @@ If two rows both plausibly apply, prefer the earliest one that fits before reach
   decides which specialist handles each item.
 - **When not**: the branching is really just a deterministic condition dressed up as a gateway (use
   Workflow script), or there's no branching at all requiring delegation (use skill chain).
-- **Generated**: one orchestrator agent (`generated/<workflow>/agents/<workflow>-orchestrator.md`,
+- **Generated**: one orchestrator agent (`generated/<workflow>/.claude/agents/<workflow>-orchestrator.md`,
   following the same shape as `task-delegator.md`) that owns the gateway decisions and delegates
   each branch to the matching generated agent via the `Agent` tool — written under
   `generated/<workflow>/` like every other output, per the pipeline's output-location decision
-  (never straight into `.agents/agents/`); the generated `README.md` gives the copy/symlink
-  instructions for actually installing it there. Only this orchestrator calls `Agent` on the other
+  (never straight into the user's `.claude/agents/`); the generated `README.md` gives the one copy
+  command that installs it. Only this orchestrator calls `Agent` on the other
   generated agents — same rule as this repo's `task-delegator` — other handoffs stay report-based.
 - **Human checkpoints**: modeled as the orchestrator itself pausing and asking via `AskUserQuestion`
   before dispatching past a `userTask`/`manualTask`, exactly like `task-delegator`'s confirmation

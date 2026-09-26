@@ -47,8 +47,9 @@ Gather (ask via `AskUserQuestion` where not already obvious from context, one re
 - **Workflow name** — kebab-case, becomes the `<workflow>` segment of `generated/<workflow>/`.
   Default it to the `.bpmn` file's own basename (kebab-cased) and confirm rather than asking
   outright when unambiguous — same default `bpmn2agent-analyze` step 1 uses.
-- **Target folder** — always `generated/<workflow>/`; note this to the user explicitly (never
-  `.agents/`/`.claude/` directly — those come later, per README, only on the user's own say-so).
+- **Target folder** — always `generated/<workflow>/`; note this to the user explicitly. The
+  installable part lands in `generated/<workflow>/.claude/`, ready to copy into a project; nothing
+  is written into a real `.claude/` — the user copies it on their own say-so.
 - **Interview language** — the language every question and every generated `README.md` will use
   (generated `SKILL.md`/agents/scripts stay English regardless — the pipeline's language rule).
   Default to the language the user is writing to you in.
@@ -93,9 +94,10 @@ business user to confirm it via `AskUserQuestion`. Three outcomes:
 
 ## 5. Generate
 
-Run `bpmn2agent-generate` on the confirmed spec. It writes agents, skills, scripts, hooks, the one
-top-level orchestration file (skill chain / Workflow script / orchestrator agent / mixed, per the
-confirmed pattern), `README.md`, `mapping/report.md`, the colour-coded `mapping/workflow-mapped.bpmn`
+Run `bpmn2agent-generate` on the confirmed spec. It writes agents, skills, hooks, the few scripts
+the diagram really needs and the one top-level orchestration file (skill chain / Workflow script /
+orchestrator agent / mixed, per the confirmed pattern) into `generated/<workflow>/.claude/`, plus
+`README.md`, `mapping/report.md`, the colour-coded `mapping/workflow-mapped.bpmn`
 and `mapping/index.html` (via `scripts/render-mapping.mjs`), and PNG renders — all under
 `generated/<workflow>/`, nothing outside it. Elements still `kind: unresolved` at this point are
 allowed through and show up red in the mapping view; they don't block generation.
@@ -130,8 +132,9 @@ Report to the business user, in their language:
 - **Open items** — every `openQuestions[]` entry still unanswered, and every red
   (`kind: unresolved`) or grey (`kind: not-generated`) element from the mapping report, in plain
   terms (quote the BPMN label, not the element id).
-- **How to install** — point at `README.md`'s own instructions (copy/symlink into `.agents/` +
-  `.claude/`, copy into `.codex/`); this skill never installs anything itself.
+- **How to install** — one copy: `cp -R generated/<workflow>/.claude/. <project>/.claude/` (merge
+  `settings.json`'s `hooks` by hand if the project already has one); details in `README.md`. This
+  skill never installs anything itself.
 - **What only runs on explicit invocation** — if a Workflow script was generated, say plainly that
   it never runs automatically, not even as part of this pipeline; the user runs it deliberately via
   the Workflow tool when they're ready.
