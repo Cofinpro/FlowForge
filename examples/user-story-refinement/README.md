@@ -59,7 +59,17 @@ Von der Repo-Wurzel aus:
 
 Stand: XSD gültig, 0 bpmn-moddle-Warnungen, 0 bpmnlint-Befunde.
 
-## Nächster Schritt
+## Ergebnis der Pipeline
 
-Das Diagramm ist noch nicht durch die Pipeline gelaufen; `generated/` gibt es hier noch nicht. Dazu
-aus diesem Verzeichnis `bpmn-to-agentic-workflow` auf `user-story-refinement.bpmn` starten.
+Am 2026-09-26 mit `bpmn-to-agentic-workflow` durchgelaufen, als erstes Beispiel im neuen Aufbau:
+[`generated/user-story-refinement/`](generated/user-story-refinement/). Muster Skill-Kette, 7 Skills
+(ein Einstieg, sechs Phasen-Skills mit dem Notebook-Wissen als `references/`), keine Agenten, keine
+Skripte, keine Hooks. Installiert wird mit einer Kopie:
+
+```bash
+cp -R generated/user-story-refinement/.claude/. <projekt>/.claude/
+```
+
+`bpmn2agent-verify` endet mit `RESULT: PASS`. Was aus jedem Element wurde, steht in
+`generated/user-story-refinement/mapping/report.md`; die sechs Notebook-Fragen dieses Laufs liegen
+in `generated/user-story-refinement/knowledge/faq/`.

@@ -1,0 +1,34 @@
+{
+ "notebook": {
+  "id": "7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0",
+  "title": "The Product - Business Design"
+ },
+ "sources": {
+  "d116656e-14cf-44af-9a4f-5ba467da0e19": "Kelly, The Art of Agile Product Ownership (2019)",
+  "bd854fca-aae2-4e85-8555-9963d94b9d40": "Anforderungsdokumentation.pdf",
+  "30f40fe1-8e1b-44bf-8e61-47926c5a90c1": "Anforderungserhebung.pdf",
+  "d583091a-e58c-42f5-9aac-e522851bbb12": "Anforderungsvalidierung.pdf",
+  "27c6602f-501c-4a9f-968d-1a1a21115e4d": "Anforderungsverwaltung.pdf",
+  "848a63c9-2cab-49ff-914f-72e159aa9f51": "Angrave, The Journey Mapping Playbook (2020)",
+  "b54179a1-9eb7-4d5b-a5c3-09ce4c52c797": "Bland, Testing Business Ideas (2019)",
+  "b1cd2c57-fcc8-4f1a-b266-896a14e782e3": "Einführung in die Business Analyse.pdf",
+  "f2fba6c1-032d-4760-875f-73e4c3345059": "Evans, Domain-Driven Design (2003)",
+  "7c0124d1-d729-4fa5-8169-47ccc28aa5f1": "Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014)",
+  "9e3d8953-00c1-4da8-aafd-08c113858205": "Croll & Yoskovitz, Lean Analytics",
+  "a8203090-20ea-4ed6-a7dd-6664ccc0e9f4": "Humble et al., Lean Enterprise",
+  "9fe2ef16-b8f1-4fef-bac4-96c5fe2a2574": "Gothelf & Seiden, Lean UX",
+  "f8088f08-8ecf-4889-95f1-7f89d0e00a39": "Kalbach, Mapping Experiences (2020)",
+  "cd0ae97e-370f-4253-a62b-26315818aca9": "LeMay, Product Management in Practice (2022)",
+  "5379a9b7-1ff9-451a-91ea-ea3d3f29feb7": "Wallaert, Start at the End (2019)",
+  "895651ec-dac7-444e-be90-7301d1b6c422": "Lewrick et al., The Design Thinking Toolbox (2020)",
+  "479ec7bf-c948-4a67-9826-0c49c4f6ffd3": "Pohl & Rupp, Basiswissen Requirements Engineering (2015)",
+  "bb04b744-724f-4a01-ad38-c69297f1e6f9": "Maurya, Running Lean",
+  "89136ca8-3d7f-47f7-8522-d6d72dde3e19": "Richter, The Product Manager's Playbook (2023)",
+  "f911394f-32fb-4371-9f3c-8bfc5822a7c2": "The Design Thinking Playbook",
+  "40321728-76a7-40fb-8363-4ffcb15a4b45": "Product School, The Product Book (2017)",
+  "26b8e5a4-bb91-48a2-afef-19110ec392f2": "Olsen, The Lean Product Playbook",
+  "11890cc8-6129-46de-a7b6-aa6f87660ac1": "Klein, UX for Lean Startups",
+  "3d14758b-5d1b-4ace-948a-05e7b357f5db": "Patton, User Story Mapping",
+  "fe5c207a-4e85-4bf6-97d5-a02e79eaa452": "Cohn, User Stories Applied (2004)"
+ }
+}
