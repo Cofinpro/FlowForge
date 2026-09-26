@@ -1,3 +1,5 @@
+<p align="center"><img src="assets/lanecraft-icon.svg" width="128" alt="lanecraft-Icon"></p>
+
 # lanecraft
 
 **BPMN-2.0-Prozess rein, prüfbare Claude-Code-Artefakte raus.**
