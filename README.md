@@ -1,120 +1,187 @@
-# bpmn2agent
+# lanecraft
 
-Aus einem handgezeichneten BPMN-2.0-Prozess einen prüfbaren Satz Claude-Code-Artefakte machen:
-Agenten, Skills, Hooks, Skripte und einen Orchestrator (Skill-Kette, Workflow-Skript oder
-Orchestrator-Agent), jede Datei mit Rückverfolgung auf ihr BPMN-Element.
+**BPMN-2.0-Prozess rein, prüfbare Claude-Code-Artefakte raus.**
 
-Das ist eine eigenständige Idee. Wer Agenten und Skills normal von Hand schreibt, braucht dieses Repo
-nicht. Die Dark Factory im Repo `ai-sdlc-dojo-2026-factory` ist einmal mit dieser Pipeline entstanden
-und wird seitdem ohne sie gepflegt.
+Ein Fachanwender zeichnet einen Prozess als BPMN-Diagramm (Lane = Rolle). lanecraft übersetzt ihn
+mit der `bpmn2agent`-Pipeline in Agenten, Skills, Hooks, Skripte und genau einen Orchestrator
+(Skill-Kette, Workflow-Skript oder Orchestrator-Agent). Jede erzeugte Datei verweist auf das
+BPMN-Element, aus dem sie entstanden ist, und das wird in beide Richtungen geprüft.
 
-Wie die Teile zusammenspielen, steht in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+- **Fachanwender führen, nicht YAML.** Jede Frage kommt als Auswahl mit Empfehlung, in der Sprache
+  des Anwenders. Vor dem Erzeugen bestätigt der Anwender einen Mapping-Plan in Klartext.
+- **Rückverfolgbar.** `bpmn: {file, elements}` in jeder Datei; `bpmn2agent-verify` findet verwaiste
+  Dateien genauso wie Elemente ohne Umsetzung.
+- **Belegtes Wissen.** Fachwissen kommt aus NotebookLM-Notebooks, dem Web oder Repo-Dokumenten und
+  ist mit Belegstellen versehen. Was keine Quelle hat, bleibt sichtbar `⚠ unverified`.
+- **Nichts wird still umgebaut.** Passt das Diagramm nicht, geht die Frage an den Anwender zurück.
+  Die Pipeline schreibt nur nach `generated/<workflow>/`, nie direkt nach `.claude/`.
 
-## Inhalt
+Wer Agenten und Skills lieber von Hand schreibt, braucht dieses Repo nicht. Wie die Teile
+zusammenspielen, steht in [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
-```text
-.agents/skills/                       # die Skills (echte Dateien); .claude/skills/<name> sind Symlinks
-  bpmn-authoring                      #   BPMN von Hand schreiben: XSD, bpmn-moddle, bpmnlint, Layout
-  bpmn-to-agentic-workflow            #   Einstieg: führt die Pipeline Ende-zu-Ende
-  bpmn2agent-analyze                  #   1. BPMN inventarisieren, Lücken erfragen → workflow-spec.yaml
-  bpmn2agent-knowledge                #   2. Fachwissen erden (NotebookLM, Web, sonst "unverified")
-  bpmn2agent-design                   #   3. Mapping + Muster wählen, vom Fachanwender bestätigen lassen
-  bpmn2agent-generate                 #   4. Dateien schreiben (nur nach generated/<workflow>/)
-  bpmn2agent-verify                   #   5. statisch prüfen: Schema, Hash, Trace in beide Richtungen, Lint
-  agentic-workflow-kb                 #   Wissensbasis Agentic Design: FAQ + Referenzen mit Belegstellen
-  orchestration-design                #   Hilfe für 3.: Orchestrierung prüfen (Übergaben, Prüfpunkte, Schleifen)
-  agent-authoring                     #   Hilfe für 3./4.: Agenten schneiden, schreiben, reviewen
-  skill-authoring                     #   Hilfe für 4.: Skills schreiben und reviewen
-  trim-the-fat                        #   Skills kürzen, ohne ihr Verhalten zu ändern (nur per /trim-the-fat)
-.agents/agents/                       # Agenten (echte Dateien); .claude/agents/<name>.md sind Symlinks
-  agentic-kb-librarian                #   beantwortet Designfragen aus der Wissensbasis, fragt sonst das Notebook
-  agentic-workflow-architect          #   prüft den Spec-Entwurf vor dem Mapping-Plan (nur lesend)
-  agentic-artifact-reviewer           #   prüft erzeugte Skills/Agenten auf Qualität (nur lesend)
-examples/dark-factory/                # Fallbeispiel: "Von der Produktvision zu User Stories"
-  product-vision-to-user-stories.bpmn #   der Prozess mit sdlc:*-Annotationen
-  docs/process-rules.md               #   Kopie der Prozessregeln (Stand 2026-09-26)
-  generated/product-vision-to-user-stories/  # Ergebnis der Pipeline (Schnappschuss)
-  tools/dark-factory-gen/             #   Generator-Quellen + regenerate.sh (reproduziert generated/)
-examples/user-story-refinement/       # zweites Beispiel: neue User Story aus Feedback erstellen & verfeinern
-  user-story-refinement.bpmn          #   ein Diagramm, 4 Lanes, 6 Phasen, noch nicht durch die Pipeline
-  notebook-faq/                       #   die Notebook-Frage hinter dem Diagramm, mit Belegstellen
-```
+## Schnellstart
 
-## Wissensbasis und FAQ
-
-`agentic-workflow-kb` enthält das Wissen aus dem NotebookLM-Notebook **„Agentic Workflows“**
-(11 Quellen: O'Reilly-Bücher zu Agenten, Claude-Doku zu Skills und Kontextfenstern, Leitfäden zu
-Claude-Code-Workflows) offline:
-
-- `faq/` – jede Frage, die dem Notebook gestellt wurde, mit wörtlicher Antwort und einer Tabelle,
-  die jede Belegnummer auf Quelle und zitierte Textstelle auflöst. `faq/README.md` ist der Index.
-- `references/` – kurze, destillierte Leitlinien je Thema; jede Aussage trägt einen Verweis wie
-  `[agent-design-1: 3, 5]` (FAQ-Eintrag, Belegnummern).
-
-Vor einer neuen Notebook-Frage zuerst im FAQ nachsehen. Neue Antworten mit
-`.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add` aufnehmen, dann findet sie der
-nächste Lauf. `bpmn2agent-knowledge` legt nach demselben Muster je Workflow ein FAQ unter
-`generated/<workflow>/knowledge/faq/` an.
-
-## Nutzen
-
-Die Pipeline-Skills schreiben relativ zum aktuellen Verzeichnis nach `generated/<workflow>/`. Starte
-Claude Code deshalb in dem Ordner, in dem das `.bpmn` liegt, und rufe `bpmn-to-agentic-workflow` auf.
-
-In einem anderen Projekt als Plugin installieren (das Repo ist Plugin und Marketplace zugleich):
+Das Repo ist Claude-Code-Plugin und Marketplace zugleich:
 
 ```text
 /plugin marketplace add Cofinpro/lanecraft
 /plugin install lanecraft@lanecraft
 ```
 
-Skills und Agenten heißen dann `lanecraft:<name>`, z. B. `/lanecraft:bpmn-to-agentic-workflow`. Lokal
-ausprobieren ohne Installation: `claude --plugin-dir <pfad-zu-lanecraft>`.
+Dann Claude Code in dem Ordner starten, in dem das `.bpmn` liegt, und die Pipeline aufrufen:
 
-Hinweis: Im installierten Plugin ist die Wissensbasis schreibgeschützt. Neue Notebook-Antworten nimmt
-`agentic-kb-librarian` nur in einem Checkout dieses Repos ins FAQ auf.
+```text
+/lanecraft:bpmn-to-agentic-workflow
+```
 
-## Plugin und Release
+oder einfach sagen: *„Mach aus meinem Prozessdiagramm einen Claude-Workflow.“* Das Ergebnis landet
+unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, nach der mitgelieferten
+`README.md`.
+
+Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-lanecraft>`.
+Noch kein Diagramm? `bpmn-authoring` hilft beim Zeichnen eines gültigen, sauber gelayouteten `.bpmn`.
+
+**Voraussetzungen:** `node`, `python3`, `xmllint`. Die npm-Pakete (`bpmn-moddle`, `bpmnlint`,
+`js-yaml`, `ajv`, `playwright`) installieren die Skripte beim ersten Lauf nach
+`~/.cache/bpmn-authoring-tools` (überschreibbar mit `BPMN_TOOLS_CACHE`), nie ins Projekt. Für
+Notebook-Wissen optional der `gemini-notebook-mcp`-Server.
+
+## So funktioniert es
+
+```mermaid
+flowchart LR
+  B[".bpmn"] --> A["1 analyze<br/>Inventar, Lücken erfragen"]
+  A --> K["2 knowledge<br/>Fachwissen erden"]
+  K --> D["3 design<br/>Mapping + Muster"]
+  D --> C{"Anwender<br/>bestätigt?"}
+  C -- ja --> G["4 generate<br/>Dateien schreiben"]
+  C -- "Diagramm ändern" --> B
+  G --> V["5 verify<br/>statisch prüfen"]
+  V -- Fehler --> D
+  V -- grün --> H["Übergabe"]
+```
+
+| Stufe | Skill | Ergebnis |
+|---|---|---|
+| 1 | `bpmn2agent-analyze` | `workflow-spec.yaml` als Entwurf; meldet nicht unterstützte Konstrukte mit Umbauvorschlag |
+| 2 | `bpmn2agent-knowledge` | belegtes Fachwissen je Lane/Aufgabe, offene Fragen an das Diagramm |
+| 3 | `bpmn2agent-design` | Entscheidung je Element, Orchestrierungsmuster, Rollen; Mapping-Plan zur Bestätigung |
+| 4 | `bpmn2agent-generate` | alle Dateien unter `generated/<workflow>/` |
+| 5 | `bpmn2agent-verify` | Bericht: Schema, Hash, Trace in beide Richtungen, Lint, keine offenen Punkte |
+
+`bpmn-to-agentic-workflow` ist der Einstieg und führt die fünf Stufen samt Rücksprüngen. Ändert sich
+das Diagramm später, fragt ein neuer Lauf nur nach neuen oder geänderten Elementen.
+
+Grob übersetzt: Lane → Agent, `serviceTask` → Skill, `userTask` → menschlicher Prüfpunkt,
+`scriptTask`/Regel → Skript (Hook nur, wenn ein Tool-Aufruf wirklich blockiert werden muss),
+Gateways und Schleifen → Steuerlogik mit Obergrenze, Datenobjekt → Artefaktvertrag. Die vollständigen
+Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
+
+## Was herauskommt
+
+```text
+generated/<workflow>/
+  workflow-spec.yaml         # die Spezifikation, über die alle Stufen reden
+  README.md                  # Installationsanleitung für den Anwender
+  agents/  skills/  hooks/   # die Artefakte
+  <workflow>.workflow.mjs    # nur beim Muster Workflow-Skript
+  knowledge/                 # destilliertes Fachwissen + FAQ mit Belegstellen
+  mapping/                   # report.md, farbiges workflow-mapped.bpmn, index.html, PNGs
+```
+
+Die Mapping-Ansicht (`mapping/index.html`) färbt jedes BPMN-Element nach Ergebnis und verlinkt es mit
+seiner Datei.
+
+## Beispiele
+
+**[`examples/dark-factory/`](examples/dark-factory/)**: „Von der Produktvision zu User Stories“. Ein
+großer Prozess mit Teilprozessen, einmal komplett durch die Pipeline gelaufen: 10 Agenten, 58
+Skills, 3 Hooks und ein Workflow-Skript unter
+[`generated/product-vision-to-user-stories/`](examples/dark-factory/generated/product-vision-to-user-stories/).
+Das ist ein Schnappschuss; das daraus entstandene Dark-Factory-Plugin wird im Repo
+`ai-sdlc-dojo-2026-factory` von Hand weitergepflegt.
+
+**[`examples/user-story-refinement/`](examples/user-story-refinement/)**: eine neue User Story aus
+Feedback erstellen und verfeinern. Ein Diagramm mit vier Lanes und sechs Phasen, noch nicht durch
+die Pipeline gelaufen, also ein guter Kandidat zum Ausprobieren.
+
+![User-Story-Refinement als BPMN](examples/user-story-refinement/user-story-refinement.png)
+
+## Inhalt des Repos
+
+```text
+.agents/skills/                       # Skills (echte Dateien); .claude/skills/<name> sind Symlinks
+  bpmn-to-agentic-workflow            #   Einstieg: führt die Pipeline Ende-zu-Ende
+  bpmn2agent-analyze … -verify        #   die fünf Stufen (siehe oben)
+  bpmn-authoring                      #   BPMN von Hand schreiben: XSD, bpmn-moddle, bpmnlint, Layout
+  agentic-workflow-kb                 #   Wissensbasis Agentic Design: FAQ + Referenzen mit Belegstellen
+  orchestration-design                #   Orchestrierung prüfen (Übergaben, Prüfpunkte, Schleifen)
+  agent-authoring                     #   Agenten schneiden, schreiben, reviewen
+  skill-authoring                     #   Skills schreiben und reviewen
+  trim-the-fat                        #   Skills kürzen, ohne ihr Verhalten zu ändern (nur per /trim-the-fat)
+.agents/agents/                       # Agenten (echte Dateien); .claude/agents/<name>.md sind Symlinks
+  agentic-kb-librarian                #   beantwortet Designfragen aus der Wissensbasis, fragt sonst das Notebook
+  agentic-workflow-architect          #   prüft den Spec-Entwurf vor dem Mapping-Plan (nur lesend)
+  agentic-artifact-reviewer           #   prüft erzeugte Skills/Agenten auf Qualität (nur lesend)
+.claude-plugin/                       # plugin.json + marketplace.json
+examples/                             # siehe oben
+```
+
+## Wissensbasis
+
+`agentic-workflow-kb` enthält das Wissen aus dem NotebookLM-Notebook **„Agentic Workflows“**
+(11 Quellen: O'Reilly-Bücher zu Agenten, Claude-Doku zu Skills und Kontextfenstern, Leitfäden zu
+Claude-Code-Workflows) offline, in drei Schichten, billigste zuerst:
+
+1. `faq/`: jede Frage an das Notebook im Wortlaut, die Antwort unverändert, jede Belegnummer auf
+   Quelle und Textstelle aufgelöst. Index: `faq/README.md`.
+2. `references/`: kurze Leitlinien je Thema; jede Aussage trägt einen Verweis wie
+   `[agent-design-1: 3, 5]` (FAQ-Eintrag, Belegnummern).
+3. das Notebook selbst, nur wenn 1 und 2 nichts hergeben.
+
+Neue Antworten mit `.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add` ins FAQ
+aufnehmen, dann findet sie der nächste Lauf. `bpmn2agent-knowledge` legt nach demselben Muster je
+Workflow ein FAQ unter `generated/<workflow>/knowledge/faq/` an. Im installierten Plugin ist die
+Wissensbasis schreibgeschützt; neue Einträge entstehen nur in einem Checkout dieses Repos.
+
+## Mitentwickeln
 
 Das Plugin braucht keinen Build: `.claude-plugin/plugin.json` zeigt direkt auf `.agents/skills/` und
-`.agents/agents/`, `.claude-plugin/marketplace.json` veröffentlicht das Repo-Root als Plugin. Pfade
-zwischen Skills stehen als `${CLAUDE_SKILL_DIR}/../<skill>/…` und funktionieren so im Repo wie im
-installierten Plugin. Agenten laden die Skills, die sie brauchen, über `skills:` im Frontmatter.
+`.agents/agents/`. Pfade zwischen Skills stehen als `${CLAUDE_SKILL_DIR}/../<skill>/…` und
+funktionieren so im Repo wie im installierten Plugin. Agenten laden ihre Skills über `skills:` im
+Frontmatter. Ein neuer Agent muss in die `agents`-Liste von `plugin.json`. Weitere Regeln stehen in
+[`CLAUDE.md`](CLAUDE.md).
 
 ```bash
-npm install          # Dev-Tools (release-it, commitlint, husky) nach node_modules/ (ignoriert),
-                     # richtet den commit-msg-Hook ein
+npm install          # Dev-Tools (release-it, commitlint, husky), richtet den commit-msg-Hook ein
 npm run validate     # claude plugin validate .
 ```
 
 Commit-Nachrichten folgen den [Conventional Commits](https://www.conventionalcommits.org/)
-(`feat: …`, `fix: …`, `docs: …`, `chore: …`); der `commit-msg`-Hook (husky + commitlint) lehnt
-andere ab. Daraus leitet release-it die Version ab (`feat:` → minor, `fix:` → patch,
-`feat!:`/`BREAKING CHANGE:` → major) und schreibt `CHANGELOG.md`.
+(`feat: …`, `fix: …`, `docs: …`, `chore: …`); der `commit-msg`-Hook lehnt andere ab.
 
-GitHub Actions:
+### Fallbeispiel neu erzeugen
 
-- `CI` (`.github/workflows/ci.yml`) – bei jedem Push auf `main` und jedem PR: Plugin validieren, bei
-  PRs zusätzlich alle Commit-Nachrichten prüfen.
-- `Release` (`.github/workflows/release.yml`) – von Hand unter *Actions → Release → Run workflow*,
-  nur auf `main`. Wahl der Erhöhung (`auto` aus den Commits, oder `patch`/`minor`/`major`) und
-  Probelauf. Setzt die Version in `plugin.json` + `package.json`, schreibt `CHANGELOG.md`,
-  committet, taggt `vX.Y.Z`, pusht und legt das GitHub-Release an.
-
-Nutzer bekommen Updates nur, wenn die Version in `plugin.json` steigt, also jede Auslieferung über
-den Release-Workflow (lokal geht auch `npm run release`).
-
-## Fallbeispiel neu erzeugen
+`examples/dark-factory/generated/` nie von Hand ändern. Stattdessen die Generator-Quellen in
+`examples/dark-factory/tools/dark-factory-gen/` anpassen und neu erzeugen:
 
 ```bash
 bash examples/dark-factory/tools/dark-factory-gen/regenerate.sh
 ```
 
 Muss mit `RESULT: PASS`, `no reference problems`, `smoke test ok`, `story smoke ok`,
-`research smoke ok` und `mapping view ok` enden. Details: `examples/dark-factory/tools/dark-factory-gen/README.md`.
+`research smoke ok` und `mapping view ok` enden. Details:
+[`tools/dark-factory-gen/README.md`](examples/dark-factory/tools/dark-factory-gen/README.md).
 
-## Voraussetzungen
+### Release
 
-`node`, `python3`, `xmllint`. Die npm-Tools (`bpmn-moddle`, `bpmnlint`, `js-yaml`, `ajv`) liegen in
-`~/.cache/bpmn-authoring-tools` (`BPMN_TOOLS_CACHE`), nie im Repo. Die Skripte installieren sie dort
-beim ersten Lauf.
+- **CI** (`.github/workflows/ci.yml`): bei jedem Push auf `main` und jedem PR wird das Plugin
+  validiert; bei PRs werden zusätzlich die Commit-Nachrichten geprüft.
+- **Release** (`.github/workflows/release.yml`): von Hand unter *Actions → Release → Run workflow*,
+  nur auf `main`. Die Erhöhung ist `auto` (aus den Commits: `feat:` → minor, `fix:` → patch,
+  `feat!:`/`BREAKING CHANGE:` → major) oder fest `patch`/`minor`/`major`, optional als Probelauf.
+  Der Workflow setzt die Version in `plugin.json` und `package.json`, schreibt `CHANGELOG.md`, taggt
+  `vX.Y.Z` und legt das GitHub-Release an.
+
+Nutzer bekommen Updates nur, wenn die Version in `plugin.json` steigt. Deshalb läuft jede
+Auslieferung über den Release-Workflow (lokal geht auch `npm run release`).
