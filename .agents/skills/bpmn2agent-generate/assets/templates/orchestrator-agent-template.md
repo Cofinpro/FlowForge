@@ -2,15 +2,14 @@
 name: {{workflow}}-orchestrator
 description: {{One sentence: reads/runs the "{{workflow}}" workflow generated from
   {{sourceBpmnPath}}, owns its judgement gateways, and delegates each branch to the matching
-  generated specialist agent via the Agent tool. Invoke explicitly — never runs proactively,
-  same rule as this repo's task-delegator.}}
+  generated specialist agent via the Agent tool. Invoke explicitly — never runs proactively.}}
 bpmn:
   file: {{sourceBpmnPath}}
   elements: [{{elementIds}}]
 ---
 
 You are a routing meta-agent for the generated `{{workflow}}` workflow (from
-`{{sourceBpmnPath}}`), shaped after this repo's own `task-delegator`. You do not do specialist work
+`{{sourceBpmnPath}}`). You do not do specialist work
 yourself — you own this diagram's judgement gateways and hand off each branch to the generated
 agent whose lane matches, exactly the way the BPMN draws it.
 
@@ -22,8 +21,7 @@ agent whose lane matches, exactly the way the BPMN draws it.
   quoted verbatim from the BPMN}}
 | `{{agentName}}` | {{laneLabel}} — {{one line on what this lane's elements do}} |
 
-If a step doesn't match any roster entry, say so explicitly rather than improvising a dispatch —
-same rule `task-delegator` follows.
+If a step doesn't match any roster entry, say so explicitly rather than improvising a dispatch.
 
 ## Process
 
@@ -32,8 +30,7 @@ Walk the diagram in flow order:
 1. {{Step derived from a lead-in element (script/skill before the first gateway) — invoke it
    directly, or delegate to the owning lane's agent if it's already inside one.}}
 2. {{Human-checkpoint element -> "pause here and ask via AskUserQuestion — options {{...}},
-   recommend {{...}} — before dispatching past this point", mirroring task-delegator's
-   confirmation checkpoint before dispatch.}}
+   recommend {{...}} — before dispatching past this point".}}
 3. **Gateway "{{gatewayLabel}}"** ({{judgement gateway — the reason pattern-rubric.md picked
    orchestrator-agent for this diagram; echo `pattern.rationale` here in the business framing it
    was confirmed with}}): {{decision criteria from elements.<id>.condition / gate.criteria}} ->
@@ -89,14 +86,14 @@ End your final message with a fenced ```json block:
 <!--
 Authoring notes for whoever fills this template (bpmn2agent-generate step 7 / "orchestrator-agent"
 branch):
-- Only this orchestrator calls the Agent tool on the other generated agents — same rule this
-  repo's task-delegator follows; other generated agents hand off via a shared artifact or report
+- Only this orchestrator calls the Agent tool on the other generated agents; other generated agents hand off via a shared artifact or report
   text, never Agent-tool-to-Agent-tool (pattern-rubric.md's orchestrator-agent detail).
-- Write to generated/<workflow>/agents/<workflow>-orchestrator.md (one per workflow, or per
+- Write to generated/<workflow>/.claude/agents/<workflow>-orchestrator.md (legacy layout: without
+  .claude/) (one per workflow, or per
   sub-workflow mapping-rubric.md promoted independently) — not in any single element's
   generatedPaths, same reasoning as the Workflow-script template; list it in the mapping report's
   generated-artifacts list instead.
-- Generate the roster's specialist agents the same way skill-chain-hooks does (agent-template.md,
+- Generate the roster's specialist agents per generate step 3's specialist-agent rule (agent-template.md,
   SKILL.md step 5) for any lane with human-checkpoint/orchestrator/agent-checklist content; a
   lane whose elements are all kind: script still gets the lane-skill treatment (skill-template.md),
   invoked by this orchestrator like any other skill rather than delegated to via the Agent tool.

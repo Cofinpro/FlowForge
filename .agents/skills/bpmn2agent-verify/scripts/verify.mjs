@@ -12,7 +12,8 @@
 //                 bpmn2agent-generate.
 //   --json        print a single machine-readable JSON report instead of the human-readable one.
 //
-// IMPORTANT: run from the repo root. workflow-spec.yaml's meta.sourceBpmn.path is repo-relative
+// IMPORTANT: run from the directory that contains generated/ (the pipeline's cwd, e.g.
+// examples/dark-factory/ for the example). workflow-spec.yaml's meta.sourceBpmn.path is repo-relative
 // and is resolved against process.cwd() — the same convention bpmn2agent-generate's
 // render-mapping.mjs documents for itself. generatedPaths entries are ALSO repo-relative
 // (e.g. "generated/<workflow>/skills/foo/SKILL.md") but are resolved against the <generatedDir>

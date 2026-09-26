@@ -1,12 +1,12 @@
 ---
 name: trim-the-fat
-description: Rewrite an existing skill package in place to remove verbosity and redundancy without changing its behavior. Use when the user explicitly asks to shorten, simplify, compress, or trim a skill.
+description: Rewrites an existing skill package in place to remove verbosity and redundancy without changing its behavior. Use when the user explicitly asks to shorten, simplify, compress, or trim a skill.
 disable-model-invocation: true
 ---
 
 # Trim the Fat
 
-**Weniger ist mehr.** Minimize text, not meaning.
+**Less is more.** Minimize text, not meaning.
 
 ## Preserve
 

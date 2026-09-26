@@ -1,14 +1,15 @@
 ---
 name: orchestration-design
-description: Designs or reviews the orchestration layer of an agentic workflow — which pattern coordinates the pieces, handoff contracts between steps, human checkpoints, loop termination and caps, error handling and fallbacks, state and resume, context passing and model tiers — and writes it up as a short orchestration brief. Use when defining how agents, skills, hooks and scripts work together, when a workflow's pattern choice needs a second look, or in bpmn2agent-design before the mapping plan goes to the business user.
+description: Designs or reviews the orchestration layer of an agentic workflow — pattern, handoff contracts, human checkpoints, loop termination and caps, errors and fallbacks, state and resume, context and model tiers — as a short orchestration brief (new design) or a list of findings (existing design or spec). Use when defining how agents, skills, hooks and scripts work together or when a pattern choice needs a second look. For a single agent definition use agent-authoring.
 ---
 
 # Orchestration design
 
-Rules come from `agentic-workflow-kb/references/` — `orchestration-patterns.md`,
-`control-flow-and-state.md`, `human-in-the-loop.md`, `multi-agent-handoffs.md`,
-`context-engineering.md`, `claude-code-workflows.md`. Read the one a step names when you need the
-detail or the citation.
+Each question names the agentic-workflow-kb reference that backs it; read it for detail or the
+citation tag.
+
+- **New design** → Procedure, then the orchestration brief.
+- **Existing design or spec** → Review mode (findings only, no brief).
 
 ## Procedure
 
@@ -17,15 +18,19 @@ Work through the eight questions in order. Each answer is one or two lines in th
 1. **Workflow or agent?** Can every branch, retry and approval be listed in advance? Then the
    control flow is deterministic (script/skill chain) and agents only work inside steps. Open-ended
    inputs or replanning from observations need an agent that decides. Prefer the least autonomy
-   that works. → `orchestration-patterns.md`
+   that works. A phase that asks the user is not a Workflow-script phase: `agent()` subagents
+   can't use AskUserQuestion, runs need explicit opt-in, and resume works only in the same
+   session. → `orchestration-patterns.md`, `claude-code-workflows.md`
 2. **Pattern.** Name it (sequential, router, fan-out/fan-in, supervisor, evaluator–optimizer,
    handoff, hierarchical) and why the neighbouring pattern doesn't fit. Start with the fewest
-   agents; add one only for a named reason (tools, context, permissions). In Claude Code terms:
-   skill chain + hooks, Workflow script, orchestrator agent, or mixed per phase.
-   → `orchestration-patterns.md`, `claude-code-workflows.md`
+   agents; add one only for a named reason (tools, context, permissions). An LLM step doing
+   deterministic work → script. In Claude Code terms: skill chain + hooks, Workflow script
+   (unattended phases only, see Q1), orchestrator agent, or mixed per phase. If the caller has a
+   pattern rubric, it wins where explicit; a pattern contradicting its signals is a finding.
+   → `orchestration-patterns.md`, `claude-code-workflows.md`, `tool-design.md`
 3. **Handoffs.** For every edge between two workers: what artifact or structured output crosses
-   it, where it lives, who validates it. No free-text handoffs. Parallel editors get isolation.
-   → `multi-agent-handoffs.md`
+   it, where it lives, who validates it. No free-text handoffs. Parallel editors get isolation;
+   parallel branches must not depend on each other's output. → `multi-agent-handoffs.md`
 4. **Human checkpoints.** Where the plan is approved; which actions are side-effecting,
    irreversible or outward-facing and get a gate *before* they run (never in the same step as the
    pause); how each decision is presented (options, recommendation, context); how to avoid
@@ -41,7 +46,9 @@ Work through the eight questions in order. Each answer is one or two lines in th
    → `control-flow-and-state.md`, `claude-code-workflows.md`
 8. **Context and models.** What each worker receives (paths and constraints, not transcripts);
    which steps need a frontier model (planning, routing, judging) and which run on a small one
-   (extraction, formatting). → `context-engineering.md`, `agent-design.md`
+   (extraction, formatting). A worker that reads untrusted input and can write outward needs a
+   gate or hook in between (lethal trifecta). → `context-engineering.md`, `agent-design.md`,
+   `evaluation-and-guardrails.md`
 
 ## Orchestration brief
 
@@ -55,22 +62,11 @@ Work through the eight questions in order. Each answer is one or two lines in th
 - Errors/fallbacks: …
 - State/resume: …
 - Context/models: …
-- Open risks: … (e.g. untrusted input + outbound write = lethal trifecta)
+- Open risks: …
 ```
 
 ## Review mode
 
-For an existing design, answer the same eight questions from what is there and list each gap as a
-finding: question number, what's missing, a concrete fix, and the reference that backs it.
-
-## In the bpmn2agent pipeline
-
-- Use in `bpmn2agent-design` after step 4 (pattern) and before step 7 (mapping plan).
-  `pattern-rubric.md` stays the decision rule for the Claude Code shape; this skill checks what the
-  rubric doesn't cover — handoff contracts, gates before side effects, termination at the cap,
-  fallbacks, resume, context per worker.
-- Findings that need a different diagram (a missing approval before an outward-facing task, a loop
-  without an exit) go to the user as open questions — design never patches the BPMN.
-- The brief's content feeds the mapping plan's "how it runs" part and `pattern.rationale`; it is
-  not written as a separate generated file.
-- `agentic-workflow-architect` runs this skill's review mode on a draft spec.
+Answer the same eight questions from what is there and list each gap as a finding: question
+number, what's missing, a concrete fix, and the reference that backs it. A gap that needs the
+source diagram or process to change is a finding for its owner, never a silent redesign.

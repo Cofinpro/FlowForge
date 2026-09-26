@@ -2,16 +2,12 @@
 
 `bpmn2agent-analyze` never silently drops a construct it can't generate from. Every element listed
 here gets a `findings[]` entry (`severity: "unresolved"`) from `inventory.mjs`, must be surfaced to
-the business user during the interview, and — once written to `workflow-spec.yaml` by
-`bpmn2agent-design` — gets `kind: unresolved` with a `reason` explaining *why*, so it renders red in
+the business user during the interview, and — once written to the spec draft by
+`bpmn2agent-analyze` — gets `kind: unresolved` with a `reason` explaining *why*, so it renders red in
 the mapping view (`mapping-rubric.md`'s legend) instead of vanishing. `bpmn2agent-verify`'s "no red
 in the map" check fails the run until every one of these is either rewritten out of the source
 `.bpmn` (by the human modeler, never by this pipeline) or explicitly accepted as an open, unresolved
 gap.
-
-This list matches `bpmn2agent-design/references/mapping-rubric.md`'s "v1 supported/unsupported
-constructs" section — this file exists so `bpmn2agent-analyze` has the same list, framed as "what to
-flag and what to suggest," without needing to read the design skill's rubric during analysis.
 
 ## Pools and message flows
 
@@ -93,19 +89,3 @@ it; a Claude agent/skill/hook has no built-in "undo this activity" mechanism to 
 branch instead — "if the approval is later reversed, do Y" becomes an ordinary task reachable via a
 gateway, not an implicit compensation handler. This keeps the rollback logic visible in the diagram
 and traceable to a generated step, exactly like every other task.
-
-## What "flag red" means in practice, end to end
-
-1. `inventory.mjs` detects the construct and adds a `findings[]` entry with
-   `severity: "unresolved"`, the element id, and a short rewrite suggestion (mirroring this file).
-2. `bpmn2agent-analyze`'s `SKILL.md` procedure surfaces every `unresolved` finding to the business
-   user (plain language, quoting the BPMN label verbatim) *before* writing the spec draft — this is
-   not something to ask about later.
-3. If the user agrees to rewrite the `.bpmn` (in `bpmn-authoring`, outside this skill — analysis
-   never edits the source file), re-run analysis; the element disappears from `findings` once it's
-   gone from the diagram.
-4. If the user wants to keep it as-is for now, write `elements.<id>.kind: unresolved` with `reason`
-   set to the concrete rewrite suggestion, and add an `openQuestions[]` entry if there's still a
-   decision pending. `bpmn2agent-verify`'s "no red in the map" check will keep failing until this is
-   resolved one way or the other — that's intentional; it's the visible reminder that something in
-   the diagram couldn't be turned into working agents/skills yet.

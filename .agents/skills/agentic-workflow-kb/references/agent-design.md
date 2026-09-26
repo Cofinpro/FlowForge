@@ -68,9 +68,3 @@ The meta-orchestration subagents split decomposition/synthesis (`agent-organizer
 Monolithic agent · overlapping tools · parallel agents on dependent work without shared context ·
 unbounded loops (no step, recursion or budget limit) · over-privileged tools · unvalidated text
 handoffs [agent-design-1: 1, 20–25, 43, 54, 61, 73–75].
-
-## For bpmn2agent
-
-Lane → agent is the pipeline's default (`mapping-rubric.md`). Check each lane against the split
-table: a lane whose tasks need very different tools or permissions may deserve two agents; two
-thin lanes may collapse into one. `agent-authoring` holds the checklist.

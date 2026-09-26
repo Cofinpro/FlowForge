@@ -1,6 +1,6 @@
 ---
 name: bpmn2agent-analyze
-description: Reads a hand-drawn BPMN diagram and turns it into the first draft of generated/<workflow>/workflow-spec.yaml — the first step of the bpmn-to-agentic-workflow pipeline (analyze → knowledge → design → generate → verify). Validates the .bpmn (bpmn-authoring), inventories every element with bpmn-moddle, flags BPMN constructs this pipeline can't generate from yet (pools/message flows, timer/message events, event sub-processes, compensation) and suggests a rewrite, then interviews the business user in plain language — via AskUserQuestion, options + a recommendation — about gaps only (missing roles, unclear multi-instance collections, unsupported constructs). Re-running it on a changed .bpmn diffs by element id (sha256 + element-level comparison) and asks only about what's new or changed. Never mutates the author's .bpmn. Use right after a business person has drawn or updated a workflow diagram and wants it turned into Claude agents/skills, before bpmn2agent-knowledge.
+description: Reads a hand-drawn .bpmn, validates and inventories it, flags constructs the pipeline can't generate yet (pools/message flows, timer/message events, event sub-processes, compensation), asks the business user about gaps only, and writes the draft generated/<workflow>/workflow-spec.yaml. On a changed .bpmn it diffs by element id and asks only about what changed. Never edits the .bpmn. Use when a diagram is new or changed, before bpmn2agent-knowledge.
 bpmn:
   file: docs/planning/bpmn-to-agentic-workflow.bpmn
   elements:
@@ -16,24 +16,20 @@ bpmn:
 
 # BPMN → Agent Analysis
 
-First step of the `bpmn-to-agentic-workflow` pipeline. Input is a `.bpmn` file the business user
-drew (with `bpmn-authoring`, ideally using lanes — see
-`bpmn-authoring/references/modelling-rules.md`). Output is
-`generated/<workflow>/workflow-spec.yaml` — a **draft**: structurally complete against
-`bpmn2agent-design/assets/workflow-spec.schema.yaml`, but with every element's actual generation
-decision (`kind`, `generatedPaths`, the orchestration `pattern`) left for `bpmn2agent-design` to
-fill in after knowledge grounding. This skill only reads the `.bpmn`; it never edits it, and it
-never decides how an element gets built — it decides what's *there*, what's *missing*, and what
-this pipeline flatly can't generate from yet.
+Input: a `.bpmn` the business user drew. Output: the **draft**
+`generated/<workflow>/workflow-spec.yaml`, conforming to
+`${CLAUDE_SKILL_DIR}/../bpmn2agent-design/assets/workflow-spec.schema.yaml`. Analysis records what is
+there, what is missing and what can't be generated. It never decides how an element gets built
+(`kind`, `generatedPaths`, `pattern` are `bpmn2agent-design`'s), and never modifies, moves or renames
+the source `.bpmn`.
+
+Every question goes through `AskUserQuestion` with concrete options plus a recommendation, in the
+user's language.
 
 ## 1. Locate the source `.bpmn` and the target folder
 
-Ask (or infer from context) which `.bpmn` file to analyze and what the workflow should be called.
-The workflow name is kebab-case and becomes the `<workflow>` segment of
-`generated/<workflow>/workflow-spec.yaml` — default it to the `.bpmn` file's own basename
-(kebab-cased) and confirm rather than asking outright when it's unambiguous. Everything this skill
-writes lives under `generated/<workflow>/`; the source `.bpmn` stays wherever the user put it
-(e.g. `docs/planning/*.bpmn`) and is **never** modified, moved, or renamed by this skill.
+Ask (or infer) which `.bpmn` to analyze and the workflow name: kebab-case, default the `.bpmn`
+basename; confirm rather than ask when unambiguous. Write only under `generated/<workflow>/`.
 
 ## 2. Validate structurally first
 
@@ -41,12 +37,10 @@ writes lives under `generated/<workflow>/`; the source `.bpmn` stays wherever th
 ${CLAUDE_SKILL_DIR}/../bpmn-authoring/scripts/validate.sh <file>.bpmn
 ```
 
-If this fails, **stop** — tell the user which stage failed (XSD / bpmn-moddle / bpmnlint, see
-`bpmn-authoring/references/validation.md`'s typical-errors table) and point them at
-`bpmn-authoring` to fix it first. Don't attempt inventory/analysis on a file that doesn't parse
-cleanly; every finding downstream would be noise on top of a real structural problem. This step
-also populates the tool cache (`${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`) that step 3
-needs — always run it, even on a file you're fairly sure is already clean.
+On failure, **stop**: name the failed stage (XSD / bpmn-moddle / bpmnlint, see
+`${CLAUDE_SKILL_DIR}/../bpmn-authoring/references/validation.md`) and send the user to
+`bpmn-authoring`. Always run it, even on a file you believe is clean: it fills the tool cache step 3
+needs.
 
 ## 3. Inventory every element
 
@@ -55,153 +49,88 @@ node ${CLAUDE_SKILL_DIR}/scripts/inventory.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" <file>.bpmn
 ```
 
-Prints a JSON inventory to stdout: every process/subProcess scope (with computed
-`pattern-rubric.md` signals — `humanTaskCount`, `parallelCount`, `multiInstanceCount`, `loopCount`,
-`judgementBranchCount`, `attended`), every lane, every flow node (lane, scope, documentation, role
-hint, multi-instance info, boundary events, event definitions), every sequence flow, every data
-object/reference + data association, every text annotation, and a `findings[]` list. Read
-`references/conventions.md` for exactly how role hints, task types and annotations are read, and
-`references/unsupported.md` for what each `unresolved`-severity finding means and what rewrite to
-suggest. Save the JSON to a scratch file — you'll need it across the rest of this procedure, not
-just once.
+Prints JSON: scopes with pattern-rubric signals, lanes, flow nodes, sequence flows, data objects and
+associations, annotations, `meta.sha256` and `findings[]`. Save it to a scratch file; later steps
+reuse it. How to read role hints, task types and annotations: `references/conventions.md`. What each
+`unresolved` finding means and which rewrite to suggest: `references/unsupported.md`.
 
 ## 4. Flag unsupported elements
 
-Every finding with `severity: "unresolved"` in the inventory is a construct this pipeline's v1
-can't generate from (see `references/unsupported.md` for the full list and why: pools + message
-flows, timer/message events, event sub-processes, compensation). Present each one to the business
-user in plain language, quoting the BPMN element's own label verbatim, e.g.:
+Present every `severity: "unresolved"` finding in plain language, quoting the BPMN label verbatim,
+with the rewrite suggestion from `references/unsupported.md`, and ask: change the diagram, or keep it
+as an open gap? For example:
 
-> Your diagram has a timer on "Wartezeit prüfen" — a fixed waiting period. I can't turn a real
-> clock-based wait into a working Claude agent yet. I'd suggest modelling it as "try up to 3
-> times" instead (a retry cap) rather than a real timer. Want to change the diagram, or should I
-> note this as an open gap for now and move on?
+> Your diagram has a timer on "Wartezeit prüfen". I can't turn a clock-based wait into a Claude
+> agent yet. I'd suggest "try up to 3 times" (a retry cap) instead. Change the diagram, or note it
+> as an open gap and move on?
 
-Record the outcome either way: if the user will rewrite the `.bpmn` themselves (in
-`bpmn-authoring`, outside this skill), tell them to re-run this skill afterwards — don't wait for
-them to do it in-session unless they say so. If they want to proceed as-is, this element gets
-`kind: unresolved` in the spec draft (step 6) with `reason` set to the concrete rewrite suggestion,
-plus an `openQuestions[]` entry.
+- User will rewrite the `.bpmn` (in `bpmn-authoring`): tell them to re-run this skill afterwards; don't
+  wait in-session unless they say so.
+- User proceeds as-is: the element gets `kind: unresolved` with `reason` = the rewrite suggestion,
+  plus an `openQuestions[]` entry (step 6).
 
 ## 5. Interview about gaps — nothing else
 
-Ask about genuine gaps only, never about generation decisions (that's `bpmn2agent-design`'s job,
-after knowledge grounding). A "gap" is one of:
+Ask only about these gaps, never about generation decisions and never about an element without a gap:
 
-- **An element without a role** — no lane, and no role hint from either the `sdlc:step`
-  extension or a `Rolle:` documentation fallback (see `references/conventions.md`). Ask which
-  role/agent it belongs to.
-- **A `documentation-role-fallback` finding** — the scope has no lanes; a role hint exists but is
-  freeform text. Confirm the actual role name (it becomes a `roles.<id>` key) rather than
-  guessing a kebab-case id from the raw string.
-- **A forking gateway without a default flow** (`gateway-without-default` finding) — ask which
-  outgoing branch is the "normal"/expected one; this becomes useful context for
-  `bpmn2agent-design`'s pattern choice even though analysis doesn't set `pattern` itself.
-- **An ambiguous plain `task`** (untyped, i.e. `bpmnType: "bpmn:Task"`) — BPMN's untyped task
-  doesn't say whether it's a human step, an agent step or a script. Ask; record the answer as a
-  note the user can act on (rename it to a typed task in `bpmn-authoring`) rather than silently
-  assuming — do not write a `kind` decision here either way (see step 6).
-- **An unclear multi-instance collection** — `multiInstance.collectionHint` is `null`, or came
-  only from an annotation/name-pattern guess rather than a structured extension or formal
-  `loopCardinality`/`loopDataInputRef`. Ask what the actual collection is (e.g. "one per epic",
-  "one per story needing rework").
-- **Every unresolved (unsupported) finding from step 4.**
-
-Every question uses `AskUserQuestion` with concrete options plus a clear recommendation — never a
-bare open-ended prompt — per the pipeline's business-language framing rule. Do **not** ask about
-elements with no gap (a laned, named, typed task with a clear role needs no question at all) —
-asking about everything defeats the point of "gaps only" and trains the user to stop reading the
-questions.
+- **No role**: no lane and no role hint (`sdlc:step` extension or `Rolle:` documentation). Ask which
+  role it belongs to.
+- **`documentation-role-fallback` finding**: confirm the actual role name (it becomes a `roles.<id>`
+  key); don't derive an id from the raw string.
+- **`gateway-without-default` finding**: ask which outgoing branch is the normal one (context for
+  design's pattern choice).
+- **Untyped `task`** (`bpmn:Task`): ask whether it is a human, agent or script step; record the answer
+  as a note (rename to a typed task in `bpmn-authoring`). Don't write a `kind`.
+- **Unclear multi-instance collection**: `multiInstance.collectionHint` is `null` or came only from an
+  annotation/name pattern. Ask what the collection is (e.g. "one per epic").
+- **Every unresolved finding from step 4.**
 
 ## 6. Write the spec draft
 
-Write (or refresh — see step 7) `generated/<workflow>/workflow-spec.yaml`, conforming to
-`bpmn2agent-design/assets/workflow-spec.schema.yaml`. What analysis is responsible for filling in:
+Write (or merge, step 7) `generated/<workflow>/workflow-spec.yaml`:
 
-- **`meta`** — `workflowName`, `sourceBpmn.path`/`sha256` (from the inventory's `meta.sha256`),
-  `language` (the user's language, from the interview), `generatorVersion` (this skill family's
-  version), `created`/`updated` timestamps, and `outputLayout: claude-dir` for every new spec
-  (installable files under `generated/<workflow>/.claude/`). On a re-run keep whatever the spec
-  already has; a spec without the field is on the legacy layout.
-- **`roles`** — one entry per lane (or per resolved documentation-fallback role from step 5),
-  `bpmnLaneId`, `label` (verbatim lane name), `agentName` left as a reasonable kebab-case guess
-  (`{workflow}-{role}`) for `bpmn2agent-design` to confirm or rename. Leave `modelTier`/`tools`
-  unset — that's a deployment decision, not analysis's call.
-- **`elements`** — one entry per flow node from the inventory: `bpmnType`, `label` (verbatim BPMN
-  name), `lane` (the resolved role id, if any). Set **`kind: unresolved`** for every element as a
-  placeholder — analysis never assigns skill/script/hook/orchestrator/human-checkpoint/etc.,
-  that's `bpmn2agent-design`'s mapping-rubric decision made after knowledge grounding. Use
-  `reason` to say *why* it's still unresolved:
-  - For a genuinely unsupported construct (step 4): the concrete rewrite suggestion from
-    `references/unsupported.md`.
-  - For everything else: `"Not yet mapped — pending bpmn2agent-design."`
-  Populate `inputs`/`outputs` from data associations the inventory found (`dataInputAssociation`/
-  `dataOutputAssociation`), referencing `artifacts.<id>` entries created in the next bullet;
-  `required: true` by default on inputs unless the user said otherwise in step 5.
-- **`artifacts`** — one entry per `dataObject`/`dataObjectReference` the inventory found, keyed by
-  a kebab-case id derived from its name. `pathPattern` defaults to
-  `generated/<workflow>/artifacts/<id>/{id}.md` (a placeholder `bpmn2agent-generate` can refine);
-  `producer`/`consumers` from the resolved data associations — `producer` is a single element id
-  for the common case, or an array when more than one element has a real `dataOutputAssociation`
-  into the same data object (e.g. a draft written by one element, then overwritten/confirmed by
-  another — both writes are real, neither is a "consumer").
-- **`pattern`** — leave unset entirely (it's optional in the schema); `bpmn2agent-design` sets it
-  from the signals this step already computed and stored in the inventory (don't recompute them,
-  and don't guess the pattern here).
-- **`knowledge`** — leave unset; `bpmn2agent-knowledge` (the very next pipeline step) owns this
-  section.
-- **`openQuestions`** — one entry per unresolved gap from step 5 the user asked to defer, with
-  their actual answer recorded in `answer` when they gave one (not left as `"pending"` unless they
-  explicitly deferred it).
+- **`meta`**: `workflowName`, `sourceBpmn.path`/`sha256` (inventory `meta.sha256`), `language` (the
+  user's), `generatorVersion`, `created`/`updated`, and `outputLayout: claude-dir` on every new spec.
+  On a re-run keep the existing value; a spec without the field is on the legacy layout.
+- **`roles`**: one per lane (or per confirmed documentation-fallback role): `bpmnLaneId`, `label`
+  (verbatim lane name), `agentName` guessed as `{workflow}-{role}` for design to confirm. Leave
+  `modelTier`/`tools` unset.
+- **`elements`**: one per flow node: `bpmnType`, `label` (verbatim), `lane` (resolved role id, if any),
+  `kind: unresolved` as placeholder for all. `reason`: the rewrite suggestion for unsupported
+  constructs (step 4), otherwise `"Not yet mapped — pending bpmn2agent-design."`. `inputs`/`outputs`
+  from data associations, referencing `artifacts.<id>`; inputs `required: true` unless the user said
+  otherwise.
+- **`artifacts`**: one per `dataObject`/`dataObjectReference`, kebab-case id from its name.
+  `pathPattern` defaults to `generated/<workflow>/artifacts/<id>/{id}.md`. `producer`/`consumers` from
+  associations; `producer` is an array when more than one element has a real `dataOutputAssociation`
+  into it (both are producers, not consumers).
+- **`pattern`**, **`knowledge`**: leave unset (design and knowledge own them).
+- **`openQuestions`**: one per gap from steps 4–5 the user deferred, keys `elementId`, `question`,
+  `answer`. Record the user's answer when given; `answer: null` when deferred.
 
-Validate the written file against the schema before finishing (e.g. an ad-hoc `ajv` check — see
-`bpmn2agent-design/assets/workflow-spec.schema.yaml`'s own definitions for the exact shape); a spec
-that doesn't conform blocks every later pipeline step, not just this one. `ajv`/`ajv-formats`/
-`js-yaml` live in `${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}/node_modules/` —
-`bpmn2agent-verify/scripts/verify.mjs` installs them there on first use (same cache, same
-install-if-missing approach step 2's `validate.sh` already uses) and resolves them via
-`createRequire` against `<cacheDir>/package.json`; reuse that pattern rather than installing
-anything globally.
+Validate the spec, then read only the spec-schema section of the output (other categories may fail
+this early):
+
+```bash
+node ${CLAUDE_SKILL_DIR}/../bpmn2agent-verify/scripts/verify.mjs \
+  "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" generated/<workflow>
+```
+
+Fix schema errors before finishing; a non-conforming spec blocks every later stage.
 
 ## 7. Re-runs: diff by element, ask only about what changed
 
-If `generated/<workflow>/workflow-spec.yaml` already exists, this is a re-run against a possibly
-updated `.bpmn`:
+If the spec already exists:
 
-1. Read the existing spec's `meta.sourceBpmn.sha256`. Compare it against the fresh inventory's
-   `meta.sha256` (from step 3). If they match, the `.bpmn` hasn't changed at all since the last
-   run — nothing to do; tell the user and stop (or proceed straight to confirming with them
-   whether they actually meant to re-run).
-2. If the hash differs, diff **by element id**: for every id in the new inventory's `flowNodes` /
-   `dataObjects` / `lanes`, check whether it existed in the old spec's `elements/roles/artifacts`
-   maps and, if so, whether anything analysis reads has changed (`bpmnType`, `label`, `lane`,
-   `documentation`, `multiInstance`, `eventDefinitions` — the fields this skill itself derives
-   values from). Classify each id as **new**, **changed**, **removed**, or **unchanged**.
-3. Only run step 5's interview for **new** and **changed** elements with an actual gap. Leave
-   every **unchanged** element's existing `kind`/`reason`/`generatedPaths`/etc. exactly as
-   `bpmn2agent-design`/`-generate` last set them — re-running analysis must never revert a later
-   stage's decisions on elements that didn't change.
-4. For **removed** elements (present in the old spec, absent from the new inventory), flag them to
-   the user rather than silently deleting — a role or artifact something else in the spec still
-   references (`elements.*.lane`, `artifacts.*.producer`/`consumers`) shouldn't disappear without
-   confirmation.
-5. Update `meta.sourceBpmn.sha256` and `meta.updated`; merge the new/changed element data into the
-   existing file rather than rewriting it from scratch, so untouched sections survive byte-for-byte
-   where possible (easier to review in a diff).
+1. Compare its `meta.sourceBpmn.sha256` with the inventory's `meta.sha256`. Equal: tell the user
+   nothing changed and stop (or confirm they meant to re-run).
+2. Otherwise diff by element id across `flowNodes`/`dataObjects`/`lanes` vs. the spec's
+   `elements`/`artifacts`/`roles`, comparing `bpmnType`, `label`, `lane`, `documentation`,
+   `multiInstance`, `eventDefinitions`. Classify each id as new, changed, removed or unchanged.
+3. Interview (step 5) only new and changed elements with a gap. Never touch an unchanged element's
+   `kind`/`reason`/`generatedPaths` or other later-stage decisions.
+4. Removed elements: flag them to the user; don't delete without confirmation, especially roles or
+   artifacts still referenced (`elements.*.lane`, `artifacts.*.producer`/`consumers`).
+5. Update `meta.sourceBpmn.sha256` and `meta.updated`; merge into the existing file instead of
+   rewriting it, so untouched sections stay byte-identical.
 
-## Reference files
-
-- `references/conventions.md` — the input contract: lane vs. documentation-fallback role
-  resolution and its priority order, what each task type means, how annotations are read as hints
-  (never as structure), and what analysis deliberately leaves for later pipeline steps.
-- `references/unsupported.md` — the v1 unsupported-construct list (pools/message flows,
-  timer/message events, event sub-processes, compensation), why each is unsupported, its detection
-  signal in `inventory.mjs`, and the concrete rewrite suggestion to offer.
-
-## Scripts
-
-- `scripts/inventory.mjs` — `node scripts/inventory.mjs <cacheDir> <file.bpmn>`, prints the JSON
-  inventory described in step 3 to stdout. Read-only; resolves `bpmn-moddle` via `createRequire`
-  against `<cacheDir>/package.json`, same approach as
-  `bpmn-authoring/scripts/check-moddle.mjs` — run `bpmn-authoring/scripts/validate.sh` first so
-  the cache actually has `bpmn-moddle` installed.

@@ -77,7 +77,7 @@ Authoring notes for whoever fills this template (bpmn2agent-generate step 5):
 - This template only fires for a lane that needs a real agent — i.e. it has at least one element
   with kind human-checkpoint, orchestrator, or agent-checklist. A lane whose elements are ALL
   kind: script gets a skill wrapper instead (assets/templates/skill-template.md), never this file —
-  see SKILL.md step 4.
-- Follows `.agents/skills/new-agent/agent-template.md`'s naming convention:
+  see SKILL.md step 3.
+- Follows agent-authoring's naming convention:
   {{workflow}}-{{role}}, kebab-case, no "-expert" suffix.
 -->
