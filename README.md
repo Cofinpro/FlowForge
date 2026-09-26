@@ -119,6 +119,61 @@ ein Tool-Aufruf wirklich blockiert werden muss,
 Gateways und Schleifen → Steuerlogik mit Obergrenze, Datenobjekt → Artefaktvertrag. Die vollständigen
 Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
 
+## Fachwissen aus Gemini-Notebooks
+
+Ein Skill ist nur so gut wie das Fachwissen darin. Schreibt das Modell eine INVEST-Checkliste oder
+die Kriterien für eine Definition of Ready aus dem Gedächtnis, klingt das plausibel, kann aber
+erfunden, veraltet oder nicht eure Praxis sein. lanecraft holt dieses Wissen deshalb aus einem
+**NotebookLM-Notebook mit Quellen, die ihr selbst ausgewählt und geprüft habt**: Fachbücher,
+Handbücher, euer Fachkonzept, Prozessregeln. Das Notebook antwortet nur aus diesen Quellen und nennt
+zu jeder Aussage die Textstelle.
+
+### Einrichten
+
+1. In [NotebookLM](https://notebooklm.google.com) ein Notebook anlegen und die Quellen hochladen,
+   die für den Prozess gelten sollen. Weniger, dafür passende Quellen sind besser als viele.
+2. In Claude Code den MCP-Server `gemini-notebook-mcp` einrichten und einmal `nlm login` im
+   Terminal ausführen.
+3. Die Pipeline starten. In Stufe 2 (`bpmn2agent-knowledge`) zeigt sie eure Notebooks zur Auswahl
+   und fragt, welches Notebook welche Lanes oder Aufgaben abdeckt. Mehrere Notebooks gehen auch,
+   z. B. eines je Fachbereich.
+
+### Was mit dem Notebook passiert
+
+- **Das Diagramm wird gegengeprüft.** Je Phase fragt die Pipeline das Notebook, welche Schritte,
+  Prüfungen oder Rollen die Quellen kennen, die im Diagramm fehlen. Jeder Befund wird zu einer Frage
+  an dich. Das Diagramm oder die Planung ändert sich nur, wenn du zustimmst.
+- **Das Wissen wird destilliert.** Je Phase oder Aufgabe entsteht eine kurze Datei unter
+  `generated/<workflow>/knowledge/`: Vorgehen, Kriterien, Fallstricke, Begriffe. Jede Aussage trägt
+  einen Verweis wie `[refinement-1: 26, 27]`, also FAQ-Eintrag und Belegnummern. Diese Dateien
+  landen als `references/` in den erzeugten Skills.
+- **Jede Antwort wird aufbewahrt.** `generated/<workflow>/knowledge/faq/` enthält jede Frage an das
+  Notebook im Wortlaut, die Antwort unverändert und zu jeder Belegnummer Quelle und zitierte
+  Textstelle. Ein späterer Lauf schaut dort zuerst nach und fragt das Notebook nur, was noch fehlt.
+
+### Belegstufen
+
+| Stufe | Bedeutung |
+|---|---|
+| `cited` | Aussage mit Beleg aus dem Notebook, dem Web oder einem geprüften Dokument im Repo |
+| `inferred` | aus belegtem Material oder dem Diagramm abgeleitet, ohne eigene Quelle |
+| `unverified` | nur Modellwissen; im Text sichtbar als `⚠ unverified` markiert |
+
+Ohne Notebook bietet die Pipeline Websuche mit Quellenangabe, vorhandene geprüfte Dokumente im
+Repo oder Modellwissen an. Letzteres bleibt als `unverified` markiert und wird nie nachträglich
+hochgestuft.
+
+**Grenze:** Das Notebook antwortet nur aus euren Quellen, aber seine Zusammenfassung kann eine
+Quelle trotzdem falsch wiedergeben. Für Aussagen, auf die es ankommt, die zitierte Textstelle im
+FAQ lesen, nicht nur den zusammengefassten Satz. Genau dafür ist sie dort.
+
+Beispiel: [`examples/user-story-refinement/`](examples/user-story-refinement/) ist mit dem Notebook
+„The Product – Business Design“ (26 Quellen) gelaufen: sechs Fragen im FAQ, sechs Wissensdateien,
+vier Befunde, die als Fragen an den Anwender gingen.
+
+Nicht verwechseln mit der [Wissensbasis](#wissensbasis) weiter unten: Die gehört der Pipeline selbst
+und beantwortet Fragen dazu, wie man Agenten und Skills baut, nicht zu eurem Fachgebiet.
+
 ## Was herauskommt
 
 ```text
