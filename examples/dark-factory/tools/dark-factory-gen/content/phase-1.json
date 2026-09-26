@@ -1,0 +1,423 @@
+{
+  "S0": {
+    "description": "Completes the raw idea brief into a full idea-brief artifact per Gedächtnis §14 (required and optional fields filled, derived fields marked 🧠 inferred, light WebSearch factcheck). Use when the dark-factory workflow reaches step 0 \"0 Idee-Brief vervollstaendigen\".",
+    "purpose": "Gives every later step one complete input contract: DR-01 (Call_R1) and S1.1.1 read idea, market/region and competitors; S1.1.6 turns every 🧠 field into an ASM item; ARC steps and G-4.2 rely on target architecture and budget/timebox.",
+    "procedure": [
+      "Read the raw brief `runs/<runId>/00_idea-brief.md` (input idea-brief, optional; written by run-state init from the idea text, brief file or input folder). If it has no explicit `idee` field, take its leading idea/problem statement verbatim as `idee`. If there is no idea at all, stop and return an error: it is the only field that cannot be derived.",
+      "If `runs/<runId>/input/` exists (the user passed a folder), read every file there as user-provided material; relative links in the brief resolve against that folder. Values the user states in these files count as `given` (cite the file as `input/<file>`), not 🧠. Their own citations are not factory evidence: only SRC ids count, so re-check a claim you rely on with the light factcheck below. List the input files you used in a section \"User input material\" so DR-01 and later steps know they exist.",
+      "Build the §14 field table with one row per field: idee, markt/region, ausgabesprache, zielgruppe-hypothese, wettbewerber, strategische-richtung, budget/timebox, zielarchitektur/plattform, constraints. Copy every user-provided value verbatim and mark its origin `given`; never rewrite given values.",
+      "Read the target project's manifest `<runDir>/../../.dark-factory/project.json` if it exists (df.project/v1). Its `platform` fills zielarchitektur/plattform and its `language` fills ausgabesprache; mark both origin `given (project manifest)`, not 🧠. A value in the raw brief wins over the manifest; if they differ, keep the brief value and note the conflict. Empty manifest fields (`\"\"`, `null`) count as missing.",
+      "Fill each missing field by the §14 rule: markt/region derived from the idea plus WebSearch; ausgabesprache defaults to `de`; zielgruppe-hypothese, strategische-richtung and constraints (regulation, no-gos) derived from the idea; budget/timebox and zielarchitektur/plattform as a plausible assumption with a one-sentence justification. Mark each such value 🧠 inferred and give its reasoning.",
+      "Leave `wettbewerber` empty when not given and note \"filled by DR-01\"; do not research competitors here.",
+      "Run a light WebSearch/WebFetch factcheck (max. a few queries) on checkable claims: the named market/region, obvious regulation for the domain, and any factual claim inside the idea. Normalize every retrieved source with `node skills/product-recherche/scripts/normalize-sources.mjs` into `research/sources/SRC-*.md` and cite it by SRC id. A field confirmed by a source becomes 🔗 cited; a refuted given value stays verbatim but gets a conflict note.",
+      "Write the section \"Inferred fields → ASM\" listing every 🧠 field with a one-line assumption statement, so S1.1.6 can take each over as an ASM item without re-interpretation.",
+      "Compute the evidence mix over the fields (given fields excluded from the mix, listed separately) and list all SRC ids in `sources`."
+    ],
+    "selfCheck": [
+      "Rubric idea-brief: all required fields (idee, markt/region, ausgabesprache, budget/timebox, zielarchitektur/plattform) are filled.",
+      "Rubric idea-brief: every derived field is marked 🧠 inferred with a stated reasoning; no derived value is presented as given.",
+      "Rubric idea-brief: budget/timebox and target architecture/platform are present and justified (§14).",
+      "Every given value is verbatim from the raw brief; conflicts found by the factcheck are noted, not silently corrected.",
+      "Every web claim cites a normalized SRC id; no raw URL without an SRC artifact.",
+      "The \"Inferred fields → ASM\" list contains exactly the 🧠 fields of the table.",
+      "The idea is framed as a customer problem, not a feature list; if the raw brief is feature-only, strategische-richtung notes that the problem is still open.",
+      "zielarchitektur/plattform and ausgabesprache come from the raw brief or the project manifest (origin given) whenever either provides them; 🧠 only when both are silent."
+    ],
+    "pitfalls": [
+      "Doing competitor or market research here: DR-01 owns the corpus; step 0 only does a light factcheck.",
+      "Inventing a concrete budget or tech stack without a justification, or hiding it as if the user had provided it.",
+      "Polishing or reinterpreting the user's idea sentence instead of keeping it verbatim.",
+      "Forgetting the ASM hand-off list, so inferred brief fields never get tested as assumptions."
+    ],
+    "templateSections": [
+      "## Idee — the idea sentence(s) verbatim from the raw brief",
+      "## Feldtabelle — field | value | origin (given / 🧠 inferred / 🔗 cited) | reasoning or SRC",
+      "## Annahmen zu Budget, Timebox und Zielarchitektur — the plausible assumptions and why",
+      "## Faktencheck — checked claim | result (confirmed / refuted / open) | SRC",
+      "## Inferred fields → ASM — one assumption statement per 🧠 field for S1.1.6",
+      "## Offene Punkte — conflicts and fields left empty on purpose (e.g. wettbewerber → DR-01)"
+    ],
+    "domainKnowledge": "## Idea brief as input contract (Gedächtnis §14)\n\n- `idee` (1–3 sentences) is the only true mandatory field; everything else can be derived.\n- Required with derivation: `markt`/`region` (from the idea and WebSearch → 🧠), `ausgabesprache` (default `de` → 🧠),\n  `budget`/`timebox` for G-4.2 and `zielarchitektur`/`plattform` for ARC (plausible, justified assumption → 🧠).\n- Optional: `zielgruppe-hypothese`, `strategische-richtung`, `constraints` (derive → 🧠); `wettbewerber` stays empty, DR-01 fills it.\n- All 🧠 fields of the brief are carried over automatically as ASM items into the assumptions-map (1.1.6).\n- Research routing (§8): Claude WebSearch is the tool for light research in step 0; every source is normalized to `SRC-<nnnn>`\n  with url, title, retrievedAt, tool, query, contentHash, sourceType and a summary.\n- Evidence (§6): inferred 🧠 = logically derived or assumed, explicitly including brief fields from step 0.\n\n## Framing\n\n- A common failure downstream is starting with solution features rather than framing the customer problem [^1];\n  the brief should keep the problem visible so 1.1.1 and the Lean Canvas can start from it [^2].\n\n[^1]: \"Lean UX\" (Gothelf, Seiden), via notebook answer 2026-09-25 — \"Starting with solution features rather than framing the customer problem/need.\"\n[^2]: \"Running Lean\" (Maurya), via notebook answer 2026-09-25 — \"Fill out the 9 building blocks in sequence: Problem (top 1–3) & Existing Alternatives → Customer Segments & Early Adopters → UVP …\""
+  },
+  "S1.1.1": {
+    "description": "Writes the zielbild artifact: the status quo versus the target picture for the idea, grounded in the idea brief and the DR-01 market and competition report. Use when the dark-factory workflow reaches step S1.1.1 \"Status quo & Zielbild klaeren\".",
+    "purpose": "Establishes the problem-first gap (today vs. desired future) that S1.1.2 condenses into the vision statement and elevator pitch; it also frames the Problem and Existing Alternatives boxes of the Lean Canvas in S1.1.3.",
+    "procedure": [
+      "Read idea-brief (fields idee, zielgruppe-hypothese, strategische-richtung, constraints) and research-markt-wettbewerb (DR-01).",
+      "Describe the status quo from the customer's perspective: who has the problem today, how they solve it now (existing alternatives, workarounds, competitor products from DR-01) and what it costs them. Cite every market or competitor statement by its SRC id (🔗).",
+      "State the core problem in one or two sentences, customer-first and solution-neutral.",
+      "Describe the target picture: what is different for the customer once the product exists (outcome, not features), and which market trends from DR-01 make it plausible now.",
+      "Make the gap explicit as a short \"from … to …\" table (dimension | status quo | target picture | evidence).",
+      "Mark statements that are not backed by DR-01 or the brief as 🧠 inferred and list them under \"Open assumptions\" for S1.1.6.",
+      "Compute the evidence mix over all statements and list the used SRC ids in `sources`."
+    ],
+    "selfCheck": [
+      "Status quo names today's alternatives/workarounds, each backed by an SRC from DR-01 or marked 🧠.",
+      "The core problem is stated from the customer's view and contains no feature or technology.",
+      "The target picture describes outcomes for the customer, not a feature list (rubric phase-1-1: problem-first framing).",
+      "Every claim carries an evidence level; cited claims reference SRC ids only (no raw URLs).",
+      "The \"from … to …\" table covers at least the problem, the alternative and the customer outcome.",
+      "The zielbild fits on one page, so S1.1.2 can condense it without losing substance."
+    ],
+    "pitfalls": [
+      "Starting from the product's features instead of the customer problem.",
+      "Copying the DR-01 report instead of synthesizing the gap it reveals.",
+      "A target picture so vague (e.g. \"better experience\") that no goal or KPI can be derived later."
+    ],
+    "templateSections": [
+      "## Status quo — who has the problem, current alternatives and workarounds, their cost (with SRC)",
+      "## Kernproblem — one or two customer-first, solution-neutral sentences",
+      "## Zielbild — the customer outcome once the product exists and why now (trends from DR-01)",
+      "## Von … zu … — table: dimension | status quo | target | evidence",
+      "## Offene Annahmen — 🧠 statements for the assumptions map"
+    ],
+    "domainKnowledge": "## Status quo and target picture (1.1.1)\n\n- Start from status quo vs. target picture, then fill Moore's template or NABC in the next step [^1][^2].\n- Pitfall: 50-page strategy documents instead of a one-page statement; starting from features instead of the customer problem [^1][^3].\n- The Lean Canvas that follows begins with Problem (top 1–3) and Existing Alternatives [^4], so the zielbild must already name today's alternatives.\n\n## Inputs (Gedächtnis §8.2)\n\n- DR-01 covers market size/growth, at least 3 direct and 2 indirect competitors with positioning and pricing model,\n  pricing/revenue benchmarks and market trends of the last 2–3 years; research syntheses cite only SRC ids.\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick, Link, Leifer 2020), via notebook answer 2026-09-25 — \"Draft a concise statement defining target customer, need, product name, category, core benefit, primary alternative, and unique differentiation using Moore's template or an NABC structure.\"\n[^2]: \"The Design Thinking Playbook\" / \"The Design Thinking Toolbox\", via notebook answer 2026-09-25 — \"Complete the right side (Customer Profile) first … Then design the left side (Value Map) … Cross-check left and right sides to evaluate 'Fit'.\"\n[^3]: \"Lean UX\" (Gothelf, Seiden), via notebook answer 2026-09-25 — \"Starting with solution features rather than framing the customer problem/need.\"\n[^4]: \"Running Lean\" (Maurya), via notebook answer 2026-09-25 — \"Fill out the 9 building blocks in sequence: Problem (top 1–3) & Existing Alternatives → Customer Segments & Early Adopters → UVP …\""
+  },
+  "S1.1.2": {
+    "description": "Formulates the vision-statement artifact with one VIS item (Moore template or NABC) plus a high-concept elevator pitch derived from the zielbild. Use when the dark-factory workflow reaches step S1.1.2 \"Vision Statement & Elevator Pitch formulieren\".",
+    "purpose": "VIS-001 is the root of the mandatory trace chain (… → IMP → GOAL → VIS); S1.1.3 builds the Lean Canvas UVP from it and S1.2.1 derives the business goals and the OMTM from it.",
+    "procedure": [
+      "Read zielbild: core problem, target customer, alternatives, target picture.",
+      "Fill Moore's template completely: For <target customer> who <need/problem>, the <product name> is a <product category> that <core benefit>. Unlike <primary alternative>, our product <unique differentiator>. Use NABC (Need, Approach, Benefits, Competition) only if the template does not fit, and say why.",
+      "Name the primary alternative concretely, taken from the zielbild status quo (competitor or workaround), not \"other solutions\".",
+      "Write a high-concept pitch (\"X for Y\") and an elevator pitch of at most 3 sentences.",
+      "Create item VIS-001 with `derivedFrom` pointing to the zielbild statements/SRC ids it rests on and one evidence level (strongest of the underlying evidence).",
+      "Strip buzzwords (e.g. \"innovative\", \"seamless\", \"AI-powered\", \"next-generation\") and check the statement against the zielbild: every part must be traceable to it."
+    ],
+    "selfCheck": [
+      "Rubric vision-statement: Moore template complete (For … who … the … is a … that … Unlike … our product …) or NABC with justification.",
+      "Rubric vision-statement: no buzzwords.",
+      "Rubric vision-statement: target customer is concrete (a segment with a situation, not \"everyone\" or \"users\").",
+      "The statement names target customer, problem and a unique differentiator and fits on one page or less.",
+      "Exactly one VIS item (VIS-001 unless the run already has one) with derivedFrom and an evidence level.",
+      "The high-concept pitch and elevator pitch do not contradict the vision statement."
+    ],
+    "pitfalls": [
+      "A generic target customer (\"small businesses\") that later makes actors and personas unfalsifiable.",
+      "Differentiation claims that are features (\"has an app\") instead of a unique benefit versus the named alternative.",
+      "Writing a strategy essay instead of a one-page statement."
+    ],
+    "templateSections": [
+      "## Vision Statement (VIS-001) — the filled Moore template, one paragraph",
+      "## Template-Zuordnung — table: slot (For, who, product, category, benefit, unlike, differentiator) | value | derivedFrom",
+      "## High-Concept Pitch — \"X for Y\"",
+      "## Elevator Pitch — max. 3 sentences"
+    ],
+    "domainKnowledge": "## Vision statement and elevator pitch (1.1.2)\n\n- Fill Moore's template (For … who … the … is a … that … Unlike … our product …) or NABC; pair it with a high-concept pitch (\"X for Y\") [^1][^2].\n- The statement defines target customer, need, product name, category, core benefit, primary alternative and unique differentiation [^1].\n- Pass: one page or less; names target customer, problem and unique differentiator; no buzzwords [^1].\n- Pitfall: 50-page strategy documents instead of a one-page statement; starting from features instead of the customer problem [^1][^3].\n\n## Rubric seed (Gedächtnis §13, `vision-statement`)\n\n- Moore template; no buzzwords; concrete target customer (Moore, Olsen).\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick, Link, Leifer 2020), via notebook answer 2026-09-25 — \"Draft a concise statement defining target customer, need, product name, category, core benefit, primary alternative, and unique differentiation using Moore's template or an NABC structure.\"\n[^2]: \"The Design Thinking Playbook\" / \"The Design Thinking Toolbox\", via notebook answer 2026-09-25 — \"Complete the right side (Customer Profile) first … Then design the left side (Value Map) … Cross-check left and right sides to evaluate 'Fit'.\"\n[^3]: \"Lean UX\" (Gothelf, Seiden), via notebook answer 2026-09-25 — \"Starting with solution features rather than framing the customer problem/need.\""
+  },
+  "S1.1.3": {
+    "description": "Maps the idea onto a one-page lean-canvas artifact (nine building blocks in Running Lean order, evidence level per cell, explicit pricing model), with a light WebSearch factcheck. Use when the dark-factory workflow reaches step S1.1.3 \"Lean / Business Model Canvas abbilden\".",
+    "purpose": "The canvas is the business-model baseline: S1.1.5 checks the value proposition against it, S1.1.6 extracts its assumptions, and G-P3 compares panel willingness to pay against its pricing model.",
+    "procedure": [
+      "Read vision-statement (VIS-001) and research-markt-wettbewerb (DR-01).",
+      "Fill the Lean Canvas in order: Problem (top 1–3) with Existing Alternatives → Customer Segments with Early Adopters → UVP with High-Level Concept (from VIS-001) → Solution → Channels → Revenue Streams → Cost Structure → Key Metrics → Unfair Advantage. Max. 3–4 entries per box.",
+      "Make the revenue model explicit: pricing model (e.g. subscription, freemium, per use), price point or range, and the DR-01 pricing benchmark it is compared against.",
+      "Give every cell an evidence level: 🔗 with SRC id, or 🧠 inferred with a short reason. Unfair Advantage stays \"none yet\" rather than invented.",
+      "Run a light WebSearch/WebFetch factcheck on the claims DR-01 does not cover (e.g. a channel cost, a price point, a regulatory cost). Normalize each source with `node skills/product-recherche/scripts/normalize-sources.mjs` into `research/sources/SRC-*.md` and cite it by SRC id.",
+      "List all 🧠 cells under \"Assumptions for 1.1.6\" with a one-line assumption statement and its risk domain (Desirability, Feasibility, Viability).",
+      "Compute the evidence mix across cells and list all SRC ids in `sources`."
+    ],
+    "selfCheck": [
+      "Rubric lean-canvas: all nine building blocks are filled (an honest \"none yet\" counts for Unfair Advantage).",
+      "Rubric lean-canvas: every cell has an evidence level (🔗 with SRC or 🧠 with reason).",
+      "Rubric lean-canvas: the pricing model is explicit (model plus price point/range) and compared to a DR-01 benchmark.",
+      "The canvas fits on one page; no box has more than 4 entries.",
+      "The Problem box names today's workarounds/existing alternatives.",
+      "The UVP is consistent with VIS-001; every web-sourced claim cites a normalized SRC id."
+    ],
+    "pitfalls": [
+      "Using the full Business Model Canvas (key partners, activities) before problem/solution fit is established.",
+      "Filling the Solution box with a long feature list, which later biases deliverables in S1.2.4.",
+      "Revenue box left vague (\"monetization later\"), which makes G-P3's willingness-to-pay check impossible.",
+      "Treating the canvas as a one-off document instead of the baseline that pivots revise."
+    ],
+    "templateSections": [
+      "## Lean Canvas — table of the nine boxes in Running Lean order, each entry with evidence level",
+      "## Preismodell — model, price point/range, DR-01 benchmark with SRC",
+      "## Faktencheck — checked claim | result | SRC",
+      "## Assumptions for 1.1.6 — 🧠 cells as assumption statements with risk domain"
+    ],
+    "domainKnowledge": "## Lean Canvas (1.1.3)\n\n- Fill the boxes in order: Problem (top 1–3) and existing alternatives → customer segments and early adopters → UVP and high-level\n  concept → solution → channels → revenue → costs → key metrics → unfair advantage [^1].\n- Pass: fits on one page; 3–4 entries per box at most; the problem box names today's workarounds; the revenue model is explicit [^1].\n  The Gedächtnis rubric adds: every cell has an evidence level.\n- Pitfall: treating the canvas as a one-off document, or using the Business Model Canvas before problem/solution fit is established [^1].\n\n## Research routing (Gedächtnis §8)\n\n- Claude WebSearch is used for fact checks and gap closing, including light research in 1.1.3; results have no persistence\n  without normalization into `SRC-<nnnn>` source artifacts.\n- G-P3 later requires at least 2 of 4 target users with willingness to pay matching the pricing model from `lean-canvas`.\n\n[^1]: \"Running Lean\" (Maurya), via notebook answer 2026-09-25 — \"Fill out the 9 building blocks in sequence: Problem (top 1–3) & Existing Alternatives → Customer Segments & Early Adopters → UVP …\""
+  },
+  "S1.1.4": {
+    "description": "Derives the proto-panel artifact: exactly 3 synthetic personas P-001..P-003 grounded only in the DR-01 report, every trait backed by an SRC id, each with open and hidden attributes. Use when the dark-factory workflow reaches step S1.1.4 \"Proto-Panel aus Research ableiten\".",
+    "purpose": "The proto panel is the synthetic audience for Phase 1 only: it rates the value proposition fit in S1.1.5 (panel mode rating), informs actors in S1.2.2 and votes at G-P1; it is replaced by the full 6-persona panel in 2.1.3.",
+    "procedure": [
+      "Read research-markt-wettbewerb (DR-01) and the SRC artifacts it cites; extract user-related evidence: segments, competitor reviews, forum and social voices, report statements about buyers.",
+      "Choose exactly 3 personas that differ in segment, context or maturity (e.g. a user of the leading competitor, a user of a workaround, a user from an adjacent/early-adopter segment) as far as DR-01 supports it.",
+      "For each persona P-<nnn> write the open part (visible to the interviewer): role/title, context, goals, current tools, pains, one \"voice\" quote. Every trait needs at least one SRC reference; source quotes used as voice are marked 🔗.",
+      "Write the hidden part (visible only to the persona model): budget/willingness to pay, skepticism level 1–5, current workaround and satisfaction with it, switching barriers, and one \"secret\" that only comes out with good questioning. Ground each hidden attribute in an SRC as well.",
+      "Drop any trait you cannot back with an SRC; do not fill gaps with 🧠 inference. If DR-01 cannot support 3 distinct personas, still produce 3 and record the thin grounding as a risk flag.",
+      "Check the source mix: at least 3 different sourceTypes across the panel, and no persona resting on a single source.",
+      "Record each persona in `itemIndex` with `derivedFrom` = its SRC ids and evidence level cited 🔗 (the persona itself is a synthetic actor; its traits are cited)."
+    ],
+    "selfCheck": [
+      "Exactly 3 personas (P-<nnn>), derived only from DR-01 and its SRC artifacts (Gedächtnis §7.1).",
+      "Rubric panel-grounding: every trait, open and hidden, carries at least one SRC reference; no un-sourced trait remains (§6, §7.2).",
+      "Rubric panel-grounding: at least 3 different source types across the panel; no persona relies on only one source.",
+      "Rubric panel-grounding: hidden attributes are set for every persona: budget/willingness to pay, skepticism 1–5, workaround + satisfaction, switching barriers, secret (§7.3).",
+      "Open and hidden parts are clearly separated, so the interviewer never sees the hidden part.",
+      "The 3 personas are distinguishable by segment, context or maturity, not just by name."
+    ],
+    "pitfalls": [
+      "Inventing plausible demographic detail with no source, which violates the grounding rule and makes the panel an echo chamber.",
+      "Three near-identical enthusiasts: without skepticism and switching barriers the panel only agrees and G-P1 becomes meaningless.",
+      "Leaking the hidden part (secret, budget) into the open profile.",
+      "Adding a contrarian or refuser: those belong to the full panel in 2.1.3, not the proto panel."
+    ],
+    "templateSections": [
+      "## Panel-Übersicht — table: P-id | role/title | segment | skepticism | main sources",
+      "## P-<nnn> Offenes Profil — role, context, goals, current tools, pains, voice quote; each trait with SRC",
+      "## P-<nnn> Verstecktes Profil — budget/WTP, skepticism 1–5, workaround + satisfaction, switching barriers, secret; each with SRC",
+      "## Quellenmix — sourceType counts per persona and for the panel",
+      "## Grounding-Lücken — traits dropped for lack of SRC and resulting risk flags"
+    ],
+    "domainKnowledge": "## Proto panel (Gedächtnis §7.1–§7.3)\n\n- Proto panel (step 1.1.4): 3 personas, derived directly from report DR-01; used only for 1.1.5 and G-P1, replaced in 2.1.3.\n- Grounding: every trait of a panel profile needs at least one `SRC` reference (forums, reviews, app-store ratings, reports, social posts).\n- Source mix: at least 3 different source types per panel; no persona rests on only one source.\n- Quotes from sources may serve as the persona's \"voice\" and are marked 🔗.\n- A persona trait without 🔗 evidence may not appear in panel profiles (§6).\n- Hidden part (only for the persona model): budget/willingness to pay, skepticism level (1–5), current workaround and its satisfaction,\n  switching barriers, and a \"secret\" that only emerges with good questioning, so the panel tests interview quality instead of just agreeing.\n- Model independence (§5): personas run on a different model family than the producer where configured.\n\n## Why grounding matters downstream\n\n- The VPC in 1.1.5 starts with the customer profile (jobs, pains, gains) [^1]; the proto panel is the evidence base for that profile.\n\n[^1]: \"The Design Thinking Playbook\" / \"The Design Thinking Toolbox\", via notebook answer 2026-09-25 — \"Complete the right side (Customer Profile) first … Then design the left side (Value Map) … Cross-check left and right sides to evaluate 'Fit'.\""
+  },
+  "S1.1.5": {
+    "description": "Builds the value-proposition-canvas artifact (customer profile, value map, explicit fit links) and consumes the proto-panel rating of the fit. Use when the dark-factory workflow reaches step S1.1.5 \"Value Proposition Canvas abgleichen\".",
+    "purpose": "Tests whether the offer from the Lean Canvas actually relieves the proto personas' top pains and creates their top gains; S1.1.6 turns weak or unlinked fit into assumptions, and G-P1 relies on it for the vision decision.",
+    "procedure": [
+      "Read lean-canvas, proto-panel (P-items) and the panel result path passed by the Workflow (panel mode rating, set proto; mandatory for this step).",
+      "Fill the customer profile first: jobs (functional, social, emotional), pains and gains, derived from the proto personas and their SRC references; rank the top pains and top gains.",
+      "Then fill the value map: products and services (from the Lean Canvas solution/UVP), pain relievers, gain creators.",
+      "Link every pain reliever to the pain(s) it addresses and every gain creator to the gain(s) it produces in a fit table; mark unlinked jobs/pains/gains and unlinked value-map entries explicitly.",
+      "Consume the panel rating table (item × persona, 1–5): add each persona's fit rating per link, compute the mean and spread, and mark all panel-derived values 🤖 synthetic with the transcript/result reference.",
+      "Summarize the fit: top pains without a reliever, relievers with low panel rating (≤ 2) or high spread (≥ 2 points), and hand them to S1.1.6 as assumption candidates.",
+      "Compute the evidence mix (🔗 profile traits, 🧠 value-map claims, 🤖 ratings)."
+    ],
+    "selfCheck": [
+      "Rubric vpc: jobs/pains/gains and products/pain relievers/gain creators are completely linked; every unlinked entry is marked as a gap.",
+      "Rubric vpc: the panel fit rating is present for every link and every persona (or a missing rating is explicitly noted).",
+      "The customer profile was filled before the value map and is grounded in proto-panel traits with SRC.",
+      "Pain relievers address the top pains and gain creators the top gains; jobs cover functional, social and emotional dimensions.",
+      "All panel-derived values are marked 🤖 synthetic and reference the panel result.",
+      "The value map is consistent with the Lean Canvas solution and UVP."
+    ],
+    "pitfalls": [
+      "Designing the value map first and then writing pains that fit it (confirmation bias).",
+      "Averaging away disagreement: a mean of 3 from ratings 1 and 5 hides a split panel.",
+      "Presenting synthetic ratings as validated customer evidence."
+    ],
+    "templateSections": [
+      "## Customer Profile — jobs (functional/social/emotional), pains, gains, ranked, with P-/SRC references",
+      "## Value Map — products & services, pain relievers, gain creators",
+      "## Fit-Tabelle — pain/gain | reliever/creator | rating per P-id (🤖) | mean | spread",
+      "## Fit-Lücken — unlinked entries, low or split ratings → assumption candidates for 1.1.6"
+    ],
+    "domainKnowledge": "## Value Proposition Canvas (1.1.5)\n\n- Customer profile first (jobs, pains, gains), then the value map (products, pain relievers, gain creators), then check the fit [^1].\n- Pass: pain relievers address the top pains and gain creators produce the top gains; jobs cover functional, social and emotional dimensions [^1].\n\n## Panel rating (Gedächtnis §7.5)\n\n- Mode `rating`: items are rated (e.g. importance/satisfaction 1–5, VPC fit); output is a table item × persona.\n- Synthetic evidence 🤖 counts for gates in dark mode but is always labeled as such (§6).\n- G-P1 passes only if the critic passes `gate-vision` and at least 2 of 3 proto personas vote ≥ 3/5 (§9.2).\n\n[^1]: \"The Design Thinking Playbook\" / \"The Design Thinking Toolbox\", via notebook answer 2026-09-25 — \"Complete the right side (Customer Profile) first … Then design the left side (Value Map) … Cross-check left and right sides to evaluate 'Fit'.\""
+  },
+  "S1.1.6": {
+    "description": "Extracts and prioritizes the assumptions-map artifact: ASM items from the brief, canvases and VPC, classified by Desirability/Feasibility/Viability and plotted Importance × Evidence with kill assumptions marked. Use when the dark-factory workflow reaches step S1.1.6 \"Annahmen in Assumptions Map priorisieren\".",
+    "purpose": "The ASM items are the risk register of the run: S1.2.5 uses them as the risk input of the impact scoring, G-P1/G-P2 check kill assumptions for No-Go, the interview guide in Phase 2 must cover them, and every story later lists the unvalidated ASM it rests on.",
+    "procedure": [
+      "Read value-proposition-canvas and lean-canvas; also read the idea-brief section \"Inferred fields → ASM\" and the \"Assumptions for 1.1.6\"/\"Offene Annahmen\"/\"Fit-Lücken\" lists of zielbild, lean-canvas and VPC.",
+      "Create one ASM-<nnn> for every 🧠 field of the idea brief (mandatory, Gedächtnis §14), then one for every 🧠 canvas cell and every VPC fit gap; merge duplicates and never reuse an ID.",
+      "Phrase each assumption as a falsifiable statement (\"We believe <segment> will <behaviour/pay/…> because …\").",
+      "Classify each ASM into exactly one risk domain: Desirability, Feasibility or Viability; make sure all three domains are considered.",
+      "Rate Importance (1–5: how badly the business model breaks if false) and Evidence (1–5: 1 = pure 🧠 inference, 3 = 🤖 panel, 5 = strong 🔗 sources); state the reason for both values.",
+      "Mark kill assumptions: Importance ≥ 4 and Evidence ≤ 2 (kill zone). Record for each the evidence that would refute it.",
+      "Record each ASM in `itemIndex` with `derivedFrom` (brief field, canvas cell, VPC link or P-/SRC ids) and its evidence level; sort the map by Importance desc, then Evidence asc."
+    ],
+    "selfCheck": [
+      "Rubric assumptions-map: every assumption is rated by Desirability/Feasibility/Viability and by Importance × Evidence.",
+      "Rubric assumptions-map: kill assumptions (high importance, low evidence) are explicitly marked.",
+      "Every 🧠 field of the idea brief appears as its own ASM item (§14).",
+      "Every ASM has derivedFrom, an evidence level and a written reason for both ratings.",
+      "All three risk domains are considered; the map is not only feasibility.",
+      "Each assumption is a falsifiable statement, not a topic (\"pricing\")."
+    ],
+    "pitfalls": [
+      "Testing only technical feasibility and ignoring desirability and viability risk.",
+      "Giving every assumption Importance 5, which destroys the prioritization.",
+      "Rating panel agreement as strong evidence: synthetic 🤖 evidence stays mid-scale at best."
+    ],
+    "templateSections": [
+      "## Assumptions Map — table: ASM-id | statement | domain (D/F/V) | importance | evidence | kill? | derivedFrom",
+      "## Matrix Importance × Evidence — 2x2 quadrant listing of ASM ids",
+      "## Kill-Annahmen — each with the evidence that would refute it",
+      "## Herkunft — mapping of brief fields, canvas cells and VPC gaps to ASM ids"
+    ],
+    "domainKnowledge": "## Assumptions map (1.1.6)\n\n- Extract the assumptions behind the canvases, classify them as Desirability, Feasibility or Viability, and plot Importance × Evidence.\n  High importance with low evidence is the kill zone [^1].\n- Pitfall: testing only technical feasibility and ignoring desirability and viability risk [^1].\n\n## Binding rules (Gedächtnis)\n\n- All 🧠 fields of the idea brief are carried over automatically as ASM items (§14).\n- No-Go at G-P1/G-P2: at least one kill assumption (importance high, evidence low) is actively refuted by 🔗 evidence (§9.3).\n- The interview guide must cover the kill assumptions (§13 `interview-guide`); every story lists the unvalidated ASM on its path (§10.2).\n\n[^1]: \"Testing Business Ideas\" (Bland, Osterwalder 2019), via notebook answer 2026-09-25 — \"Categorize into three risk domains: Desirability, Feasibility, and Viability. Plot on a 2x2 grid of Importance vs. Evidence.\""
+  },
+  "S1.2.1": {
+    "description": "Sets the business-goals artifact: GOAL items as measurable business outcomes, with one One Metric That Matters placed on the AARRR funnel for the current stage. Use when the dark-factory workflow reaches step S1.2.1 \"Ziel & Kennzahlen festlegen (Why)\".",
+    "purpose": "GOAL items are the \"Why\" level of the impact map and a mandatory link of the trace chain (IMP → GOAL → VIS); S1.2.2 derives actors from them and S1.2.6 states roadmap milestones as movements of the OMTM.",
+    "procedure": [
+      "Read vision-statement (VIS-001) and determine the product's current stage (e.g. problem/solution fit, early traction).",
+      "Place the stage on the AARRR funnel (Acquisition, Activation, Retention, Revenue, Referral) and choose exactly one One Metric That Matters for it; state why this funnel stage is the bottleneck now.",
+      "Define the OMTM precisely: name, formula, unit, measurement window, baseline (or \"unknown, 🧠 assumed\" with reason) and target value with a time frame.",
+      "Create GOAL-<nnn> items as business outcomes (not solution mandates). The first GOAL carries the OMTM; add at most 1–2 supporting goals, each on its own AARRR stage, clearly subordinate to the OMTM.",
+      "Give each GOAL `derivedFrom: [VIS-001]` (plus SRC ids used for baselines) and an evidence level.",
+      "Reject any goal that names a feature or technology (\"launch an app\") and rewrite it as the outcome that feature was supposed to cause."
+    ],
+    "selfCheck": [
+      "Exactly one OMTM is defined, placed on an AARRR stage, with the reason for that stage.",
+      "Rubric impact-map (goal level): every GOAL is a measurable business outcome with metric, baseline and target, not a solution mandate.",
+      "Every GOAL has derivedFrom VIS-001 and an evidence level; unknown baselines are marked 🧠.",
+      "Supporting goals do not compete with the OMTM (at most 1–2, clearly subordinate).",
+      "No GOAL contains a feature, deliverable or technology."
+    ],
+    "pitfalls": [
+      "A loose list of KPIs instead of one OMTM, so later prioritization has no single yardstick.",
+      "Vanity metrics (downloads, page views) instead of a metric that reflects the bottleneck stage.",
+      "A goal phrased as a feature (\"build a mobile app\")."
+    ],
+    "templateSections": [
+      "## Produktphase & AARRR — current stage, funnel stage chosen and why",
+      "## One Metric That Matters — name, formula, unit, window, baseline, target, time frame",
+      "## Ziele — table: GOAL-id | outcome | metric | baseline | target | AARRR stage | derivedFrom | evidence"
+    ],
+    "domainKnowledge": "## Goals and OMTM (1.2.1)\n\n- Impact mapping has four levels in order: Goal (why, a measurable KPI) → Actors → Impacts → Deliverables [^1].\n- OMTM (adopted 2026-09-25): 1.2.1 fixes one One Metric That Matters for the product's current stage and places it on the AARRR funnel\n  (Acquisition, Activation, Retention, Revenue, Referral) instead of listing KPIs loosely [^2].\n- Pass: goals are business outcomes, not solution mandates [^1].\n- Pitfall: a feature as goal or impact (\"build a mobile app\") [^1].\n\n## Trace chain (Gedächtnis §10.2)\n\n- Mandatory chain: AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS.\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\"\n[^2]: \"Lean Analytics\" (Croll, Yoskovitz), via notebook answer 2026-09-25 — \"define a single OMTM suited to the product's current stage, using Dave McClure's AARRR (Pirate Metrics) framework.\""
+  },
+  "S1.2.2": {
+    "description": "Identifies the actors artifact: ACT items (primary, secondary, off-stage) whose behaviour can move each GOAL, informed by the proto panel. Use when the dark-factory workflow reaches step S1.2.2 \"Akteure identifizieren (Who)\".",
+    "purpose": "ACT items are the \"Who\" level of the impact map; S1.2.3 derives the behaviour changes (IMP) per actor, and the actors later seed the full persona panel and user roles in Phase 2.",
+    "procedure": [
+      "Read business-goals (GOAL items, OMTM) and proto-panel (P-items).",
+      "For each GOAL list everyone whose behaviour can help or hinder it: primary actors (use the product directly, e.g. the segments behind the proto personas), secondary actors (provide services or influence the primary ones) and off-stage actors (affected or able to block, e.g. regulators, partners, competitors' users).",
+      "Describe each actor as a concrete role in a situation, not a department or \"users\"; link proto personas that represent the actor (P-ids).",
+      "Create ACT-<nnn> items with `derivedFrom` = the GOAL id(s) they serve plus P-/SRC ids, and an evidence level (🔗 if a persona trait/SRC backs it, else 🧠).",
+      "Check coverage: every GOAL has at least one primary actor; flag actors that no GOAL needs and drop them."
+    ],
+    "selfCheck": [
+      "Rubric impact-map (actor level): every ACT hangs under at least one GOAL (strict hierarchy Goal → Actor).",
+      "Primary, secondary and off-stage actors are each considered and labeled.",
+      "Every GOAL has at least one primary actor.",
+      "Each actor is a concrete role, not \"users\" or an internal team; each has derivedFrom and an evidence level.",
+      "Proto personas are mapped to the actors they represent."
+    ],
+    "pitfalls": [
+      "Listing only the end user and missing blockers such as regulators, payers or partners.",
+      "Using the own delivery team as an actor, which later produces fake stories (\"As a developer …\").",
+      "Actors not linked to a goal, which become orphans in the trace chain."
+    ],
+    "templateSections": [
+      "## Akteure — table: ACT-id | role in situation | type (primary/secondary/off-stage) | GOAL ids | P-ids | evidence",
+      "## Abdeckung — per GOAL: its actors; dropped actors and why"
+    ],
+    "domainKnowledge": "## Actors (1.2.2)\n\n- Four levels in order: Goal (why) → Actors (who: primary, secondary, off-stage) → Impacts (how) → Deliverables (what) [^1].\n\n## Binding rules (Gedächtnis)\n\n- Rubric `impact-map`: strict hierarchy Goal → Actor → Impact → Deliverable (§13).\n- Fake story (§10.2): a story whose role is the own team (e.g. \"As a developer …\") has no user value; avoid own-team actors at the root.\n- The proto panel (1.1.4) is grounded in DR-01 SRC evidence and can back actor descriptions (§7.1).\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\""
+  },
+  "S1.2.3": {
+    "description": "Derives the impacts artifact: IMP items as measurable behaviour changes of each actor that move the GOAL. Use when the dark-factory workflow reaches step S1.2.3 \"Verhaltensaenderungen ableiten (How)\".",
+    "purpose": "IMP items are the \"How\" level and a mandatory link of the trace chain (… → OPP/JOB → IMP → GOAL); S1.2.4 collects deliverables per impact and S1.2.5 scores them by leverage and risk.",
+    "procedure": [
+      "Read actors (ACT items with their GOAL links).",
+      "For each actor ask: how must this actor's behaviour change so the GOAL moves? Consider helping impacts (start, do more, do faster) and hindering impacts to reduce (stop, do less).",
+      "Phrase each impact as an observable behaviour change: \"<actor> <does X more/less/differently>\", with an indicator and, where possible, a direction and target that connects to the OMTM.",
+      "Reject impacts that are features or product capabilities and rewrite them as the behaviour they are meant to cause.",
+      "Create IMP-<nnn> items with `derivedFrom` = [ACT-id] (and the GOAL it serves) and an evidence level; add P-/SRC ids where a persona trait supports the behaviour.",
+      "Check that every ACT has at least one IMP and that no IMP spans several actors."
+    ],
+    "selfCheck": [
+      "Rubric impact-map: every IMP is a measurable behaviour change with an indicator, not a feature.",
+      "Rubric impact-map: strict hierarchy: each IMP belongs to exactly one ACT, which belongs to a GOAL.",
+      "Every ACT has at least one IMP.",
+      "Every IMP has derivedFrom and an evidence level.",
+      "At least one hindering/reducing behaviour is considered where the actor has a workaround."
+    ],
+    "pitfalls": [
+      "Writing \"user uses feature X\" — that is a deliverable in disguise, not a behaviour change.",
+      "Unmeasurable impacts (\"users are happier\") that cannot be scored in S1.2.5.",
+      "Ignoring the current workaround behaviour the actor must stop."
+    ],
+    "templateSections": [
+      "## Impacts — table: IMP-id | actor (ACT-id) | behaviour change | indicator | direction/target | GOAL | evidence",
+      "## Abdeckung — per ACT: its impacts"
+    ],
+    "domainKnowledge": "## Impacts (1.2.3)\n\n- Four levels in order: Goal → Actors → Impacts (how: behaviour changes) → Deliverables [^1].\n- Pass: impacts are actor behaviour changes, not features [^1].\n- Pitfall: a feature as goal or impact (\"build a mobile app\") [^1].\n\n## Rubric seed (Gedächtnis §13, `impact-map`)\n\n- Strict hierarchy Goal → Actor → Impact → Deliverable; impacts as measurable behaviour change; deliverables as options (Adzic).\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\""
+  },
+  "S1.2.4": {
+    "description": "Collects deliverables as options under each impact and assembles the complete impact-map artifact (GOAL → ACT → IMP → DEL). Use when the dark-factory workflow reaches step S1.2.4 \"Deliverables als Optionen sammeln (What)\".",
+    "purpose": "DEL items are the \"What\" options that S1.2.5 prioritizes and S1.2.6 sequences; the impact map as a whole is the traceable backbone that Phase 2–4 opportunities and epics hang from.",
+    "procedure": [
+      "Read impacts (IMP items with ACT and GOAL links).",
+      "For each IMP brainstorm several alternative deliverables that could cause the behaviour change: features, content, services, campaigns, partnerships, process changes — including non-software options.",
+      "Create DEL-<nnn> items with `derivedFrom: [IMP-id]`, a one-line hypothesis (\"if we deliver X, actor Y will Z\") and an evidence level.",
+      "Mark every DEL explicitly as an option, not a commitment, and note the condition under which it would be dropped (the IMP target is reached, or a cheaper option works).",
+      "Assemble the full impact map as a Mermaid tree and as a table: GOAL → ACT → IMP → DEL, one parent per node.",
+      "Check that no DEL hangs directly under a GOAL or ACT and that every IMP has at least one option (ideally 2+)."
+    ],
+    "selfCheck": [
+      "Rubric impact-map: strict hierarchy Goal → Actor → Impact → Deliverable; every DEL has exactly one IMP parent.",
+      "Rubric impact-map: deliverables are phrased as options with a drop condition, not as commitments (Adzic).",
+      "Rubric impact-map: impacts remain measurable behaviour changes in the assembled map.",
+      "Every IMP has at least one DEL; most have more than one alternative.",
+      "Every DEL has derivedFrom, a hypothesis and an evidence level."
+    ],
+    "pitfalls": [
+      "Only one deliverable per impact, which turns the options list into a hidden feature commitment.",
+      "Copying the Lean Canvas solution list without tying each item to a behaviour change.",
+      "Deliverables attached to a goal directly, skipping actor and impact."
+    ],
+    "templateSections": [
+      "## Impact Map — Mermaid tree GOAL → ACT → IMP → DEL",
+      "## Deliverable-Optionen — table: DEL-id | IMP-id | option | hypothesis | drop condition | evidence",
+      "## Hierarchie-Prüfung — nodes without parent/children and how they were resolved"
+    ],
+    "domainKnowledge": "## Deliverables and the impact map (1.2.4)\n\n- Four levels in order: Goal (why, a measurable KPI) → Actors (who) → Impacts (how) → Deliverables (what: options, not commitments) [^1].\n- Capture user stories, epics, tasks, product ideas — all the deliverables that could potentially cause a positive impact — and treat them\n  as options, not as commitments [^1].\n- Pass: deliverables can be dropped once the impact target is reached [^1].\n- Pitfall: deliverables treated as immutable [^1].\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\""
+  },
+  "S1.2.5": {
+    "description": "Produces the impact-scoring artifact: a disclosed, recomputable leverage × risk scoring of every IMP (and its DEL options) using the OMTM and the linked ASM items. Use when the dark-factory workflow reaches step S1.2.5 \"Impacts nach Hebel & Risiko priorisieren\".",
+    "purpose": "The ranking tells S1.2.6 which outcomes to pursue first and which risky impacts to test early; the critic recomputes it from the disclosed inputs.",
+    "procedure": [
+      "Read impact-map (GOAL/ACT/IMP/DEL) and assumptions-map (ASM items with importance, evidence, kill flag).",
+      "Link each IMP to the ASM items its hypothesis depends on (derive the links from derivedFrom chains and content; list them).",
+      "Rate Leverage L (1–5): expected effect of the impact on the OMTM, with a one-line reason.",
+      "Derive Risk R (1–5) from the linked ASM: R = max over linked ASM of round((Importance + (6 − Evidence)) / 2); R = 1 if no ASM is linked. Flag the IMP \"kill-risk\" if any linked ASM is a kill assumption.",
+      "Compute Priority = L × (6 − R) and a Learning flag \"test first\" for L ≥ 4 and R ≥ 4 (high leverage, high risk). Disclose the formula and every input value in the table.",
+      "Rank IMPs by Priority desc (ties: higher L first); within each IMP order its DEL options by the cheapest plausible test of the impact.",
+      "Recompute the table once from the listed inputs and confirm the ranking matches the values."
+    ],
+    "selfCheck": [
+      "Rubric scoring: formula and all input values (L, linked ASM with importance/evidence, R) are disclosed.",
+      "Rubric scoring: the scoring is recomputable by the critic from the table alone.",
+      "Rubric scoring: the ranking is consistent with the computed values and the stated tie-break.",
+      "Every IMP of the impact map is scored; each L has a reason tied to the OMTM.",
+      "Kill-risk and \"test first\" flags are set exactly where the rules say."
+    ],
+    "pitfalls": [
+      "Gut-feel ranking with numbers added afterwards that do not reproduce it.",
+      "Ignoring the assumptions map, so risky impacts look as safe as proven ones.",
+      "Scoring deliverables instead of impacts, which re-opens feature prioritization too early."
+    ],
+    "templateSections": [
+      "## Formel — Priority = L × (6 − R); R from linked ASM; flag rules",
+      "## Scoring-Tabelle — IMP-id | L + reason | linked ASM (importance/evidence) | R | priority | flags | rank",
+      "## Deliverable-Reihenfolge je Impact — DEL ids ordered by cheapest test",
+      "## Nachrechnung — confirmation that the ranking reproduces from the inputs"
+    ],
+    "domainKnowledge": "## Prioritizing impacts (1.2.5)\n\n- Roadmap order follows impact leverage and risk [^1][^2]; the OMTM from 1.2.1 is the single yardstick for leverage [^2].\n- High importance with low evidence is the kill zone of the assumptions map [^3].\n- Deliverables stay options that can be dropped once the impact target is reached [^1].\n\n## Binding rules (Gedächtnis)\n\n- Principle 5 (§2): prioritizations and scorings disclose their inputs and formula so the critic can recompute them.\n- Rubric `scoring` (§13): formula and inputs disclosed; recomputable; ranking consistent with the values.\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\"\n[^2]: \"Lean Analytics\" (Croll, Yoskovitz), via notebook answer 2026-09-25 — \"define a single OMTM suited to the product's current stage, using Dave McClure's AARRR (Pirate Metrics) framework.\"\n[^3]: \"Testing Business Ideas\" (Bland, Osterwalder 2019), via notebook answer 2026-09-25 — \"Categorize into three risk domains: Desirability, Feasibility, and Viability. Plot on a 2x2 grid of Importance vs. Evidence.\""
+  },
+  "S1.2.6": {
+    "description": "Derives the outcome-oriented roadmap artifact from the impact scoring: milestones as OMTM/impact movements (\"from A to B\") linked to GOAL and IMP, not feature dates. Use when the dark-factory workflow reaches step S1.2.6 \"Outcome-orientierte Roadmap ableiten\".",
+    "purpose": "Closes the impact-mapping sub-phase with a sequenced plan of target outcomes; G-P1 reviews it with the vision bundle, and Phase 2 opportunity work and later release slicing refer back to its milestones.",
+    "procedure": [
+      "Read impact-scoring (ranked IMPs, flags, DEL order) and follow the chain back to GOAL and the OMTM.",
+      "Group impacts into 3–5 milestones ordered by the scoring: \"test first\" impacts early (learning), then the highest priority ones.",
+      "Phrase each milestone as a target outcome \"from A to B\" on the OMTM or an IMP indicator (baseline → target), with a horizon (Now / Next / Later) rather than calendar feature dates.",
+      "Reference for each milestone the GOAL and IMP ids it moves and, as candidate means, the DEL options (still options); name the ASM items it will test.",
+      "State the learning or exit criterion per milestone: what result moves the team to the next milestone, and what result triggers a rethink.",
+      "Check against the idea-brief budget/timebox that the Now horizon is plausible; note conflicts as risk."
+    ],
+    "selfCheck": [
+      "Rubric roadmap: every milestone is phrased as an outcome (\"from A to B\"), not as a feature or date.",
+      "Rubric roadmap: every milestone references GOAL and IMP ids.",
+      "Milestone order is consistent with the impact-scoring ranking and flags (deviations are justified).",
+      "Deliverables appear only as candidate options, never as commitments.",
+      "Each milestone has a learning/exit criterion and names the ASM it tests."
+    ],
+    "pitfalls": [
+      "A feature timeline with dates relabeled as a roadmap.",
+      "Milestones that cannot be measured because they lack a baseline and target.",
+      "Ignoring the budget/timebox from the idea brief, which makes G-4.2 fail later."
+    ],
+    "templateSections": [
+      "## Roadmap — Now / Next / Later: milestone as \"from A to B\"",
+      "## Meilensteine — table: milestone | outcome (baseline → target) | GOAL ids | IMP ids | candidate DEL | tested ASM",
+      "## Lern- und Exit-Kriterien — per milestone: proceed / rethink conditions",
+      "## Budget-/Timebox-Abgleich — plausibility against the idea brief"
+    ],
+    "domainKnowledge": "## Outcome roadmap (1.2.6)\n\n- Roadmap: order by impact leverage and risk; milestones are target outcomes (\"from A to B\"), not feature dates [^1][^2].\n- The OMTM for the current stage, placed on AARRR, is the metric the milestones move [^2].\n- Deliverables are options, not commitments, and can be dropped once the impact target is reached [^1].\n\n## Rubric seed (Gedächtnis §13, `roadmap`)\n\n- Outcome instead of feature formulation; reference to GOAL/IMP.\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic, Evans, Korac 2014) — \"capture user stories, epics, tasks, product ideas – all the deliverables that could potentially cause a positive impact … Then treat them as options, not as commitments.\"\n[^2]: \"Lean Analytics\" (Croll, Yoskovitz), via notebook answer 2026-09-25 — \"define a single OMTM suited to the product's current stage, using Dave McClure's AARRR (Pirate Metrics) framework.\""
+  }
+}

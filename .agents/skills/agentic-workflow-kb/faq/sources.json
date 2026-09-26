@@ -1,0 +1,14 @@
+{"notebook": {"id": "dcc7a270-d78d-40c5-969b-6819a8af26cc", "title": "Agentic Workflows"},
+ "sources": {
+ "5fcece55-cc88-4a90-9f3c-9a9ca55c4db3": "Koenigstein, AI Agents: The Definitive Guide (O'Reilly, 2025)",
+ "b6b0d53b-6fd2-4fa6-a760-d4e962ee2bcf": "Grootendorst & Alammar, An Illustrated Guide to AI Agents (O'Reilly, 2025)",
+ "e84b4118-d69e-41c5-a92a-6d76b9ce31be": "Osmani, Beyond Vibe Coding (O'Reilly, 2025)",
+ "0e07ac2f-3629-433d-b440-aa6cb88a8f33": "Albada, Building Applications with AI Agents (O'Reilly, 2025)",
+ "41724efa-b467-4d22-8a14-5accc6cf4804": "Context windows - Claude Platform Docs",
+ "eda0af80-7d6f-44a4-86c2-5a5376f82c45": "Osmani, My LLM coding workflow going into 2026 (addyosmani.com)",
+ "e0ae1530-c03b-451e-a21c-bcf34f797e1d": "Bhagwat & Gienow, Patterns for Building AI Agents (2026)",
+ "193fad43-0bdf-4db8-ad8b-786f3d13c3c1": "Bhagwat, Principles of Building AI Agents",
+ "2ce09002-4b05-4b9c-93af-85990961b2d2": "Skill authoring best practices - Claude Platform Docs",
+ "8a2bb7e1-40c3-4ddf-b82a-2d82fee134b0": "VoltAgent awesome-claude-code-subagents, 09-meta-orchestration (GitHub)",
+ "41c88e2d-3e1b-4efe-9b17-8f62fa1b5877": "Bruniaux, claude-code-ultimate-guide: dynamic-workflows.md (GitHub)"
+ }}

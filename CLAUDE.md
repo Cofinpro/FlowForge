@@ -1,0 +1,28 @@
+# bpmn2agent
+
+BPMN 2.0 process diagram in, reviewable Claude Code artifacts (agents, skills, hooks, scripts,
+orchestrator) out. See `README.md` for the layout and `ARCHITECTURE.md` for how the pipeline, the
+spec, traceability, the knowledge layer and the helper skills/agents fit together.
+
+## Rules of work
+
+- Skills live in `.agents/skills/` (real files); `.claude/skills/<name>` are relative symlinks. Agents
+  likewise: `.agents/agents/<name>.md`, symlinked from `.claude/agents/`. Add new ones the same way.
+- Notebook answers are kept, not thrown away: record every `notebook_query` result with
+  `.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add`. Agentic-design questions go to
+  `.agents/skills/agentic-workflow-kb/faq/`; check its `README.md` before asking the notebook again.
+- The `bpmn2agent-*` skills write relative to the cwd into `generated/<workflow>/`. For the example, run
+  them (and `bpmn-authoring` on its BPMN) from `examples/dark-factory/`.
+- Never edit `examples/dark-factory/generated/` by hand. Edit the generator sources in
+  `examples/dark-factory/tools/dark-factory-gen/` and run `regenerate.sh`; it must end with
+  `RESULT: PASS`, `no reference problems`, the three smoke lines and `mapping view ok`.
+- The example is a snapshot. The dark-factory plugin it once produced is maintained by hand in the
+  `ai-sdlc-dojo-2026-factory` repo; nothing here builds or ships that plugin.
+- Paths like `docs/planning/…` inside `.agents/skills/bpmn2agent-*` point to the repo those skills came
+  from. They are not links in this repo.
+
+## Conventions
+
+- Docs and READMEs in German. Skills, scripts and code comments in English. BPMN labels stay verbatim.
+- Every generated file carries `bpmn: {file, elements}`; `bpmn2agent-verify` checks it in both directions.
+- npm dependencies live in `~/.cache/bpmn-authoring-tools`, never in this repo.

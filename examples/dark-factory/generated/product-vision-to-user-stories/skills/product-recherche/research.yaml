@@ -1,0 +1,65 @@
+# bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["R_1"]}
+#
+# Research configuration of process R (docs/dark-factory/process-rules.md §8.0, §8.2, §8.3, §9.4).
+# Read by scripts/lib/research-config.mjs. Rules live in process-rules.md; this file only binds
+# channels to providers and sets the numbers.
+
+channels:
+  deep-research: { provider: gemini-deep-research, enabled: true }
+  websearch:     { provider: claude-websearch, enabled: true }   # Claude Code WebSearch tool
+  fetch:         { provider: raw-fetch, fallback: claude-webfetch, enabled: true }
+  ddg:           { provider: ddg-html, enabled: false }          # unofficial; off by default (D-24)
+
+# Per run. The paid adapters check both caps BEFORE every call (Gedächtnis §9.4).
+limits:
+  deepResearchHardCap: 3     # Deep Research calls per run
+  moneyCapUsd: 15            # all paid research APIs together, per run
+  deepResearchPerCorpus: 1   # a second call of the same DR-0n is refused -> gap-fill (§8.5)
+
+providers:
+  gemini-deep-research:
+    endpoint: https://generativelanguage.googleapis.com/v1beta/interactions
+    apiKeyEnv: GEMINI_API_KEY
+    agents:
+      standard: deep-research-preview-04-2026
+      max: deep-research-max-preview-04-2026
+    variantByCall: { DR-01: standard, DR-02: standard, DR-03: standard }
+    pollSeconds: 15
+    timeoutMinutes: 30       # per invocation; a re-run resumes the same interaction
+    stallMinutes: 60         # unfinished this long after it was issued -> cancelled and voided (DR usually takes ~15 min)
+    # Cost booking. Until pricingVerified is true, every call books the conservative estimate
+    # (estimateUsd) instead of the token-based cost — better to over- than to under-count.
+    # Verify at https://ai.google.dev/gemini-api/docs/pricing before setting it to true.
+    pricingVerified: false
+    pricing: { inputPerM: 2.0, cachedInputPerM: 0.2, outputPerM: 12.0, searchPerThousand: 14.0 }
+    estimateUsd: { standard: 3.0, max: 7.0 }
+    resolveRedirects: true   # citation URLs are grounding-api-redirect links -> resolve via HEAD
+
+  raw-fetch:
+    timeoutSeconds: 20
+    maxBytes: 2000000
+    minIntervalMsPerHost: 1000
+    respectRobots: true
+    userAgent: "dark-factory-research/1.0 (autonomous research agent; respects robots.txt)"
+
+  ddg-html:
+    minIntervalMs: 1500
+    maxResults: 20
+
+# Source tiers (§8.3). Deterministic defaults by domain; R_3b may override with a reason.
+tiers:
+  default: T2
+  T1: ['\.gov(\.|$)', '\.gv\.at$', '\.admin\.ch$', 'bund\.de$', 'europa\.eu$', 'eur-lex\.', 'destatis\.de$',
+       'bundesbank\.de$', 'bafin\.de$', 'gesetze-im-internet\.de$', 'iso\.org$', 'w3\.org$', 'oecd\.org$', 'eurostat']
+  T3: ['reddit\.com$', 'trustpilot\.', 'apps\.apple\.com$', 'play\.google\.com$', 'quora\.com$', 'medium\.com$',
+       'facebook\.com$', 'x\.com$', 'twitter\.com$', 'youtube\.com$', 'forum', 'community\.', 'gutefrage\.net$']
+
+freshness:
+  maxAgeYears: { market: 3, competitor: 3, number: 3 }   # regulation: currently valid version
+
+# Required scope per corpus (§8.2) — R_3b maps every claim to one of these points; a point without
+# a claim is a gap.
+scope:
+  DR-01: [market-size, competitors-direct, competitors-indirect, feature-matrix, pricing-benchmarks, trends, entry-barriers]
+  DR-02: [segments, voc-quotes, jobs-pains, workarounds, willingness-to-pay]
+  DR-03: [as-is-process, regulation, practice-case, negative-case, glossary-terms]

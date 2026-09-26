@@ -1,0 +1,465 @@
+{
+  "S5.1.1": {
+    "description": "Drafts Connextra story cards (ST items) for one epic from the story map, each traced to its user task and listing its unvalidated ASM assumptions. Use when the dark-factory workflow reaches step 5.1.1 \"Story Card entwerfen (Connextra)\".",
+    "purpose": "Produces the story-cards that the invest critic (SP5.1_CallK) judges and that 5.1.3 (splitting), 5.1.4 (spikes) and the per-story refinement 5.2.x consume; every later AC hangs off these ST items.",
+    "procedure": [
+      "Take the epic id passed by the Workflow (MI over EP[slice=1]); from story-map read that EP/ACTV and its UT items below the release line of slice 1 only.",
+      "For each UT write one or more stories in Connextra form \"As a <concrete PER role>, I want <goal>, so that <user or business outcome>\" — active voice, one user, no UI or technology assumptions; the role must be a PER/ACT from upstream, never the delivery team.",
+      "Get new ids with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs next-id <runDir> --count <n>` (never reuse). For each story build the story record (df.story/v1): id, title, epic, userTask, connextra {role, want, soThat}, derivedFrom = the UT id plus the EP/ACTV id and the JOB/OPP/HS/PAIN ids the task was derived from where the story map records them.",
+      "Walk the trace path UT → EP/ACTV → (OPP|JOB) → IMP → GOAL → VIS through the upstream sidecars (`*.meta.json`, authored.itemIndex) and put, per story, every ASM on that path whose evidence is low (inferred/not cited) into `assumptions` [{id, evidence, why}] (Gedächtnis §10.2).",
+      "Add Card-level `conversation` notes (open questions, known constraints) and a first rough `size` {class S/M/L, reasoning}; add `flags` such as \"split-candidate\" or \"spike-candidate\" for anything obviously L or technically uncertain (L also needs status needs-resplit).",
+      "Set `evidence` per story: 🧠 inferred by default; 🔗 cited only if the need is directly backed by an SRC quote, 🤖 synthetic if it rests on panel transcripts (T ids), and list them in `refs`.",
+      "Hand each story to `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs put <runDir> --step S5.1.1` (stdin {\"story\": {...}, \"notesForNext\": \"…\"}). The script validates the record, renders backlog/stories/ST-nnn_<slug>.md and commits it; fix every rejection. Check coverage with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs list <runDir> --epic <EP id>`: every in-scope UT has at least one story."
+    ],
+    "selfCheck": [
+      "Every story uses Connextra with a concrete role taken from PER/ACT; no \"As a developer/QA/PO\" stories (rubric invest).",
+      "Every \"so that\" names a user or business outcome, not a technical effect (Valuable).",
+      "Stories are independent of each other where possible and negotiable — no embedded solution design or UI layout.",
+      "Each story is estimable and small: rough size ≤ M, or it is flagged for 5.1.3 splitting (Small = ≤ M, Gedächtnis §4).",
+      "Each story is testable: the goal is concrete enough that a pass/fail check can be imagined.",
+      "Each ST has derivedFrom containing its UT and EP/ACTV id and an \"Unvalidated assumptions\" list (may be empty only if no low-evidence ASM is on its path).",
+      "Only UT items above the slice-1 release line of the passed epic were used; every such UT is covered by at least one story."
+    ],
+    "pitfalls": [
+      "Writing one story per technical layer (API story, UI story, DB story) instead of vertical slices.",
+      "Using the team or the system as the role (\"As the system …\"), which 6.2.4 later removes as a fake story.",
+      "Copying the UT label verbatim without an outcome in the \"so that\" clause.",
+      "Pulling tasks from below the release line or from other epics into this epic's stories."
+    ],
+    "templateSections": [
+      "## (rendered) Story file — backlog/stories/ST-nnn_<slug>.md is rendered by story.mjs from the story record: title, Connextra sentence, epic/UT/size/evidence table, conversation, acceptance criteria, unvalidated assumptions, trace. Do not write it; supply the record."
+    ],
+    "domainKnowledge": "**Connextra form.** \"As a <concrete role/persona>, I want <goal>, so that <user or business outcome>\"; active voice, one user, no UI assumptions [^1].\n\n**INVEST** — Independent, Negotiable, Valuable (to users or purchasers), Estimable, Small, Testable [^1][^2]. In the dark factory \"Small\" means size class ≤ M; L forces splitting (Gedächtnis §4). Larger stories carry greater uncertainty, and a testable story makes clear how to check it is done [^2].\n\n**Card, Conversation, Confirmation.** A card is a placeholder for a conversation, not a contract [^1] — keep solution detail out of the card; it is negotiated in 5.2.\n\n**Vertical slices.** Each story must have a little from each layer (\"slicing the cake\") [^1].\n\n**Trace and assumptions (binding, Gedächtnis §10.2).** Required chain AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS. Every story lists the unvalidated ASM items (low evidence) its path rests on.\n\n**Fake stories** are about the needs of delivery team members [^3]; they are removed in 6.2.4, so do not write them here.\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\""
+  },
+  "S5.1.3": {
+    "description": "Splits oversized or needs-resplit stories into vertical, INVEST-conform child stories (new ST items) using named splitting patterns. Use when the dark-factory workflow reaches step 5.1.3 \"Splitting-Muster anwenden\".",
+    "purpose": "Turns stories judged \"Zu gross\" at SP5.1_Gw (or flagged needs-resplit via G-Split after 5.2/6.1) into right-sized story-cards that go back to the invest critic and on into refinement 5.2.x.",
+    "procedure": [
+      "Read the stories of the passed epic (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs list <runDir> --epic <EP id>` and `show <ST id>`) and the latest invest gate record; select the stories the critic or G-Split marked too big (status needs-resplit, size L, or change requests naming Small/Independent).",
+      "For each selected story pick the splitting pattern that fits and name it: by business rule, by option/variant, by channel, hard-coded reference data first then live sources, output-first, simplified output (files instead of a data warehouse), basic utility vs. skeleton on crutches; use the user story hamburger when no pattern fits.",
+      "Split vertically only — every child must deliver an end-to-end, user-visible slice through all layers; never split by technical layer or by workflow step that has no value on its own.",
+      "Create each child with a new id (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs next-id`) via `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs put <runDir> --step S5.1.3`: splitFrom = parent ST, splitPattern = the pattern name, same epic and userTask, derivedFrom = [same UT, same EP/ACTV], and `assumptions` re-derived per child (only the ASM that still apply).",
+      "Mark the parent with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <parent ST> --step S5.1.3` → {\"story\": {\"status\": \"superseded\", \"splitInto\": [child ids]}}; never delete it and never reuse its id. If the parent has `spikes`, re-point each spike to the child that carries the uncertainty (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/spike.mjs patch <runDir> <SPK id> --step S5.1.3` → {\"spike\": {\"blocks\": [child], \"derivedFrom\": [child, …]}}) and list it in that child's `spikes`.",
+      "Give each child a rough size S/M with one-line reasoning; if a child is still L, split again or record why it cannot be split (and flag it for 5.1.4 if the blocker is technical uncertainty).",
+      "Put the value each child delivers into its `notes` and anything deliberately dropped from the parent into the parent's `notes` (deferred scope) in the same patch; the split log is the parent → splitInto → children records, the traceability scripts skip superseded parents."
+    ],
+    "selfCheck": [
+      "Every child passes invest: Connextra with concrete role, \"so that\" = user/business outcome, independent, negotiable, estimable, small (≤ M), testable.",
+      "No child is a technical-layer slice (UI-only, API-only, DB-only story).",
+      "Each split names its pattern and states what value each child delivers on its own.",
+      "Parent is superseded with splitInto; child ids are new; derivedFrom points to parent, UT and EP/ACTV.",
+      "Union of children covers the parent's intent; anything deliberately dropped is listed as deferred, not silently lost.",
+      "Unvalidated ASM list present on every child."
+    ],
+    "pitfalls": [
+      "Horizontal splits (\"backend part\", \"frontend part\") that each deliver nothing to the user.",
+      "Splitting by CRUD verbs or process steps that only make sense together, creating dependent stories.",
+      "Re-using the parent id for the first child, which breaks the trace and violates §10.1.",
+      "Splitting a story whose real problem is technical uncertainty — that belongs in a spike (5.1.4)."
+    ],
+    "templateSections": [
+      "## (rendered) Child and parent story files — rendered by story.mjs from the records (splitFrom/splitPattern on children, status superseded + splitInto + deferred scope in notes on the parent). Do not write them; supply the records."
+    ],
+    "domainKnowledge": "**Split vertically.** Split through all layers (\"slice the cake\"), never by technical layer [^1].\n\n**Splitting patterns** [^1][^2]:\n- by business rule, option or channel;\n- hard-coded reference data first, live sources later;\n- output-first;\n- simplified outputs (files instead of a data warehouse);\n- basic utility vs. skeleton on crutches;\n- the user story hamburger when stuck.\n\n**Why small.** Larger stories carry greater uncertainty [^3]; in the dark factory Small = size class ≤ M, and L forces splitting (Gedächtnis §4).\n\n**Small vs. Valuable.** Technical stories without an outcome are the typical symptom of choosing Small over Valuable [^2] — a split that loses the outcome is a bad split.\n\n**IDs (binding, Gedächtnis §10.1).** IDs are stable per run and never reused, even after an item is discarded or superseded.\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^3]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\""
+  },
+  "S5.1.4": {
+    "description": "Extracts technical uncertainty from stories into timeboxed spikes (SPK items) with a question and predefined acceptance criteria. Use when the dark-factory workflow reaches step 5.1.4 \"Technische Unsicherheit als Spike auslagern\".",
+    "purpose": "Makes stories judged \"Zu unsicher (Spike)\" at SP5.1_Gw estimable again: the spikes are checked by the invest critic (rubric spike) and the DoR gate in 5.2 requires that no un-spiked risk remains; 7 lists them in the backlog export.",
+    "procedure": [
+      "Read story-cards for the passed epic and the invest gate record; select stories flagged too uncertain (not Estimable because of an unknown technical factor).",
+      "Read the target architecture/platform from 00_idea-brief.md (zielarchitektur/plattform) — if it is an 🧠 assumption, put that ASM into the spike's `architectureAssumptions` as a source of the uncertainty.",
+      "For each uncertainty build one spike record (df.spike/v1) with a new id (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/spike.mjs next-id <runDir>`): `question` (the single question to answer), `why` (why the story cannot be sized without it), `timebox` {amount, unit: hours|days} (bounded: ≤ 2 days), `acceptanceCriteria` defined in advance (what evidence or prototype output ends it) and `decisionEnabled` (the decision it unlocks).",
+      "Set `blocks` to the blocked ST id(s) and `derivedFrom` to those ST ids plus any ASM involved; `evidence` 🧠 inferred unless an SRC documents the risk (then `refs`). Commit each spike with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/spike.mjs put <runDir> --step S5.1.4` — the script renders backlog/spikes/SPK-nnn_<slug>.md.",
+      "Update the affected story only through `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <ST id> --step S5.1.4` → {\"story\": {\"spikes\": [\"SPK-nnn\"], \"blockers\": [\"Blocked by SPK-nnn: …\"], \"size\": null}}; keep the Connextra sentence unchanged; the story stays in the backlog with a pending size.",
+      "If the uncertainty is actually a missing business decision (not technical), do not create a spike — add it to the story's `conversation` via `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch` for 5.2.1.",
+      "Check the links: `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/spike.mjs list <runDir> --blocks <ST id>` lists the spikes of each blocked story, and the story's `spikes` (set in step 5) must name exactly those; `export-backlog.mjs` reports any mismatch."
+    ],
+    "selfCheck": [
+      "Every spike has a timebox, one explicit question and acceptance criteria defined before execution (rubric spike).",
+      "Each spike links to the story/stories it unblocks and states the decision it enables.",
+      "Spikes cover technical uncertainty only; business unknowns are routed to refinement, not spiked.",
+      "Timeboxes are bounded (no open-ended research); total spike effort is visible per epic.",
+      "Every blocked story lists its SPK id in `spikes` (story.mjs patch), and every spike lists the story in `blocks`; the Connextra sentence is unchanged."
+    ],
+    "pitfalls": [
+      "Open-ended spikes (\"investigate the architecture\") that become never-ending research projects.",
+      "Spike acceptance criteria phrased as tasks (\"look at X\") instead of an answerable outcome.",
+      "Hiding a too-big story behind a spike instead of splitting it (5.1.3)."
+    ],
+    "templateSections": [
+      "## (rendered) Spike file — backlog/spikes/SPK-nnn_<slug>.md is rendered by spike.mjs from the spike record: question, why it blocks sizing, blocks/timebox/evidence table, acceptance criteria, decision enabled, architecture assumptions, trace. Do not write it; supply the record."
+    ],
+    "domainKnowledge": "**Spike definition.** A spike has a timebox, a question, and acceptance criteria defined in advance [^1][^2].\n\n**Why timebox.** Before performing a spike, clearly define the acceptance criteria and time box — otherwise spikes turn into never-ending research projects [^1].\n\n**Estimable.** INVEST requires a story to be estimable [^2]; larger or unclear stories carry greater uncertainty [^3]. A spike restores estimability; it does not replace splitting.\n\n**Role (Gedächtnis §4).** The architect (ARC) owns spikes and size classes and needs the target architecture/platform from the idea brief (§14); if that field was inferred it is an ASM.\n\n**DoR link.** The Definition of Ready requires no open blockers or un-spiked risks [^2][^1].\n\n[^1]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\"\n[^2]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^3]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\""
+  },
+  "S5.2.1": {
+    "description": "Runs a simulated three-amigos debate for one story in three perspectives (BLA what, ARC how, QA edge cases) and writes the protocol. Use when the dark-factory workflow reaches step 5.2.1 \"Three-Amigos-Debatte (3 Perspektiven)\".",
+    "purpose": "The amigos-protocol replaces the human three-amigos session (Gedächtnis §4); 5.2.2 uses it to separate What from How, and its edge cases feed 6.1.1 confirmation notes and 6.1.2 SBE examples.",
+    "procedure": [
+      "Take the story id passed by the Workflow (MI over ST[from=5.1]); read backlog/stories/ST-nnn_<slug>.md, its UT/EP context and its unvalidated ASM list.",
+      "Business perspective (BLA): restate the user need and outcome, the persona and the trigger situation; list what is in and out of scope for this story.",
+      "Development perspective (ARC): name how it could be built against the idea-brief target architecture, dependencies on other stories/spikes, technical constraints and risks — as notes, not as story text.",
+      "Testing perspective (QA): list edge cases, limits, error and exception situations, data variations and \"what if\" questions (expired, empty, duplicate, concurrent, no permission).",
+      "Let the perspectives challenge each other in at least one round: each open question is answered, turned into an assumption (reference or propose ASM), or recorded as a blocker.",
+      "Write the protocol to artifacts/p5-refinement/<storyId>/ with sections What (BLA), How (ARC), Edge cases (QA), decisions, open questions/blockers; mark all content 🧠 inferred with the ST/ASM ids it rests on."
+    ],
+    "selfCheck": [
+      "All three perspectives are present, each with substantive content (at least one entry per perspective).",
+      "What (BLA), How (ARC) and edge cases (QA) are recorded in separate sections.",
+      "At least one negative/exception case per story is identified for later AC work.",
+      "Every open question ends as an answer, an ASM reference, or a named blocker — none left dangling.",
+      "Protocol references the ST id and the ASM ids it touches."
+    ],
+    "pitfalls": [
+      "Three voices that just agree — no challenge, no new edge cases (rubber-stamp debate).",
+      "The ARC perspective rewriting the story into a technical task instead of annotating How.",
+      "QA listing generic test types (\"do load testing\") instead of concrete edge cases of this story."
+    ],
+    "templateSections": [
+      "## Story — ST id, Connextra sentence, unvalidated ASM",
+      "## What (BLA) — need, outcome, scope in/out",
+      "## How (ARC) — implementation notes, dependencies, constraints, risks",
+      "## Edge cases (QA) — limits, errors, exceptions, data variations",
+      "## Debate & decisions — challenges between perspectives and how they were resolved",
+      "## Open questions & blockers — unresolved items with owner step (spike, ASM, 5.2.2)"
+    ],
+    "domainKnowledge": "**Three amigos.** At least one person per perspective — business, development, testing. The protocol records What (BLA), How (ARC) and edge cases (QA). Four or five amigos are fine if needed [^1].\n\n**Small conversations.** Create small conversations that involve at least one person representing each of the development, testing and analysis roles [^1].\n\n**Human-role replacement (binding, Gedächtnis §4).** Three amigos becomes a debate in three perspectives (BLA = what, ARC = how, QA = edge cases); the protocol is the artifact.\n\n**Conversation over contract.** The card is a placeholder for a conversation [^2] — this debate is that conversation.\n\n**Examples.** Speak in examples: exactly what users do, what data might be entered and what they would see in response [^3] — capture candidate examples here for 6.1.2.\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^2]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^3]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\""
+  },
+  "S5.2.2": {
+    "description": "Refines one story by separating the What (need, outcome, rules) from the How (implementation notes) based on the three-amigos protocol. Use when the dark-factory workflow reaches step 5.2.2 \"Was von Wie trennen\".",
+    "purpose": "Produces story-refined — the implementation-neutral story text plus separated technical notes — which 5.2.3 (wireframe/domain model), 5.2.4 (size class), 6.1.1 (confirmation) and the dor critic consume.",
+    "procedure": [
+      "Read the amigos-protocol for the passed story id and the story record (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs show <runDir> <storyId>`).",
+      "Restate the story so it holds only the What: `connextra` (and `title`), `context` (trigger), `businessRules`, `scope` {in, out} — no UI element names, technologies, endpoints or data structures.",
+      "Move every How statement from story and protocol into `implementationNotes` (ARC, non-binding).",
+      "Check the story does not describe a solution instead of the need (misleading story); if it does, rephrase the goal back to the need and keep the solution as one option in the notes.",
+      "Carry forward edge cases from the protocol as `confirmationCandidates` and the open blockers as `blockers` (with SPK/ASM refs); update `assumptions`.",
+      "Write story-refined to artifacts/p5-refinement/<storyId>/ (commit it as usual) and apply the same What to the story record with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <storyId> --step S5.2.2` (same ST id, no new items)."
+    ],
+    "selfCheck": [
+      "Story text is implementation-neutral: no UI, technology or data-model decisions in the What.",
+      "Connextra sentence with concrete role intact; \"so that\" still a user/business outcome (invest).",
+      "Every How statement from the protocol appears in the implementation notes, none lost.",
+      "Blockers listed with SPK/ASM refs; no hidden open questions (dor: no open blockers).",
+      "Business rules are stated as rules, not as screens or steps."
+    ],
+    "pitfalls": [
+      "Deleting technical insight instead of moving it to the notes — ARC loses it for sizing.",
+      "Leaving solution wording (\"add a dropdown\", \"store in Postgres\") in the goal.",
+      "Changing the story's scope during refinement without recording it (scope should change via 5.1.3)."
+    ],
+    "templateSections": [
+      "## What — Connextra sentence, context/trigger, business rules, scope in/out",
+      "## Implementation notes (ARC, non-binding) — How items moved from protocol and story",
+      "## Confirmation candidates — edge cases and rules for 6.1.1",
+      "## Blockers & assumptions — SPK refs, unvalidated ASM list"
+    ],
+    "domainKnowledge": "**Negotiable.** A story is negotiable; the card is a placeholder for a conversation, not a contract [^1] — keep How out of the What so it stays negotiable.\n\n**No UI assumptions.** Connextra stories are written in active voice, for one user, without UI assumptions [^1].\n\n**Misleading stories.** A misleading story describes a solution instead of the need [^2].\n\n**Small vs. Valuable.** Technical stories without an outcome are the typical symptom of choosing Small over Valuable [^2].\n\n**DoR (gate dor).** Connextra with a concrete role; INVEST fulfilled; at least one AC; low-fi wireframe as text or Mermaid sketch; no open blockers or un-spiked risks; size ≤ M; terms as in the glossary [^1][^3].\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^3]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\""
+  },
+  "S5.2.3": {
+    "description": "Attaches a low-fi text/Mermaid wireframe (regions, elements, states) and a small domain model with candidate terms to one refined story. Use when the dark-factory workflow reaches step 5.2.3 \"Low-Fi-Wireframe & Domaenenmodell anhaengen\".",
+    "purpose": "The wireframe-text satisfies the DoR wireframe criterion and gives 5.2.4 a basis for sizing; its domain-model terms are the input 6.2.3 turns into TERM glossary items.",
+    "procedure": [
+      "Read story-refined for the passed story id (What section, business rules, confirmation candidates).",
+      "Sketch the interaction as text or a Mermaid diagram: regions, elements and the information shown, plus states (empty, loading, error, success, no permission) relevant to the story — no images, no visual styling.",
+      "Keep the sketch low-fidelity and consistent with the What: it illustrates one way to meet the need and is labeled non-binding.",
+      "Model the domain concepts the story touches as a small Mermaid class/ER sketch or a list: entity, key attributes, relations, and business rules attached to them.",
+      "List each domain term with a one-line definition as a glossary candidate; reuse existing TERM wording from any prior glossary or other stories of the run instead of inventing synonyms, and flag conflicts.",
+      "Write wireframe-text to artifacts/p5-refinement/<storyId>/; derivedFrom = story-refined@version; evidence 🧠 inferred."
+    ],
+    "selfCheck": [
+      "Wireframe is a text or Mermaid sketch with regions, elements and states — no image (dor).",
+      "At least the empty/error states relevant to the story are shown, matching the QA edge cases.",
+      "Sketch does not add scope beyond story-refined.",
+      "Every domain concept used in the story appears in the domain model with a definition.",
+      "One term per concept; synonyms or conflicts with existing terms are flagged (ubiquitous-language).",
+      "Mermaid blocks are syntactically valid."
+    ],
+    "pitfalls": [
+      "Hi-fi pixel descriptions or styling details that pre-empt design and bloat sizing.",
+      "Introducing new synonyms for concepts other stories already named (\"order\" vs. \"booking\").",
+      "Only the happy-path screen; missing error/empty states that the ACs will need."
+    ],
+    "templateSections": [
+      "## Wireframe (low-fi) — text or Mermaid sketch: regions, elements, data shown",
+      "## States — empty, loading, error, success, no permission as relevant",
+      "## Domain model — Mermaid class/ER sketch or entity list with relations and rules",
+      "## Glossary candidates — term, definition, story ids, conflicts with existing terms"
+    ],
+    "domainKnowledge": "**Human-role replacement (binding, Gedächtnis §4).** Wireframes become text/Mermaid sketches (regions, elements, states), no images.\n\n**DoR.** A low-fi wireframe as a text or Mermaid sketch is part of the Definition of Ready, as is \"terms as in the glossary\" [^1][^2].\n\n**No UI assumptions in the story.** The story itself stays free of UI assumptions [^1]; the wireframe is a separate, non-binding illustration.\n\n**Examples.** Use specific examples of what users do, exactly what data might be entered and exactly what users would see in response [^3] — show real-looking data in the sketch.\n\n**Ubiquitous language.** One term per concept, no contradicting domain rules, every term in the glossary (Gedächtnis §13 `ubiquitous-language`); TERM items originate in 5.2.3 and 6.2.3 (§10.1).\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\"\n[^3]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\""
+  },
+  "S5.2.4": {
+    "description": "Assigns a size class S/M/L with explicit reasoning to one refined story, forcing re-splitting for L. Use when the dark-factory workflow reaches step 5.2.4 \"Groessenklasse bestimmen (S/M/L)\".",
+    "purpose": "The size-estimate replaces story points (Gedächtnis §4); the dor critic (SP5.2_CallK) and SP56_Gw use it — L sends the story back via G-Split to 5.1.3 — and 7 reports sizes in the backlog export.",
+    "procedure": [
+      "Read story-refined (What, implementation notes, blockers) and wireframe-text (states, domain model) for the passed story id.",
+      "Derive the size drivers explicitly: number of business rules, states/variants, domain entities touched, integrations/dependencies, unknowns, and spikes still open.",
+      "Assign S, M or L using the driver list and state the reasoning in 2–4 sentences; disclose the drivers so the critic can recompute the judgment.",
+      "If L: set status needs-resplit on the story, name the drivers that make it large and suggest a splitting pattern for 5.1.3 (in `flags`/`notes`); do not shrink the story yourself.",
+      "If a size cannot be given because of technical uncertainty, set `size: null` with a `blockers` entry naming the SPK id (or propose a new spike for 5.1.4) instead of guessing.",
+      "Write size-estimate to artifacts/p5-refinement/<storyId>/ (commit it as usual; evidence 🧠 inferred) and set the size on the story with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <storyId> --step S5.2.4` → {\"story\": {\"size\": {\"class\": \"M\", \"reasoning\": \"…\"}}} (plus `\"status\": \"needs-resplit\"` for L)."
+    ],
+    "selfCheck": [
+      "Exactly one size class S, M or L (or unsized with SPK ref) per story.",
+      "Reasoning names concrete drivers from story-refined and wireframe-text and is recomputable (scoring principle, Gedächtnis §2.5).",
+      "L always results in status needs-resplit with a suggested pattern (Small = ≤ M).",
+      "No open blockers or un-spiked risks are ignored in the estimate (dor).",
+      "Size is consistent with the scope shown in the wireframe and edge-case list."
+    ],
+    "pitfalls": [
+      "Converting to hidden story points or hours — only S/M/L with reasoning is allowed.",
+      "Rating an L as M to avoid a re-split loop.",
+      "Sizing only the happy path and ignoring the error states and rules captured in 5.2.1/5.2.3."
+    ],
+    "templateSections": [
+      "## Size class — S | M | L | unsized, one line",
+      "## Size drivers — table: driver · count/observation · source (story-refined / wireframe-text)",
+      "## Reasoning — 2–4 sentences tying drivers to the class",
+      "## Consequence — needs-resplit with suggested pattern, or blocking SPK, or ready"
+    ],
+    "domainKnowledge": "**Human-role replacement (binding, Gedächtnis §4).** Story points become a size class S/M/L with reasoning. INVEST \"Small\" means ≤ M; L forces splitting.\n\n**Small and Estimable.** Good stories tend to be small in scope; larger stories will have greater uncertainty [^1]. INVEST demands both Estimable and Small [^2].\n\n**Spikes restore estimability.** When uncertainty blocks sizing, a spike with timebox, question and predefined acceptance criteria is the tool [^3].\n\n**DoR.** Size ≤ M and no open blockers or un-spiked risks are part of the Definition of Ready [^2][^3].\n\n[^1]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\"\n[^2]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^3]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\""
+  },
+  "S6.1.1": {
+    "description": "Records the confirmation notes (\"back of the card\") for one refined story as the first acceptance-criteria draft. Use when the dark-factory workflow reaches step 6.1.1 \"Confirmation-Kriterien festhalten\".",
+    "purpose": "The ac-draft is the rule-level basis that 6.1.2 turns into concrete SBE examples and 6.1.3 formalizes as Gherkin AC items judged by the gherkin critic.",
+    "procedure": [
+      "Read story-refined for the passed story id (What, business rules, confirmation candidates, edge cases from the amigos protocol).",
+      "Write confirmation notes as short, testable statements of what must be true when the story is done — one per business rule or outcome, in the story's domain terms.",
+      "Include at least one happy-path confirmation and at least one negative/exception confirmation (limits, invalid or expired data, missing permission) from the QA edge cases.",
+      "Keep every note implementation-neutral: no selectors, screens, SQL, API calls; refer to domain concepts and observable outcomes.",
+      "Tag each note with its source (business rule, edge case, ASM) and mark notes that rest on an unvalidated ASM.",
+      "Write ac-draft to artifacts/p6-akzeptanz/<storyId>/; derivedFrom = story-refined@version; evidence 🧠 inferred."
+    ],
+    "selfCheck": [
+      "At least one happy-path and at least one negative/exception confirmation (gherkin).",
+      "Every note is implementation-neutral and uses glossary/domain-model terms.",
+      "Each business rule in story-refined is covered by at least one note.",
+      "Notes are testable statements (observable outcome), not tasks or vague qualities (\"fast\", \"easy\").",
+      "Notes depending on unvalidated ASM are marked."
+    ],
+    "pitfalls": [
+      "Writing test steps or UI click paths instead of confirmation criteria.",
+      "Only happy-path criteria, pushing all negatives to \"later\".",
+      "Adding new scope in the confirmation that is not in the story."
+    ],
+    "templateSections": [
+      "## Story — ST id and Connextra sentence",
+      "## Confirmation notes — numbered list: statement · type (happy/negative/exception) · source",
+      "## Rule coverage — each business rule → confirmation note numbers",
+      "## Assumption-dependent notes — notes resting on unvalidated ASM"
+    ],
+    "domainKnowledge": "**Card, Conversation, Confirmation.** The confirmation is the third C; the card is a placeholder for a conversation [^1].\n\n**Order of work.** First confirmation notes on the back of the card, then concrete examples (SBE, real values, tables), then Given-When-Then [^1][^2][^3].\n\n**Pass criteria (gate gherkin).** At least one happy path and at least one negative or exception path (limits, expired data, …); implementation-neutral (no selectors, no SQL) [^1][^2].\n\n**Testable.** A good story provides enough information to make it clear how to test that it is \"done\" [^4].\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^3]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\"\n[^4]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\""
+  },
+  "S6.1.2": {
+    "description": "Specifies one story's confirmation criteria with concrete examples (SBE tables with real values), optionally rated by the full synthetic panel. Use when the dark-factory workflow reaches step 6.1.2 \"Mit konkreten Beispielen spezifizieren (SBE)\".",
+    "purpose": "The sbe-examples make each criterion unambiguous with real data; 6.1.3 formalizes them into Gherkin AC items and the gherkin critic checks the concrete values.",
+    "procedure": [
+      "Read ac-draft for the passed story id and personas (PER) for realistic roles, contexts and data.",
+      "For each confirmation note write concrete examples: specific input values, preconditions and the exact expected outcome; use tables for rule variations and boundary values (just below / at / above limits).",
+      "Cover every negative/exception note with at least one example using concrete invalid, expired, empty or boundary data.",
+      "If a panel result path is passed (mode rating, panelSet full), consume it: use the per-persona ratings of the examples (realism/importance) to drop or fix unrealistic examples and add persona-suggested cases; mark those examples and changes 🤖 synthetic citing the panel/T ids.",
+      "If no panel result is passed (optional, budget skip), proceed with persona-derived examples marked 🧠 inferred and note \"panel skipped\" in the artifact.",
+      "Keep examples implementation-neutral (domain values and outcomes, no UI selectors or SQL) and in glossary terms.",
+      "Write sbe-examples to artifacts/p6-akzeptanz/<storyId>/; derivedFrom = ac-draft@version, personas@version (and panel result if used)."
+    ],
+    "selfCheck": [
+      "Every confirmation note has at least one example with concrete values (gherkin: SBE examples with concrete values).",
+      "At least one happy-path and one negative/exception example exist.",
+      "Boundary values are explicit for every numeric/time limit.",
+      "Examples are implementation-neutral and use domain/glossary terms.",
+      "Panel-derived content is marked 🤖 with its source; without panel the skip is stated and nothing is marked 🤖.",
+      "Example data is plausible for the PER roles in personas."
+    ],
+    "pitfalls": [
+      "Placeholder values (\"some user\", \"a valid date\") instead of real data.",
+      "Treating panel ratings as validation — they are synthetic evidence only.",
+      "Tables that mix several rules in one row so the failing rule is unclear."
+    ],
+    "templateSections": [
+      "## Examples per confirmation note — note number, preconditions, input, expected outcome",
+      "## Rule tables — variations and boundary values in tabular form",
+      "## Negative & exception examples — invalid/expired/empty/boundary data",
+      "## Panel input — ratings used, changes made (🤖), or \"panel skipped\""
+    ],
+    "domainKnowledge": "**Speak in examples.** Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response [^1].\n\n**Order of work.** First confirmation notes, then concrete examples (SBE, real values, tables), then Given-When-Then [^2][^3][^1].\n\n**Pass criteria (gate gherkin).** At least one happy path and at least one negative or exception path (limits, expired data, …); implementation-neutral [^2][^3].\n\n**Panel (binding, Gedächtnis §6/§7).** Mode rating produces a table item × persona. Synthetic evidence 🤖 counts for gates in dark mode but is always labeled; 6.1.2 is an optional panel point and is the first to be skipped when the budget runs low (§9.4).\n\n[^1]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\"\n[^2]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\""
+  },
+  "S6.1.3": {
+    "description": "Formalizes one story's SBE examples into Given-When-Then acceptance criteria (AC items) traced to the story. Use when the dark-factory workflow reaches step 6.1.3 \"In Given-When-Then formalisieren\".",
+    "purpose": "Creates the AC items at the head of the required trace chain; the gherkin critic (SP6.1_CallK) judges them, 6.1.4 aligns test expectations, 6.2.3 checks their language and 7 exports them.",
+    "procedure": [
+      "Read sbe-examples for the passed story id.",
+      "Write one AC per behavior as a Gherkin scenario (Given context, When one action/event, Then observable outcome); use Scenario Outline + Examples tables for rule variations and boundary values from SBE.",
+      "Give each AC a new id AC-nnn (never reuse), a title and a kind (happy | negative | edge); derivedFrom = [ST id] plus the SBE example/confirmation note it formalizes.",
+      "Keep Given/When/Then implementation-neutral: domain terms, concrete values, no selectors, clicks, SQL or endpoints.",
+      "Evidence per AC: 🤖 if its example came from the panel, else 🧠 inferred; list refs.",
+      "First commit acceptance-criteria to artifacts/p6-akzeptanz/<storyId>/ with every AC id in its authored itemIndex; then set the canonical ACs on the story with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <storyId> --step S6.1.3` → {\"story\": {\"acceptanceCriteria\": [{id, title, kind, given: [..], when: [..], then: [..], examples?: [..]}]}}. The script rejects AC ids that are not committed items."
+    ],
+    "selfCheck": [
+      "Every scenario is valid Given-When-Then with one When per scenario (gherkin).",
+      "At least one happy-path and at least one negative/exception AC per story.",
+      "Implementation-neutral: no UI selectors, SQL, endpoints or click paths.",
+      "Concrete values from the SBE examples are used (no placeholders).",
+      "Every AC has a new AC id, derivedFrom containing its ST id, and an evidence level.",
+      "Every SBE example is covered by an AC or its omission is justified."
+    ],
+    "pitfalls": [
+      "Multiple Whens/Thens chaining a whole workflow into one scenario.",
+      "Then steps that assert internal state (\"record saved in table X\") instead of observable outcomes.",
+      "Losing boundary values when collapsing examples into prose."
+    ],
+    "templateSections": [
+      "## Acceptance criteria — per AC: id, title, type tag, Gherkin scenario, derivedFrom, evidence",
+      "## Scenario outlines — rule variations with Examples tables",
+      "## Coverage — SBE example / confirmation note → AC ids"
+    ],
+    "domainKnowledge": "**Order of work.** First confirmation notes, then concrete examples (SBE, real values, tables), then Given-When-Then [^1][^2][^3].\n\n**Pass criteria (gate gherkin).** Valid Given-When-Then; at least one happy path and at least one negative or exception path (limits, expired data, …); implementation-neutral (no selectors, no SQL); SBE examples with concrete values [^1][^2].\n\n**Testable.** A good story provides enough information to make it clear how to test that the story is \"done\" [^4].\n\n**Trace (binding, Gedächtnis §10).** AC items originate in 6.1.3; required chain AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS. IDs are never reused.\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^3]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\"\n[^4]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\""
+  },
+  "S6.1.4": {
+    "description": "Aligns business and technical test expectations for one story's acceptance criteria, adding architect-found gaps as AC items without making them implementation-specific. Use when the dark-factory workflow reaches step 6.1.4 \"Fachliche vs. technische Testerwartungen abgleichen\".",
+    "purpose": "Delivers the final acceptance-criteria set per story that the gherkin critic judges at SP6.1_Gw (\"Testbar & eindeutig?\"); the result feeds 6.2 hygiene checks and the export in 7.",
+    "procedure": [
+      "Read acceptance-criteria for the passed story id plus the ARC implementation notes in story-refined and the target architecture from 00_idea-brief.md.",
+      "For each AC check technical testability: can the outcome be observed and automated against the target platform, are preconditions settable, are time/concurrency/data-volume aspects implied?",
+      "Identify technical expectations that change observable behavior (e.g. timeouts, offline, concurrent edits, data retention) and add them as new AC-nnn items in business language with derivedFrom = [ST id, related AC].",
+      "Record purely technical checks with no observable business outcome (e.g. index usage, logging format) as non-functional test notes, not as ACs.",
+      "Resolve contradictions between business ACs and technical constraints by rewording the AC or flagging a conflict for the critic; never silently drop a business AC.",
+      "If an AC turns out untestable or the story too large, mark the story needs-resplit (G-Split) with the reason.",
+      "Update acceptance-criteria (same file, new version, new AC ids in its itemIndex) and then the story's full `acceptanceCriteria` list via `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <storyId> --step S6.1.4`; needs-resplit goes into the same patch as `status`."
+    ],
+    "selfCheck": [
+      "Every AC is testable and unambiguous from both business and technical perspective (gherkin).",
+      "All ACs, including new ones, stay implementation-neutral Given-When-Then.",
+      "Happy-path and negative/exception coverage still present after alignment.",
+      "Technical-only checks are kept as test notes, not disguised as ACs.",
+      "Every conflict is resolved or flagged; no business AC removed without a stated reason.",
+      "New AC ids are unique with derivedFrom to ST and related AC."
+    ],
+    "pitfalls": [
+      "Rewriting ACs into technical test cases (API assertions, SQL) — breaks implementation neutrality.",
+      "Adding technical ACs that no user could observe, which 6.2.4 later treats like fake stories.",
+      "Ignoring non-functional behavior that users do notice (timeouts, offline)."
+    ],
+    "templateSections": [
+      "## Alignment table — AC id · business expectation · technical testability · action (keep/reword/flag)",
+      "## Added acceptance criteria — new AC items from technical findings, in Gherkin",
+      "## Non-functional test notes — technical checks without business outcome",
+      "## Conflicts & resplit flags — open conflicts for the critic, needs-resplit reasons"
+    ],
+    "domainKnowledge": "**Pass criteria (gate gherkin).** At least one happy path and at least one negative or exception path; implementation-neutral (no selectors, no SQL) [^1][^2].\n\n**Testable.** A good story provides enough information to make it clear how to test that the story is \"done\" [^3].\n\n**Three perspectives.** Development and testing perspectives are part of every story conversation [^2]; here ARC contributes the How-side view of testability.\n\n**Small vs. Valuable.** Technical stories without an outcome are the typical symptom of choosing Small over Valuable [^2] — the same applies to technical ACs without an observable outcome.\n\n**Role (Gedächtnis §4).** ARC is the technical perspective and needs the target architecture/platform from the idea brief (§14).\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^3]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\""
+  },
+  "S6.2.3": {
+    "description": "Checks ubiquitous-language consistency across all acceptance criteria and stories and builds the run glossary (TERM items), as the critic-owned business rule step. Use when the dark-factory workflow reaches step 6.2.3 \"Ubiquitous-Language-Konsistenz pruefen\".",
+    "purpose": "The glossary is the reference for the DoR criterion \"terms as in the glossary\" and the backlog-hygiene/traceability critic in SP6.2; 6.2.4 and 7 use its findings and export it with the backlog.",
+    "procedure": [
+      "Read acceptance-criteria of all stories, the story files in backlog/stories/ and the glossary candidates from each story's wireframe-text (artifacts/p5-refinement/<storyId>/).",
+      "Extract every domain term used; cluster synonyms and near-synonyms (same concept, different words) and homonyms (same word, different concepts).",
+      "For each concept pick one canonical term, write a definition and list rejected synonyms; create one TERM-nnn item per concept (new id, never reuse) with derivedFrom = the ST/AC ids where it occurs.",
+      "Detect contradicting domain rules across stories/ACs (e.g. different limits, states or ownership for the same concept) and record each as a finding with the conflicting item ids.",
+      "Produce findings for every AC/story that uses a non-canonical term or an undefined term; do not rewrite ACs or stories yourself — the findings are change requests for the producers.",
+      "Evaluate against rubric ubiquitous-language (one term per concept; no contradicting domain rules; all terms in the glossary) and state per criterion pass/partial/fail with reasons as input for the critic loop; never set status passed.",
+      "Write glossary to artifacts/p6-akzeptanz/ with TERM items in the authored itemIndex (evidence 🧠 inferred unless a TERM comes from a cited SRC)."
+    ],
+    "selfCheck": [
+      "One canonical term per concept; every rejected synonym is listed (ubiquitous-language).",
+      "No contradicting domain rules left unreported; each conflict names the item ids involved.",
+      "Every domain term used in any AC or story appears in the glossary.",
+      "Every TERM has a definition, a new id and derivedFrom to the ST/AC where it occurs.",
+      "Findings are change requests only; no story or AC text was modified by this step.",
+      "Criterion-level assessment against the rubric is present; status is not set to passed."
+    ],
+    "pitfalls": [
+      "Silently rewriting ACs to the canonical term — the critic role never rewrites artifacts (Gedächtnis §4).",
+      "Treating generic words (user, button, data) as domain terms and bloating the glossary.",
+      "Merging two genuinely different concepts because they share a word (homonym)."
+    ],
+    "templateSections": [
+      "## Glossary — table: TERM id · term · definition · rejected synonyms · occurs in (ST/AC ids)",
+      "## Synonym & homonym findings — term clusters and the canonical choice",
+      "## Rule conflicts — contradicting domain rules with involved item ids",
+      "## Change requests — per ST/AC: term to replace or define",
+      "## Rubric assessment — ubiquitous-language criteria with pass/partial/fail and reasons"
+    ],
+    "domainKnowledge": "**Ubiquitous language (Gedächtnis §13 `ubiquitous-language`).** One term per concept, no contradicting domain rules, every term in the glossary (Evans).\n\n**DoR.** \"Terms as in the glossary\" is part of the Definition of Ready [^1][^2].\n\n**Implementation-neutral ACs.** ACs use domain concepts, not selectors or SQL [^1][^3] — so the domain vocabulary in ACs is exactly what the glossary must cover.\n\n**Examples expose terms.** Specific examples of what users do and see [^4] surface the concrete words the domain uses.\n\n**Critic role (binding, Gedächtnis §4).** The critic evaluates against rubrics and never rewrites artifacts; findings go back as change requests. TERM items originate in 5.2.3 and 6.2.3 (§10.1).\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^4]: \"User Story Mapping\" (Patton) — \"Speak in examples. Wherever possible, use specific examples of what users do, exactly what data might be entered, exactly what users would see in response.\""
+  },
+  "S6.2.4": {
+    "description": "Sorts out orphan, fake and duplicate stories from the backlog — consuming the deterministic orphan findings of 6.2.1/6.2.2 and judging fake stories and duplicates — as the critic-owned business rule step. Use when the dark-factory workflow reaches step 6.2.4 \"Orphan- & Fake-Stories aussortieren\".",
+    "purpose": "Produces backlog-cleaned, the input of 6.2.5 (traceability matrix), the traceability critic at SP6.2_Gw and step 7 export; rubric backlog-hygiene requires no orphans, no fake stories, no duplicates.",
+    "procedure": [
+      "Read trace-findings from 6.2.1 (story → epic) and 6.2.2 (epic → impact/vision); take the orphan list as given — do not recompute graph paths.",
+      "For each orphan record the break in the chain (missing UT/EP/OPP|JOB/IMP/GOAL/VIS link) and decide: discard, or re-attach request to the producer when the story is valuable but mislinked.",
+      "Judge every remaining story for fake-story signals: role is the delivery team or the system (\"As a developer/QA …\"), purely technical \"so that\", need inside the team's own zone of control, or a misleading story that describes a solution instead of the need.",
+      "Judge duplicates: compare stories semantically (same role, goal and outcome, possibly different wording or epic); keep the better-traced one and mark the other duplicateOf.",
+      "Discard removed stories with `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/story.mjs patch <runDir> <ST id> --step S6.2.4` → {\"story\": {\"status\": \"discarded\", \"discard\": {\"reason\": \"orphan|fake|duplicate\", \"duplicateOf\"?: \"ST-nnn\", \"justification\": \"…\"}}} — never delete files or reuse ids; their ACs drop out of the export with the story. List micro-stories that are fine because their hierarchy is tracked. Discard every spike whose blocked stories are all discarded (`node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/spike.mjs patch <runDir> <SPK id> --step S6.2.4` → {\"spike\": {\"status\": \"discarded\"}}); export-backlog.mjs reports spikes that only block excluded stories.",
+      "Write backlog-cleaned to artifacts/p6-akzeptanz/: remaining stories by epic, discarded list with reasons, re-attach change requests, and a rubric backlog-hygiene assessment per criterion (pass/partial/fail); never set status passed."
+    ],
+    "selfCheck": [
+      "No orphans remain in the cleaned backlog; every orphan from trace-findings is discarded or has a re-attach change request (backlog-hygiene).",
+      "No fake stories remain: every remaining story has a user/customer role and a user or business outcome.",
+      "No duplicates remain; each duplicate names its duplicateOf story.",
+      "Orphan status comes only from trace-findings; no orphan was added or removed by LLM judgment.",
+      "Discarded items keep their ids with status discarded and reason; their ACs leave the export with them.",
+      "Each fake/duplicate verdict has a one-line justification citing the story text."
+    ],
+    "pitfalls": [
+      "Recomputing or overriding the deterministic orphan result from 6.2.1/6.2.2 by LLM judgment.",
+      "Discarding legitimate enabler stories that do have a user outcome just because they sound technical.",
+      "Deleting story files instead of marking them discarded, breaking stable ids and history."
+    ],
+    "templateSections": [
+      "## Orphans (from trace-findings) — ST id · missing link · decision (discard / re-attach request)",
+      "## Fake stories — ST id · signal (team role / technical outcome / solution-not-need) · justification",
+      "## Duplicates — ST id · duplicateOf · justification",
+      "## Cleaned backlog — remaining stories per epic with AC count",
+      "## Rubric assessment — backlog-hygiene criteria with pass/partial/fail and reasons"
+    ],
+    "domainKnowledge": "**Fake story.** A need inside the team's own zone of control, e.g. \"As a QA, I want database restarts automated\" [^1]. Binding definition (Gedächtnis §10.2): story without user value (role is the own team), duplicate (semantically equal story), or story with a purely technical \"so that\"; judged in 6.2.4 by the critic.\n\n**Misleading story.** Describes a solution instead of the need [^1].\n\n**Micro-stories** are fine if the hierarchy is tracked [^1].\n\n**Small vs. Valuable.** Technical stories without an outcome are the typical symptom of choosing Small over Valuable [^1]; Valuable means valuable to users or purchasers [^2].\n\n**Orphan (binding, Gedächtnis §10.2).** An item without a complete path along AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS; found deterministically in 6.2.1/6.2.2 by graph traversal, without LLM. IDs are never reused, even after discarding (§10.1).\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"\n[^2]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\""
+  },
+  "S7": {
+    "description": "Exports the cleaned backlog as backlog/backlog.json and writes the run report REPORT.md (MVP scope, evidence mix, risk flags, forced loop exits, top-5 risk assumptions, pivot history, cost/runtime), with a partial mode for budget exhaustion and a discarded mode for a no-go. Use when the dark-factory workflow reaches step 7 \"7 Abschluss: Backlog exportieren & Run-Report erstellen\".",
+    "purpose": "backlog.json is the product of the run for tracker adapters (Jira, GitHub Issues, Azure Boards) and REPORT.md is the only place a human has to look (Gedächtnis §2.1); the same procedure in partial mode serves the budget event subprocess \"Teilergebnis sichern & Run-Report erstellen\", and in discarded mode the no-go path \"No-Go-Report erstellen\" (S_NoGo).",
+    "procedure": [
+      "Determine the mode: full (normal flow after G-6.2), partial (invoked from SP_Budget after Error_BudgetErschoepft) or discarded (invoked from S_NoGo after a no-go); in partial and discarded mode snapshot the current run state first and do not run any further production step, and in discarded mode skip the backlog export and publishing (see the discarded-mode section).",
+      "Read backlog-cleaned, glossary, backlog/traceability.md, all gates/G-*.meta.json, run.json and log/events.jsonl; stories and epics come from their records (story.mjs list/show, commit-artifact.mjs query --type epic).",
+      "Export backlog/backlog.json deterministically: `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/export-backlog.mjs <runDir>` (add `--partial` in partial mode). It builds df.backlog/v1 from the epic and story records (Connextra, size, status, trace chain up to VIS, evidence, assumptions, ACs, spikes, risk flags, gate) and lists consistency `problems`; never write backlog.json yourself.",
+      "Aggregate the evidence mix (🔗/🧠/🤖 shares) over all backlog items and per phase from the artifact sidecars (derived.evidence); list every riskFlag (e.g. loop-cap-reached, same-model-review) with the artifact/item it sits on, and every forced loop exit (gate records with verdict pass-with-risk) with open criteria.",
+      "Select the top-5 risk assumptions: ASM items with high importance and low evidence ranked by number of stories whose path rests on them; disclose importance, evidence and story count so the ranking is recomputable.",
+      "Build the pivot history from G-P2 gate records (pivotCount, verdict, reason) and the cost/runtime from log/events.jsonl (tokens, cost per model role and phase, wall-clock from first to last event, deep-research calls vs. hard cap).",
+      "Write REPORT.md: status (complete | partial), summary and MVP scope (slice-1 epics/stories, walking skeleton, budget/timebox fit), evidence mix, risk flags & forced loop exits, top-5 risk assumptions, pivot history, cost & runtime, links to backlog.json and traceability.md.",
+      "In partial mode: set status: partial, record the last completed BPMN step and the interrupting step, list what is missing (phases/artifacts/stories not produced, gates not reached) and run export-backlog.mjs with --partial so backlog.json contains only what exists.",
+      "Report every entry of the export's `problems` list in REPORT.md under risk flags; in full mode a non-empty list (exit 1) means the backlog is not consistent — say so in the status."
+    ],
+    "selfCheck": [
+      "REPORT.md contains evidence mix, all risk flags, all forced loop exits, top-5 risk assumptions and cost (rubric run-report).",
+      "Summary and MVP scope, pivot history and runtime are present; figures trace to gate records and log/events.jsonl.",
+      "backlog.json is valid JSON with epics, stories, ACs, trace, evidence and risk flags; ids match the run exactly.",
+      "Every exported story has a complete required trace chain AC → ST → UT → EP/ACTV → (OPP|JOB) → IMP → GOAL → VIS (rubric traceability), or is flagged.",
+      "Synthetic evidence is reported as 🤖, never presented as validated.",
+      "Partial mode: status: partial, interruption point and a concrete list of missing parts are stated.",
+      "Discarded mode: status: discarded, the no-go rule that fired with its gate record, the kill assumptions with evidence and the change requests that would reopen the idea are stated; no backlog.json, nothing published.",
+      "Top-5 ranking discloses its inputs and is recomputable.",
+      "Full mode: publish-results.mjs ran after the REPORT.md commit, and its result (published directory or reason for not publishing) is in the step summary."
+    ],
+    "pitfalls": [
+      "Hiding pass-with-risk gates or inherited risk flags in the summary to make the run look clean.",
+      "Estimating cost/runtime instead of summing log/events.jsonl.",
+      "Exporting discarded or superseded stories as active backlog items.",
+      "In partial mode, trying to finish missing steps instead of saving and reporting the gap.",
+      "Publishing in partial mode, or writing into the publish directory by hand: only publish-results.mjs writes there."
+    ],
+    "templateSections": [
+      "## Status — complete | partial | discarded, run id, BPMN hash, last completed step (partial: interrupting step; discarded: the no-go gate record)",
+      "## Summary & MVP scope — product idea, slice-1 epics and stories, fit to budget/timebox",
+      "## Evidence mix — 🔗/🧠/🤖 shares overall and per phase",
+      "## Risk flags & forced loop exits — every flag and pass-with-risk gate with open criteria",
+      "## Top-5 risk assumptions — ASM id, importance, evidence, stories affected",
+      "## Pivot history — G-P2 records: iteration, verdict, reason",
+      "## Cost & runtime — tokens/cost per model role and phase, wall-clock, deep-research calls vs. cap",
+      "## Missing (partial only) — phases, artifacts, gates not reached",
+      "## Outputs — links to backlog/backlog.json, backlog/traceability.md, glossary"
+    ],
+    "domainKnowledge": "**Run outputs (binding, docs/dark-factory/implementation.md §6).** `backlog.json`: generic schema with epics, stories, ACs, trace, evidence and risk flags; adapters for Jira, GitHub Issues and Azure Boards come later. `REPORT.md` is the only place a human has to look: summary and MVP scope, evidence mix (🔗/🧠/🤖), all risk flags and forced loop exits, top-5 risk assumptions, pivot history, cost and runtime.\n\n**Evidence (Gedächtnis §6).** Each item carries exactly one level; the artifact's evidence mix is aggregated for the run report; synthetic evidence counts for gates but is always labeled.\n\n**Budget (Gedächtnis §9.4).** On exhaustion `Error_BudgetErschoepft` fires; the event subprocess saves the intermediate state and writes a run report with `status: partial`.\n\n**Forced loop exits (Gedächtnis §9.1).** At iteration ≥ maxLoops the verdict is pass-with-risk and open criteria are inherited as risk flags by the artifact and all derived items.\n\n**What a ready story looks like.** INVEST [^1]; testable enough to know when it is done [^2]; DoR includes at least one AC and no un-spiked risks [^1][^3]; fake stories (team needs) are not in the backlog [^4].\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"A good story is: Independent, Negotiable, Valuable to users or customers, Estimatable, Small, Testable … Bill Wake (2003a) refers to this as 'slicing the cake.' Each story must have a little from each layer.\"\n[^2]: \"The Lean Product Playbook\" (Olsen) — \"Small: Good stories tend to be small in scope. Larger stories will have greater uncertainty … Testable: A good story provides enough information to make it clear how to test that the story is 'done'.\"\n[^3]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"Before performing a spike, clearly define the acceptance criteria and time box … These can turn into never-ending research projects if left unchecked.\"\n[^4]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Fake stories are those about the needs of delivery team members … create small conversations that involve at least one person representing each of the development, testing and analysis roles.\"",
+    "afterCommit": [
+      "**Publish** (full mode only, after REPORT.md is committed): `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/publish-results.mjs <runDir>`. It copies REPORT.md, the backlog (epics, active stories, spikes, backlog.json, traceability.md), glossary, strategy, user and story-map artifacts into the target project's publish directory from `.dark-factory/project.json` (default `docs/product/`) and records the runId in `.published.json` there. Without a manifest it publishes nothing and exits 0; a partial run is refused (exit 1). Never copy files there yourself. Name the publish directory and file count in your summary, or \"not published\" with the reason.",
+      "**Finish the run** (every mode, last command): `node ${CLAUDE_PLUGIN_ROOT}/skills/product-traceability/scripts/run-state.mjs finish <runDir> complete` (partial mode: `partial`, discarded mode: `discarded`). It sets run.json status and clears runs/.active, so the hooks stop treating the run as active."
+    ]
+  }
+}

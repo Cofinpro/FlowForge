@@ -1,0 +1,363 @@
+{
+  "S2.1.1": {
+    "description": "Produces the stakeholder-matrix that lists every stakeholder group, user role and requirement source (with SRC ids and source types) and assigns the full-panel slots and elicitation technique per group. Use when the dark-factory workflow reaches step S2.1.1 \"Stakeholder & Anforderungsquellen identifizieren\".",
+    "purpose": "Tells S2.1.2 whom the interview guide must address and which assumptions each group can speak to, and fixes the segment coverage (4 target-user slots, Contrarian, Verweigerer) that S2.1.3 grounds the full panel against.",
+    "procedure": [
+      "Read impact-map and actors: list every ACT item (primary, secondary, off-stage) with its IMP items; each becomes a candidate stakeholder row that keeps its ACT id.",
+      "Read research-zielgruppe-voc: extract the target-group segments (at least 2) with their distinguishing traits and the SRC ids of their voice-of-customer evidence; attach each segment to the ACT rows it refines, and add rows for groups the corpus reveals but the impact-map lacks (evidence 🔗, flag \"not in impact-map\").",
+      "Name each user role concretely (e.g. \"Part-time bookkeeper in a 5-person firm\", never \"user\"); split an ACT into several roles when the corpus shows different contexts or maturity levels.",
+      "For every row record: influence and interest (high/medium/low, each with a one-line reason), requirement sources as SRC ids plus their sourceType (forum, review, app store, report, social, docs), and the gap in source types still missing for that group.",
+      "Choose the elicitation technique per row from what dark mode can reach: synthetic interview (panel), synthetic rating, desk research of VoC sources; mark human-only techniques (contextual inquiry, observation) as \"not reachable in dark mode\".",
+      "Propose the full-panel slot allocation (Gedächtnis §7.1): 4 target-user slots spread over different segments, contexts and maturity levels, 1 Contrarian slot (skeptical of the core assumption), 1 Verweigerer slot (in the target group, working workaround, no intent to switch); name the stakeholder row and the source-type gaps for each slot so S2.1.3 can direct its DDG discovery.",
+      "Mark every cell's evidence level (🔗 with SRC, 🧠 inferred from ACT/IMP) and record the rows as items and every SRC id in the authored block (itemIndex, sources); commit-artifact.mjs computes the evidence mix."
+    ],
+    "selfCheck": [
+      "Every ACT item from impact-map/actors appears in a row or is explicitly excluded with a reason.",
+      "At least 2 segments from research-zielgruppe-voc are covered, each with its distinguishing trait and ≥1 SRC.",
+      "Every role label is a concrete role title, no generic \"user\" or \"customer\".",
+      "Every requirement source is an SRC id with a sourceType; no uncited 🔗 claim.",
+      "The panel slot allocation names exactly 4 target-user slots on distinct segment/context/maturity combinations plus 1 Contrarian and 1 Verweigerer slot.",
+      "Every row carries an elicitation technique that dark mode can execute, or is flagged not reachable."
+    ],
+    "pitfalls": [
+      "Copying the ACT list unchanged, so all 4 target-user slots end up in one segment and the panel cannot disagree.",
+      "Listing stakeholders by demographics only instead of by role, context and job, which leaves S2.1.2 nothing to ask about.",
+      "Treating the own team or the product owner as a stakeholder with user requirements (seeds fake stories later)."
+    ],
+    "templateSections": [
+      "## Stakeholder matrix — table: row, role title, ACT id, segment, influence, interest, requirement sources (SRC + sourceType), evidence",
+      "## Segments from the VoC corpus — each segment with distinguishing traits and SRC ids",
+      "## Elicitation techniques — technique per row; human-only techniques marked not reachable",
+      "## Full-panel slot allocation — 4 target-user slots, Contrarian, Verweigerer with stakeholder row and missing source types",
+      "## Gaps and exclusions — ACTs excluded, groups missing from the impact-map, source-type gaps"
+    ],
+    "domainKnowledge": "- Identify user roles across the whole interaction space first, before condensing them into personas; name each role concretely instead of \"a user\" [^1].\n- Generic roles invite pet features and unjustified scope, so every stakeholder row needs a concrete role title [^2].\n- The full panel built in 2.1.3 has 6 personas: 4 target users covering different segments, contexts and maturity levels, 1 Contrarian and 1 Verweigerer (Gedächtnis §7.1). The slot allocation here is its seed.\n- Contextual inquiry is out of reach in dark mode (Gedächtnis §2.1); the extreme-user idea is covered by the Contrarian and Verweigerer slots.\n- Every panel trait later needs SRC grounding with at least 3 source types (Gedächtnis §7.2), so the matrix should already name missing source types per group.\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"Rather than writing stories like 'A user can restrict job searches…' you can write 'A Geographic Searcher can restrict his job searches…'\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Using generic roles is often a get-out-of-jail-free card for people who want to push in pet features, or unjustified scope.\""
+  },
+  "S2.1.2": {
+    "description": "Produces the interview-guide: a four-stage past-behaviour interview (qualifier, story, problem ranking with workaround, solution last) that covers every kill assumption and fixes the shuffled top-3 problem order per persona. Use when the dark-factory workflow reaches step S2.1.2 \"Erhebungstechniken & Interviewleitfaden erstellen\".",
+    "purpose": "Is the script the panel interview (product-panel-befragung, mode interview) follows in S2.1.4; its problem-ranking block is what S2.1.4 synthesises into the G-P2 kill signal, and the SP2.1 critic judges it against rubric interview-guide.",
+    "procedure": [
+      "Read assumptions-map: list every kill assumption (importance high, evidence low) and every desirability assumption as ASM ids; identify the core problem assumption the idea stands on.",
+      "Read stakeholder-matrix: take the stakeholder rows and panel slots (target users, Contrarian, Verweigerer) the guide must serve, and note per slot which ASM items it can speak to.",
+      "Write stage 1 \"Qualifier\": 2–3 questions that establish whether the persona is in the target group and in which context (role, frequency, current tools), without mentioning the idea.",
+      "Write stage 2 \"Story\": past-behaviour questions only (\"When was the last time you…?\", \"Walk me through what you did\", \"What happened next?\"); each question names the ASM id(s) it probes; add neutral follow-ups (\"Why was that?\", \"What did that cost you?\").",
+      "Write stage 3 \"Problem ranking and workaround\": define exactly 3 problems (the core problem plus the 2 strongest competing problem hypotheses, each linked to ASM ids), let the persona rank them by its own experience, then ask for today's workaround, its cost and satisfaction. Fix the shuffle: the 3! = 6 permutations are assigned to the 6 panel slots in slot order, recorded as a table, so no persona sees the core problem in the same position and S2.1.4 can check order bias.",
+      "Write stage 4 \"Solution\" for the last third only: a neutral one-paragraph concept description, then reaction questions about fit to past behaviour (\"Where would this have fit last time?\"), no pitch or guided tour; add Verweigerer/Contrarian probes on switching barriers and the strongest objection.",
+      "Add interviewer rules: no leading or loaded questions, no hypothetical \"would you\" before stage 4, accept \"don't know\" and \"don't care\" verbatim without reinterpreting, one transcript per persona, record guide version.",
+      "Build a coverage table ASM id → question ids; every kill assumption needs ≥1 question in stages 2–3. Record the coverage table in the body; the guide version is the artifact version set by commit-artifact.mjs."
+    ],
+    "selfCheck": [
+      "Stages 1–3 contain only past-behaviour questions; no \"would you\", \"do you like\" or leading/loaded question (rubric interview-guide).",
+      "The solution is shown only in stage 4, the last third of the guide (rubric interview-guide).",
+      "Every kill assumption from assumptions-map is covered by ≥1 question, shown in the coverage table (rubric interview-guide).",
+      "The problem-ranking block lists exactly 3 problems including the core problem, each linked to ASM ids, and a per-slot permutation table covering all 6 slots with distinct orders.",
+      "The rules state that \"don't know\"/\"don't care\" are recorded verbatim and never reinterpreted (Gedächtnis §7.4).",
+      "Contrarian and Verweigerer probes (objection, workaround satisfaction, switching barriers) are present."
+    ],
+    "pitfalls": [
+      "Opening with the product idea or a pitch, which produces fake validation (\"Sure, I'd use that\").",
+      "Phrasing the core problem so it obviously wins the ranking (more vivid wording, always listed first).",
+      "Asking about future intent (\"Would you pay for…?\") in the story stage instead of past spend and behaviour.",
+      "Writing questions that fish for the hidden \"secret\" directly instead of letting good follow-ups surface it."
+    ],
+    "templateSections": [
+      "## Interview goals — ASM ids under test, core problem assumption",
+      "## Interviewer rules — Mom-test rules, no leading questions, \"don't know\" accepted, solution only in the last third",
+      "## Stage 1: Qualifier — questions with ids",
+      "## Stage 2: Story about past behaviour — questions with ids and probed ASM ids, follow-ups",
+      "## Stage 3: Problem ranking and workaround — the 3 problems with ASM links, ranking instruction, per-slot permutation table, workaround questions",
+      "## Stage 4: Solution (last third) — neutral concept text, reaction questions, Contrarian/Verweigerer probes",
+      "## Assumption coverage — table ASM id → question ids"
+    ],
+    "domainKnowledge": "- Four-stage funnel: qualifier (is this the target audience?) → story about past behaviour → problem ranking and today's workaround → prototype or solution shown last [^1][^2].\n- Problem ranking (adopted 2026-09-25): list the top 3 problems, shuffle their order per persona, and let each persona rank them from its own experience [^1]. If the core problem is ranked last, or not at all, by most target personas, that is a kill signal for G-P2 [^3].\n- Only past-behaviour questions (\"When was the last time you…?\"); no leading or loaded questions [^4].\n- No guided tour or pitch before the last third; a product pitch up front produces fake validation [^5].\n- Gedächtnis §7.4: the persona may say \"don't know\" / \"don't care\" and the interviewer must not reinterpret it; each persona gets its own transcript with guide version.\n- Personas carry a hidden \"secret\" that only good questioning surfaces (Gedächtnis §7.3): the guide is judged by whether its follow-ups can reach it.\n\n[^1]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"List the top three customer jobs, pains, and gains. Interviewee ranks them based on personal experiences.\"\n[^2]: \"Lean UX\" (Gothelf, Seiden) — \"First, try to identify if the customer is in your target audience. Then, try to confirm any problem hypotheses … if you have a prototype or mockup with you, show this last.\"\n[^3]: \"Lean Analytics\" (Croll, Yoskovitz) — \"Test the problem by getting the subject to rank the problems … you might get a resounding 'meh,' in which case there's a clear disconnect.\"\n[^4]: \"The Product Book\" (Product School 2017) — \"always aim for actual instead of ideal-self questions—i.e., ask what customers have done, not what they might do. Also avoid leading and loaded questions.\"\n[^5]: \"UX for Lean Startups\" (Klein) — \"Don't Give a Guided tour … inexperienced moderators wanting to give way too much information about the product up front.\""
+  },
+  "S2.1.3": {
+    "description": "Produces panel-profiles: the full synthetic panel of 6 personas (P items: 4 target users, 1 Contrarian, 1 Verweigerer), each with an open part and a hidden persona-only part, every trait grounded in SRC sources found via DuckDuckGo bulk discovery and WebSearch factcheck. Use when the dark-factory workflow reaches step S2.1.3 \"Synthetisches Panel aus Research-Korpus aufbauen\".",
+    "purpose": "Replaces the proto-panel; product-panel-befragung plays these profiles in S2.1.4 (interviews), S2.2.1, S2.2.5, S3.1.1, S3.1.3 and the gates G-P2/G-P3, and the SP2.1 critic judges them against rubric panel-grounding.",
+    "procedure": [
+      "Read proto-panel (its P items), the research-zielgruppe-voc corpus in artifacts/ and its SRC files in research/sources/, and the panel slot allocation of stakeholder-matrix in the run workspace; take the core problem assumption from 00_idea-brief.md and the proto-panel.",
+      "Define the 6 slots (Gedächtnis §7.1): 4 target users on distinct segment × context × maturity combinations, 1 Contrarian who is skeptical of the core assumption and hunts weaknesses, 1 Verweigerer who belongs to the target group but has a working workaround and no intent to switch. Allocate new P ids (never reuse proto ids); a persona that continues a proto persona lists that P id in derivedFrom.",
+      "Run DuckDuckGo bulk URL discovery per slot: 3–6 queries each aimed at a missing source type (forum threads, product reviews, app-store ratings, social posts, reports); for the Verweigerer search for satisfied users of the incumbent workaround, for the Contrarian for critiques of the solution category. Fetch the promising URLs with WebFetch.",
+      "Normalize every retrieved source with `node skills/product-recherche/scripts/normalize-sources.mjs` into research/sources/SRC-<nnnn>.md (url, title, retrievedAt, tool, query, contentHash, sourceType); cite only the resulting SRC ids.",
+      "Factcheck with WebSearch: every trait that rests on a DDG-discovered source must be corroborated by a second SRC from WebSearch or the DR-02 corpus (DuckDuckGo is never the sole source of a claim); drop or replace traits that fail.",
+      "Write the open part per persona (visible to the interviewer): concrete role title, segment, context, maturity, recent behaviour, publicly voiced frustrations and 1–3 verbatim source quotes as \"voice\" (🔗 with SRC).",
+      "Write the hidden part per persona between `<!-- persona-hidden:start P-<nnn> -->` and `<!-- persona-hidden:end -->` (Gedächtnis §7.3): budget / willingness to pay, skepticism level 1–5, current workaround and its satisfaction, switching barriers, one \"secret\" that only good questioning surfaces; each attribute with SRC. Set the Contrarian to skepticism ≥4 and the Verweigerer to high workaround satisfaction.",
+      "Build the source-mix table (SRC → sourceType → personas) and verify: ≥3 distinct source types across the panel, ≥2 distinct SRC per persona, no trait without SRC. Record every P item in itemIndex as cited 🔗 with derivedFrom = its SRC ids (+ proto P id)."
+    ],
+    "selfCheck": [
+      "Every trait in open and hidden parts carries ≥1 SRC reference; no uncited trait remains (rubric panel-grounding, Gedächtnis §6/§7.2).",
+      "The panel uses ≥3 distinct source types and no persona rests on a single source (rubric panel-grounding).",
+      "Exactly 6 P items: 4 target users on distinct segment/context/maturity combinations, 1 Contrarian, 1 Verweigerer (rubric panel-grounding).",
+      "Every profile has a delimited hidden part with budget/WTP, skepticism 1–5, workaround + satisfaction, switching barriers and a secret (rubric panel-grounding, §7.3).",
+      "Every SRC cited exists as research/sources/SRC-<nnnn>.md produced by normalize-sources.mjs; no claim rests on a DDG-only source.",
+      "New P ids are used; proto P ids are only referenced in derivedFrom."
+    ],
+    "pitfalls": [
+      "Inventing plausible traits (age, income, hobbies) with no SRC — they must be dropped, not marked 🧠.",
+      "Making the Contrarian merely negative in tone instead of skeptical of the specific core assumption with sourced arguments.",
+      "Giving the Verweigerer a weak workaround, so it is really a latent target user and the switching-intent test is lost.",
+      "Leaking hidden attributes into the open part (e.g. mentioning the workaround satisfaction), which lets the interviewer skip good questioning."
+    ],
+    "templateSections": [
+      "## Panel overview — table: P id, slot (target user 1–4 / Contrarian / Verweigerer), role title, segment, context, maturity, derivedFrom",
+      "## Source mix — table SRC → sourceType → personas; count of distinct source types",
+      "## P-<nnn> — <role title> — open part: context, behaviour, frustrations, voice quotes with SRC",
+      "### Hidden attributes (persona model only) — between persona-hidden markers: budget/WTP, skepticism 1–5, workaround + satisfaction, switching barriers, secret, each with SRC",
+      "## Research log — DDG queries per slot, WebSearch factchecks, dropped traits and why"
+    ],
+    "domainKnowledge": "- Gedächtnis §7.1: the full panel has 6 personas — 4 target users (different segments, contexts, maturity), 1 Contrarian (skeptical of the core assumption, hunts weaknesses), 1 Verweigerer (target group, working workaround, no intent to switch). It replaces the proto-panel from 1.1.4.\n- §7.2: every trait needs ≥1 SRC (forums, reviews, app-store ratings, reports, social posts); ≥3 source types per panel; no persona on a single source; source quotes may serve as the persona's \"voice\" (🔗).\n- §7.3: the hidden part (persona model only) holds budget/WTP, skepticism 1–5, current workaround and satisfaction, switching barriers and a \"secret\" — so the panel tests interview quality instead of just agreeing.\n- §8: DuckDuckGo is for bulk URL discovery for panel grounding and is never the only source of a claim; WebSearch does the factchecks; every source is normalized to SRC-<nnnn> with sourceType and contentHash, duplicates merged.\n- The extreme-user idea from the sources is covered by the Contrarian and Verweigerer personas.\n- Personas are later played against a guide that ranks the top 3 problems per persona [^1]; a hidden workaround and secret make a \"meh\" answer possible [^2].\n\n[^1]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"List the top three customer jobs, pains, and gains. Interviewee ranks them based on personal experiences.\"\n[^2]: \"Lean Analytics\" (Croll, Yoskovitz) — \"Test the problem by getting the subject to rank the problems … you might get a resounding 'meh,' in which case there's a clear disconnect.\""
+  },
+  "S2.1.4": {
+    "description": "Produces interview-transcripts: consolidates the 6 panel interview transcripts that product-panel-befragung (mode interview, full panel) already recorded into T items with an index, quality flags and the problem-ranking synthesis that raises or clears the G-P2 kill signal. Use when the dark-factory workflow reaches step S2.1.4 \"Synthetische Interviews durchfuehren\".",
+    "purpose": "Is the synthetic evidence base (🤖 T items) that S2.1.5 personas, S2.1.6 JTBD and S2.2.1 empathy maps are built from; its problem-ranking synthesis feeds the SP2.1 critic and gate G-P2.",
+    "procedure": [
+      "Read the panel result the Workflow passed (product-panel-befragung, mode interview, panelSet full) and locate one raw transcript per persona under panel/; do not play, extend or re-ask any persona yourself — this step only consolidates.",
+      "Match transcripts against panel-profiles (the 6 P items) and interview-guide (version): if a persona's transcript is missing or was run on a different guide version, record it as a blocker in the index and in the return summary instead of filling the gap.",
+      "Assign one T-<nnn> item per transcript (file naming T-<nnn>_P-<nnn> per Gedächtnis §7.4) with derivedFrom = [P id, interview-guide@version], evidence synthetic 🤖, and the persona modelRole/model from the panel result.",
+      "Keep each transcript verbatim; add per transcript the quality flags only: persona stayed in role (y/n with line refs), \"don't know\"/\"don't care\" answers left unreinterpreted, leading questions or solution shown before the last third (with question ids), stages of the guide covered.",
+      "Extract per transcript the problem ranking: the order in which the 3 problems were shown (from the guide's permutation table), the persona's ranking, and the stated workaround with its cost/satisfaction.",
+      "Write the problem-ranking synthesis: table persona × problem rank; per target-user persona flag \"core problem ranked last or not in its top 3\"; raise the kill signal for G-P2 when this holds for ≥3 of 4 target users, report Contrarian and Verweigerer rankings separately (they do not count toward the majority); note any position bias visible across permutations.",
+      "List per transcript the objections of Contrarian and Verweigerer verbatim (they must be addressed at G-P2) and the ASM ids each transcript supports or contradicts; mark all panel-derived statements 🤖 synthetic and record the T items in itemIndex."
+    ],
+    "selfCheck": [
+      "Exactly one T item per P item of the full panel, each with guide version and model role; missing ones are reported as blockers, never fabricated (rubric transcript: complete).",
+      "Transcripts are verbatim from the panel result; no answer was added or rewritten by this step (rubric transcript: persona stayed in role).",
+      "No \"don't know\"/\"don't care\" answer is reinterpreted in flags or synthesis (rubric transcript).",
+      "The problem-ranking synthesis shows the shown order and the ranking per persona and states the kill signal explicitly (raised / not raised) with the ≥3-of-4 target-user count.",
+      "Contrarian and Verweigerer rankings and objections are reported separately and excluded from the majority.",
+      "Every T item is marked 🤖 synthetic with derivedFrom P id + interview-guide@version."
+    ],
+    "pitfalls": [
+      "Re-playing or \"completing\" a persona to close a gap in a transcript — that breaks the model-family separation and fakes evidence.",
+      "Reading the hidden part of panel-profiles to judge answers; the interviewer role only knows the open part.",
+      "Softening a \"meh\" ranking of the core problem in the synthesis, which hides the G-P2 kill signal.",
+      "Averaging Contrarian and Verweigerer into the target-user ranking."
+    ],
+    "templateSections": [
+      "## Transcript index — table: T id, P id, slot, guide version, model, stages covered, quality flags",
+      "## Problem-ranking synthesis — table persona × shown order × ranking; core-problem position per persona; kill signal raised / not raised with count",
+      "## Workarounds — per persona: current workaround, cost, satisfaction (🤖)",
+      "## Objections from Contrarian and Verweigerer — verbatim, with T refs",
+      "## Assumption signals — ASM id → supporting / contradicting T ids",
+      "## T-<nnn>_P-<nnn> — verbatim transcript with question ids",
+      "## Blockers — missing transcripts or guide-version mismatches"
+    ],
+    "domainKnowledge": "- The interview follows the four-stage funnel: qualifier → story about past behaviour → problem ranking and today's workaround → solution shown last [^1][^2].\n- Problem ranking (adopted 2026-09-25): the top 3 problems, shuffled per persona, are ranked by each persona from its own experience [^1]. If the core problem is ranked last, or not at all, by most target personas, that is a kill signal for G-P2 — a resounding \"meh\" means a clear disconnect [^3].\n- Transcript quality is judged by past-behaviour questioning without leading questions [^4] and by the absence of a pitch or guided tour before the last third [^5].\n- Gedächtnis §7.4: one transcript T-<nn>_P-<nn> per persona with guide version and model role; the persona may say \"don't know\" and the interviewer must not reinterpret it.\n- §6: panel answers are synthetic evidence 🤖; they count for gates in dark mode but are always labelled as such.\n- §9.2: at G-P2 only the 4 target users form the majority; Contrarian and Verweigerer objections must each be answered or turned into a risk flag.\n\n[^1]: \"Testing Business Ideas\" (Bland, Osterwalder 2019) — \"List the top three customer jobs, pains, and gains. Interviewee ranks them based on personal experiences.\"\n[^2]: \"Lean UX\" (Gothelf, Seiden) — \"First, try to identify if the customer is in your target audience. Then, try to confirm any problem hypotheses … if you have a prototype or mockup with you, show this last.\"\n[^3]: \"Lean Analytics\" (Croll, Yoskovitz) — \"Test the problem by getting the subject to rank the problems … you might get a resounding 'meh,' in which case there's a clear disconnect.\"\n[^4]: \"The Product Book\" (Product School 2017) — \"always aim for actual instead of ideal-self questions—i.e., ask what customers have done, not what they might do. Also avoid leading and loaded questions.\"\n[^5]: \"UX for Lean Startups\" (Klein) — \"Don't Give a Guided tour … inexperienced moderators wanting to give way too much information about the product up front.\""
+  },
+  "S2.1.5": {
+    "description": "Produces personas: PER items (concrete user roles) condensed from the interview transcripts, each with 1–3 JTBD, top-2 pains, top-2 gains, a trigger situation and T/SRC evidence. Use when the dark-factory workflow reaches step S2.1.5 \"User Roles & Personas modellieren\".",
+    "purpose": "Gives S2.1.6, S2.2.1, S3.1.1, S4.1.1 and S6.1.2 the concrete roles every later job, journey and story is written for; its evidence mix decides the G-P2 \"more research\" route.",
+    "procedure": [
+      "Read interview-transcripts: the T index, the verbatim transcripts, workarounds, objections and the problem-ranking synthesis; note the kill-signal status.",
+      "Identify user roles across the interaction space first: cluster the target-user transcripts by shared context, goal and behaviour (two P can merge into one role, one P can reveal two roles); give each role a concrete title, never \"user\".",
+      "Condense each role into a PER-<nnn> persona using only quotes and observed behaviour from the transcripts: role title, context, trigger situation, 1–3 jobs in plain words (formalised in S2.1.6), top-2 pains and top-2 gains, current workaround.",
+      "Strengthen evidence: for every persona statement cite the T ids and, where the research-zielgruppe-voc SRC ids behind the underlying panel-profile trait support it, the SRC id as well (🔗 beats 🤖); aim for ≥50 % cited statements.",
+      "Fold Verweigerer and Contrarian insights into the matching PER as \"adoption barriers\" (switching barriers, objections) instead of modelling them as separate target personas.",
+      "Record per PER item derivedFrom (T ids, P ids) and one evidence level (strongest applicable), in the authored itemIndex; if the committed evidence mix shows a cited share < 50 %, add a risk flag (G-P2 \"more research\" risk)."
+    ],
+    "selfCheck": [
+      "Every PER has a concrete role title, not a generic user (rubric persona).",
+      "Every PER has 1–3 JTBD, exactly top-2 pains and top-2 gains, and one trigger situation (rubric persona).",
+      "Every persona statement cites T and/or SRC ids; nothing is invented (rubric persona).",
+      "Each PER lists derivedFrom T/P ids and exactly one evidence level; the evidence mix is recorded and a cited share < 50 % is flagged.",
+      "Contrarian/Verweigerer objections appear as adoption barriers on the matching PER."
+    ],
+    "pitfalls": [
+      "The mythical generic user built from averages, which opens the door for pet features.",
+      "Copying panel-profiles 1:1 as personas instead of condensing transcript facts into roles.",
+      "Adding demographic colour (names, hobbies) with no T/SRC backing."
+    ],
+    "templateSections": [
+      "## User roles — the roles across the interaction space and which T/P they came from",
+      "## PER-<nnn> — <role title> — context, trigger situation, jobs (1–3), top-2 pains, top-2 gains, workaround, adoption barriers, evidence refs",
+      "## Evidence mix — share cited / synthetic / inferred; flag if cited < 50 %",
+      "## Kill signal carried over — status from the problem-ranking synthesis"
+    ],
+    "domainKnowledge": "- Identify user roles across the interaction space first, then condense interview facts into personas; write for a concrete role like \"a Geographic Searcher\", not \"a user\" [^1].\n- Pass: concrete role label; built only from quotes and observed behaviour; 1–3 JTBD, top 2 pains, top 2 gains, one trigger situation [^1][^2].\n- Pitfall: the mythical generic user — generic roles are a get-out-of-jail-free card for pet features and unjustified scope [^2].\n- Gedächtnis §9.3: if the evidence mix of personas/jtbd has less than 50 % 🔗, G-P2 routes to \"more research\" (back to SP2.1).\n- §6: mixed evidence takes the strongest level (🔗 > 🤖 > 🧠) and lists all references.\n\n[^1]: \"User Stories Applied\" (Cohn 2004) — \"Rather than writing stories like 'A user can restrict job searches…' you can write 'A Geographic Searcher can restrict his job searches…'\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"Using generic roles is often a get-out-of-jail-free card for people who want to push in pet features, or unjustified scope.\""
+  },
+  "S2.1.6": {
+    "description": "Produces jtbd: JOB items in \"When …, I want to …, so I can …\" syntax per persona, solution-neutral and covering functional, emotional and social jobs, each traced to T/SRC evidence. Use when the dark-factory workflow reaches step S2.1.6 \"Jobs-to-be-Done formulieren\".",
+    "purpose": "JOB items are a link in the mandatory trace chain (OPP | JOB → IMP) and feed the journeys in S3.1.1; the SP2.1 critic and G-P2 judge their evidence mix.",
+    "procedure": [
+      "Read personas (PER items and their plain-language jobs) and interview-transcripts (story and workaround passages).",
+      "For each PER write 1–3 JOB-<nnn> items in the syntax \"When [situation], I want to [motivation], so I can [expected result]\", taking the situation from the trigger and past-behaviour stories.",
+      "Cover the job dimensions: at least one functional job per PER and, where transcripts show it, an emotional or social job; label each JOB functional / emotional / social.",
+      "Strip solution language: no UI elements, features, devices or technology in any part; rewrite needs as verbs.",
+      "Link each JOB to the IMP item(s) of the impact-map it serves (via the PER's ACT) so the trace chain JOB → IMP → GOAL is closed; flag JOBs that match no IMP as potential scope gaps.",
+      "Record per JOB derivedFrom (PER id, T ids, IMP id), evidence refs (T and SRC where available) and one evidence level in the authored itemIndex (the evidence mix is computed on commit)."
+    ],
+    "selfCheck": [
+      "Every JOB follows \"When …, I want to …, so I can …\" exactly (rubric jtbd).",
+      "No JOB mentions UI, a feature or a technology (rubric jtbd: implementation-neutral).",
+      "Every PER has 1–3 JOBs and at least one emotional or social job exists across the artifact where transcripts support it.",
+      "Every JOB has derivedFrom with a PER id, ≥1 T or SRC reference and an IMP link, or an explicit \"no IMP\" flag.",
+      "The evidence mix is recorded; cited share < 50 % is flagged for G-P2."
+    ],
+    "pitfalls": [
+      "Smuggling the solution into the motivation (\"I want to use an app to…\").",
+      "Situations that are generic (\"When I work…\") instead of the concrete trigger from a past story.",
+      "Duplicating the same job for several personas instead of referencing shared jobs once."
+    ],
+    "templateSections": [
+      "## Jobs by persona — per PER: JOB id, statement, dimension (functional/emotional/social), IMP link, evidence refs",
+      "## Trace to impacts — table JOB → IMP → GOAL; JOBs without IMP flagged",
+      "## Evidence mix — cited / synthetic / inferred shares"
+    ],
+    "domainKnowledge": "- Syntax: \"When [situation], I want to [motivation], so I can [expected result]\" [^1].\n- Pass: solution-independent (no UI, no technology); captures emotional and social jobs next to functional ones; needs are verbs, nouns are usually solutions [^1].\n- Gedächtnis §10.2: the mandatory chain runs AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS, so each JOB should reach an IMP.\n- §9.3: a JOB set with < 50 % 🔗 evidence sends G-P2 to \"more research\".\n- §6: JOB statements condensed from panel answers are 🤖 synthetic; a JOB also backed by a VoC source from the DR-02 corpus is 🔗.\n- Jobs are taken from the persona's 1–3 JTBD (rubric persona) and must stay consistent with them.\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"The customer tasks are written down according to the pattern: 'When I … (situation), I want to… (motivation), so I can… (expected result).'\" / \"Use verbs, not nouns. Needs are verbs … Nouns are usually solutions.\""
+  },
+  "S2.2.1": {
+    "description": "Produces empathy-maps: one four-quadrant map (Think & Feel, See, Hear, Say & Do) per persona built from the interview transcripts, optionally weighted by a panel rating, with Say/Do-vs-Think/Feel contradictions marked. Use when the dark-factory workflow reaches step S2.2.1 \"Empathy Maps erstellen\".",
+    "purpose": "Is the sole input of S2.2.2, which derives PAIN/GAIN items from the contradictions marked here.",
+    "procedure": [
+      "Read personas and interview-transcripts; build one empathy map per PER from the transcripts of the P items it was derived from.",
+      "Fill Say & Do with verbatim transcript quotes and reported actions (🤖 synthetic, with T id and line/question ref); fill Hear and See with influences, channels and environment the persona mentioned; fill Think & Feel with inferred attitudes (🧠) each tied to the quotes that support it.",
+      "Mark contradictions between Say/Do and Think/Feel (e.g. says a problem is minor but spends hours on a workaround) with a short id per contradiction; these are the raw material for pains and gains.",
+      "If the Workflow passed a panel result (product-panel-befragung, mode rating, optional): read each persona's 1–5 rating of how well the map's statements describe it, keep statements rated ≥3 by their source persona, and mark statements rated ≤2 as \"disputed by panel\" (🤖) — do not delete them silently.",
+      "If no panel result was passed (budget skipped it), proceed without it and state \"panel rating skipped\" in the artifact.",
+      "Write needs in the map summary as verbs, not nouns; record per map derivedFrom (PER id, T ids) and evidence in the authored itemIndex."
+    ],
+    "selfCheck": [
+      "One map per PER with all four quadrants filled.",
+      "Say & Do contains only verbatim quotes or reported actions, each with a T reference and marked 🤖.",
+      "Every Think & Feel entry is marked 🧠 and points to supporting quotes.",
+      "Contradictions between Say/Do and Think/Feel are listed with ids.",
+      "Panel use is explicit: rating applied with thresholds, or \"panel rating skipped\" stated.",
+      "Needs are phrased as verbs, not nouns."
+    ],
+    "pitfalls": [
+      "Paraphrasing quotes in Say & Do, which erases the evidence and the contradictions.",
+      "Filling Think & Feel with the team's wishes instead of inferences from transcript behaviour.",
+      "Treating panel ratings as new facts; they only weight existing statements."
+    ],
+    "templateSections": [
+      "## Empathy map PER-<nnn> — <role title> — four quadrants: Think & Feel, See, Hear, Say & Do, each entry with T ref and evidence level",
+      "### Contradictions — id, Say/Do side, Think/Feel side, T refs",
+      "### Needs — verbs, with contradiction ids",
+      "## Panel rating — table statement × persona rating 1–5 and applied thresholds, or \"panel rating skipped\""
+    ],
+    "domainKnowledge": "- Four quadrants from interview notes: Think & Feel, See, Hear, Say & Do; pains and gains are derived afterwards, from contradictions between Say/Do and Think/Feel [^1].\n- Pass: Say & Do holds verbatim quotes (🤖 synthetic, marked as such); needs are verbs, not nouns — nouns are usually solutions [^1].\n- Gedächtnis §7.5: rating mode produces an item × persona table (1–5); §9.4: steps with optional panel are skipped first when budget runs low, so the map must stand without it.\n- Personas are built only from quotes and observed behaviour, so every quadrant entry points back to a transcript (T id).\n- §6: Say & Do quotes are 🤖 synthetic; Think & Feel entries are inferences 🧠 and must name the quotes they rest on.\n- Contradictions such as \"says it is minor, spends hours on the workaround\" are the pains and gains S2.2.2 extracts.\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"The customer tasks are written down according to the pattern: 'When I … (situation), I want to… (motivation), so I can… (expected result).'\" / \"Use verbs, not nouns. Needs are verbs … Nouns are usually solutions.\""
+  },
+  "S2.2.2": {
+    "description": "Produces pains-gains: PAIN and GAIN items per persona derived from the empathy-map contradictions and needs, each with severity/relevance and traced evidence. Use when the dark-factory workflow reaches step S2.2.2 \"Pains & Gains extrahieren\".",
+    "purpose": "Feeds S2.2.3 (POV/HMW) and S3.1.2 (journey hot spots); PAIN is a recommended edge in the trace chain.",
+    "procedure": [
+      "Read empathy-maps: per PER the contradictions, needs and Say & Do quotes.",
+      "Derive a PAIN-<nnn> item from each contradiction or negative experience (frustration, risk, cost, obstacle in the current workaround), phrased from the persona's view and solution-free.",
+      "Derive GAIN-<nnn> items (Gedächtnis §10.1 PAIN / GAIN) for desired outcomes and benefits the persona expressed or implied; label each gain required / expected / desired.",
+      "Rate each PAIN severity and each GAIN relevance (high/medium/low) with a one-line reason tied to transcript behaviour (time or money spent, frequency), not to the team's opinion.",
+      "Check consistency with personas: every PER's top-2 pains and top-2 gains must appear; flag any new pain that outranks them.",
+      "Record per item derivedFrom (empathy-map contradiction id, PER id, T ids) and one evidence level in the authored itemIndex."
+    ],
+    "selfCheck": [
+      "Every PAIN/GAIN is phrased from the persona's perspective and names no solution or feature.",
+      "Every item traces to an empathy-map contradiction or quote with T ids.",
+      "Every PAIN has severity and every GAIN has relevance with a behaviour-based reason.",
+      "Every PER's top-2 pains and gains from personas are present.",
+      "IDs are new and never reused; each item has exactly one evidence level."
+    ],
+    "pitfalls": [
+      "Writing gains as features (\"has an export button\") instead of outcomes.",
+      "Listing the absence of the product as a pain (\"no app for X\").",
+      "Inflating severity for pains that match the planned solution."
+    ],
+    "templateSections": [
+      "## Pains by persona — PAIN id, statement, severity + reason, source contradiction, T refs, evidence",
+      "## Gains by persona — GAIN id, statement, required/expected/desired, relevance + reason, T refs, evidence",
+      "## Consistency with personas — top-2 pains/gains check, newly surfaced high-severity pains"
+    ],
+    "domainKnowledge": "- Pains and gains are derived from contradictions between Say/Do and Think/Feel in the empathy map [^1].\n- Needs are verbs, not nouns; nouns are usually solutions — the same applies to pains and gains [^1].\n- Gedächtnis §10.1: PAIN / GAIN items originate in 2.2.2; §10.2: PAIN is a recommended additional edge in the trace chain.\n- Personas carry top-2 pains and top-2 gains (rubric persona), which this list must contain.\n- §6: each item carries exactly one evidence level; with mixed support the strongest wins (🔗 > 🤖 > 🧠) and all refs are listed.\n- Pains and gains feed POV/HMW (2.2.3) and journey hot spots (3.1.2), so a solution-laden pain propagates downstream.\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"The customer tasks are written down according to the pattern: 'When I … (situation), I want to… (motivation), so I can… (expected result).'\" / \"Use verbs, not nouns. Needs are verbs … Nouns are usually solutions.\""
+  },
+  "S2.2.3": {
+    "description": "Produces pov-hmw: one solution-neutral Point-of-View sentence per persona need and HMW items derived from it, each focused on one persona and scoped neither too broad nor too narrow. Use when the dark-factory workflow reaches step S2.2.3 \"Point of View & How-Might-We formulieren\".",
+    "purpose": "Feeds S2.2.4, where each opportunity grows from HMW questions, and S4.1.1 story mapping.",
+    "procedure": [
+      "Read pains-gains; select per PER the high-severity PAINs and high-relevance GAINs.",
+      "Write one POV per persona need: \"[PER role] needs a way to [need as verb] because [surprising insight]\", where the insight comes from an empathy-map contradiction behind the PAIN/GAIN.",
+      "Derive 2–5 HMW-<nnn> items per POV (\"How might we … for [PER] …?\"), each targeting one need of one persona.",
+      "Test each HMW for scope: too broad (could be answered by anything, e.g. \"improve the experience\") or too narrow (already names a solution); rewrite until neither.",
+      "Remove solution language from POV and HMW (no feature, channel or technology).",
+      "Record per HMW derivedFrom (PAIN/GAIN ids, PER id) and the evidence level inherited from its strongest source; write the item index."
+    ],
+    "selfCheck": [
+      "Every POV and HMW is solution-neutral (rubric pov-hmw).",
+      "Every POV and HMW focuses on one persona and one need (rubric pov-hmw).",
+      "Every POV follows \"[Persona] needs a way to [verb] because [insight]\" and the insight traces to a contradiction.",
+      "Every HMW is neither too broad nor too narrow, with the scope test noted.",
+      "Every HMW has derivedFrom PAIN/GAIN and PER ids."
+    ],
+    "pitfalls": [
+      "An insight that restates the need instead of something surprising from the transcripts.",
+      "HMW questions that encode the planned solution (\"How might we add a dashboard…\").",
+      "One HMW mixing the needs of several personas."
+    ],
+    "templateSections": [
+      "## POV statements — per PER: POV sentence, insight source (contradiction id), PAIN/GAIN ids",
+      "## How-Might-We questions — HMW id, question, parent POV, scope check, derivedFrom"
+    ],
+    "domainKnowledge": "- One-sentence POV: \"[Persona] needs a way to [need] because [surprising insight]\", then several HMW questions [^1].\n- Pass: the need is a verb and not a feature (needs are verbs, nouns are usually solutions); HMW questions are neither too broad nor too narrow [^1].\n- Rubric pov-hmw (Gedächtnis §13): solution-neutral; focused on one persona or one need.\n- A POV insight must be surprising, i.e. come from a Say/Do vs. Think/Feel contradiction in the empathy map, not restate the need.\n- HMWs become opportunities in the Opportunity-Solution-Tree (2.2.4), so a solution inside an HMW collapses the tree to one branch.\n- §10.2: each HMW keeps derivedFrom to its PAIN/GAIN so the chain to JOB and GOAL stays traversable.\n\n[^1]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"The customer tasks are written down according to the pattern: 'When I … (situation), I want to… (motivation), so I can… (expected result).'\" / \"Use verbs, not nouns. Needs are verbs … Nouns are usually solutions.\""
+  },
+  "S2.2.4": {
+    "description": "Produces the opportunity-solution-tree: desired outcome from business-goals → OPP items (customer needs from HMW) → several competing solutions each → experiments, fully traced to GOAL and JOB. Use when the dark-factory workflow reaches step S2.2.4 \"Opportunity-Solution-Tree aufbauen\".",
+    "purpose": "Its OPP items are scored and ranked in S2.2.5; OPP is a link in the mandatory trace chain toward IMP → GOAL.",
+    "procedure": [
+      "Read business-goals: take the One Metric That Matters (its GOAL id and AARRR stage) as the tree's desired outcome root; secondary GOALs may become separate roots only if HMWs clearly serve them.",
+      "Read pov-hmw: group HMW items by the underlying need; each group becomes one OPP-<nnn> phrased from the customer's view (a need, pain or desire, not a feature), nested as parent/child where one opportunity is a sub-need of another.",
+      "Attach 2–4 competing solution ideas under each leaf OPP (never directly under the outcome), each a short description with the HMW it answers.",
+      "Attach 1–2 experiments per solution that could test its riskiest assumption (what to test, signal, the ASM id if one applies).",
+      "Trace each OPP: derivedFrom = HMW ids, the PAIN/GAIN and the JOB id reached via the HMW's derivedFrom, and the GOAL id of its root, so OPP → IMP → GOAL stays closed; flag OPPs that reach no JOB/IMP.",
+      "Render the tree as a Mermaid graph plus an OPP table; record OPP items with evidence level (inherited from their strongest source) in the item index."
+    ],
+    "selfCheck": [
+      "The tree has the four levels Outcome → Opportunities → Solutions → Experiments (rubric ost).",
+      "Every OPP is phrased from the user's perspective as a need, not a feature (rubric ost).",
+      "No solution hangs directly under the outcome; every leaf OPP has ≥2 competing solutions.",
+      "The outcome root references a GOAL id from business-goals (the One Metric That Matters).",
+      "Every OPP has derivedFrom HMW ids plus a JOB and GOAL link, or an explicit gap flag."
+    ],
+    "pitfalls": [
+      "Opportunities that are solutions in disguise (\"mobile app for…\").",
+      "A single solution per opportunity, which turns the tree into a feature list.",
+      "Losing the link to the outcome, so solutions cannot be tied to a goal."
+    ],
+    "templateSections": [
+      "## Desired outcome — GOAL id, One Metric That Matters, AARRR stage",
+      "## Tree — Mermaid graph Outcome → OPP → solutions → experiments",
+      "## Opportunities — table: OPP id, statement, parent OPP, HMW ids, JOB id, PAIN/GAIN ids, evidence",
+      "## Solutions and experiments — per OPP: competing solutions, experiment per solution with signal and ASM id",
+      "## Trace gaps — OPPs without JOB/IMP/GOAL link"
+    ],
+    "domainKnowledge": "- Tree: Outcome → Opportunities (customer needs) → Solutions → Experiments; every solution hangs under an opportunity, never directly under the goal, and each opportunity has several competing solutions [^1].\n- Solutions derived from opportunities are tied to the goal they serve [^1].\n- Rubric ost (Gedächtnis §13, Torres): opportunities are phrased from the user's perspective.\n- §10.2 mandatory chain: … → (OPP | JOB) → IMP → GOAL → VIS.\n- The outcome root is the One Metric That Matters placed on AARRR in business-goals (adopted for 1.2.1).\n- Opportunities come from HMW questions, which are already solution-neutral and focused on one persona or need.\n- Experiments test the riskiest assumption of a solution; kill assumptions live in the assumptions-map as ASM items.\n\n[^1]: \"The Product Manager's Playbook\" (Richter 2023) — \"You can derive solutions from opportunities, and you know exactly which of your goals they relate to.\""
+  },
+  "S2.2.5": {
+    "description": "Produces the opportunity-backlog: every OPP scored with Opportunity = Importance + max(Importance − Satisfaction, 0) from the full-panel rating (1–5), inputs and aggregation disclosed, ranked with dissent from Contrarian and Verweigerer shown. Use when the dark-factory workflow reaches step S2.2.5 \"Opportunities priorisieren\".",
+    "purpose": "Tells S3.1.3 and S4.2.4 which opportunities the journeys, MVP and release cut should serve first; the SP2.2 critic recomputes the scores (rubric scoring).",
+    "procedure": [
+      "Read opportunity-solution-tree (OPP items) and the panel result the Workflow passed (product-panel-befragung, mode rating, panelSet full): per OPP × persona an Importance and a Satisfaction rating 1–5 with a short reason.",
+      "Validate the rating table: every OPP rated by all 6 personas; record missing cells as \"n/a\" and never impute them.",
+      "Aggregate per OPP over the 4 target-user personas only: Importance = mean, Satisfaction = mean (rounded to 1 decimal; state the rule); report Contrarian and Verweigerer ratings in separate columns, not in the aggregate.",
+      "Compute Opportunity = Importance + max(Importance − Satisfaction, 0) per OPP and show the arithmetic in the table; also compute the score from the Contrarian and Verweigerer ratings as a dissent indicator.",
+      "Rank by score (tie-break: higher Importance, then lower Satisfaction); flag OPPs with rating spread ≥ 2 points among target users as \"panel disagrees\".",
+      "Mark the top opportunities selected for phase 3 with a one-line rationale each and the risks from dissent; mark all rating-derived values 🤖 synthetic and cite T/P ids of the raters."
+    ],
+    "selfCheck": [
+      "The formula Opportunity = Importance + max(Importance − Satisfaction, 0) and the aggregation rule are stated (rubric scoring: formula and inputs disclosed).",
+      "Every score can be recomputed from the displayed per-persona inputs (rubric scoring: recomputable).",
+      "The ranking order matches the scores and the stated tie-break (rubric scoring: consistent).",
+      "Only the 4 target users enter the aggregate; Contrarian and Verweigerer are shown separately.",
+      "Missing ratings are shown as n/a, not imputed; spread ≥ 2 is flagged.",
+      "All panel-derived values are marked 🤖 synthetic."
+    ],
+    "pitfalls": [
+      "Adjusting ratings or the formula so the favoured solution's opportunity wins.",
+      "Using max(Satisfaction − Importance, 0) or dropping the max, which rewards over-served needs.",
+      "Hiding a high Verweigerer satisfaction that signals the workaround already solves the need."
+    ],
+    "templateSections": [
+      "## Scoring method — formula, rating scale, aggregation over the 4 target users, rounding, tie-break",
+      "## Rating inputs — table OPP × persona: Importance / Satisfaction",
+      "## Opportunity backlog — ranked table: rank, OPP id, statement, Importance, Satisfaction, arithmetic, score, spread flag, dissent score",
+      "## Selected for phase 3 — top OPPs with rationale and dissent risks"
+    ],
+    "domainKnowledge": "- Opportunity scoring (adopted 2026-09-25): Opportunity = Importance + max(Importance − Satisfaction, 0); Importance and Satisfaction are 1–5 ratings from the panel in rating mode; disclose the inputs so the critic can recompute them [^1].\n- Solutions that meet jobs that are important but unsatisfied have a higher chance of succeeding (Ulwick) [^1].\n- The tree being prioritised has several competing solutions per opportunity, each tied to a goal [^2].\n- Gedächtnis §2.5 and rubric scoring: formula and input values disclosed, recomputable, ranking consistent with the values.\n- §9.2: Contrarian and Verweigerer do not count toward the majority, but their objections must be answered; §9.3: panel spread ≥ 2 points signals disagreement.\n\n[^1]: \"Mapping Experiences\" (Kalbach 2020) — \"Solutions that meet unmet needs—or jobs that are important but unsatisfied—have a higher chance of succeeding … a specific technique developed by Tony Ulwick.\"\n[^2]: \"The Product Manager's Playbook\" (Richter 2023) — \"You can derive solutions from opportunities, and you know exactly which of your goals they relate to.\""
+  }
+}

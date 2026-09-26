@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "WebSearch|WebFetch|Bash|mcp__gemini-notebook-mcp__research_.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/product-research-budget-guard.hook.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}

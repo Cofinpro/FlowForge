@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_UserStoryErstellenVerfeinern" targetNamespace="https://example.com/bpmn/user-story-erstellen-verfeinern">
+  <bpmn:category id="Category_Group_Phase1"><bpmn:categoryValue id="CategoryValue_Group_Phase1" value="1 Eingang &amp; Triage" /></bpmn:category>
+  <bpmn:category id="Category_Group_Phase2"><bpmn:categoryValue id="CategoryValue_Group_Phase2" value="2 Fachliche Klärung" /></bpmn:category>
+  <bpmn:category id="Category_Group_Phase3"><bpmn:categoryValue id="CategoryValue_Group_Phase3" value="3 Story formulieren" /></bpmn:category>
+  <bpmn:category id="Category_Group_Phase4"><bpmn:categoryValue id="CategoryValue_Group_Phase4" value="4 Refinement (Three Amigos)" /></bpmn:category>
+  <bpmn:category id="Category_Group_Phase5"><bpmn:categoryValue id="CategoryValue_Group_Phase5" value="5 Definition of Ready" /></bpmn:category>
+  <bpmn:category id="Category_Group_Phase6"><bpmn:categoryValue id="CategoryValue_Group_Phase6" value="6 Plausibilität gegen Backlog &amp; Freigabe" /></bpmn:category>
+  <bpmn:process id="Process_UserStoryErstellenVerfeinern" name="Neue User Story aus Feedback erstellen &amp; verfeinern" isExecutable="false">
+    <bpmn:documentation>Weg einer neuen User Story in einem laufenden IT-Projekt: Produktvision, Epics, Fachkonzept und Backlog existieren bereits. Auslöser ist Feedback von Nutzern oder Stakeholdern. Triage (Bug, Änderung an offener Story, neue Story unter einem Epic, parken), leichtgewichtige fachliche Klärung gegen Epic-Ziel und Fachkonzept, Spike oder Prototyp nur bei echter Unsicherheit, Story formulieren und gegen INVEST prüfen, Three-Amigos-Refinement, Definition of Ready und abschließend eine Plausibilitätsprüfung gegen die übrigen Stories im Backlog (Duplikate, widersprüchliche Akzeptanzkriterien, Abhängigkeiten, Ablaufkonsistenz). Wissensbasis: NotebookLM-Notebook &quot;The Product - Business Design&quot;.</bpmn:documentation>
+    <bpmn:laneSet id="LaneSet_UserStory">
+      <bpmn:lane id="Lane_ProductOwner" name="Product Owner / BA">
+        <bpmn:flowNodeRef>Start_FeedbackEingegangen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Bug</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_BugUebergeben</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Bezug</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AnStoryUebergeben</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_FeedbackGeparkt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Fachkonzept</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_FachkonzeptAenderung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_KlaerungSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_KlaerungJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Unsicherheit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>B5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Erkenntnis</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_AnliegenVerworfen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Einordnung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>C1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Formulierung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>C2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>C3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>C4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Invest</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Refinement</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_AmigosSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D2a</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Sprintgroesse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Ready</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_StoryVerworfen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_PlausiSplit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_PlausiJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Plausibel</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_StoryZusammengefuehrt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_StorySprintReady</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_UxResearchDesign" name="UX &amp; Design">
+        <bpmn:flowNodeRef>K5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Validierung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D2d</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P7</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Entwicklung" name="Entwicklung / Tech Lead">
+        <bpmn:flowNodeRef>K4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>B4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D2b</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Schaetzung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Schaetzung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P3</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_QaTest" name="QA / Test">
+        <bpmn:flowNodeRef>D2c</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Par_AmigosJoin</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>E1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P2</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_FeedbackEingegangen" name="Nutzer- oder Stakeholder-Feedback eingegangen">
+      <bpmn:documentation>Quellen: Support-Tickets, Nutzerfeedback (Reviews, In-App-Feedback, Usability-Beobachtung), Anmerkungen aus dem Sprint Review, Change Requests von Stakeholdern. Rahmen besteht bereits: Produktvision, Epics, Fachkonzept mit Domänenmodell, laufendes Product Backlog.</bpmn:documentation>
+      <bpmn:outgoing>F01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="I1" name="Feedback erfassen &amp; als Problem formulieren">
+      <bpmn:documentation>Input: Rohfeedback, Quelle und Absender. Output: Feedback-Eintrag - beobachtetes Problem statt gewünschter Lösung ('Ich muss Abweichungen schneller finden' statt 'Ich brauche einen Excel-Export'), betroffene Nutzerrolle, Häufigkeit, Dringlichkeit, Link zur Quelle.</bpmn:documentation>
+      <bpmn:incoming>F01</bpmn:incoming>
+      <bpmn:outgoing>F02</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Feedback_Ref"><bpmn:targetRef>DO_Feedback_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="I2" name="Verwandte Stories &amp; Epics im Backlog suchen">
+      <bpmn:documentation>Input: Feedback-Eintrag, Product Backlog, User Story Map, Epics. Output: Kandidatenliste verwandter Stories (offen, in Arbeit, erledigt) und der passende Epic bzw. Impact-Zweig, jeweils mit Begründung.</bpmn:documentation>
+      <bpmn:incoming>F02</bpmn:incoming>
+      <bpmn:outgoing>F03</bpmn:outgoing>
+      <bpmn:property id="Property_DO_Backlog_Ref" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref"><bpmn:sourceRef>DO_Backlog_Ref</bpmn:sourceRef><bpmn:targetRef>Property_DO_Backlog_Ref</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Bug" name="Fehlverhalten einer bestehenden Funktion?" default="F05">
+      <bpmn:documentation>Bug = das System weicht von vereinbarten Akzeptanzkriterien oder Fachregeln ab. Kleine Bugs laufen über die Fehlerbearbeitung; erfordert die Korrektur neue Fähigkeiten oder geänderte Abläufe, ist es eine Story.</bpmn:documentation>
+      <bpmn:incoming>F03</bpmn:incoming>
+      <bpmn:outgoing>F04</bpmn:outgoing>
+      <bpmn:outgoing>F05</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_BugUebergeben" name="An Fehlerbearbeitung übergeben">
+      <bpmn:incoming>F04</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Gw_Bezug" name="Wie hängt das Anliegen mit dem Backlog zusammen?" default="F08">
+      <bpmn:incoming>F05</bpmn:incoming>
+      <bpmn:outgoing>F06</bpmn:outgoing>
+      <bpmn:outgoing>F07</bpmn:outgoing>
+      <bpmn:outgoing>F08</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_AnStoryUebergeben" name="Als Änderung an offene Story übergeben">
+      <bpmn:documentation>Betrifft das Feedback eine Story, die noch im Refinement oder in Arbeit ist, werden deren Akzeptanzkriterien angepasst statt eine neue Story anzulegen.</bpmn:documentation>
+      <bpmn:incoming>F06</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_FeedbackGeparkt" name="Feedback im Opportunity Backlog geparkt">
+      <bpmn:documentation>Kein Bezug zu einem bestehenden Epic oder Ziel, kein erkennbarer Nutzen, abgelaufene Frist oder reiner Technik-Wunsch ohne Nutzerproblem.</bpmn:documentation>
+      <bpmn:incoming>F07</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="K1" name="Anliegen mit Feedbackgeber klären">
+      <bpmn:documentation>Input: Feedback-Eintrag, Kandidatenliste. Output: kurze Rückfrage beim Nutzer oder Stakeholder bestätigt - Problem hinter dem Wunsch, gewünschtes Ergebnis, Dringlichkeit, Ansprechpartner für das Refinement.</bpmn:documentation>
+      <bpmn:incoming>F08</bpmn:incoming>
+      <bpmn:outgoing>F09</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="K2" name="Gegen Epic-Ziel &amp; Fachkonzept prüfen">
+      <bpmn:documentation>Input: bestätigtes Anliegen, Epic mit Ziel-KPI, Fachkonzept (Fachregeln, Domänenmodell, Ubiquitous Language). Output: Befund - unterstützt das Anliegen das Epic-Ziel, welche Fachregeln und Begriffe sind betroffen, widerspricht es dem Fachkonzept?</bpmn:documentation>
+      <bpmn:incoming>F09</bpmn:incoming>
+      <bpmn:outgoing>F10</bpmn:outgoing>
+      <bpmn:property id="Property_DO_Fachkonzept_Ref" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_DO_Fachkonzept_Ref"><bpmn:sourceRef>DO_Fachkonzept_Ref</bpmn:sourceRef><bpmn:targetRef>Property_DO_Fachkonzept_Ref</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Fachkonzept" name="Mit dem Fachkonzept vereinbar?" default="F12">
+      <bpmn:incoming>F10</bpmn:incoming>
+      <bpmn:outgoing>F11</bpmn:outgoing>
+      <bpmn:outgoing>F12</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_FachkonzeptAenderung" name="Fachkonzept-Änderung beantragt">
+      <bpmn:documentation>Das Anliegen verlangt eine Änderung an Fachregeln oder am Domänenmodell. Das entscheiden Fachbereich und Stakeholder, bevor eine Story entsteht.</bpmn:documentation>
+      <bpmn:incoming>F11</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="Par_KlaerungSplit">
+      <bpmn:incoming>F12</bpmn:incoming>
+      <bpmn:outgoing>F13</bpmn:outgoing>
+      <bpmn:outgoing>F14</bpmn:outgoing>
+      <bpmn:outgoing>F15</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="K3" name="Ist-/Soll-Delta beschreiben">
+      <bpmn:documentation>Input: Befund zu Epic und Fachkonzept, Feedback-Eintrag. Output: Ist-/Soll-Delta - wie verhält sich das System heute, wie nach der Story, was gehört ausdrücklich nicht dazu.</bpmn:documentation>
+      <bpmn:incoming>F13</bpmn:incoming>
+      <bpmn:outgoing>F16</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_ScopeDelta_Ref"><bpmn:targetRef>DO_ScopeDelta_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="K5" name="Betroffene Screens &amp; Abläufe identifizieren">
+      <bpmn:documentation>Input: Feedback-Eintrag, bestehende Wireframes und Design-System. Output: betroffene Screens, Interaktionsfluss, wiederverwendbare Muster.</bpmn:documentation>
+      <bpmn:incoming>F14</bpmn:incoming>
+      <bpmn:outgoing>F17</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="K4" name="Technische Auswirkungen grob einschätzen">
+      <bpmn:documentation>Input: Feedback-Eintrag, Architektur, betroffene Komponenten. Output: grobe Größe, betroffene Schnittstellen, offene technische Risiken (unbekannte APIs, Performance, Compliance-Grenzen).</bpmn:documentation>
+      <bpmn:incoming>F15</bpmn:incoming>
+      <bpmn:outgoing>F18</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Par_KlaerungJoin">
+      <bpmn:incoming>F16</bpmn:incoming>
+      <bpmn:incoming>F17</bpmn:incoming>
+      <bpmn:incoming>F18</bpmn:incoming>
+      <bpmn:outgoing>F19</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:exclusiveGateway id="Gw_Unsicherheit" name="Relevante Unsicherheit offen?" default="F20">
+      <bpmn:documentation>Nur bei echter Unsicherheit eskalieren - ein Feedback innerhalb eines bestehenden Epics braucht keinen vollständigen Discovery-Zyklus.</bpmn:documentation>
+      <bpmn:incoming>F19</bpmn:incoming>
+      <bpmn:outgoing>F20</bpmn:outgoing>
+      <bpmn:outgoing>F21</bpmn:outgoing>
+      <bpmn:outgoing>F22</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="K6" name="Klickbaren Prototyp mit Nutzern testen">
+      <bpmn:documentation>Input: betroffene Screens, Feedback-Eintrag, vorab definierte Erfolgskriterien. Output: Prototyp und Testergebnisse mit 3-5 Nutzern (Nutzerzitate, erfüllt / nicht erfüllt).</bpmn:documentation>
+      <bpmn:incoming>F21</bpmn:incoming>
+      <bpmn:outgoing>F23</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Testing_Ref"><bpmn:targetRef>DO_Testing_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="B4" name="Time-boxed Spike durchführen">
+      <bpmn:documentation>Input: offenes technisches Risiko, feste Timebox (1-3 Tage), Akzeptanzkriterien des Spikes. Output: Spike-Report (machbar ja/nein, Architektur-Randbedingungen).</bpmn:documentation>
+      <bpmn:incoming>F22</bpmn:incoming>
+      <bpmn:outgoing>F24</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Spike_Ref"><bpmn:targetRef>DO_Spike_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Merge_Validierung">
+      <bpmn:incoming>F23</bpmn:incoming>
+      <bpmn:incoming>F24</bpmn:incoming>
+      <bpmn:outgoing>F25</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="B5" name="Erkenntnisse auswerten">
+      <bpmn:documentation>Input: Spike-Report oder Testergebnisse, Ist-/Soll-Delta. Output: Entscheidung weitermachen oder verwerfen mit Begründung; ggf. angepasstes Delta.</bpmn:documentation>
+      <bpmn:incoming>F25</bpmn:incoming>
+      <bpmn:outgoing>F26</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Erkenntnis" name="Tragen die Erkenntnisse die Story?" default="F27">
+      <bpmn:incoming>F26</bpmn:incoming>
+      <bpmn:outgoing>F27</bpmn:outgoing>
+      <bpmn:outgoing>F28</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_AnliegenVerworfen" name="Anliegen verworfen">
+      <bpmn:incoming>F28</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Merge_Einordnung">
+      <bpmn:incoming>F20</bpmn:incoming>
+      <bpmn:incoming>F27</bpmn:incoming>
+      <bpmn:outgoing>F29</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="C1" name="Story unter Epic in User Story Map einordnen">
+      <bpmn:documentation>Input: Feedback-Eintrag, Epic, User Story Map (Backbone aus Aktivitäten und Nutzer-Tasks). Output: Platz der Story unter ihrem Nutzer-Task im Epic-Zweig.</bpmn:documentation>
+      <bpmn:incoming>F29</bpmn:incoming>
+      <bpmn:outgoing>F30</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Merge_Formulierung">
+      <bpmn:incoming>F30</bpmn:incoming>
+      <bpmn:incoming>F36</bpmn:incoming>
+      <bpmn:incoming>F52</bpmn:incoming>
+      <bpmn:outgoing>F31</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="C2" name="Story im Connextra-Format formulieren">
+      <bpmn:documentation>Input: Platz in der Story Map, Nutzerrolle aus dem Fachkonzept, Problemformulierung, Ist-/Soll-Delta. Output: Story-Karte 'Als [Rolle] möchte ich [Ziel], damit [Nutzen]' - Nutzerziel statt 'Das System soll ...'. Die Karte ist ein Platzhalter für ein Gespräch, kein Vertrag.</bpmn:documentation>
+      <bpmn:incoming>F31</bpmn:incoming>
+      <bpmn:outgoing>F32</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_StoryKarte_Ref"><bpmn:targetRef>DO_StoryKarte_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="C3" name="Bezug zu Epic, Fachkonzept &amp; Feedback dokumentieren">
+      <bpmn:documentation>Input: Story-Karte, Epic, Fachkonzept, Feedback-Eintrag. Output: Traceability-Eintrag Vision -&gt; Geschäftsziel -&gt; Epic -&gt; User Story, betroffene Fachkonzept-Kapitel und Link zum auslösenden Feedback.</bpmn:documentation>
+      <bpmn:incoming>F32</bpmn:incoming>
+      <bpmn:outgoing>F33</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="C4" name="INVEST-Selbstcheck durchführen">
+      <bpmn:documentation>Input: Story-Karte. Output: INVEST-Befund (Independent, Negotiable, Valuable, Estimable, Small, Testable) je Kriterium.</bpmn:documentation>
+      <bpmn:incoming>F33</bpmn:incoming>
+      <bpmn:outgoing>F34</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="Gw_Invest" name="INVEST erfüllt?" default="F35">
+      <bpmn:incoming>F34</bpmn:incoming>
+      <bpmn:outgoing>F35</bpmn:outgoing>
+      <bpmn:outgoing>F36</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Merge_Refinement">
+      <bpmn:incoming>F35</bpmn:incoming>
+      <bpmn:incoming>F58</bpmn:incoming>
+      <bpmn:incoming>F61</bpmn:incoming>
+      <bpmn:incoming>F73</bpmn:incoming>
+      <bpmn:outgoing>F37</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="D1" name="Refinement mit Three Amigos ansetzen">
+      <bpmn:documentation>Input: Story-Karte, INVEST-Befund. Output: Refinement-Termin mit PO/BA, Entwicklung und QA (Power of Three), UX bei Bedarf; Feedbackgeber optional eingeladen.</bpmn:documentation>
+      <bpmn:incoming>F37</bpmn:incoming>
+      <bpmn:outgoing>F38</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:parallelGateway id="Par_AmigosSplit">
+      <bpmn:incoming>F38</bpmn:incoming>
+      <bpmn:outgoing>F39</bpmn:outgoing>
+      <bpmn:outgoing>F40</bpmn:outgoing>
+      <bpmn:outgoing>F41</bpmn:outgoing>
+      <bpmn:outgoing>F42</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="D2a" name="Wert &amp; Fachregeln erläutern (Was)">
+      <bpmn:documentation>Input: Story-Karte, Fachkonzept, Ist-/Soll-Delta. Output: Fachregeln, gewünschtes Ergebnis, Wert - das 'Was', nicht das 'Wie'.</bpmn:documentation>
+      <bpmn:incoming>F39</bpmn:incoming>
+      <bpmn:outgoing>F43</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D2d" name="Wireframes &amp; Interaktionsfluss beilegen">
+      <bpmn:documentation>Input: betroffene Screens, bestehende Wireframes, Prototyp (falls getestet). Output: Wireframes/Mockups und Interaktionsfluss an der Story.</bpmn:documentation>
+      <bpmn:incoming>F40</bpmn:incoming>
+      <bpmn:outgoing>F44</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D2b" name="Umsetzung &amp; Abhängigkeiten klären (Wie)">
+      <bpmn:documentation>Input: Story-Karte, technische Grobeinschätzung, Spike-Report (falls vorhanden), Architektur. Output: technischer Ansatz, Abhängigkeiten zu anderen Stories/Teams, Risiken.</bpmn:documentation>
+      <bpmn:incoming>F41</bpmn:incoming>
+      <bpmn:outgoing>F45</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D2c" name="Randfälle &amp; Negativszenarien identifizieren">
+      <bpmn:documentation>Input: Story-Karte, Fachregeln. Output: Liste von Grenzwerten, ungültigen Eingaben und Systemgrenzen (Testheuristiken).</bpmn:documentation>
+      <bpmn:incoming>F42</bpmn:incoming>
+      <bpmn:outgoing>F46</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Par_AmigosJoin">
+      <bpmn:incoming>F43</bpmn:incoming>
+      <bpmn:incoming>F44</bpmn:incoming>
+      <bpmn:incoming>F45</bpmn:incoming>
+      <bpmn:incoming>F46</bpmn:incoming>
+      <bpmn:outgoing>F47</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="D3" name="Akzeptanzkriterien in Given-When-Then formulieren">
+      <bpmn:documentation>Input: Fachregeln, Rand- und Negativfälle, Wireframes. Output: Akzeptanzkriterien als BDD-Szenarien (Gegeben / Wenn / Dann) auf der Rückseite der Karte.</bpmn:documentation>
+      <bpmn:incoming>F47</bpmn:incoming>
+      <bpmn:outgoing>F76</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Akzeptanz_Ref"><bpmn:targetRef>DO_Akzeptanz_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D4" name="Beispieltabellen ergänzen (Specification by Example)">
+      <bpmn:documentation>Input: Akzeptanzkriterien. Output: Beispieltabellen mit konkreten Werten statt abstrakter Regeln.</bpmn:documentation>
+      <bpmn:incoming>F76</bpmn:incoming>
+      <bpmn:outgoing>F77</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Merge_Schaetzung">
+      <bpmn:incoming>F77</bpmn:incoming>
+      <bpmn:incoming>F49</bpmn:incoming>
+      <bpmn:outgoing>F78</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="D5" name="Story Points schätzen (Planning Poker)">
+      <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, technischer Ansatz. Output: relative Schätzung in Story Points, vom Team gemeinsam verantwortet.</bpmn:documentation>
+      <bpmn:incoming>F78</bpmn:incoming>
+      <bpmn:outgoing>F79</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Schaetzung_Ref"><bpmn:targetRef>DO_Schaetzung_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Schaetzung" name="Schätzungen konvergiert?" default="F48">
+      <bpmn:incoming>F79</bpmn:incoming>
+      <bpmn:outgoing>F48</bpmn:outgoing>
+      <bpmn:outgoing>F49</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gw_Sprintgroesse" name="Passt die Story in einen Sprint?" default="F50">
+      <bpmn:incoming>F48</bpmn:incoming>
+      <bpmn:outgoing>F50</bpmn:outgoing>
+      <bpmn:outgoing>F51</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="D6" name="Story vertikal schneiden (Splitting-Muster)">
+      <bpmn:documentation>Input: zu große Story, Akzeptanzkriterien. Output: kleinere Teil-Stories (1-3 Tage) durch vertikalen Schnitt: Slice the Cake, Basisnutzen zuerst, Referenzdaten fest verdrahten, Backend 'auf Krücken'. Jede Teil-Story wird neu formuliert.</bpmn:documentation>
+      <bpmn:incoming>F51</bpmn:incoming>
+      <bpmn:outgoing>F52</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:businessRuleTask id="E1" name="Definition of Ready prüfen">
+      <bpmn:documentation>Input: verfeinerte Story, Akzeptanzkriterien, Schätzung. Output: DoR-Befund: INVEST erfüllt, konkrete Rolle statt 'der Nutzer', Akzeptanzkriterien bestätigt, Wireframes vorhanden, keine offenen Blocker, Größe unter Kapazitätsgrenze.</bpmn:documentation>
+      <bpmn:incoming>F50</bpmn:incoming>
+      <bpmn:outgoing>F53</bpmn:outgoing>
+    </bpmn:businessRuleTask>
+    <bpmn:serviceTask id="E2" name="Begriffe mit Domänenmodell abgleichen">
+      <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, Domänenmodell aus dem Fachkonzept. Output: Abweichungen von der Ubiquitous Language (Entitäten, Rollen, Regeln).</bpmn:documentation>
+      <bpmn:incoming>F53</bpmn:incoming>
+      <bpmn:outgoing>F54</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="E3" name="Auf Fake- &amp; Waisen-Story prüfen">
+      <bpmn:documentation>Input: Story-Karte, Traceability-Eintrag. Output: Befund, ob die Story ein verkleideter Entwickler-Task oder ohne Bezug zu Epic/Ziel ist.</bpmn:documentation>
+      <bpmn:incoming>F54</bpmn:incoming>
+      <bpmn:outgoing>F55</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Ready" name="Definition of Ready erfüllt?" default="F57">
+      <bpmn:incoming>F55</bpmn:incoming>
+      <bpmn:outgoing>F57</bpmn:outgoing>
+      <bpmn:outgoing>F58</bpmn:outgoing>
+      <bpmn:outgoing>F59</bpmn:outgoing>
+      <bpmn:outgoing>F60</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="E5" name="Nachgelagerten Spike durchführen">
+      <bpmn:documentation>Input: im DoR-Check entdecktes technisches Risiko. Output: Spike-Report; die Story geht danach erneut ins Refinement.</bpmn:documentation>
+      <bpmn:incoming>F59</bpmn:incoming>
+      <bpmn:outgoing>F61</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_StoryVerworfen" name="Story verworfen">
+      <bpmn:incoming>F60</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:parallelGateway id="Par_PlausiSplit">
+      <bpmn:incoming>F57</bpmn:incoming>
+      <bpmn:outgoing>F62</bpmn:outgoing>
+      <bpmn:outgoing>F63</bpmn:outgoing>
+      <bpmn:outgoing>F64</bpmn:outgoing>
+      <bpmn:outgoing>F65</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="P1" name="Auf Duplikate &amp; Überschneidungen prüfen">
+      <bpmn:documentation>Input: Story-Karte, Product Backlog (offene und erledigte Stories). Output: Stories mit gleichem oder überlappendem Ziel, gleiche Konzepte unter anderem Namen ('Splitter').</bpmn:documentation>
+      <bpmn:incoming>F62</bpmn:incoming>
+      <bpmn:outgoing>F66</bpmn:outgoing>
+      <bpmn:property id="Property_DO_Backlog_Ref2" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref2"><bpmn:sourceRef>DO_Backlog_Ref2</bpmn:sourceRef><bpmn:targetRef>Property_DO_Backlog_Ref2</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P7" name="Konsistenz mit bestehenden Abläufen prüfen">
+      <bpmn:documentation>Input: Wireframes der Story, Wireframes anderer Stories im selben Nutzer-Task. Output: Abweichungen von bestehenden Interaktionsmustern und UI-Begriffen.</bpmn:documentation>
+      <bpmn:incoming>F63</bpmn:incoming>
+      <bpmn:outgoing>F67</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P3" name="Abhängigkeiten &amp; Reihenfolge prüfen">
+      <bpmn:documentation>Input: technischer Ansatz, Backlog, nichtfunktionale Ziele des Release. Output: Vorgänger-/Nachfolger-Stories, geteilte Komponenten, Konflikte mit Sicherheits-, Performance- oder Kapazitätszielen.</bpmn:documentation>
+      <bpmn:incoming>F64</bpmn:incoming>
+      <bpmn:outgoing>F68</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="P2" name="Akzeptanzkriterien gegen bestehende Stories abgleichen">
+      <bpmn:documentation>Input: Given-When-Then-Szenarien, Akzeptanzkriterien anderer Stories, Living Documentation. Output: widersprüchliche Szenarien und Fachregeln mit Fundstelle.</bpmn:documentation>
+      <bpmn:incoming>F65</bpmn:incoming>
+      <bpmn:outgoing>F69</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Par_PlausiJoin">
+      <bpmn:incoming>F66</bpmn:incoming>
+      <bpmn:incoming>F67</bpmn:incoming>
+      <bpmn:incoming>F68</bpmn:incoming>
+      <bpmn:incoming>F69</bpmn:incoming>
+      <bpmn:outgoing>F70</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="P4" name="Plausibilitätsbefund zusammenführen">
+      <bpmn:documentation>Input: Befunde zu Duplikaten, Abläufen, Abhängigkeiten und Akzeptanzkriterien. Output: Plausibilitätsbefund - Duplikate, Widersprüche, Abhängigkeiten und betroffene Stories, je mit Fundstelle.</bpmn:documentation>
+      <bpmn:incoming>F70</bpmn:incoming>
+      <bpmn:outgoing>F71</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_Plausi_Ref"><bpmn:targetRef>DO_Plausi_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Plausibel" name="Konsistent mit dem übrigen Backlog?" default="F72">
+      <bpmn:incoming>F71</bpmn:incoming>
+      <bpmn:outgoing>F72</bpmn:outgoing>
+      <bpmn:outgoing>F73</bpmn:outgoing>
+      <bpmn:outgoing>F74</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P6" name="Mit bestehender Story zusammenführen">
+      <bpmn:documentation>Input: neue Story, gefundenes Duplikat. Output: bestehende Story um die neuen Akzeptanzkriterien und den Feedback-Link ergänzt; die neue Story entfällt.</bpmn:documentation>
+      <bpmn:incoming>F74</bpmn:incoming>
+      <bpmn:outgoing>F75</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_StoryZusammengefuehrt" name="Story in bestehende Story überführt">
+      <bpmn:incoming>F75</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="P5" name="Betroffene Stories zur Anpassung markieren">
+      <bpmn:documentation>Input: Plausibilitätsbefund. Output: Abhängigkeitslinks und Anpassungshinweise an betroffenen oder überholten Stories. Ohne Befund entfällt dieser Schritt.</bpmn:documentation>
+      <bpmn:incoming>F72</bpmn:incoming>
+      <bpmn:outgoing>F80</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="E4" name="Story priorisieren &amp; in Ready-Spalte stellen">
+      <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story. Output: priorisierte, sprint-reife User Story in der Ready-Spalte des Boards.</bpmn:documentation>
+      <bpmn:incoming>F80</bpmn:incoming>
+      <bpmn:outgoing>F81</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_DO_ReadyStory_Ref"><bpmn:targetRef>DO_ReadyStory_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:userTask>
+    <bpmn:endEvent id="End_StorySprintReady" name="Story sprint-ready">
+      <bpmn:incoming>F81</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F01" sourceRef="Start_FeedbackEingegangen" targetRef="I1" />
+    <bpmn:sequenceFlow id="F02" sourceRef="I1" targetRef="I2" />
+    <bpmn:sequenceFlow id="F03" sourceRef="I2" targetRef="Gw_Bug" />
+    <bpmn:sequenceFlow id="F04" sourceRef="Gw_Bug" targetRef="End_BugUebergeben" name="Ja (Bug)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ja (Bug)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F05" sourceRef="Gw_Bug" targetRef="Gw_Bezug" name="Nein" />
+    <bpmn:sequenceFlow id="F06" sourceRef="Gw_Bezug" targetRef="End_AnStoryUebergeben" name="Ändert eine offene Story">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ändert eine offene Story</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F07" sourceRef="Gw_Bezug" targetRef="End_FeedbackGeparkt" name="Kein Epic-Bezug / kein Nutzen">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Kein Epic-Bezug / kein Nutzen</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F08" sourceRef="Gw_Bezug" targetRef="K1" name="Neue Story unter bestehendem Epic" />
+    <bpmn:sequenceFlow id="F09" sourceRef="K1" targetRef="K2" />
+    <bpmn:sequenceFlow id="F10" sourceRef="K2" targetRef="Gw_Fachkonzept" />
+    <bpmn:sequenceFlow id="F11" sourceRef="Gw_Fachkonzept" targetRef="End_FachkonzeptAenderung" name="Nein (Fachkonzept ändern)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (Fachkonzept ändern)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F12" sourceRef="Gw_Fachkonzept" targetRef="Par_KlaerungSplit" name="Ja" />
+    <bpmn:sequenceFlow id="F13" sourceRef="Par_KlaerungSplit" targetRef="K3" />
+    <bpmn:sequenceFlow id="F14" sourceRef="Par_KlaerungSplit" targetRef="K5" />
+    <bpmn:sequenceFlow id="F15" sourceRef="Par_KlaerungSplit" targetRef="K4" />
+    <bpmn:sequenceFlow id="F16" sourceRef="K3" targetRef="Par_KlaerungJoin" />
+    <bpmn:sequenceFlow id="F17" sourceRef="K5" targetRef="Par_KlaerungJoin" />
+    <bpmn:sequenceFlow id="F18" sourceRef="K4" targetRef="Par_KlaerungJoin" />
+    <bpmn:sequenceFlow id="F19" sourceRef="Par_KlaerungJoin" targetRef="Gw_Unsicherheit" />
+    <bpmn:sequenceFlow id="F20" sourceRef="Gw_Unsicherheit" targetRef="Merge_Einordnung" name="Nein" />
+    <bpmn:sequenceFlow id="F21" sourceRef="Gw_Unsicherheit" targetRef="K6" name="Nutzen / Bedienbarkeit unklar">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nutzen / Bedienbarkeit unklar</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F22" sourceRef="Gw_Unsicherheit" targetRef="B4" name="Technisch unklar">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Technisch unklar</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F23" sourceRef="K6" targetRef="Merge_Validierung" />
+    <bpmn:sequenceFlow id="F24" sourceRef="B4" targetRef="Merge_Validierung" />
+    <bpmn:sequenceFlow id="F25" sourceRef="Merge_Validierung" targetRef="B5" />
+    <bpmn:sequenceFlow id="F26" sourceRef="B5" targetRef="Gw_Erkenntnis" />
+    <bpmn:sequenceFlow id="F27" sourceRef="Gw_Erkenntnis" targetRef="Merge_Einordnung" name="Ja" />
+    <bpmn:sequenceFlow id="F28" sourceRef="Gw_Erkenntnis" targetRef="End_AnliegenVerworfen" name="Nein">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F29" sourceRef="Merge_Einordnung" targetRef="C1" />
+    <bpmn:sequenceFlow id="F30" sourceRef="C1" targetRef="Merge_Formulierung" />
+    <bpmn:sequenceFlow id="F31" sourceRef="Merge_Formulierung" targetRef="C2" />
+    <bpmn:sequenceFlow id="F32" sourceRef="C2" targetRef="C3" />
+    <bpmn:sequenceFlow id="F33" sourceRef="C3" targetRef="C4" />
+    <bpmn:sequenceFlow id="F34" sourceRef="C4" targetRef="Gw_Invest" />
+    <bpmn:sequenceFlow id="F35" sourceRef="Gw_Invest" targetRef="Merge_Refinement" name="Ja" />
+    <bpmn:sequenceFlow id="F36" sourceRef="Gw_Invest" targetRef="Merge_Formulierung" name="Nein (umformulieren)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (umformulieren)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F37" sourceRef="Merge_Refinement" targetRef="D1" />
+    <bpmn:sequenceFlow id="F38" sourceRef="D1" targetRef="Par_AmigosSplit" />
+    <bpmn:sequenceFlow id="F39" sourceRef="Par_AmigosSplit" targetRef="D2a" />
+    <bpmn:sequenceFlow id="F40" sourceRef="Par_AmigosSplit" targetRef="D2d" />
+    <bpmn:sequenceFlow id="F41" sourceRef="Par_AmigosSplit" targetRef="D2b" />
+    <bpmn:sequenceFlow id="F42" sourceRef="Par_AmigosSplit" targetRef="D2c" />
+    <bpmn:sequenceFlow id="F43" sourceRef="D2a" targetRef="Par_AmigosJoin" />
+    <bpmn:sequenceFlow id="F44" sourceRef="D2d" targetRef="Par_AmigosJoin" />
+    <bpmn:sequenceFlow id="F45" sourceRef="D2b" targetRef="Par_AmigosJoin" />
+    <bpmn:sequenceFlow id="F46" sourceRef="D2c" targetRef="Par_AmigosJoin" />
+    <bpmn:sequenceFlow id="F47" sourceRef="Par_AmigosJoin" targetRef="D3" />
+    <bpmn:sequenceFlow id="F76" sourceRef="D3" targetRef="D4" />
+    <bpmn:sequenceFlow id="F77" sourceRef="D4" targetRef="Merge_Schaetzung" />
+    <bpmn:sequenceFlow id="F78" sourceRef="Merge_Schaetzung" targetRef="D5" />
+    <bpmn:sequenceFlow id="F79" sourceRef="D5" targetRef="Gw_Schaetzung" />
+    <bpmn:sequenceFlow id="F48" sourceRef="Gw_Schaetzung" targetRef="Gw_Sprintgroesse" name="Ja" />
+    <bpmn:sequenceFlow id="F49" sourceRef="Gw_Schaetzung" targetRef="Merge_Schaetzung" name="Nein (Ausreißer begründen)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (Ausreißer begründen)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F50" sourceRef="Gw_Sprintgroesse" targetRef="E1" name="Ja" />
+    <bpmn:sequenceFlow id="F51" sourceRef="Gw_Sprintgroesse" targetRef="D6" name="Nein (zu groß)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (zu groß)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F52" sourceRef="D6" targetRef="Merge_Formulierung" />
+    <bpmn:sequenceFlow id="F53" sourceRef="E1" targetRef="E2" />
+    <bpmn:sequenceFlow id="F54" sourceRef="E2" targetRef="E3" />
+    <bpmn:sequenceFlow id="F55" sourceRef="E3" targetRef="Gw_Ready" />
+    <bpmn:sequenceFlow id="F57" sourceRef="Gw_Ready" targetRef="Par_PlausiSplit" name="Ja" />
+    <bpmn:sequenceFlow id="F58" sourceRef="Gw_Ready" targetRef="Merge_Refinement" name="Kriterien unklar">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Kriterien unklar</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F59" sourceRef="Gw_Ready" targetRef="E5" name="Technisches Risiko offen">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Technisches Risiko offen</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F60" sourceRef="Gw_Ready" targetRef="End_StoryVerworfen" name="Nicht mehr relevant">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nicht mehr relevant</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F61" sourceRef="E5" targetRef="Merge_Refinement" />
+    <bpmn:sequenceFlow id="F62" sourceRef="Par_PlausiSplit" targetRef="P1" />
+    <bpmn:sequenceFlow id="F63" sourceRef="Par_PlausiSplit" targetRef="P7" />
+    <bpmn:sequenceFlow id="F64" sourceRef="Par_PlausiSplit" targetRef="P3" />
+    <bpmn:sequenceFlow id="F65" sourceRef="Par_PlausiSplit" targetRef="P2" />
+    <bpmn:sequenceFlow id="F66" sourceRef="P1" targetRef="Par_PlausiJoin" />
+    <bpmn:sequenceFlow id="F67" sourceRef="P7" targetRef="Par_PlausiJoin" />
+    <bpmn:sequenceFlow id="F68" sourceRef="P3" targetRef="Par_PlausiJoin" />
+    <bpmn:sequenceFlow id="F69" sourceRef="P2" targetRef="Par_PlausiJoin" />
+    <bpmn:sequenceFlow id="F70" sourceRef="Par_PlausiJoin" targetRef="P4" />
+    <bpmn:sequenceFlow id="F71" sourceRef="P4" targetRef="Gw_Plausibel" />
+    <bpmn:sequenceFlow id="F72" sourceRef="Gw_Plausibel" targetRef="P5" name="Ja" />
+    <bpmn:sequenceFlow id="F73" sourceRef="Gw_Plausibel" targetRef="Merge_Refinement" name="Widerspruch zu anderen Stories">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Widerspruch zu anderen Stories</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F74" sourceRef="Gw_Plausibel" targetRef="P6" name="Duplikat einer bestehenden Story">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Duplikat einer bestehenden Story</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F75" sourceRef="P6" targetRef="End_StoryZusammengefuehrt" />
+    <bpmn:sequenceFlow id="F80" sourceRef="P5" targetRef="E4" />
+    <bpmn:sequenceFlow id="F81" sourceRef="E4" targetRef="End_StorySprintReady" />
+    <bpmn:dataObject id="DO_Feedback" />
+    <bpmn:dataObjectReference id="DO_Feedback_Ref" name="Feedback-Eintrag" dataObjectRef="DO_Feedback" />
+    <bpmn:dataObject id="DO_Backlog" />
+    <bpmn:dataObjectReference id="DO_Backlog_Ref" name="Product Backlog &amp; User Story Map" dataObjectRef="DO_Backlog" />
+    <bpmn:dataObject id="DO_Fachkonzept" />
+    <bpmn:dataObjectReference id="DO_Fachkonzept_Ref" name="Epic &amp; Fachkonzept" dataObjectRef="DO_Fachkonzept" />
+    <bpmn:dataObject id="DO_ScopeDelta" />
+    <bpmn:dataObjectReference id="DO_ScopeDelta_Ref" name="Ist-/Soll-Delta" dataObjectRef="DO_ScopeDelta" />
+    <bpmn:dataObject id="DO_Testing" />
+    <bpmn:dataObjectReference id="DO_Testing_Ref" name="Prototyp &amp; Testergebnisse" dataObjectRef="DO_Testing" />
+    <bpmn:dataObject id="DO_Spike" />
+    <bpmn:dataObjectReference id="DO_Spike_Ref" name="Spike-Report" dataObjectRef="DO_Spike" />
+    <bpmn:dataObject id="DO_StoryKarte" />
+    <bpmn:dataObjectReference id="DO_StoryKarte_Ref" name="Story-Karte (Connextra)" dataObjectRef="DO_StoryKarte" />
+    <bpmn:dataObject id="DO_Akzeptanz" />
+    <bpmn:dataObjectReference id="DO_Akzeptanz_Ref" name="Given-When-Then-Szenarien" dataObjectRef="DO_Akzeptanz" />
+    <bpmn:dataObject id="DO_Schaetzung" />
+    <bpmn:dataObjectReference id="DO_Schaetzung_Ref" name="Story-Point-Schätzung" dataObjectRef="DO_Schaetzung" />
+    <bpmn:dataObjectReference id="DO_Backlog_Ref2" name="Product Backlog" dataObjectRef="DO_Backlog" />
+    <bpmn:dataObject id="DO_Plausi" />
+    <bpmn:dataObjectReference id="DO_Plausi_Ref" name="Plausibilitätsbefund" dataObjectRef="DO_Plausi" />
+    <bpmn:dataObject id="DO_ReadyStory" />
+    <bpmn:dataObjectReference id="DO_ReadyStory_Ref" name="Sprint-reife User Story" dataObjectRef="DO_ReadyStory" />
+    <bpmn:group id="Group_Phase1" categoryValueRef="CategoryValue_Group_Phase1" />
+    <bpmn:group id="Group_Phase2" categoryValueRef="CategoryValue_Group_Phase2" />
+    <bpmn:group id="Group_Phase3" categoryValueRef="CategoryValue_Group_Phase3" />
+    <bpmn:group id="Group_Phase4" categoryValueRef="CategoryValue_Group_Phase4" />
+    <bpmn:group id="Group_Phase5" categoryValueRef="CategoryValue_Group_Phase5" />
+    <bpmn:group id="Group_Phase6" categoryValueRef="CategoryValue_Group_Phase6" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_UserStory">
+    <bpmndi:BPMNPlane id="BPMNPlane_UserStory" bpmnElement="Process_UserStoryErstellenVerfeinern">
+      <bpmndi:BPMNShape id="Lane_ProductOwner_di" bpmnElement="Lane_ProductOwner" isHorizontal="true"><dc:Bounds x="100" y="80" width="10720" height="460" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_UxResearchDesign_di" bpmnElement="Lane_UxResearchDesign" isHorizontal="true"><dc:Bounds x="100" y="540" width="10720" height="300" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Entwicklung_di" bpmnElement="Lane_Entwicklung" isHorizontal="true"><dc:Bounds x="100" y="840" width="10720" height="300" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_QaTest_di" bpmnElement="Lane_QaTest" isHorizontal="true"><dc:Bounds x="100" y="1140" width="10720" height="300" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase1_di" bpmnElement="Group_Phase1"><dc:Bounds x="120" y="30" width="1160" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="130" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase2_di" bpmnElement="Group_Phase2"><dc:Bounds x="1320" y="30" width="2480" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="1330" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase3_di" bpmnElement="Group_Phase3"><dc:Bounds x="3840" y="30" width="1600" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="3850" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase4_di" bpmnElement="Group_Phase4"><dc:Bounds x="5480" y="30" width="2480" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="5490" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase5_di" bpmnElement="Group_Phase5"><dc:Bounds x="8000" y="30" width="940" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="8010" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Group_Phase6_di" bpmnElement="Group_Phase6"><dc:Bounds x="8980" y="30" width="1820" height="1430" /><bpmndi:BPMNLabel><dc:Bounds x="8990" y="38" width="300" height="20" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_FeedbackEingegangen_di" bpmnElement="Start_FeedbackEingegangen"><dc:Bounds x="242" y="312" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="200" y="354" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="I1_di" bpmnElement="I1"><dc:Bounds x="410" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="I2_di" bpmnElement="I2"><dc:Bounds x="630" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Bug_di" bpmnElement="Gw_Bug" isMarkerVisible="true"><dc:Bounds x="895" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="750" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_BugUebergeben_di" bpmnElement="End_BugUebergeben"><dc:Bounds x="902" y="197" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="860" y="153" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Bezug_di" bpmnElement="Gw_Bezug" isMarkerVisible="true"><dc:Bounds x="1115" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="970" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_AnStoryUebergeben_di" bpmnElement="End_AnStoryUebergeben"><dc:Bounds x="1122" y="197" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1080" y="153" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_FeedbackGeparkt_di" bpmnElement="End_FeedbackGeparkt"><dc:Bounds x="1122" y="427" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1080" y="469" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K1_di" bpmnElement="K1"><dc:Bounds x="1390" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K2_di" bpmnElement="K2"><dc:Bounds x="1610" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Fachkonzept_di" bpmnElement="Gw_Fachkonzept" isMarkerVisible="true"><dc:Bounds x="1875" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1730" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_FachkonzeptAenderung_di" bpmnElement="End_FachkonzeptAenderung"><dc:Bounds x="1882" y="197" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="1840" y="153" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_KlaerungSplit_di" bpmnElement="Par_KlaerungSplit"><dc:Bounds x="2095" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K3_di" bpmnElement="K3"><dc:Bounds x="2270" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K5_di" bpmnElement="K5"><dc:Bounds x="2270" y="645" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K4_di" bpmnElement="K4"><dc:Bounds x="2270" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_KlaerungJoin_di" bpmnElement="Par_KlaerungJoin"><dc:Bounds x="2535" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Unsicherheit_di" bpmnElement="Gw_Unsicherheit" isMarkerVisible="true"><dc:Bounds x="2755" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2610" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K6_di" bpmnElement="K6"><dc:Bounds x="2930" y="645" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="B4_di" bpmnElement="B4"><dc:Bounds x="2930" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Validierung_di" bpmnElement="Merge_Validierung" isMarkerVisible="true"><dc:Bounds x="3195" y="665" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="B5_di" bpmnElement="B5"><dc:Bounds x="3370" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Erkenntnis_di" bpmnElement="Gw_Erkenntnis" isMarkerVisible="true"><dc:Bounds x="3635" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3490" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_AnliegenVerworfen_di" bpmnElement="End_AnliegenVerworfen"><dc:Bounds x="3642" y="197" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="3600" y="153" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Einordnung_di" bpmnElement="Merge_Einordnung" isMarkerVisible="true"><dc:Bounds x="3955" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="C1_di" bpmnElement="C1"><dc:Bounds x="4130" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Formulierung_di" bpmnElement="Merge_Formulierung" isMarkerVisible="true"><dc:Bounds x="4395" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="C2_di" bpmnElement="C2"><dc:Bounds x="4570" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="C3_di" bpmnElement="C3"><dc:Bounds x="4790" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="C4_di" bpmnElement="C4"><dc:Bounds x="5010" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Invest_di" bpmnElement="Gw_Invest" isMarkerVisible="true"><dc:Bounds x="5275" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="5130" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Refinement_di" bpmnElement="Merge_Refinement" isMarkerVisible="true"><dc:Bounds x="5595" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D1_di" bpmnElement="D1"><dc:Bounds x="5770" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_AmigosSplit_di" bpmnElement="Par_AmigosSplit"><dc:Bounds x="6035" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D2a_di" bpmnElement="D2a"><dc:Bounds x="6210" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D2d_di" bpmnElement="D2d"><dc:Bounds x="6210" y="645" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D2b_di" bpmnElement="D2b"><dc:Bounds x="6210" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D2c_di" bpmnElement="D2c"><dc:Bounds x="6210" y="1245" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_AmigosJoin_di" bpmnElement="Par_AmigosJoin"><dc:Bounds x="6475" y="1265" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D3_di" bpmnElement="D3"><dc:Bounds x="6650" y="1245" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D4_di" bpmnElement="D4"><dc:Bounds x="6870" y="1245" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Schaetzung_di" bpmnElement="Merge_Schaetzung" isMarkerVisible="true"><dc:Bounds x="7135" y="965" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D5_di" bpmnElement="D5"><dc:Bounds x="7310" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Schaetzung_di" bpmnElement="Gw_Schaetzung" isMarkerVisible="true"><dc:Bounds x="7575" y="965" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7430" y="918" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Sprintgroesse_di" bpmnElement="Gw_Sprintgroesse" isMarkerVisible="true"><dc:Bounds x="7795" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7650" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D6_di" bpmnElement="D6"><dc:Bounds x="7750" y="400" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E1_di" bpmnElement="E1"><dc:Bounds x="8070" y="1245" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E2_di" bpmnElement="E2"><dc:Bounds x="8290" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E3_di" bpmnElement="E3"><dc:Bounds x="8510" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Ready_di" bpmnElement="Gw_Ready" isMarkerVisible="true"><dc:Bounds x="8775" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="8630" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E5_di" bpmnElement="E5"><dc:Bounds x="8730" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_StoryVerworfen_di" bpmnElement="End_StoryVerworfen"><dc:Bounds x="9102" y="197" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="9060" y="153" width="120" height="40" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_PlausiSplit_di" bpmnElement="Par_PlausiSplit"><dc:Bounds x="9095" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P1_di" bpmnElement="P1"><dc:Bounds x="9270" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P7_di" bpmnElement="P7"><dc:Bounds x="9270" y="645" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P3_di" bpmnElement="P3"><dc:Bounds x="9270" y="945" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P2_di" bpmnElement="P2"><dc:Bounds x="9270" y="1245" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Par_PlausiJoin_di" bpmnElement="Par_PlausiJoin"><dc:Bounds x="9535" y="305" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P4_di" bpmnElement="P4"><dc:Bounds x="9710" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Plausibel_di" bpmnElement="Gw_Plausibel" isMarkerVisible="true"><dc:Bounds x="9975" y="305" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="9830" y="258" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P6_di" bpmnElement="P6"><dc:Bounds x="10150" y="400" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_StoryZusammengefuehrt_di" bpmnElement="End_StoryZusammengefuehrt"><dc:Bounds x="10422" y="427" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="10380" y="469" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P5_di" bpmnElement="P5"><dc:Bounds x="10150" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="E4_di" bpmnElement="E4"><dc:Bounds x="10370" y="285" width="140" height="90" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_StorySprintReady_di" bpmnElement="End_StorySprintReady"><dc:Bounds x="10642" y="312" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="10682" y="316" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Feedback_Ref_di" bpmnElement="DO_Feedback_Ref"><dc:Bounds x="462" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="410" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Feedback_Ref_di" bpmnElement="DataOut_DO_Feedback_Ref"><di:waypoint x="480" y="285" /><di:waypoint x="480" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Backlog_Ref_di" bpmnElement="DO_Backlog_Ref"><dc:Bounds x="682" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="630" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_DO_Backlog_Ref_di" bpmnElement="DataIn_DO_Backlog_Ref"><di:waypoint x="700" y="240" /><di:waypoint x="700" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Fachkonzept_Ref_di" bpmnElement="DO_Fachkonzept_Ref"><dc:Bounds x="1662" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1610" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_DO_Fachkonzept_Ref_di" bpmnElement="DataIn_DO_Fachkonzept_Ref"><di:waypoint x="1680" y="240" /><di:waypoint x="1680" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_ScopeDelta_Ref_di" bpmnElement="DO_ScopeDelta_Ref"><dc:Bounds x="2322" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2270" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_ScopeDelta_Ref_di" bpmnElement="DataOut_DO_ScopeDelta_Ref"><di:waypoint x="2340" y="285" /><di:waypoint x="2340" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Testing_Ref_di" bpmnElement="DO_Testing_Ref"><dc:Bounds x="2982" y="565" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3024" y="573" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Testing_Ref_di" bpmnElement="DataOut_DO_Testing_Ref"><di:waypoint x="3000" y="645" /><di:waypoint x="3000" y="615" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Spike_Ref_di" bpmnElement="DO_Spike_Ref"><dc:Bounds x="2982" y="865" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3024" y="873" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Spike_Ref_di" bpmnElement="DataOut_DO_Spike_Ref"><di:waypoint x="3000" y="945" /><di:waypoint x="3000" y="915" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_StoryKarte_Ref_di" bpmnElement="DO_StoryKarte_Ref"><dc:Bounds x="4622" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4570" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_StoryKarte_Ref_di" bpmnElement="DataOut_DO_StoryKarte_Ref"><di:waypoint x="4640" y="285" /><di:waypoint x="4640" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Akzeptanz_Ref_di" bpmnElement="DO_Akzeptanz_Ref"><dc:Bounds x="6702" y="1165" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6744" y="1173" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Akzeptanz_Ref_di" bpmnElement="DataOut_DO_Akzeptanz_Ref"><di:waypoint x="6720" y="1245" /><di:waypoint x="6720" y="1215" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Schaetzung_Ref_di" bpmnElement="DO_Schaetzung_Ref"><dc:Bounds x="7362" y="865" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7404" y="873" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Schaetzung_Ref_di" bpmnElement="DataOut_DO_Schaetzung_Ref"><di:waypoint x="7380" y="945" /><di:waypoint x="7380" y="915" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Backlog_Ref2_di" bpmnElement="DO_Backlog_Ref2"><dc:Bounds x="9322" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="9270" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_DO_Backlog_Ref2_di" bpmnElement="DataIn_DO_Backlog_Ref2"><di:waypoint x="9340" y="240" /><di:waypoint x="9340" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_Plausi_Ref_di" bpmnElement="DO_Plausi_Ref"><dc:Bounds x="9762" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="9710" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_Plausi_Ref_di" bpmnElement="DataOut_DO_Plausi_Ref"><di:waypoint x="9780" y="285" /><di:waypoint x="9780" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="DO_ReadyStory_Ref_di" bpmnElement="DO_ReadyStory_Ref"><dc:Bounds x="10422" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="10370" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_DO_ReadyStory_Ref_di" bpmnElement="DataOut_DO_ReadyStory_Ref"><di:waypoint x="10440" y="285" /><di:waypoint x="10440" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F01_di" bpmnElement="F01"><di:waypoint x="278" y="330" /><di:waypoint x="410" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F02_di" bpmnElement="F02"><di:waypoint x="550" y="330" /><di:waypoint x="630" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F03_di" bpmnElement="F03"><di:waypoint x="770" y="330" /><di:waypoint x="895" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F04_di" bpmnElement="F04"><di:waypoint x="920" y="305" /><di:waypoint x="920" y="233" /><bpmndi:BPMNLabel><dc:Bounds x="926" y="264" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F05_di" bpmnElement="F05"><di:waypoint x="945" y="330" /><di:waypoint x="1115" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="951" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F06_di" bpmnElement="F06"><di:waypoint x="1140" y="305" /><di:waypoint x="1140" y="233" /><bpmndi:BPMNLabel><dc:Bounds x="1146" y="257" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F07_di" bpmnElement="F07"><di:waypoint x="1140" y="355" /><di:waypoint x="1140" y="427" /><bpmndi:BPMNLabel><dc:Bounds x="1146" y="363" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F08_di" bpmnElement="F08"><di:waypoint x="1165" y="330" /><di:waypoint x="1390" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="1171" y="298" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F09_di" bpmnElement="F09"><di:waypoint x="1530" y="330" /><di:waypoint x="1610" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10"><di:waypoint x="1750" y="330" /><di:waypoint x="1875" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F11_di" bpmnElement="F11"><di:waypoint x="1900" y="305" /><di:waypoint x="1900" y="233" /><bpmndi:BPMNLabel><dc:Bounds x="1906" y="257" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F12_di" bpmnElement="F12"><di:waypoint x="1925" y="330" /><di:waypoint x="2095" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="1931" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F13_di" bpmnElement="F13"><di:waypoint x="2145" y="330" /><di:waypoint x="2270" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F14_di" bpmnElement="F14"><di:waypoint x="2120" y="355" /><di:waypoint x="2120" y="690" /><di:waypoint x="2270" y="690" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F15_di" bpmnElement="F15"><di:waypoint x="2120" y="355" /><di:waypoint x="2120" y="990" /><di:waypoint x="2270" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F16_di" bpmnElement="F16"><di:waypoint x="2410" y="330" /><di:waypoint x="2535" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F17_di" bpmnElement="F17"><di:waypoint x="2410" y="690" /><di:waypoint x="2560" y="690" /><di:waypoint x="2560" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F18_di" bpmnElement="F18"><di:waypoint x="2410" y="990" /><di:waypoint x="2560" y="990" /><di:waypoint x="2560" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F19_di" bpmnElement="F19"><di:waypoint x="2585" y="330" /><di:waypoint x="2755" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F20_di" bpmnElement="F20"><di:waypoint x="2780" y="305" /><di:waypoint x="2780" y="140" /><di:waypoint x="3980" y="140" /><di:waypoint x="3980" y="305" /><bpmndi:BPMNLabel><dc:Bounds x="2786" y="264" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F21_di" bpmnElement="F21"><di:waypoint x="2780" y="355" /><di:waypoint x="2780" y="690" /><di:waypoint x="2930" y="690" /><bpmndi:BPMNLabel><dc:Bounds x="2788" y="658" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F22_di" bpmnElement="F22"><di:waypoint x="2780" y="355" /><di:waypoint x="2780" y="990" /><di:waypoint x="2930" y="990" /><bpmndi:BPMNLabel><dc:Bounds x="2788" y="958" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F23_di" bpmnElement="F23"><di:waypoint x="3070" y="690" /><di:waypoint x="3195" y="690" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F24_di" bpmnElement="F24"><di:waypoint x="3070" y="990" /><di:waypoint x="3220" y="990" /><di:waypoint x="3220" y="715" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F25_di" bpmnElement="F25"><di:waypoint x="3220" y="665" /><di:waypoint x="3220" y="330" /><di:waypoint x="3370" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F26_di" bpmnElement="F26"><di:waypoint x="3510" y="330" /><di:waypoint x="3635" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F27_di" bpmnElement="F27"><di:waypoint x="3685" y="330" /><di:waypoint x="3955" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="3691" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F28_di" bpmnElement="F28"><di:waypoint x="3660" y="305" /><di:waypoint x="3660" y="233" /><bpmndi:BPMNLabel><dc:Bounds x="3666" y="264" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F29_di" bpmnElement="F29"><di:waypoint x="4005" y="330" /><di:waypoint x="4130" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F30_di" bpmnElement="F30"><di:waypoint x="4270" y="330" /><di:waypoint x="4395" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F31_di" bpmnElement="F31"><di:waypoint x="4445" y="330" /><di:waypoint x="4570" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F32_di" bpmnElement="F32"><di:waypoint x="4710" y="330" /><di:waypoint x="4790" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F33_di" bpmnElement="F33"><di:waypoint x="4930" y="330" /><di:waypoint x="5010" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F34_di" bpmnElement="F34"><di:waypoint x="5150" y="330" /><di:waypoint x="5275" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F35_di" bpmnElement="F35"><di:waypoint x="5325" y="330" /><di:waypoint x="5595" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="5331" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F36_di" bpmnElement="F36"><di:waypoint x="5300" y="355" /><di:waypoint x="5300" y="395" /><di:waypoint x="4420" y="395" /><di:waypoint x="4420" y="355" /><bpmndi:BPMNLabel><dc:Bounds x="5306" y="363" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F37_di" bpmnElement="F37"><di:waypoint x="5645" y="330" /><di:waypoint x="5770" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F38_di" bpmnElement="F38"><di:waypoint x="5910" y="330" /><di:waypoint x="6035" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F39_di" bpmnElement="F39"><di:waypoint x="6085" y="330" /><di:waypoint x="6210" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F40_di" bpmnElement="F40"><di:waypoint x="6060" y="355" /><di:waypoint x="6060" y="690" /><di:waypoint x="6210" y="690" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F41_di" bpmnElement="F41"><di:waypoint x="6060" y="355" /><di:waypoint x="6060" y="990" /><di:waypoint x="6210" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F42_di" bpmnElement="F42"><di:waypoint x="6060" y="355" /><di:waypoint x="6060" y="1290" /><di:waypoint x="6210" y="1290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F43_di" bpmnElement="F43"><di:waypoint x="6350" y="330" /><di:waypoint x="6500" y="330" /><di:waypoint x="6500" y="1265" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F44_di" bpmnElement="F44"><di:waypoint x="6350" y="690" /><di:waypoint x="6500" y="690" /><di:waypoint x="6500" y="1265" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F45_di" bpmnElement="F45"><di:waypoint x="6350" y="990" /><di:waypoint x="6500" y="990" /><di:waypoint x="6500" y="1265" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F46_di" bpmnElement="F46"><di:waypoint x="6350" y="1290" /><di:waypoint x="6475" y="1290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F47_di" bpmnElement="F47"><di:waypoint x="6525" y="1290" /><di:waypoint x="6650" y="1290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F76_di" bpmnElement="F76"><di:waypoint x="6790" y="1290" /><di:waypoint x="6870" y="1290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F77_di" bpmnElement="F77"><di:waypoint x="7010" y="1290" /><di:waypoint x="7095" y="1290" /><di:waypoint x="7095" y="990" /><di:waypoint x="7135" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F78_di" bpmnElement="F78"><di:waypoint x="7185" y="990" /><di:waypoint x="7310" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F79_di" bpmnElement="F79"><di:waypoint x="7450" y="990" /><di:waypoint x="7575" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F48_di" bpmnElement="F48"><di:waypoint x="7625" y="990" /><di:waypoint x="7755" y="990" /><di:waypoint x="7755" y="330" /><di:waypoint x="7795" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="7631" y="972" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F49_di" bpmnElement="F49"><di:waypoint x="7600" y="1015" /><di:waypoint x="7600" y="1090" /><di:waypoint x="7160" y="1090" /><di:waypoint x="7160" y="1015" /><bpmndi:BPMNLabel><dc:Bounds x="7606" y="1023" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F50_di" bpmnElement="F50"><di:waypoint x="7845" y="330" /><di:waypoint x="8030" y="330" /><di:waypoint x="8030" y="1290" /><di:waypoint x="8070" y="1290" /><bpmndi:BPMNLabel><dc:Bounds x="7851" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F51_di" bpmnElement="F51"><di:waypoint x="7820" y="355" /><di:waypoint x="7820" y="400" /><bpmndi:BPMNLabel><dc:Bounds x="7826" y="363" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F52_di" bpmnElement="F52"><di:waypoint x="7750" y="445" /><di:waypoint x="4420" y="445" /><di:waypoint x="4420" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F53_di" bpmnElement="F53"><di:waypoint x="8210" y="1290" /><di:waypoint x="8250" y="1290" /><di:waypoint x="8250" y="990" /><di:waypoint x="8290" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F54_di" bpmnElement="F54"><di:waypoint x="8430" y="990" /><di:waypoint x="8470" y="990" /><di:waypoint x="8470" y="330" /><di:waypoint x="8510" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F55_di" bpmnElement="F55"><di:waypoint x="8650" y="330" /><di:waypoint x="8775" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F57_di" bpmnElement="F57"><di:waypoint x="8825" y="330" /><di:waypoint x="9095" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="8831" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F58_di" bpmnElement="F58"><di:waypoint x="8800" y="305" /><di:waypoint x="8800" y="125" /><di:waypoint x="5620" y="125" /><di:waypoint x="5620" y="305" /><bpmndi:BPMNLabel><dc:Bounds x="8806" y="257" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F59_di" bpmnElement="F59"><di:waypoint x="8800" y="355" /><di:waypoint x="8800" y="945" /><bpmndi:BPMNLabel><dc:Bounds x="8806" y="363" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F60_di" bpmnElement="F60"><di:waypoint x="8825" y="330" /><di:waypoint x="9062" y="330" /><di:waypoint x="9062" y="215" /><di:waypoint x="9102" y="215" /><bpmndi:BPMNLabel><dc:Bounds x="9068" y="239" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F61_di" bpmnElement="F61"><di:waypoint x="8730" y="990" /><di:waypoint x="8690" y="990" /><di:waypoint x="8690" y="140" /><di:waypoint x="5620" y="140" /><di:waypoint x="5620" y="305" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F62_di" bpmnElement="F62"><di:waypoint x="9145" y="330" /><di:waypoint x="9270" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F63_di" bpmnElement="F63"><di:waypoint x="9120" y="355" /><di:waypoint x="9120" y="690" /><di:waypoint x="9270" y="690" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F64_di" bpmnElement="F64"><di:waypoint x="9120" y="355" /><di:waypoint x="9120" y="990" /><di:waypoint x="9270" y="990" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F65_di" bpmnElement="F65"><di:waypoint x="9120" y="355" /><di:waypoint x="9120" y="1290" /><di:waypoint x="9270" y="1290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F66_di" bpmnElement="F66"><di:waypoint x="9410" y="330" /><di:waypoint x="9535" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F67_di" bpmnElement="F67"><di:waypoint x="9410" y="690" /><di:waypoint x="9560" y="690" /><di:waypoint x="9560" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F68_di" bpmnElement="F68"><di:waypoint x="9410" y="990" /><di:waypoint x="9560" y="990" /><di:waypoint x="9560" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F69_di" bpmnElement="F69"><di:waypoint x="9410" y="1290" /><di:waypoint x="9560" y="1290" /><di:waypoint x="9560" y="355" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F70_di" bpmnElement="F70"><di:waypoint x="9585" y="330" /><di:waypoint x="9710" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F71_di" bpmnElement="F71"><di:waypoint x="9850" y="330" /><di:waypoint x="9975" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F72_di" bpmnElement="F72"><di:waypoint x="10025" y="330" /><di:waypoint x="10150" y="330" /><bpmndi:BPMNLabel><dc:Bounds x="10031" y="312" width="80" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F73_di" bpmnElement="F73"><di:waypoint x="10000" y="305" /><di:waypoint x="10000" y="110" /><di:waypoint x="5620" y="110" /><di:waypoint x="5620" y="305" /><bpmndi:BPMNLabel><dc:Bounds x="10006" y="257" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F74_di" bpmnElement="F74"><di:waypoint x="10000" y="355" /><di:waypoint x="10000" y="445" /><di:waypoint x="10150" y="445" /><bpmndi:BPMNLabel><dc:Bounds x="10008" y="413" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F75_di" bpmnElement="F75"><di:waypoint x="10290" y="445" /><di:waypoint x="10422" y="445" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F80_di" bpmnElement="F80"><di:waypoint x="10290" y="330" /><di:waypoint x="10370" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F81_di" bpmnElement="F81"><di:waypoint x="10510" y="330" /><di:waypoint x="10642" y="330" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

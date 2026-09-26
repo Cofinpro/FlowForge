@@ -1,0 +1,459 @@
+{
+  "S3.1.1": {
+    "description": "Maps the current-state customer journey (journey-current) of the focal persona before, during and after the job, with touchpoints, thoughts, emotion curve and per-step panel walkthrough comments. Use when the dark-factory workflow reaches step 3.1.1 \"Current-State-Journey kartieren\".",
+    "purpose": "Gives an outside-in picture of how the job is done today, so S3.1.2 can mark hot spots on concrete journey steps and S3.1.3 can design the future state against it.",
+    "procedure": [
+      "Pick the focal persona (PER-…) and one job (JOB-…) from personas/jtbd; state the scenario and trigger situation in one paragraph, citing both ids.",
+      "Take the as-is process steps, workarounds and regulatory touchpoints from research-domaene-prozesse-regulatorik (DR-03) and cite them by SRC id; include the Verweigerer workaround as a real current-state path.",
+      "Lay out stages Before / During / After (journey starts before first contact with any tool and ends after the job is done); give every step a stable local anchor (e.g. `cur.B2`) that S3.1.2 will reference — anchors are not items.",
+      "For each step record: user action, touchpoint/channel, thought (quote-like), emotion score -2..+2; no internal/system-only steps.",
+      "Consume the walkthrough panel result passed by the Workflow: attach each persona comment (persona id, step anchor, verbatim gist) to its step and mark it 🤖; where personas diverge, keep separate emotion values per persona and show the spread.",
+      "Draw the emotion curve as a Mermaid xychart or a text table (step × score); mark candidate moments of truth (largest drops/rises) without yet rating them — rating is S3.1.2.",
+      "Set evidence per step (🔗 when a DR-03 SRC backs it, 🤖 when only panel comments, 🧠 when inferred) and record it per item in the authored itemIndex (commit-artifact.mjs computes the artifact evidence mix)."
+    ],
+    "selfCheck": [
+      "Rubric `journey`: phases (Before/During/After), touchpoints and an emotion curve are all present.",
+      "Outside-in: every step describes what the persona experiences, none is an internal process step.",
+      "End to end: the first step precedes first contact, the last step follows the transaction/job outcome.",
+      "Every action is tied to a touchpoint or channel.",
+      "Every step has at least one panel walkthrough comment marked 🤖 or an explicit note that no persona commented.",
+      "DR-03 facts are cited by SRC id; nothing from the panel is labelled 🔗."
+    ],
+    "pitfalls": [
+      "Drawing a process map (system/back-office steps) instead of a journey map.",
+      "Starting the journey at \"opens our app\" — the current state has no product of ours yet.",
+      "Averaging persona emotions into one curve and hiding Contrarian/Verweigerer divergence."
+    ],
+    "templateSections": [
+      "## Scenario — focal PER, JOB, trigger situation, scope of the journey",
+      "## Journey table — stage | anchor | action | touchpoint | thought | emotion | evidence",
+      "## Emotion curve — Mermaid xychart or text table, per persona where divergent",
+      "## Panel walkthrough comments — per step anchor: persona, comment gist, 🤖",
+      "## Candidate moments of truth — anchors with largest emotion swings (unrated)",
+      "## Sources & evidence mix — SRC ids used, share per evidence level"
+    ],
+    "domainKnowledge": "- Pick a persona and a scenario or job; lay out the stages Before, During and After; for each step record actions, touchpoints, thoughts and an emotion curve; mark hot spots and moments of truth [^1][^2].\n- Pass: outside-in (what the user experiences, not internal process steps); end to end, starting before first contact and ending after the transaction; every action tied to a touchpoint or channel [^1][^2].\n- Pitfall: confusing a process map with a journey map [^1].\n- Dark-factory rule: panel `walkthrough` comments on each journey step (Gedächtnis §7.5); every hot spot is either addressed in the future state or skipped with a reason (rubric `journey`).\n- Walkthrough output = one comment per step and persona; synthetic content is always shown as 🤖 and never passed off as cited (Gedächtnis §6, §7.5).\n\n[^1]: \"The Journey Mapping Playbook\" (Angrave 2020) — \"The customer journey is not about your process maps. Their journey may start well before any contact with you and may carry on well beyond their last interaction with you.\"\n[^2]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"Define what happens BEFORE, DURING, and AFTER the actual experience … Supplement what the persona thinks … and the emotion he/she feels.\""
+  },
+  "S3.1.2": {
+    "description": "Marks hot spots and friction points on the current-state journey as HS items, linked to journey steps and PAIN items, with a disclosed severity score. Use when the dark-factory workflow reaches step 3.1.2 \"Hot Spots & Friktionspunkte markieren\".",
+    "purpose": "Turns the current journey into a ranked list of HS items that S3.1.3 must address or explicitly skip in the future state and that S4.1.4 turns into edge-case/detail cards; HS is a recommended trace edge (Gedächtnis §10.2).",
+    "procedure": [
+      "Read journey-current step by step; a hot spot is a step with an emotion ≤ -1, a panel complaint, a documented failure case from DR-03, or a moment of truth.",
+      "Create one `HS-<nnn>` item per distinct friction point (merge duplicates across steps; never reuse ids); name it from the user's view (\"waits for …\", \"re-enters …\").",
+      "For each HS record: journey anchor(s), type (pain, wait, error, drop-off risk, compliance, moment of truth), affected personas, and `derivedFrom` = matching PAIN-… items from pains-gains plus the anchor evidence.",
+      "Score severity with a disclosed formula: severity = frequency (share of panel personas who hit it, 0..1) × intensity (|min emotion| on the step, 0..2) + 1 if it is a moment of truth; list the inputs per HS so the critic can recompute.",
+      "Set evidence per HS: 🔗 if a PAIN or DR-03 SRC cites it, 🤖 if only from panel comments, 🧠 if inferred; list all supporting ids (strongest level wins).",
+      "Flag PAIN items from pains-gains that do not surface anywhere on the journey (possible journey gap) and HS items with no matching PAIN (possible new pain) in a reconciliation section.",
+      "Record all HS ids with derivedFrom and evidence in the authored `itemIndex`, sorted by severity."
+    ],
+    "selfCheck": [
+      "Every HS references at least one journey-current anchor and at least one evidence id (PAIN, SRC, T/panel comment or inferred).",
+      "Rubric `scoring`: severity formula and every input value are shown; the ranking matches the computed values.",
+      "Every journey step with emotion ≤ -1 is covered by an HS or explicitly dismissed with a reason.",
+      "Moments of truth are marked as such.",
+      "PAIN ↔ HS reconciliation lists unmatched items on both sides.",
+      "Evidence levels follow Gedächtnis §6 (strongest wins, panel-only = 🤖)."
+    ],
+    "pitfalls": [
+      "Writing solutions into the hot spot (\"needs a reminder feature\") instead of the friction itself.",
+      "One HS per step by reflex, duplicating the same underlying friction.",
+      "Severity as a gut label (high/medium/low) without disclosed inputs."
+    ],
+    "templateSections": [
+      "## Hot spot list — HS id | title | anchors | type | personas | severity | evidence",
+      "## Severity calculation — formula and per-HS input values",
+      "## Moments of truth — HS ids flagged as moments of truth, why",
+      "## PAIN ↔ HS reconciliation — unmatched PAIN, unmatched HS",
+      "## Dismissed candidates — low-emotion steps not turned into HS, with reason"
+    ],
+    "domainKnowledge": "- Journey maps record actions, touchpoints, thoughts and an emotion curve per step; hot spots and moments of truth are marked on that curve [^1][^2].\n- The journey is outside-in and may start well before and end well after any contact with the product, so hot spots can sit outside our touchpoints [^1].\n- Dark-factory rule: every hot spot is either addressed in the future state or skipped with a reason (rubric `journey`), so each HS needs a stable id (`HS-<nnn>`, Gedächtnis §10.1).\n- HS, PAIN and ASM are recommended extra edges on the mandatory trace chain (Gedächtnis §10.2).\n- Any score discloses inputs and formula so the critic can recompute it (Gedächtnis §2.5, rubric `scoring`).\n\n[^1]: \"The Journey Mapping Playbook\" (Angrave 2020) — \"The customer journey is not about your process maps. Their journey may start well before any contact with you and may carry on well beyond their last interaction with you.\"\n[^2]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"Define what happens BEFORE, DURING, and AFTER the actual experience … Supplement what the persona thinks … and the emotion he/she feels.\""
+  },
+  "S3.1.3": {
+    "description": "Designs the future-state customer journey (journey-future) that resolves the hot spots via backlog opportunities, validated by a panel walkthrough. Use when the dark-factory workflow reaches step 3.1.3 \"Future-State-Journey entwerfen\".",
+    "purpose": "Defines the target experience that S3.1.4 blueprints into frontstage/backstage layers and that S4.1.2 retells as the story-map narrative.",
+    "procedure": [
+      "Start from the current journey stages; for each HS-… (highest severity first) decide: address (which future step, which OPP-… from opportunity-backlog) or skip (reason: out of scope, low severity, not ours to fix).",
+      "Write the future journey Before / During / After with local anchors (`fut.B1` …), action, touchpoint, thought, target emotion; mark new or changed touchpoints versus the current state.",
+      "Keep it outside-in and solution-light: describe what the persona experiences, not UI widgets; any screen idea is a text/Mermaid region sketch only, no images (Gedächtnis §4).",
+      "Consume the walkthrough panel result: per future step and persona, the comment, whether they would take this path, remaining friction; mark all 🤖 and keep Contrarian and Verweigerer objections verbatim with an answer or a risk flag.",
+      "Draw current vs. future emotion curves side by side (Mermaid xychart or table) and name the moments of truth the future state must win.",
+      "Build the HS coverage table: every HS → addressed-by (future anchor + OPP) or skipped-with-reason; every future step lists derivedFrom (HS, OPP, JOB).",
+      "Record new assumptions the future state relies on (e.g. \"persona will connect X\") as candidates for ASM, flagged 🧠, in an assumptions section."
+    ],
+    "selfCheck": [
+      "Rubric `journey`: phases, touchpoints and emotion curve present; every HS is addressed or skipped with a reason.",
+      "Every addressed HS names the OPP (or JOB) that resolves it.",
+      "Outside-in and end to end (before first contact to after the job outcome).",
+      "Panel walkthrough comments exist per step, are 🤖, and Contrarian/Verweigerer objections are answered or risk-flagged.",
+      "No images; any wireframe is text/Mermaid.",
+      "Current vs. future emotion comparison is shown."
+    ],
+    "pitfalls": [
+      "Describing the product feature list in journey form instead of the experience.",
+      "Silently dropping low-severity HS instead of listing them as skipped with reason.",
+      "Letting the panel rubber-stamp: ignoring the Verweigerer who stays on the workaround."
+    ],
+    "templateSections": [
+      "## Scenario & target outcome — PER, JOB, what changes for the persona",
+      "## Future journey table — stage | anchor | action | touchpoint | thought | target emotion | derivedFrom | new/changed",
+      "## HS coverage — HS id | addressed-by (anchor, OPP) | or skipped: reason",
+      "## Emotion curve current vs. future — Mermaid xychart or table",
+      "## Panel walkthrough — per anchor and persona, 🤖; objections with answer or risk flag",
+      "## Assumptions introduced — candidate ASM, 🧠"
+    ],
+    "domainKnowledge": "- A journey covers Before, During and After the experience with actions, touchpoints, thoughts and emotion per step [^2].\n- Pass: outside-in, not internal process steps; end to end, starting before first contact and ending after the transaction; every action tied to a touchpoint or channel [^1][^2].\n- Pitfall: confusing a process map with a journey map [^1].\n- Dark-factory rule: panel `walkthrough` comments on each journey step (Gedächtnis §7.5); every hot spot is either addressed in the future state or skipped with a reason (rubric `journey`).\n- Wireframes are text/Mermaid sketches (regions, elements, states), never images (Gedächtnis §4).\n\n[^1]: \"The Journey Mapping Playbook\" (Angrave 2020) — \"The customer journey is not about your process maps. Their journey may start well before any contact with you and may carry on well beyond their last interaction with you.\"\n[^2]: \"The Design Thinking Toolbox\" (Lewrick et al. 2020) — \"Define what happens BEFORE, DURING, and AFTER the actual experience … Supplement what the persona thinks … and the emotion he/she feels.\""
+  },
+  "S3.1.4": {
+    "description": "Layers the future-state journey into a service blueprint (customer actions, frontstage, backstage, support systems) on the target architecture from the idea brief, with rated backstage complexity and web-fact-checked system claims. Use when the dark-factory workflow reaches step 3.1.4 \"Service Blueprint schichten\".",
+    "purpose": "Shows what must exist behind every touchpoint so S4.2.2 can cut a walking skeleton through all layers and later sizing/spikes can see backstage complexity.",
+    "procedure": [
+      "Read `zielarchitektur`/`plattform` and `constraints` from idea-brief; note which fields are 🧠 assumptions and carry that flag onto dependent blueprint cells.",
+      "For each journey-future anchor create one column with lanes: customer action | line of interaction | frontstage (touchpoint) | line of visibility | backstage action | line of internal interaction | support process / IT system.",
+      "Trace every frontstage interaction down to at least one backstage action or support system; mark gaps as \"no backstage yet\" explicitly.",
+      "Rate backstage complexity per column low/medium/high with a disclosed reason (new component, external integration, regulated data, manual process) — a manual backstage is allowed and flagged as candidate \"crutch\" for S4.2.2.",
+      "Fact-check claims about external systems, APIs, platform limits and regulatory obligations with WebSearch/WebFetch; normalize every retrieved source via `node skills/product-recherche/scripts/normalize-sources.mjs` into `research/sources/SRC-*.md` and cite by SRC id; mark unchecked claims 🧠.",
+      "Render the blueprint as a Markdown table per stage or a Mermaid flowchart with subgraphs per lane; no images.",
+      "List cross-column shared components/systems and the riskiest backstage items (high complexity or unverified external dependency) for release sequencing."
+    ],
+    "selfCheck": [
+      "Rubric `service-blueprint`: frontstage, line of visibility, backstage and support systems all present; backstage complexity rated.",
+      "Strict separation at the line of visibility: nothing the customer cannot see is in frontstage.",
+      "Every frontstage interaction traces to a backstage process or system, or is marked as a gap.",
+      "Blueprint is consistent with the target architecture/platform from idea-brief; brief-derived 🧠 assumptions are flagged.",
+      "Every external-system or regulatory claim cites an SRC produced by this step or DR-03, or is marked 🧠."
+    ],
+    "pitfalls": [
+      "Mixing internal staff actions into frontstage (blurring the line of visibility).",
+      "Designing a technology stack that ignores the brief's `zielarchitektur`.",
+      "Citing a web page without normalizing it into an SRC artifact."
+    ],
+    "templateSections": [
+      "## Architecture frame — target architecture/platform and constraints from idea-brief, 🧠 flags",
+      "## Blueprint — per journey-future anchor: customer action | frontstage | backstage | support system",
+      "## Backstage complexity — anchor | rating | reason | crutch candidate",
+      "## Shared components & external dependencies — with SRC citations",
+      "## Fact-check log — claim | result | SRC",
+      "## Riskiest backstage items — input for release sequencing"
+    ],
+    "domainKnowledge": "- Swimlanes: customer actions | line of interaction | frontstage | **line of visibility** | backstage | line of internal interaction | support processes and IT systems [^1].\n- Pass: strict separation at the line of visibility; every frontstage interaction traces down to a backstage process or system; backstage complexity is rated [^1].\n- Support processes indirectly impact the customer experience, so they belong on the blueprint even without a touchpoint [^1].\n- The architect role replaces tech lead/operations and needs the target architecture/platform from the idea brief (Gedächtnis §4, §14).\n- Light research uses Claude WebSearch for fact-checks; every retrieved source becomes an `SRC-<nnnn>` source artifact (Gedächtnis §8).\n- Unverified claims stay 🧠; a claim the critic later refutes via K.3 fact-check becomes a `fail` of the affected criterion (Gedächtnis §9.1).\n\n[^1]: \"Mapping Experiences\" (Kalbach 2020) — \"The line of visibility separates onstage touchpoints from backstage actions … Support processes … indirectly impact the customer experience.\""
+  },
+  "S4.1.1": {
+    "description": "Sets the story-map frame (story-map-framing): focal personas, problem statement and business goals written above the map. Use when the dark-factory workflow reaches step 4.1.1 \"Rahmen setzen (Personas, Ziele, Problem)\".",
+    "purpose": "Fixes for whom, for which problem and toward which goals the map is built, so S4.1.2 tells one coherent narrative and S4.2.1 can set outcome-based release goals.",
+    "procedure": [
+      "Select the primary persona (PER-…) and at most two secondary personas from personas; state why the primary one leads the map.",
+      "State the problem as one POV sentence taken from pov-hmw, citing the POV/HMW-… ids it builds on; keep it solution-neutral.",
+      "Copy the goals from business-goals: the One Metric That Matters (with its AARRR stage) and the supporting GOAL-… items, each with its target value.",
+      "Write scope boundaries: in-scope jobs (JOB-…), explicitly out-of-scope personas/jobs, known constraints from the brief.",
+      "List the open questions and riskiest ASM-… items the map must help answer.",
+      "Keep it one page; everything here is the \"top of the map\" header the later steps repeat."
+    ],
+    "selfCheck": [
+      "Exactly one primary persona, referenced by PER id.",
+      "Problem statement is solution-neutral and traceable to a POV/HMW id (rubric `pov-hmw`).",
+      "OMTM and GOAL ids are present with target values and AARRR stage.",
+      "Out-of-scope section is non-empty.",
+      "Every reference is an existing item id; no new items are created."
+    ],
+    "pitfalls": [
+      "Framing the map for \"all users\", which makes the narrative incoherent.",
+      "Restating a feature idea as the problem."
+    ],
+    "templateSections": [
+      "## Personas — primary PER (why), secondary PER",
+      "## Problem — POV statement with HMW/POV ids",
+      "## Goals — OMTM (AARRR stage, target), supporting GOAL ids",
+      "## Scope — in-scope JOB ids, out of scope, constraints",
+      "## Questions the map must answer — open questions, riskiest ASM ids"
+    ],
+    "domainKnowledge": "- Story mapping step 1: set the frame — personas, problem and goals written above the map [^1].\n- Kalbach: \"Frame the idea … Write your responses down at the top of the map\", before mapping the big picture [^1].\n- Pitfall: the flat backlog trap, meaning a linear list without narrative context [^2]; the frame is what gives the later narrative its context.\n- Mandatory trace chain `AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS` (Gedächtnis §10.2): the frame names the GOAL ids the backbone must serve.\n- The frame references existing PER, HMW and GOAL items only; it creates no new items (Gedächtnis §10.1).\n\n[^1]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.1.2": {
+    "description": "Tells the big picture as a left-to-right narrative flow of the primary persona through the future-state journey (narrative-flow). Use when the dark-factory workflow reaches step 4.1.2 \"Big Picture & Narrative Flow erzaehlen\".",
+    "purpose": "Provides the ordered, user-voiced story from which S4.1.3 distils backbone activities and tasks.",
+    "procedure": [
+      "Read story-map-framing (primary persona, problem, goals) and journey-future (anchors, touchpoints).",
+      "Retell the journey as a sequence of short beats in the persona's voice (\"First I …, then I …\"), left to right, from trigger to job outcome, including before/after beats outside the product.",
+      "Tag every beat with its journey-future anchor and the HS/OPP it serves; beats without an anchor are allowed only as marked gaps.",
+      "Keep beats solution-independent: user intent and outcome, not screens or buttons.",
+      "Note branches (alternative paths, secondary persona variants) as side notes; do not expand details — that is S4.1.4.",
+      "End with a Mermaid flowchart (LR) of the beats as a one-glance big picture."
+    ],
+    "selfCheck": [
+      "Narrative runs strictly left to right from trigger to outcome and is end to end.",
+      "Every beat references a journey-future anchor or is marked as a gap.",
+      "Beats are solution-independent (no UI or technology terms).",
+      "The primary persona from story-map-framing is the narrator throughout."
+    ],
+    "pitfalls": [
+      "Listing features instead of telling what the user does.",
+      "Diving into edge cases and alternatives too early, losing the big picture."
+    ],
+    "templateSections": [
+      "## Narrator & goal — primary PER, JOB, target outcome",
+      "## Narrative beats — # | beat (persona voice) | journey anchor | HS/OPP",
+      "## Branches — alternative paths and secondary-persona variants (not expanded)",
+      "## Big picture — Mermaid flowchart LR of the beats"
+    ],
+    "domainKnowledge": "- Story mapping step 2: tell the big picture as a narrative from left to right [^1].\n- The horizontal axis of a story map represents steps in a high-level user activity [^2]; the narrative defines that axis.\n- Pass: the backbone derived from it is solution-independent; the map is a 2D grid (horizontal is narrative) [^1][^2].\n- Pitfall: the flat backlog trap, meaning a linear list without narrative context [^2].\n- Kalbach: \"Map the big picture\" comes right after framing and before exploring details [^1].\n\n[^1]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.1.3": {
+    "description": "Distils the story-map backbone from the narrative into User Activities (ACTV), User Tasks (UT) and one Epic (EP) per activity, and writes one epic file per EP into the run backlog. Use when the dark-factory workflow reaches step 4.1.3 \"Backbone destillieren (Activities & Tasks)\".",
+    "purpose": "Creates the ACTV/UT/EP skeleton of the trace chain (UT → EP/ACTV → OPP|JOB) that S4.1.4 details, S4.2.x slices and S5.1.1 turns into stories; S6.2.1/6.2.2 traverse it for orphan checks.",
+    "procedure": [
+      "Group the narrative-flow beats into user activities (verb phrase of a user goal, e.g. \"plan the week\"); create `ACTV-<nnn>` items in narrative order, derivedFrom the beats' OPP/JOB ids and journey anchors.",
+      "Under each activity list the user tasks at walking level (one verb, one user intent); create `UT-<nnn>` items, each derivedFrom exactly one ACTV plus the beat's OPP/HS ids; order them left to right.",
+      "Create one `EP-<nnn>` per ACTV (1:1 default; merge or split only with a written reason); each EP is derivedFrom its ACTV and the OPP or JOB it serves so the chain EP/ACTV → (OPP | JOB) → IMP → GOAL is unbroken — name the IMP/GOAL reached via the OPP.",
+      "Write one file per epic at `runs/<runId>/backlog/epics/EP-<nnn>_<slug>.md` (file name = EP item id + kebab slug) containing only a 3–5 line body (user goal, outcome, in/out of scope), then commit each with `--type epic`: authored itemIndex = the EP item, attributes {title, actv, tasks [UT ids], goal, slice: null} (slice is set later by S4.2.5).",
+      "Keep the backbone solution-independent: activity and task names describe user intent, never screens, APIs or components.",
+      "Render the backbone as a Markdown grid (columns = ACTV in narrative order, rows = UT) plus the ACTV → EP mapping table.",
+      "Assign evidence per item (strongest of its derivedFrom sources, Gedächtnis §6) and record all ACTV, UT and EP ids with derivedFrom and evidence in the authored `itemIndex`."
+    ],
+    "selfCheck": [
+      "Rubric `story-map` (partial): horizontal axis follows the narrative; no orphaned cards — every UT sits under exactly one ACTV and every ACTV has ≥ 1 UT.",
+      "Every EP traces via its ACTV to at least one OPP or JOB, and onward to IMP and GOAL (Gedächtnis §10.2).",
+      "Backbone is solution-independent (no UI/tech words in ACTV/UT titles).",
+      "One epic file exists per EP id under backlog/epics/, committed as type `epic` with attributes.slice = null.",
+      "IDs are new and unique in the run; none reused.",
+      "Every narrative beat is covered by at least one UT or listed as intentionally dropped."
+    ],
+    "pitfalls": [
+      "Activities that are really features or system components (\"notification service\").",
+      "Tasks too fine (clicks) or too coarse (another activity) — mixed altitudes break slicing.",
+      "Epic files that drift from the itemIndex (different titles, missing UT list)."
+    ],
+    "templateSections": [
+      "## Backbone grid — columns ACTV (narrative order), rows UT",
+      "## Activities — ACTV id | title | derivedFrom (OPP/JOB, anchors) | evidence",
+      "## Tasks — UT id | title | ACTV | derivedFrom | evidence",
+      "## Epics — EP id | ACTV | OPP/JOB → IMP → GOAL | file path | merge/split reason",
+      "## Dropped beats — narrative beats not mapped, with reason"
+    ],
+    "domainKnowledge": "- Story mapping step 3: distil the backbone — activities (top row, candidate epics) and tasks (the walking level) [^1].\n- Pass: 2D grid (horizontal is narrative, vertical is priority); the backbone is solution-independent; no orphaned cards [^2][^3].\n- A story map is a grid where the horizontal axis represents steps in a high-level user activity and the vertical axis the delivery schedule [^3].\n- Pitfall: the flat backlog trap, meaning a linear list without narrative context [^3].\n- Item prefixes: `ACTV` = user activity (epic candidate), `UT` = user task, `EP` = epic, all created in 4.1.3; format `<PREFIX>-<nnn>`, never reused (Gedächtnis §10.1).\n- Mandatory chain `AC → ST → UT → EP/ACTV → (OPP | JOB) → IMP → GOAL → VIS`; orphans are found deterministically in 6.2.1/6.2.2 (Gedächtnis §10.2).\n\n[^1]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^2]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.1.4": {
+    "description": "Explores details, alternatives, edge cases and error paths below each user task (story-map-details), including a \"What-About\" pass and hot-spot coverage, from the QA perspective. Use when the dark-factory workflow reaches step 4.1.4 \"Details, Alternativen & Randfaelle explorieren\".",
+    "purpose": "Fills the vertical axis of the map with detail cards that S4.1.5 walks for gaps and dependencies and that S4.2.1–4.2.5 slice into releases; later S5.1.1 turns cards into stories.",
+    "procedure": [
+      "For every UT-… in backbone, add detail cards below it: happy-path variant, alternatives, edge cases, error/exception paths, business rules; give each a local card ref `<UT-id>.c<n>` (cards are not items; stories get ST ids in 5.1.1).",
+      "Play \"What-About\" per task: what about no data, wrong input, interruption, offline, second device, permission denied, regulated data, the Contrarian's objection, the Verweigerer's workaround?",
+      "Map every HS-… from hot-spots to at least one card (card cites the HS) or list it as \"not covered here\" with reason (e.g. resolved in journey design only).",
+      "Mark each card type (variant, alternative, edge, error, rule) and a testability note (observable outcome) — the QA view that 6.1.x will build on.",
+      "Keep cards user-facing and solution-neutral; flag cards that are purely technical as candidates for S4.1.5 dependencies instead.",
+      "Render the map as a Markdown grid: columns = ACTV → UT, rows = cards; add a per-UT count of cards."
+    ],
+    "selfCheck": [
+      "Rubric `story-map`: no orphaned cards — every card hangs under exactly one UT.",
+      "Every UT has ≥ 1 detail card beyond the happy path, or a stated reason why not.",
+      "Every HS is covered by a card or explicitly marked not covered with reason.",
+      "Each card has a type and an observable outcome (testable).",
+      "No new ACTV/UT/EP ids are invented; missing tasks are noted for S4.1.5."
+    ],
+    "pitfalls": [
+      "Only listing happy paths; edge and error cards are the point of this step.",
+      "Writing implementation tasks (\"add DB index\") as cards.",
+      "Silently adding new tasks instead of noting them as gaps."
+    ],
+    "templateSections": [
+      "## Detail map — grid ACTV → UT columns, cards as rows",
+      "## Cards — ref | UT | type | description | observable outcome | HS",
+      "## What-About log — question asked per UT and resulting card or \"n/a\"",
+      "## HS coverage — HS id | card refs | or not covered: reason",
+      "## Noted gaps — suspected missing tasks or technical items for S4.1.5"
+    ],
+    "domainKnowledge": "- Story mapping step 4: explore details, alternatives, edge cases, and play \"What-About\" [^1].\n- Pass: 2D grid (horizontal is narrative, vertical is priority); no orphaned cards [^2][^3].\n- Kalbach's mapping sequence: frame, map the big picture, explore, then create a release strategy [^2].\n- QA role owns edge cases, SBE, Gherkin and testability (Gedächtnis §4); every hot spot needs a documented disposition (rubric `journey`).\n\n[^1]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^2]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.1.5": {
+    "description": "Walks the detailed story map end to end to find missing steps, admin tasks and system/ordering dependencies, producing a gap-dependency-list. Use when the dark-factory workflow reaches step 4.1.5 \"Map durchlaufen: Luecken & Abhaengigkeiten finden\".",
+    "purpose": "Gives the SP4.1 critic and the release-slicing steps (S4.2.2/S4.2.3) an explicit list of gaps and dependencies so slices are buildable in order.",
+    "procedure": [
+      "Walk story-map-details left to right as the primary persona and again as an admin/operator: at each UT ask what must have happened before and what happens after.",
+      "Record gaps: missing user steps, admin/back-office tasks (setup, moderation, support, data correction), onboarding/offboarding, notifications; each gap names where it belongs (after which UT/ACTV) and proposes a card or task title — do not mint ACTV/UT ids here.",
+      "Record dependencies between cards/UTs: type (data, technical, ordering, external system, regulatory), from → to, blocking yes/no, with the reason.",
+      "Cross-check external systems and shared components against the service-blueprint support lane where visible in the details; mark unknowns as spike candidates.",
+      "Draw the dependency graph as Mermaid (flowchart LR) and check it for cycles; list any cycle as a must-resolve finding.",
+      "Summarise which gaps the backlog author must add (change request for S4.1.3/S4.1.4 on the next iteration) and which are deliberately out of scope."
+    ],
+    "selfCheck": [
+      "Rubric `story-map`: the map has no hidden gaps between consecutive tasks; each gap is located in the grid.",
+      "Every dependency has type, direction, blocking flag and reason.",
+      "Dependency graph is acyclic or cycles are listed as findings.",
+      "Admin/operator tasks were explicitly considered (section present even if empty with reason).",
+      "No new item ids created; proposals reference existing UT/card refs."
+    ],
+    "pitfalls": [
+      "Walking only the happy path and missing admin/support tasks.",
+      "Recording dependencies without direction, making sequencing impossible."
+    ],
+    "templateSections": [
+      "## Walk log — per UT: preconditions, follow-ups, findings",
+      "## Gaps — location (after UT/ACTV) | missing step | proposed card | user or admin",
+      "## Dependencies — from | to | type | blocking | reason",
+      "## Dependency graph — Mermaid flowchart, cycle check result",
+      "## Spike candidates — unknown external/technical dependencies"
+    ],
+    "domainKnowledge": "- Story mapping step 5: walk the map — find missing steps, admin tasks and system dependencies [^1].\n- Pass: no orphaned cards; the grid keeps narrative horizontally and priority vertically [^2][^3].\n- The walking skeleton later cuts through all backbone activities end to end [^1], so ordering dependencies found here constrain the first slice.\n- The architect role owns walking skeleton, spikes and the technical perspective (Gedächtnis §4).\n\n[^1]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^2]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^3]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.2.1": {
+    "description": "Sets outcome-based release goals (release-goals) for the detailed story map, each tied to GOAL/IMP items and a learning hypothesis. Use when the dark-factory workflow reaches step 4.2.1 \"Outcome-basierte Release-Ziele festlegen\".",
+    "purpose": "Defines what each release must change for users and the business, so S4.2.2 cuts a skeleton serving release 1 and S4.2.5 checks every slice has a learning goal.",
+    "procedure": [
+      "Read the OMTM and GOAL-… items from business-goals and the IMP-… items they connect to; read story-map-details for what is buildable.",
+      "Define 2–4 releases; for each write an outcome goal as a behaviour change of a persona (\"PER-… does X within Y\"), not a feature list.",
+      "Attach to each release goal: GOAL/IMP ids, metric and target (preferably the OMTM or a leading indicator, with AARRR stage), and a learning hypothesis linked to the riskiest ASM-… it tests.",
+      "Name the primary persona and the ACTV-… activities each release must touch (without choosing cards yet).",
+      "State the release-1 success/kill signal: what result would stop further investment.",
+      "Order releases by learning value: release 1 tests the riskiest assumption behind the OMTM."
+    ],
+    "selfCheck": [
+      "Rubric `roadmap`: every goal is an outcome, not a feature, and references GOAL/IMP ids.",
+      "Each release has a metric with target and an AARRR stage.",
+      "Each release has a learning hypothesis linked to an ASM id (rubric `mvp`: every slice has a learning goal).",
+      "Release 1 has an explicit success and kill signal."
+    ],
+    "pitfalls": [
+      "Release goals phrased as \"deliver feature X\".",
+      "Metrics with no target value or no link to the OMTM."
+    ],
+    "templateSections": [
+      "## Goal frame — OMTM (AARRR stage), GOAL and IMP ids",
+      "## Releases — # | outcome goal | GOAL/IMP | metric & target | ASM tested | ACTV touched",
+      "## Release 1 signals — success signal, kill signal",
+      "## Ordering rationale — why this sequence maximises learning"
+    ],
+    "domainKnowledge": "- The mapping sequence ends with \"Create a release strategy\" after framing, big picture and exploration [^1].\n- MVP: a balanced vertical slice (feasible, valuable, usable, delightful), not one technical layer; it must yield learning toward a goal [^2].\n- Rubric `roadmap`: outcome instead of feature phrasing; reference to GOAL/IMP (Gedächtnis §13).\n- Rubric `mvp`: every slice has a learning goal and a reference to GOAL (Gedächtnis §13).\n- The One Metric That Matters sits on an AARRR stage (adopted source addition in 1.2.1); release metrics should use it or a leading indicator.\n\n[^1]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^2]: \"Lean Enterprise\" (Humble, Molesky, O'Reilly) — \"Minimum Viable Product: build a slice across instead of one layer at a time … valuable, usable, and feasible … to which we add 'delightful'.\""
+  },
+  "S4.2.2": {
+    "description": "Cuts the walking skeleton (walking-skeleton): the thinnest end-to-end slice across every backbone activity and every service-blueprint layer, crutches allowed. Use when the dark-factory workflow reaches step 4.2.2 \"Walking Skeleton schneiden\".",
+    "purpose": "Defines the steel thread that S4.2.3 places in the opening game and that anchors the MVP scope in S4.2.5.",
+    "procedure": [
+      "For each ACTV-… in backbone order, pick the single minimal card (or UT happy path) the persona needs to get from trigger to outcome under release goal 1.",
+      "For each pick, trace it through the service-blueprint layers (frontstage → backstage → support system) and name the minimal implementation per layer.",
+      "Where a layer is expensive or unproven, allow a \"crutch\" (manual backstage, stub, concierge step) — mark it explicitly with what it replaces and when it must be removed.",
+      "Check blocking dependencies from the gap-dependency-list via story-map-details: include every card the skeleton cannot run without.",
+      "Describe the resulting end-to-end run in 5–10 lines as the persona experiences it; any screen sketch is text/Mermaid only.",
+      "Produce a coverage matrix ACTV × layer showing the skeleton touches every activity and every layer."
+    ],
+    "selfCheck": [
+      "Rubric `walking-skeleton`: steel thread through all layers; minimal; end-to-end usable.",
+      "Every ACTV in the backbone is touched by exactly the minimum needed (no activity skipped).",
+      "Every chosen card traces to a blueprint column and all its layers.",
+      "Every crutch is labelled with what it fakes and a removal release.",
+      "Serves release goal 1 (named)."
+    ],
+    "pitfalls": [
+      "Horizontal slicing: building one layer (e.g. backend only) instead of a thin vertical thread.",
+      "Gold-plating the skeleton with nice-to-have variants.",
+      "Skipping an activity because it looks trivial, breaking end-to-end usability."
+    ],
+    "templateSections": [
+      "## Target — release goal 1 and persona",
+      "## Skeleton cards — ACTV | chosen card/UT | why minimal",
+      "## Layer trace — card | frontstage | backstage | support system | crutch?",
+      "## Coverage matrix — ACTV × layer",
+      "## End-to-end run — persona narrative of the skeleton",
+      "## Crutches — what is faked, risk, removal release"
+    ],
+    "domainKnowledge": "- Walking skeleton or steel thread: a thin slice end to end through all layers across all backbone activities [^1][^2].\n- Adzic's variant \"skeleton on crutches\" uses a manual backend to validate the front end earlier (\"put it on crutches and ship it out\") [^2].\n- Patton: \"I call this first slice a functional walking skeleton\" [^1].\n- Pitfall: horizontal cake slicing [^2].\n- Service blueprint lanes (frontstage, backstage, support systems) define the layers the thread must cross (rubric `service-blueprint`, Gedächtnis §13).\n\n[^1]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.2.3": {
+    "description": "Plans opening game, midgame and endgame (release-sequencing) by assigning every story-map card to a release with the walking skeleton and risky items first. Use when the dark-factory workflow reaches step 4.2.3 \"Opening / Mid / Endgame planen\".",
+    "purpose": "Produces the release lines on the map that S4.2.4 scores and S4.2.5 fixes as MVP and roadmap.",
+    "procedure": [
+      "Put the walking-skeleton cards into the opening game, then add risky items: cards whose path relies on a high-importance/low-evidence ASM, high backstage complexity, or an unverified external dependency.",
+      "Assign optional steps, alternatives and business rules to the midgame; refinement, efficiency, polish and crutch removal to the endgame (or name the release that removes each crutch).",
+      "Respect blocking dependencies: no card precedes a card it depends on; list any violation you had to accept and why.",
+      "Map each game/release to a release goal from S4.2.1 and show which ACTV columns each release thickens.",
+      "Render the map with explicit release lines: Markdown grid, columns = ACTV, row bands = opening / mid / end, cards in cells.",
+      "List cards deliberately left unassigned (parked) with reason."
+    ],
+    "selfCheck": [
+      "Rubric `story-map`: 2D structure with narrative horizontal and priority vertical; release lines explicit; no orphaned cards.",
+      "Opening game contains the full walking skeleton plus identified risky items, each with its risk reason.",
+      "Every card is in exactly one release or listed as parked.",
+      "No dependency order violation, or each is justified.",
+      "Every release references a release goal."
+    ],
+    "pitfalls": [
+      "Front-loading all \"must-haves\" into the opening game so it stops being thin.",
+      "Deferring risky items to the endgame, postponing the learning."
+    ],
+    "templateSections": [
+      "## Release map — grid ACTV columns × opening/mid/end bands",
+      "## Opening game — skeleton cards and risky items with risk reason",
+      "## Midgame — cards and release goal",
+      "## Endgame — cards, crutch removals, release goal",
+      "## Dependency check — violations accepted and why",
+      "## Parked cards — with reason"
+    ],
+    "domainKnowledge": "- Opening game (essential end-to-end flow plus risky items) → midgame (optional steps, business rules) → endgame (refinement, efficiency) [^1].\n- Patton: \"Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\" [^1]\n- A story map's vertical axis represents the software delivery schedule [^2]; release lines make that schedule explicit.\n- Pitfall: the \"all must-have\" priority-one paradox under MoSCoW [^2].\n- Opening game items include the risky ones, so the riskiest assumptions are tested first [^1].\n\n[^1]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^2]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  },
+  "S4.2.4": {
+    "description": "Scores the release slices and their epics by value vs. effort (slice-scoring) with disclosed inputs and formula, using opportunity scores and blueprint complexity. Use when the dark-factory workflow reaches step 4.2.4 \"Nach Value vs. Effort priorisieren\".",
+    "purpose": "Gives S4.2.5 a recomputable ranking to fix the MVP cut and roadmap order, and lets the critic verify the prioritisation.",
+    "procedure": [
+      "For each release and for each EP-… with cards in that release, collect value inputs: opportunity score of the linked OPP-… from opportunity-backlog (Importance + max(Importance − Satisfaction, 0)), contribution to the OMTM/GOAL (0–2), and HS severity resolved.",
+      "Collect effort inputs: size class S/M/L per card (S=1, M=2, L=3) justified from backstage complexity and dependencies in release-sequencing; effort = sum over the epic's cards in that release.",
+      "Compute value = opportunity score + 2 × goal contribution (state any other weight explicitly) and priority = value / effort; show every input in a table so it can be recomputed.",
+      "Place epics/slices in a value-vs-effort quadrant (quick win, big bet, fill-in, money pit) as a text table or Mermaid quadrantChart.",
+      "Check consistency: does the opening game contain the top-priority or deliberately risky items? Flag cards whose score contradicts their release and propose a move with reason.",
+      "Report sensitivity: which ranking changes if a single weight or size class changes by one step."
+    ],
+    "selfCheck": [
+      "Rubric `scoring`: formula and input values disclosed; recomputable; ranking consistent with values.",
+      "Every OPP score quoted matches opportunity-backlog and its formula Importance + max(Importance − Satisfaction, 0).",
+      "Every size class has a one-line reason.",
+      "Not everything is top priority: the distribution shows a real cut.",
+      "Proposed release moves are listed, not silently applied."
+    ],
+    "pitfalls": [
+      "Using gut ratings for value instead of the panel-derived opportunity scores.",
+      "Priority-one paradox: every epic rated maximum value.",
+      "Changing the release sequence without recording the move proposal."
+    ],
+    "templateSections": [
+      "## Formula — value, effort, priority definitions and weights",
+      "## Inputs — EP | release | OPP score | goal contribution | HS resolved | cards (size) | effort",
+      "## Ranking — EP/slice | value | effort | priority",
+      "## Quadrant — text table or Mermaid quadrantChart",
+      "## Consistency & proposed moves — card, from/to release, reason",
+      "## Sensitivity — ranking changes under weight/size perturbation"
+    ],
+    "domainKnowledge": "- Dark-factory rule: value vs. effort discloses its inputs and formula (rubric `scoring`); the MVP fits the budget and timebox from the idea brief (rubric `mvp`).\n- Pitfall: horizontal cake slicing; the \"all must-have\" priority-one paradox under MoSCoW [^1][^2].\n- MVP: a balanced vertical slice (feasible, valuable, usable, delightful), not one technical layer; it must yield learning toward a goal [^2].\n- Opportunity score = Importance + max(Importance − Satisfaction, 0) from the panel rating (1–5), computed in 2.2.5 (adopted source addition).\n- Stakeholder prioritisation is replaced by panel rating plus disclosed scoring; size class S/M/L replaces story points (Gedächtnis §4).\n\n[^1]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\"\n[^2]: \"Lean Enterprise\" (Humble, Molesky, O'Reilly) — \"Minimum Viable Product: build a slice across instead of one layer at a time … valuable, usable, and feasible … to which we add 'delightful'.\""
+  },
+  "S4.2.5": {
+    "description": "Fixes the final sliced story map with release roadmap and MVP-candidate section, sets `slice` on every epic file, and proves the MVP fits the budget and timebox from the idea brief. Use when the dark-factory workflow reaches step 4.2.5 \"MVP & Release-Roadmap abgrenzen\".",
+    "purpose": "The story map is the input S5.1.1 turns into stories; the Workflow iterates `EP[slice=1]` in SP5.1, and the MVP-candidate section is what G-P3 (rubric `gate-mvp`) and the panel vote on.",
+    "procedure": [
+      "Take the ranking and proposed moves from slice-scoring; accept or reject each move with a reason and fix the final release lines.",
+      "Define slice 1 (MVP) as a balanced vertical slice: walking skeleton + highest-priority/risky cards, feasible, valuable, usable and delightful; it must reach release goal 1's learning hypothesis.",
+      "Prove fit against `budget`/`timebox` from idea-brief: effort sum of slice 1 (size-class points) converted with a disclosed rate (e.g. points per week for the assumed team) versus the timebox; if it does not fit, cut cards and repeat; flag 🧠 if budget/timebox were derived in step 0.",
+      "Write the final story map: Markdown grid, columns = ACTV/EP in narrative order, rows = cards, horizontal release lines labelled slice 1 / 2 / 3 with their release goals.",
+      "Write the `## MVP candidate` section (anchor `#mvp-candidate`): value proposition for the primary persona, included EP ids and cards, learning goal + success/kill signal, GOAL/OMTM link, crutches, known risks and unvalidated ASM.",
+      "Update every epic file `runs/<runId>/backlog/epics/EP-<nnn>_<slug>.md`: set `slice` (1 for every epic with at least one card in the MVP, else the earliest slice it appears in) and `releaseGoal`; do not create or rename EP ids.",
+      "Write the roadmap for slices 2+ as outcomes (goal, metric, learning hypothesis), and set `slice` on every epic with `commit-artifact.mjs attrs <runDir> <epic.md> '{\"slice\":1}'` (2+ for later slices) so the Workflow collection `EP[slice=1]` (commit-artifact.mjs query --type epic --attr slice=1) is non-empty and matches the files."
+    ],
+    "selfCheck": [
+      "Rubric `mvp`: slice 1 fits budget/timebox from idea-brief with the calculation shown; every slice has a learning goal; each slice references a GOAL.",
+      "Rubric `story-map`: 2D structure (narrative horizontal, priority vertical); no orphaned cards; release line explicit.",
+      "Rubric `roadmap`: later slices phrased as outcomes with GOAL/IMP references.",
+      "Every EP file has a non-null `slice`; the set with `slice: 1` equals the epics listed in the MVP-candidate section and is non-empty.",
+      "MVP is a vertical slice across all backbone activities, not one layer.",
+      "Accepted/rejected moves from slice-scoring are all accounted for."
+    ],
+    "pitfalls": [
+      "An MVP that silently exceeds the timebox because the effort-to-time conversion is not shown.",
+      "Epic files left at `slice: null`, so the SP5.1 iteration over EP[slice=1] runs empty.",
+      "An MVP that is a technical layer or a feature bundle without a learning goal."
+    ],
+    "templateSections": [
+      "## Story map — grid ACTV/EP columns × cards, release lines slice 1/2/3",
+      "## MVP candidate — (anchor #mvp-candidate) value proposition, EP ids, cards, learning goal, success/kill signal, GOAL/OMTM, crutches, risks, open ASM",
+      "## Budget & timebox fit — effort points, conversion rate, timebox from brief, result, 🧠 flags",
+      "## Release roadmap — slice | outcome goal | metric | learning hypothesis | EP ids",
+      "## Decisions on proposed moves — move, accepted/rejected, reason",
+      "## Epic slice assignment — EP id | slice | releaseGoal | file path"
+    ],
+    "domainKnowledge": "- MVP: a balanced vertical slice (feasible, valuable, usable, delightful), not one technical layer; it must yield learning toward a goal [^1].\n- \"Minimum Viable Product: build a slice across instead of one layer at a time\" [^1].\n- Walking skeleton = first slice through all backbone activities; opening game → midgame → endgame orders the rest [^2].\n- Pass: 2D grid (horizontal is narrative, vertical is priority); no orphaned cards [^3][^4].\n- Pitfall: horizontal cake slicing; the \"all must-have\" priority-one paradox under MoSCoW [^4][^1].\n- Dark-factory rule: the MVP fits the budget and timebox from the idea brief (rubric `mvp`); `budget`/`timebox` is a mandatory brief field, assumed and marked 🧠 if missing (Gedächtnis §14).\n- G-P3 passes only with critic `pass` (rubric `gate-mvp`), ≥ 3 of 4 target users \"would use\" ≥ 4/5 and ≥ 2 of 4 with willingness to pay matching the lean-canvas pricing (Gedächtnis §9.2).\n\n[^1]: \"Lean Enterprise\" (Humble, Molesky, O'Reilly) — \"Minimum Viable Product: build a slice across instead of one layer at a time … valuable, usable, and feasible … to which we add 'delightful'.\"\n[^2]: \"User Story Mapping\" (Patton) — \"I call this first slice a functional walking skeleton … Opening game: Focus on the essential features or user steps that cross through the entire product … Midgame … Endgame.\"\n[^3]: \"Mapping Experiences\" (Kalbach 2020) — \"Frame the idea … Write your responses down at the top of the map. Map the big picture … Explore … Create a release strategy.\"\n[^4]: \"Fifty Quick Ideas to Improve Your User Stories\" (Adzic et al. 2014) — \"A story map is a grid where the horizontal axis represents steps in a high-level user activity, and the vertical axis represents the software delivery schedule.\" / \"put it on crutches and ship it out.\""
+  }
+}

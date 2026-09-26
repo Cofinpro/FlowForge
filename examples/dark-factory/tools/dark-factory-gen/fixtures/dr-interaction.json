@@ -1,0 +1,16 @@
+{
+  "id": "v1_smoke_fixture_0001",
+  "status": "completed",
+  "agent": "deep-research-preview-04-2026",
+  "usage": { "total_tokens": 1000, "total_input_tokens": 800, "total_cached_tokens": 0, "total_output_tokens": 150, "total_tool_use_tokens": 30, "total_thought_tokens": 20, "grounding_tool_count": [{ "type": "google_search", "count": 2, "search_query_count": 2 }] },
+  "steps": [
+    { "type": "user_input", "content": [{ "type": "text", "text": "Synthetic smoke-test order" }] },
+    { "type": "model_output", "content": [{ "type": "text",
+      "text": "# Smoke report\n\nAlpha App costs 5 EUR per month [cite: 1, 2]. Beta App is free [cite: 3].\n\n**Sources:**\n1. [alpha.example](https://alpha.example/pricing)\n2. [review.example](https://review.example/alpha)\n3. [beta.example](https://beta.example/)\n",
+      "annotations": [
+        { "type": "url_citation", "start_index": 16, "end_index": 45, "url": "https://alpha.example/pricing" },
+        { "type": "url_citation", "start_index": 16, "end_index": 45, "url": "https://review.example/alpha" },
+        { "type": "url_citation", "start_index": 58, "end_index": 74, "url": "https://beta.example/" }
+      ] }] }
+  ]
+}

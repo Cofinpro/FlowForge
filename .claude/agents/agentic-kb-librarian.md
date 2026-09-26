@@ -1,0 +1,1 @@
+../../.agents/agents/agentic-kb-librarian.md
