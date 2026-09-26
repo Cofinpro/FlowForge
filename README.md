@@ -74,11 +74,45 @@ flowchart LR
 `bpmn-to-agentic-workflow` ist der Einstieg und führt die fünf Stufen samt Rücksprüngen. Ändert sich
 das Diagramm später, fragt ein neuer Lauf nur nach neuen oder geänderten Elementen.
 
-Grob übersetzt: Lane → Agent, `serviceTask` → Skill, `userTask` → menschlicher Prüfpunkt,
-`scriptTask`/mechanische Regel → Skript, Prüfung mit Urteil (INVEST, DoR) → Skill-Text, Hook nur, wenn
-ein Tool-Aufruf wirklich blockiert werden muss,
-Gateways und Schleifen → Steuerlogik mit Obergrenze, Datenobjekt → Artefaktvertrag. Die vollständigen
-Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
+## Das Diagramm zeichnen
+
+Wer ausführt, bestimmen Sie mit dem **Aufgabentyp** im Modeler (in Camunda Modeler oder bpmn.io über
+das Schraubenschlüssel-Symbol): KI, Skript oder Mensch.
+
+| Sie zeichnen … | wenn der Schritt … | daraus wird | ausgeführt von |
+|---|---|---|---|
+| Lane | eine Rolle ist (z. B. „Product Owner“) | Agent-Rolle; ihre Schritte werden Skills oder Checklistenpunkte | – |
+| Service Task (Zahnrad) | Lesen, Schreiben oder Urteilen braucht | Skill oder Checklistenpunkt des Agenten | **KI** |
+| User Task (Person) / Manual Task (Hand) | eine Entscheidung oder Freigabe durch einen Menschen ist | Prüfpunkt: Claude schlägt vor, der Mensch wählt | **Mensch** |
+| Script Task (Schriftrolle) | rein mechanisch ist (nummerieren, zählen, Pflichtfeld prüfen); gleiche Eingabe, gleiches Ergebnis | Skript im Skill der Lane | **Skript** |
+| Business Rule Task (Tabelle) | eine Regel prüft | mechanisch: Skript; mit Urteil (INVEST, DoR): Skill-Text; muss es eine Aktion hart sperren (z. B. „kein Commit vor Freigabe“): Hook | Skript / KI |
+| Task ohne Typ | – | nicht eindeutig; die Pipeline fragt nach | wird erfragt |
+| Gateway, Schleife, Start/Ende | den Ablauf steuert | Steuerlogik im Orchestrator, keine eigene Datei; jede Schleife hat eine Obergrenze | – |
+| Teilprozess (zugeklappt) / Call Activity | eine eigene Abfolge von Schritten ist | wiederverwendbarer Skill oder eigener Teil-Workflow | – |
+| Datenobjekt | ein Ergebnis ist, das weitergereicht wird | Artefaktvertrag (Ablageort, Pflichtfelder) | – |
+
+Tipps:
+
+- **Aufgaben mit Verb und Objekt benennen** („Feedback als Problem formulieren“). Die Bezeichnungen
+  bleiben wörtlich erhalten und tauchen in den erzeugten Skills auf.
+- **Menschliche Entscheidungen als User Task zeichnen.** Nur dort hält der Ablauf an und fragt nach.
+  Ein Gateway direkt danach („Freigegeben?“) entscheidet dann der Mensch.
+- **Gateway-Fragen als Frage formulieren**, die Ausgänge beschriften („ja“ / „nein“).
+- **Rücksprünge über ein Merge-Gateway führen**, nicht direkt in eine Aufgabe.
+- **Ergebnisse als Datenobjekt anhängen**, wenn ein späterer Schritt sie braucht; das macht die
+  Übergabe zwischen Rollen prüfbar.
+- **Im Zweifel Service Task.** Ein Skript lohnt sich nur, wenn wirklich nichts zu beurteilen ist.
+
+**Noch nicht unterstützt** (analyze meldet sie und schlägt einen Umbau vor): mehrere Pools mit
+Nachrichtenflüssen (stattdessen Lanes), Timer- und Nachrichtenereignisse (stattdessen Schleife mit
+Obergrenze), Event-Teilprozesse, Kompensation.
+
+**Wo steht das Ergebnis?** Nach einem Lauf zeigt `generated/<workflow>/mapping/report.md` für jedes
+Element, was daraus geworden ist (Spalte *Kind*: `skill`, `agent-checklist`, `script`, `hook`,
+`human-checkpoint`, `orchestrator`, …), und `mapping/index.html` färbt das Diagramm danach ein.
+Festgehalten ist es in `workflow-spec.yaml` unter `elements.<id>.kind`. Die vollständigen Regeln
+stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln) und
+[`mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md).
 
 ## Was herauskommt
 
