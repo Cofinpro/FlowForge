@@ -46,6 +46,47 @@ Noch kein Diagramm? `bpmn-authoring` hilft beim Zeichnen eines gültigen, sauber
 `~/.cache/bpmn-authoring-tools` (überschreibbar mit `BPMN_TOOLS_CACHE`), nie ins Projekt. Für
 Notebook-Wissen optional der `gemini-notebook-mcp`-Server.
 
+## Im eigenen Projekt nutzen
+
+**Für das ganze Team einrichten.** Statt dass jeder das Plugin selbst installiert, kommt es in die
+`.claude/settings.json` des Projekts:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "lanecraft": { "source": { "source": "github", "repo": "Cofinpro/lanecraft" } }
+  },
+  "enabledPlugins": { "lanecraft@lanecraft": true }
+}
+```
+
+Wer das Repo klont und Claude Code startet, bekommt das Plugin angeboten. Gleiches Ergebnis per
+Kommandozeile: `claude plugin install lanecraft@lanecraft --scope project`. Ohne `--scope` gilt die
+Installation nur für dich.
+
+**Zugriff.** Claude Code holt das Plugin mit den eigenen Git-Zugangsdaten von GitHub. Ist das Repo
+privat, braucht jeder im Team Lesezugriff auf `Cofinpro/lanecraft`.
+
+**Aufrufen.** Skills und Agenten des Plugins tragen das Präfix `lanecraft:`, z. B.
+`/lanecraft:bpmn-to-agentic-workflow` oder `/lanecraft:bpmn-authoring`.
+
+**Was im Projekt entsteht.** Ein Lauf schreibt nur nach `generated/<workflow>/`:
+
+- `generated/<workflow>/.claude/` ist das Ergebnis zum Übernehmen. Installiert wird es erst, wenn
+  ihr es kopiert: `cp -R generated/<workflow>/.claude/. .claude/`.
+- `workflow-spec.yaml`, `mapping/` und `knowledge/` daneben halten fest, was aus jedem BPMN-Element
+  wurde und warum. Empfehlung: `generated/` mit einchecken, dann bleiben die Entscheidungen
+  nachvollziehbar, und ein neuer Lauf nach einer Diagrammänderung fragt nur nach dem Geänderten.
+
+**Aktualisieren.** Neue Versionen kommen mit `/plugin marketplace update lanecraft` (oder
+automatisch, wenn Auto-Update für den Marketplace an ist), danach `/reload-plugins` oder eine neue
+Sitzung. Es gibt nur dann ein Update, wenn die Version im Plugin gestiegen ist. Welche Version was
+geändert hat, steht in den GitHub-Releases.
+
+**Grenzen.** Die Wissensbasis `agentic-workflow-kb` ist im installierten Plugin schreibgeschützt;
+neue Notebook-Antworten landen nur in einem Checkout dieses Repos. Das Fachwissen eines Laufs
+(`generated/<workflow>/knowledge/`) liegt dagegen in eurem Projekt.
+
 ## So funktioniert es
 
 ```mermaid
