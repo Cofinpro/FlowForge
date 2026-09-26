@@ -23,6 +23,7 @@ flowchart LR
   G --> V["5 verify<br/>statisch prüfen"]
   V -- "Fehler (Schleife B)" --> D
   V -- Fehler --> G
+  V -- ".bpmn geändert/ungültig" --> A
   V -- grün --> H["Übergabe:<br/>README, mapping/report.md"]
 ```
 
@@ -30,6 +31,30 @@ flowchart LR
 fünf Stufen-Skills nacheinander auf, trägt die beiden Schleifen und berichtet am Ende. Jede Frage an
 den Menschen läuft über `AskUserQuestion` mit Optionen und einer Empfehlung, in der Sprache des
 Anwenders.
+
+Schleifen der Pipeline selbst: Schleife A beendet den Lauf, der Anwender ändert das Diagramm und
+startet neu (die bestätigte Spec ist der Punkt, an dem eine neue Sitzung weitermacht). Schleife B
+läuft höchstens dreimal; danach, oder wenn derselbe Befund unverändert wiederkommt, entscheidet der
+Anwender: zurück ins Design, Diagramm ändern oder Übergabe als „unverifiziert“. Das Nachjustieren im
+Mapping-Plan ist ebenfalls auf drei Runden begrenzt.
+
+### Warum die Pipeline selbst kein Workflow-Skript ist
+
+Die Pipeline ist eine Skill-Kette, kein Claude-Code-Workflow-Skript, und soll es bleiben. Nach ihrer
+eigenen `pattern-rubric.md` ist sie ein beaufsichtigter, fast linearer Ablauf ohne parallele
+Gateways – Zeile 1, Skill-Kette. Dazu kommen harte Gründe:
+
+- Jede Stufe fragt den Anwender; die `agent()`-Unteragenten eines Workflow-Skripts können kein
+  `AskUserQuestion` stellen.
+- Ein Workflow muss jedes Mal ausdrücklich gestartet werden und läuft im Hintergrund – eine weitere
+  Freigabe in einem Ablauf, der ohnehin viele Fragen stellt.
+- Fortsetzen geht dort nur in derselben Sitzung; Schleife A setzt aber über Sitzungen fort. Das
+  leistet schon die Spec (sha256, Diff je Element).
+
+Die Drei-von-fünf-Regel (`agentic-workflow-kb/references/claude-code-workflows.md`) erfüllt nur
+die Wissensextraktion über viele Lanes × Notebooks. Auch dort reichen parallele `Agent`-Aufrufe aus
+dem Stufen-Skill; ein Workflow-Skript lohnt erst, wenn das deutlich wächst. Workflow-Skripte
+erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm dazu passt.
 
 | Stufe | Skill | Liest | Schreibt |
 |---|---|---|---|
@@ -64,11 +89,11 @@ Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinande
 
 | BPMN | wird zu |
 |---|---|
-| Lane | Agent-Rolle |
+| Lane | Rolle; eigener Agent nur beim Muster Orchestrator-Agent |
 | `serviceTask` | Skill (wiederverwendet, braucht Material, eigenes Artefakt) oder Checklistenpunkt des Agenten |
 | `userTask` / `manualTask` | menschlicher Prüfpunkt (`AskUserQuestion`) |
 | `scriptTask` | Skript im Skill der Lane |
-| `businessRuleTask`, Bedingung | Skript; Hook nur, wenn ein Tool-Aufruf physisch blockiert werden muss |
+| `businessRuleTask`, Bedingung | mechanische Regel → Skript; Prüfung mit Urteil (INVEST, DoR) → Checkliste im Skill; Hook nur, wenn ein Tool-Aufruf physisch blockiert werden muss |
 | Gateway, Schleife, Start/Ende | Steuerlogik im Orchestrierungsmuster, keine eigene Datei |
 | aufgeklappter Teilprozess / Call Activity | wiederverwendbarer Skill oder eigener Teil-Workflow |
 | Datenobjekt | Artefaktvertrag |
@@ -101,6 +126,7 @@ generated/<workflow>/
     settings.json            #   meldet jeden Hook an ("$CLAUDE_PROJECT_DIR"/.claude/hooks/…)
     workflows/<workflow>.workflow.mjs  # nur beim Muster Workflow-Skript
   workflow-spec.yaml         # die Drehscheibe
+  workflow-spec.draft.yaml   # nur während design (Schritt 6a–8), Eingabe des Architekten
   README.md                  # Installation: eine Kopie von .claude/
   knowledge/*.md             # destilliertes, belegtes Fachwissen je Element/Lane
   knowledge/faq/             # Notebook-Fragen im Wortlaut mit Belegstellen
@@ -137,7 +163,7 @@ Zwei Arten von Wissen, zwei Orte:
 | Frage | Was tut die Rolle, welche Kriterien gelten? | Welches Muster, wie schneidet man Agenten, wo gehört ein Prüfpunkt hin? |
 | Quelle | Notebooks des Anwenders, Web, vorhandene Repo-Dokumente | NotebookLM-Notebook „Agentic Workflows“ |
 | Ablage | `generated/<workflow>/knowledge/` | `.agents/skills/agentic-workflow-kb/` |
-| Wer | `bpmn2agent-knowledge` | design, generate, verify über die Helfer unten |
+| Wer | `bpmn2agent-knowledge` | design und generate über die Helfer unten |
 
 Beide folgen demselben Muster in drei Schichten, billigste zuerst:
 
@@ -157,15 +183,15 @@ zu „belegt“ hochgestuft.
 
 Keine eigenen Stufen; die Stufen-Skills rufen sie an festen Stellen auf.
 
-| Helfer | Art | Einsatz |
+| Helfer | Art | Einsatz (genau eine Stelle) |
 |---|---|---|
-| `agentic-workflow-kb` | Skill | belegte Antworten auf Designfragen (FAQ + Referenzen) |
-| `agentic-kb-librarian` | Agent | beantwortet Designfragen, fragt sonst das Notebook und ergänzt das FAQ |
-| `orchestration-design` | Skill | acht Prüffragen zur Orchestrierung; design Schritt 6a |
-| `agentic-workflow-architect` | Agent, nur lesend | prüft den Spec-Entwurf vor dem Mapping-Plan; design Schritt 6a |
-| `agent-authoring` | Skill | Rolle schneiden, Agenten schreiben und prüfen; design 5, generate 3/7 |
-| `skill-authoring` | Skill | Skills schreiben und prüfen; generate 5 |
-| `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11, verify (beratend) |
+| `agentic-workflow-architect` | Agent, nur lesend | prüft den Spec-Entwurf (`workflow-spec.draft.yaml`) vor dem Mapping-Plan; design 6a, immer |
+| `orchestration-design` | Skill | acht Prüffragen zur Orchestrierung; Maßstab des Architekten |
+| `agentic-kb-librarian` | Agent | Designfragen, die die Referenzen nicht beantworten; fragt das Notebook und ergänzt das FAQ; design 6a |
+| `agentic-workflow-kb` | Skill | belegte Antworten auf Designfragen (FAQ + Referenzen); überall direkt lesbar |
+| `agent-authoring` | Skill | Rolle schneiden (design 5), Agenten schreiben (generate) |
+| `skill-authoring` | Skill | Skills schreiben (generate 5) |
+| `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11 |
 | `trim-the-fat` | Skill, nur auf Anforderung | kürzt Skills, ohne ihr Verhalten zu ändern; generate 11, nur wenn der Anwender zustimmt |
 
 Befunde der Prüf-Agenten tragen ein Ziel: `design` (in der Spec lösbar), `generate` (Formulierung,

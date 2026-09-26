@@ -1,6 +1,6 @@
 ---
 name: agentic-artifact-reviewer
-description: Reviews generated agents, skills and the orchestration file under generated/<workflow>/ (or any hand-written skill or agent) for quality that static checks can't see — discoverable descriptions, lean bodies, progressive disclosure, run-or-read script intent, explicit inputs, stop and escalation points, least-privilege tools, parseable reports, bounded loops. Read-only; returns findings per file and line with a fix and a route (bpmn2agent-generate or bpmn2agent-design). Use after bpmn2agent-generate and alongside bpmn2agent-verify, or when reviewing any skill or agent package.
+description: Reviews generated agents, skills and the orchestration file under generated/<workflow>/ (or any hand-written skill or agent) for quality that static checks can't see. Read-only; returns findings per file and line with a fix and a route (generate, design or trim). Use in bpmn2agent-generate step 11 or on any skill or agent package. Reviews written files only; for a draft spec / mapping plan before generation use agentic-workflow-architect.
 tools: Read, Grep, Glob
 skills:
   - skill-authoring
@@ -19,8 +19,10 @@ A directory (usually `generated/<workflow>/`) or a list of files. For generated 
 
 ## Method
 
-1. List the skills (`skills/*/SKILL.md` and their bundled files), agents (`agents/*.md`) and the
-   top-level orchestration file (skill-chain skill, `*.workflow.mjs` or orchestrator agent).
+1. List the skills (`.claude/skills/*/SKILL.md` and their bundled files), agents
+   (`.claude/agents/*.md`) and the top-level orchestration file (skill-chain skill,
+   `.claude/workflows/*.workflow.mjs` or orchestrator agent). Legacy layout (no
+   `meta.outputLayout`): the same paths without `.claude/`.
 2. Run the matching checklist on each file. For the orchestration file also check: every gateway
    and loop from the spec appears with its condition and `maxLoops` behaviour; every human
    checkpoint uses options plus a recommendation; side effects come after their checkpoint; a
@@ -41,6 +43,7 @@ A directory (usually `generated/<workflow>/`) or a list of files. For generated 
   condition, an unbounded loop, an over-broad tool list, a script with no run instruction — plus
   clear bloat as `trim` findings. No style preferences.
 - Give file and line for each finding and a fix concrete enough to apply.
+- n/a items are not reported.
 
 ## Report
 
@@ -48,11 +51,11 @@ End with a fenced JSON block:
 
 ```json
 {
-  "status": "done",
+  "status": "done | blocked",
   "summary": "counts per severity, one line",
   "findings": [
     {
-      "file": "generated/<workflow>/skills/…/SKILL.md",
+      "file": "generated/<workflow>/.claude/skills/…/SKILL.md",
       "line": 3,
       "severity": "high | medium | low",
       "check": "description says what AND when",

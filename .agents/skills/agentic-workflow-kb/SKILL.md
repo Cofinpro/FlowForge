@@ -1,6 +1,6 @@
 ---
 name: agentic-workflow-kb
-description: Offline, citation-backed knowledge base on designing agentic workflows, agents, skills, tools, human checkpoints, context and evaluation, distilled from the NotebookLM notebook "Agentic Workflows" plus a FAQ of every question already asked to it. Use when a design question about agents, skills, subagents, orchestration patterns, hooks, Workflow scripts, human-in-the-loop, loop caps, context engineering or evals comes up — especially inside the bpmn2agent pipeline (design, generate, verify) — before querying the notebook again.
+description: Offline, citation-backed knowledge base on designing agentic workflows, agents, skills, tools, human checkpoints, context and evaluation, distilled from the NotebookLM notebook "Agentic Workflows" plus a FAQ of every question already asked to it. Use when a design question about agents, skills, subagents, orchestration patterns, hooks, Workflow scripts, human-in-the-loop, loop caps, context engineering or evals comes up, before querying the notebook again.
 ---
 
 # Agentic workflow knowledge base
@@ -43,18 +43,23 @@ Answers design questions offline, with sources. Three layers, cheapest first:
 ## Adding knowledge
 
 When the FAQ has no answer, ask the notebook (id in `faq/sources.json`) and record the answer so
-the next run finds it:
+the next run finds it. To keep large notebook results out of your context, delegate this to the
+`agentic-kb-librarian` agent (unless you are that agent).
 
 ```
 ToolSearch: select:mcp__gemini-notebook-mcp__notebook_query
 ```
 
 1. Ask one focused question per call with `new_conversation: true` — follow-ups in one
-   conversation drift toward the previous answer.
+   conversation drift toward the previous answer. On an auth error, stop and tell the user to run
+   `nlm login`. Never present an unsourced answer as cited.
 2. The result is usually too large to show inline and gets saved to a file. If it comes back
    inline, write it to a `.json` file first (keep `question`, `answer`, `conversation_id`,
    `references`).
-3. Record it:
+3. Write only if `git -C ${CLAUDE_SKILL_DIR} rev-parse --show-toplevel` succeeds and that root's
+   `.claude-plugin/plugin.json` has `"name": "lanecraft"`. Otherwise (e.g. installed plugin) stop
+   here and return the saved result path as a follow-up for a maintainer.
+4. Record it:
 
    ```bash
    python3 ${CLAUDE_SKILL_DIR}/../bpmn2agent-knowledge/scripts/notebook-faq.py add \
@@ -64,9 +69,9 @@ ToolSearch: select:mcp__gemini-notebook-mcp__notebook_query
 
    Reuse an existing topic slug when the question fits one; the script numbers the entry
    (`<topic>-2`, …) and rebuilds `faq/README.md`.
-4. If the answer changes or extends guidance, add the distilled point to the matching
+5. If the answer changes or extends guidance, add the distilled point to the matching
    `references/*.md` with its citation tag. Keep references short; the FAQ is the full record.
-5. A new source in the notebook needs a line in `faq/sources.json` and `references/sources.md`,
+6. A new source in the notebook needs a line in `faq/sources.json` and `references/sources.md`,
    otherwise its citations show the raw source id.
 
 ## Limits

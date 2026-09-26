@@ -1,9 +1,11 @@
 # BPMN 2.0.2 XML & DI — element reference
 
-English distillation of `docs/planning/bpmn-referenz.md` (the authoritative German reference; consult
-it directly for anything not covered here). Scope: hand-authoring/editing `.bpmn` files that (1)
-validate against the OMG XSD, (2) import into bpmn.io/bpmn-moddle warning-free, (3) pass
-`bpmnlint:recommended` with zero warnings.
+- [Document skeleton](#document-skeleton)
+- [Element catalogue](#element-catalogue)
+- [Sub-processes and drill-down](#sub-processes-and-drill-down)
+- [Lanes (`laneSet`)](#lanes-laneset)
+- [Diagram Interchange (DI)](#diagram-interchange-di)
+- [Standard sizes](#standard-sizes)
 
 ## Document skeleton
 
@@ -36,8 +38,8 @@ enforces this via the XSD's element sequence.
 - **Events** (circle, 36×36): `startEvent` (no incoming), `endEvent` (no outgoing), boundary events
   (no incoming, attached via `attachedToRef`), intermediate throw/catch. A blank start/end has no
   `eventDefinition` child.
-- **Tasks** (rounded rectangle, 100×80): plain `task`, or typed (`userTask`, `serviceTask`, …) — this
-  repo's diagrams use plain `task`/`subProcess` since they're descriptive, not executable.
+- **Tasks** (rounded rectangle): plain `task`, or typed (`userTask`, `serviceTask`, `scriptTask`,
+  `businessRuleTask`, …); typed tasks are fine in a descriptive diagram and the examples use them.
 - **Gateways** (diamond, 50×50): `exclusiveGateway` (XOR), `parallelGateway` (AND), `inclusiveGateway`
   (OR, avoid unless truly needed), `eventBasedGateway`. Forking XOR/OR gateways need a `name` (a
   question) and their outgoing flows named as answers; exactly one outgoing flow is the `default`.
@@ -49,16 +51,13 @@ enforces this via the XSD's element sequence.
 - **Data objects**: `dataObject` (the type, no name) + `dataObjectReference` (the named, visible node,
   `dataObjectRef` pointing at the `dataObject`). `dataInputAssociation`/`dataOutputAssociation` connect
   a reference to a task; an input association needs a `property` on the task as its `targetRef`
-  (`<bpmn:property id="Property_X" name="__targetRef_placeholder" />`), matching this repo's existing
-  pattern.
+  (`<bpmn:property id="Property_X" name="__targetRef_placeholder" />`).
 - **Text annotations & associations**: `textAnnotation` + plain `association` (not sequence flow) to
   the annotated element.
 - **Groups / category / categoryValue**: `category` + nested `categoryValue` at `definitions` level;
   `group` inside `process` with `categoryValueRef`. Purely visual — never changes token flow.
-- **Pools/lanes/message flows**: message flows (between pools) aren't used in this repo's diagrams.
-  Lanes (`laneSet`, within one pool/process) **are** the default for an agent-bound workflow — see
-  "Lanes (`laneSet`)" below — and stay unused (roles live in `<documentation>` instead) only for a
-  purely descriptive diagram; see `modelling-rules.md` for the decision.
+- **Pools/message flows**: not used here. **Lanes**: see "Lanes (`laneSet`)" below; whether to use
+  them is decided in `modelling-rules.md`.
 
 ## Sub-processes and drill-down
 
@@ -66,7 +65,7 @@ enforces this via the XSD's element sequence.
 |---|---|
 | `subProcess` (embedded) | Activity with its own inner flow; **exactly one blank start event** inside (`sub-process-blank-start-event`), its own end event(s). Tokens leave only via its boundary. |
 | `subProcess triggeredByEvent="true"` | Event sub-process: no incoming/outgoing; started by a **typed** start event. Not used here. |
-| `callActivity` | Not a sub-process in the XML — references a separate `process`. Not used here. |
+| `callActivity` | Not a sub-process in the XML — references a separate reusable `process` via `calledElement`. |
 
 ```xml
 <bpmn:subProcess id="Task_1_1" name="1.1 Produktvision & Geschäftsmodell rahmen">
@@ -83,24 +82,15 @@ enforces this via the XSD's element sequence.
 </bpmn:subProcess>
 ```
 
-**Refining a `task` into a `subProcess` without breaking the parent**: keep the element's `id`
-unchanged (every `incoming`/`outgoing`/flow `sourceRef`/`targetRef`/data-association `targetRef`
-pointing at it keeps working); just change the tag from `bpmn:task` to `bpmn:subProcess` and insert
-the inner start/steps/end/flows as children. Data input/output associations on the task move onto the
-subProcess element itself (they attach at the collapsed level, not to an inner step) — this repo's
-convention is to leave them there so drill-down doesn't disturb Data Object wiring.
-
 **ID convention for inner elements**: `<ParentTaskId>_Start`, `<ParentTaskId>_S<n>` (steps, in the
 step's own order — reuse the parent's numbering, e.g. `Task_1_1_S1`..`Task_1_1_S4`), `<ParentTaskId>_
 Gw<letter>` (internal gateway), `<ParentTaskId>_End`/`_EndAlt` (multiple named ends allowed),
 `<ParentTaskId>_F<n>` (flows) / `<ParentTaskId>_FLoop` (loop-back flow). Keeps every ID globally
 unique and greppable back to its parent task.
 
-**DI for a collapsed sub-process**: the parent-level shape gets `isExpanded="false"` and standard
-collapsed size 100×80 (not the 150×90 this diagram used for plain tasks before drill-down — 100×80 is
-`bpmnlint`'s `standard-size` expectation, checked manually since that rule isn't in `recommended`).
-Its inner flow gets a **second, separate** `BPMNDiagram`/`BPMNPlane` pair whose `bpmnElement` is the
-subProcess's own ID:
+**DI for a collapsed sub-process**: the parent-level shape gets `isExpanded="false"`; its inner flow
+gets a **second, separate** `BPMNDiagram`/`BPMNPlane` pair whose `bpmnElement` is the subProcess's
+own ID:
 
 ```xml
 <bpmndi:BPMNDiagram id="BPMNDiagram_Task_1_1">
@@ -114,13 +104,11 @@ One `<bpmndi:BPMNDiagram>` per collapsed sub-process, all as siblings of the top
 direct children of `bpmn:definitions` (after the top-level `BPMNDiagram`). Coordinates inside a
 child plane are independent of the parent — start fresh at a convenient origin (see `layout.md`).
 
-## Lanes (`laneSet`) — default for an agent-bound workflow
+## Lanes (`laneSet`)
 
-Use this whenever the diagram is (or may become) input to the `bpmn2agent-*` family — see
-`modelling-rules.md`. A purely descriptive diagram skips this and keeps roles in
-`<bpmn:documentation>` instead.
+No pool/participant is needed for lanes to render in bpmn-js, at process or sub-process level.
 
-**`laneSet` inside a plain process** (no pool needed): `laneSet` is the *first* child of
+**`laneSet` inside a plain process**: `laneSet` is the *first* child of
 `bpmn:process`, before any flow element (same element-order rule as above). Each `bpmn:lane` lists
 every flow node assigned to it via `flowNodeRef` (events, tasks, gateways — not data objects,
 which aren't flow nodes and carry no lane).
@@ -143,37 +131,17 @@ which aren't flow nodes and carry no lane).
 
 DI: one `BPMNShape` per lane (`bpmnElement` = the lane's own ID, `isHorizontal="true"`, bounds
 spanning the full width of the process's flow content, lanes stacked top-to-bottom with no gap).
-The top-level `BPMNPlane`'s `bpmnElement` can point **directly at the process ID** — a
-`collaboration`/`participant` (pool) is *not* required for lanes to render. Add a `participant`
+The top-level `BPMNPlane`'s `bpmnElement` points **directly at the process ID**. Add a `participant`
 only when the diagram genuinely needs a second pool (message flows to another organization); when
 it's there, the plane's `bpmnElement` becomes the `collaboration` ID instead, and a `BPMNShape` for
-the `participant` wraps the lane shapes (see "Tested" below for a worked example of both forms).
+the `participant` wraps the lane shapes.
 
 **`laneSet` inside a collapsed sub-process's own drill-down plane**: same pattern, one level down —
 the `laneSet` is the first child of `bpmn:subProcess` (before its inner start event/steps/end/
 flows), and its lanes' `flowNodeRef`s list the sub-process's *inner* elements (`<ParentTaskId>_
 Start`, `<ParentTaskId>_S<n>`, …). The sub-process's own `BPMNDiagram`/`BPMNPlane
-bpmnElement="<subProcessId>"` (per the drill-down section above) gets the lane `BPMNShape`s plus
-the inner node shapes — nothing about the drill-down mechanics changes. No participant/pool is
-needed at this level either, even though the parent-level shape for the sub-process itself sits
-inside a lane of the *outer* plane.
-
-**Tested** (2026-09-25, scratchpad spike, not committed): a minimal file with (a) a
-`collaboration`+`participant`+`process` carrying a 2-lane `laneSet`, and (b) a collapsed
-`subProcess` with its own 2-lane `laneSet` in its drill-down plane — both passed `validate.sh`
-(XSD, 0 moddle warnings, 0 bpmnlint findings) and both rendered correctly end-to-end with
-`render.mjs` (bpmn-js): lane bands, role labels and every inner shape showed up as expected in
-both the pool'd top-level plane and the pool-less drill-down plane. This matches
-`docs/planning/product-vision-to-user-stories.bpmn`, which already uses lanes this way throughout
-(every `SPn.n` drill-down, plus two top-level reusable `bpmn:process` elements `Process_P`/
-`Process_PG`) with **no `collaboration`/`participant` anywhere in the file** — confirming a pool is
-never actually required for lanes to render in bpmn-js, at either the process or the sub-process
-level. Treat "pool required for lanes" as a myth for this skill's purposes.
-
-**Fallback**, only if a future bpmn-js/viewer version regresses this: colour-code per role instead,
-using the `bioc`/`color` extension on each node plus a text-annotation legend, and keep
-`<bpmn:documentation>Rolle: …</bpmn:documentation>` (or `sdlc:agentRole` where that extension
-applies) as the authoritative role source that generators read from instead of the lane shapes.
+bpmnElement="<subProcessId>"` gets the lane `BPMNShape`s plus the inner node shapes — the drill-down
+mechanics don't change.
 
 ## Diagram Interchange (DI)
 
@@ -205,22 +173,24 @@ Without DI, bpmn-js can't render the model, and bpmnlint's `no-bpmndi` fires for
   consumer (input).
 - **Groups**: a plain `BPMNShape` for the `group` ID with bounds enclosing the grouped shapes; the
   label shows `categoryValue@value`. Membership is purely geometric.
-- Eingeklappter (collapsed) sub-process: second `BPMNDiagram` with `BPMNPlane bpmnElement=
-  "<subProcessId>"` (see above).
 
-Standard sizes (bpmn-js defaults = bpmnlint's `standard-size` rule, not in `recommended` but worth
-matching):
+## Standard sizes
+
+bpmn-js defaults (bpmnlint's `standard-size` rule, not in `recommended`), except two deliberate
+deviations: bpmn-js doesn't grow a task to fit its label, it clips (German step names run long), and a
+too-small gateway label box lets a wrapped question overflow into whatever sits below it.
 
 | Element | Width × Height |
 |---|---|
-| Task / callActivity / collapsed subProcess | 100 × 80 |
+| Collapsed subProcess (short `<n>.<m>` name) | 100 × 80 |
+| Task / callActivity shown with its full name | 140 × 100 |
 | Event (any) | 36 × 36 |
 | Gateway (any) | 50 × 50 |
 | dataObjectReference | 36 × 50 |
 | dataStoreReference | 50 × 50 |
 | textAnnotation | ~100 × 30 (free) |
 | Pool (participant) | e.g. 600+ × 250, header 30 wide |
-| Label | ~text width × 14 per line |
+| Label | ~text width × 14 per line; forking-gateway question 140–160 × 42 |
 
-Centering tip: an event on a task row with task `y=110,h=80` → center `y=150` → event `y=132`,
-gateway `y=125`. Keep ~50px horizontal spacing.
+Centre shapes on a shared row: row centre `c` → event `y=c-18`, gateway `y=c-25`, shape of height
+`h` at `y=c-h/2` (grid in `layout.md`).

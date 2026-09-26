@@ -23,7 +23,7 @@ console.log({{resultShape}});
 process.exit(0);
 
 /*
-Authoring notes for whoever fills this template (bpmn2agent-generate step 3):
+Authoring notes for whoever fills this template (bpmn2agent-generate step 4):
 - Header comment (line 2) is this file's bpmn frontmatter: strip the "// bpmn: " prefix and
   JSON.parse the remainder — this is the JS convention SKILL.md documents for every generated
   .mjs file (scripts, hooks, Workflow scripts). Keep it on its own line, before any other code.

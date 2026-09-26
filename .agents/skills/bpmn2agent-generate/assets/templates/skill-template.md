@@ -55,7 +55,7 @@ bpmn:
 ```
 
 <!--
-Authoring notes for whoever fills this template (bpmn2agent-generate step 4):
+Authoring notes for whoever fills this template (bpmn2agent-generate step 5):
 - One skill dir per `kind: skill` element (or one shared dir when the rubric grouped several
   reused elements into a single reusable skill) — write to exactly the path in
   `elements.<id>.generatedPaths`, never a path this template invents.

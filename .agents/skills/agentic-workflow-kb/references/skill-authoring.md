@@ -59,10 +59,3 @@ Docs). Tag `[skill-authoring-1: n]` = citation n in that entry's table.
 - Test with every model tier that will use the skill (Haiku needs more guidance, Opus less)
   [skill-authoring-1: 11, 26].
 - Author with one Claude instance, test with a fresh one on real tasks, feed observations back.
-
-## For bpmn2agent
-
-`bpmn2agent-generate` writes skills from `skill-template.md`; the `skill-authoring` skill turns the
-rules above into a review checklist, and `agentic-artifact-reviewer` applies it to
-`generated/<workflow>/skills/`. BPMN labels stay verbatim inside descriptions; the description
-still needs the "use when" clause.

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Usage: node check-moddle.mjs <cacheDir> <file.bpmn>
 // Parses <file.bpmn> with bpmn-moddle and fails (exit 1) on any parse warning
-// (unresolved references, duplicate IDs, unparsable elements). See
-// references/validation.md for why bpmn-moddle is resolved via createRequire
-// against <cacheDir>/package.json instead of a bare import.
+// (unresolved references, duplicate IDs, unparsable elements). bpmn-moddle is
+// resolved via createRequire against <cacheDir>/package.json because the npm
+// packages live in the cache, not in this repo (see render.mjs).
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { readFileSync } from 'node:fs';
