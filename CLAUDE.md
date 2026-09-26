@@ -8,6 +8,12 @@ spec, traceability, the knowledge layer and the helper skills/agents fit togethe
 
 - Skills live in `.agents/skills/` (real files); `.claude/skills/<name>` are relative symlinks. Agents
   likewise: `.agents/agents/<name>.md`, symlinked from `.claude/agents/`. Add new ones the same way.
+- The repo is also the `lanecraft` plugin (`.claude-plugin/`). A new agent must be added to the
+  `agents` list in `plugin.json`. Inside a SKILL.md, point at another skill as
+  `${CLAUDE_SKILL_DIR}/../<skill>/…`, never `.agents/skills/…`; agents get skills through `skills:`
+  in their frontmatter. Check with `npm run validate`; release via the `Release` GitHub Action.
+- Commit messages are Conventional Commits (commitlint `commit-msg` hook); release-it derives the
+  version and changelog from them.
 - Notebook answers are kept, not thrown away: record every `notebook_query` result with
   `.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add`. Agentic-design questions go to
   `.agents/skills/agentic-workflow-kb/faq/`; check its `README.md` before asking the notebook again.
@@ -25,4 +31,5 @@ spec, traceability, the knowledge layer and the helper skills/agents fit togethe
 
 - Docs and READMEs in German. Skills, scripts and code comments in English. BPMN labels stay verbatim.
 - Every generated file carries `bpmn: {file, elements}`; `bpmn2agent-verify` checks it in both directions.
-- npm dependencies live in `~/.cache/bpmn-authoring-tools`, never in this repo.
+- npm dependencies live in `~/.cache/bpmn-authoring-tools`, never in this repo. Only exception: the
+  dev tooling in `package.json` (release-it, commitlint, husky).

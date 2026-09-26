@@ -165,13 +165,13 @@ Not stages of their own; the stage skills call them where noted.
 
 ## Reference
 
-- `.agents/skills/bpmn2agent-analyze/SKILL.md` — step 2.
-- `.agents/skills/bpmn2agent-knowledge/SKILL.md` — step 3.
-- `.agents/skills/bpmn2agent-design/SKILL.md` — step 4, loop A.
-- `.agents/skills/bpmn2agent-generate/SKILL.md` — step 5 (`scripts/render-mapping.mjs` renders the
+- `${CLAUDE_SKILL_DIR}/../bpmn2agent-analyze/SKILL.md` — step 2.
+- `${CLAUDE_SKILL_DIR}/../bpmn2agent-knowledge/SKILL.md` — step 3.
+- `${CLAUDE_SKILL_DIR}/../bpmn2agent-design/SKILL.md` — step 4, loop A.
+- `${CLAUDE_SKILL_DIR}/../bpmn2agent-generate/SKILL.md` — step 5 (`scripts/render-mapping.mjs` renders the
   mapping view).
-- `.agents/skills/bpmn2agent-verify/` — step 6, loop B.
-- `.agents/skills/bpmn-authoring/SKILL.md` — where the source `.bpmn` is authored/edited, including
+- `${CLAUDE_SKILL_DIR}/../bpmn2agent-verify/` — step 6, loop B.
+- `${CLAUDE_SKILL_DIR}/../bpmn-authoring/SKILL.md` — where the source `.bpmn` is authored/edited, including
   after loop A sends the user back to change the diagram.
 - `docs/planning/bpmn-to-agentic-workflow.bpmn` — the meta-process this skill's own procedure
   matches, lane by lane.

@@ -1,0 +1,16 @@
+{
+  "name": "lanecraft",
+  "owner": {
+    "name": "Cofinpro"
+  },
+  "metadata": {
+    "description": "Turn BPMN 2.0 process diagrams into reviewable Claude Code agentic workflows."
+  },
+  "plugins": [
+    {
+      "name": "lanecraft",
+      "source": "./",
+      "description": "BPMN 2.0 process diagram in, reviewable Claude Code agents, skills, hooks, scripts and orchestrator out."
+    }
+  ]
+}

@@ -57,8 +57,8 @@ ToolSearch: select:mcp__gemini-notebook-mcp__notebook_query
 3. Record it:
 
    ```bash
-   python3 .agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add \
-     --faq .agents/skills/agentic-workflow-kb/faq --topic <topic-slug> \
+   python3 ${CLAUDE_SKILL_DIR}/../bpmn2agent-knowledge/scripts/notebook-faq.py add \
+     --faq ${CLAUDE_SKILL_DIR}/faq --topic <topic-slug> \
      --title "<short question>" <result.json>
    ```
 

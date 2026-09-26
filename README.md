@@ -61,8 +61,48 @@ nächste Lauf. `bpmn2agent-knowledge` legt nach demselben Muster je Workflow ein
 Die Pipeline-Skills schreiben relativ zum aktuellen Verzeichnis nach `generated/<workflow>/`. Starte
 Claude Code deshalb in dem Ordner, in dem das `.bpmn` liegt, und rufe `bpmn-to-agentic-workflow` auf.
 
-In einem anderen Projekt: die Ordner aus `.agents/skills/` nach `.claude/skills/` des Projekts kopieren
-oder verlinken.
+In einem anderen Projekt als Plugin installieren (das Repo ist Plugin und Marketplace zugleich):
+
+```text
+/plugin marketplace add Cofinpro/lanecraft
+/plugin install lanecraft@lanecraft
+```
+
+Skills und Agenten heißen dann `lanecraft:<name>`, z. B. `/lanecraft:bpmn-to-agentic-workflow`. Lokal
+ausprobieren ohne Installation: `claude --plugin-dir <pfad-zu-lanecraft>`.
+
+Hinweis: Im installierten Plugin ist die Wissensbasis schreibgeschützt. Neue Notebook-Antworten nimmt
+`agentic-kb-librarian` nur in einem Checkout dieses Repos ins FAQ auf.
+
+## Plugin und Release
+
+Das Plugin braucht keinen Build: `.claude-plugin/plugin.json` zeigt direkt auf `.agents/skills/` und
+`.agents/agents/`, `.claude-plugin/marketplace.json` veröffentlicht das Repo-Root als Plugin. Pfade
+zwischen Skills stehen als `${CLAUDE_SKILL_DIR}/../<skill>/…` und funktionieren so im Repo wie im
+installierten Plugin. Agenten laden die Skills, die sie brauchen, über `skills:` im Frontmatter.
+
+```bash
+npm install          # Dev-Tools (release-it, commitlint, husky) nach node_modules/ (ignoriert),
+                     # richtet den commit-msg-Hook ein
+npm run validate     # claude plugin validate .
+```
+
+Commit-Nachrichten folgen den [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat: …`, `fix: …`, `docs: …`, `chore: …`); der `commit-msg`-Hook (husky + commitlint) lehnt
+andere ab. Daraus leitet release-it die Version ab (`feat:` → minor, `fix:` → patch,
+`feat!:`/`BREAKING CHANGE:` → major) und schreibt `CHANGELOG.md`.
+
+GitHub Actions:
+
+- `CI` (`.github/workflows/ci.yml`) – bei jedem Push auf `main` und jedem PR: Plugin validieren, bei
+  PRs zusätzlich alle Commit-Nachrichten prüfen.
+- `Release` (`.github/workflows/release.yml`) – von Hand unter *Actions → Release → Run workflow*,
+  nur auf `main`. Wahl der Erhöhung (`auto` aus den Commits, oder `patch`/`minor`/`major`) und
+  Probelauf. Setzt die Version in `plugin.json` + `package.json`, schreibt `CHANGELOG.md`,
+  committet, taggt `vX.Y.Z`, pusht und legt das GitHub-Release an.
+
+Nutzer bekommen Updates nur, wenn die Version in `plugin.json` steigt, also jede Auslieferung über
+den Release-Workflow (lokal geht auch `npm run release`).
 
 ## Fallbeispiel neu erzeugen
 

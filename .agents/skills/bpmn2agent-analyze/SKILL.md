@@ -38,7 +38,7 @@ writes lives under `generated/<workflow>/`; the source `.bpmn` stays wherever th
 ## 2. Validate structurally first
 
 ```bash
-.agents/skills/bpmn-authoring/scripts/validate.sh <file>.bpmn
+${CLAUDE_SKILL_DIR}/../bpmn-authoring/scripts/validate.sh <file>.bpmn
 ```
 
 If this fails, **stop** — tell the user which stage failed (XSD / bpmn-moddle / bpmnlint, see
@@ -51,7 +51,7 @@ needs — always run it, even on a file you're fairly sure is already clean.
 ## 3. Inventory every element
 
 ```bash
-node .agents/skills/bpmn2agent-analyze/scripts/inventory.mjs \
+node ${CLAUDE_SKILL_DIR}/scripts/inventory.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" <file>.bpmn
 ```
 

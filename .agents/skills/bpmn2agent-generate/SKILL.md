@@ -137,7 +137,7 @@ call — still just gets this treatment; don't second-guess the `kind` design al
 
 Use `assets/templates/skill-template.md` for all three cases; they differ only in scope. While
 filling it, follow `skill-authoring`'s "Writing a skill" steps 2–6
-(`.agents/skills/skill-authoring/SKILL.md`): a description that says what *and* when, only what the
+(`${CLAUDE_SKILL_DIR}/../skill-authoring/SKILL.md`): a description that says what *and* when, only what the
 model doesn't already know, detail in directly linked `references/`, run-or-read intent for every
 script. Agents (steps 3 and 7) follow `agent-authoring`'s "Writing an agent" the same way: explicit
 inputs, stop and escalation points, `tools`/`model` only where design decided them.
@@ -255,7 +255,7 @@ match `elements.<id>.generatedPaths` exactly.
 ## 10. Render the mapping view
 
 ```bash
-node .agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs \
+node ${CLAUDE_SKILL_DIR}/scripts/render-mapping.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" \
   generated/<workflow>/workflow-spec.yaml <sourceBpmn> generated/<workflow>/mapping
 ```
@@ -274,7 +274,7 @@ Then check the viewer in a headless browser (needs internet for the bpmn-js CDN;
 only the fallback and says so):
 
 ```bash
-node .agents/skills/bpmn2agent-generate/scripts/check-mapping-view.mjs \
+node ${CLAUDE_SKILL_DIR}/scripts/check-mapping-view.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" generated/<workflow>/mapping/index.html
 ```
 
@@ -310,7 +310,7 @@ panning, a readable start zoom, no collapse at 390 px, and a working sidebar wit
   skills with `trim-the-fat` — options: trim the flagged skills (recommended when there are `trim`
   findings), trim all generated skills, skip. `trim-the-fat` is user-invoked only
   (`disable-model-invocation`), so run it only on a yes, which counts as the explicit request: read
-  `.agents/skills/trim-the-fat/SKILL.md` and follow it once per skill directory. Its "functional
+  `${CLAUDE_SKILL_DIR}/../trim-the-fat/SKILL.md` and follow it once per skill directory. Its "functional
   frontmatter" includes the `bpmn:` block; also keep verbatim BPMN labels, the templates'
   regenerate boundary and the JSON reporting block. `bpmn2agent-verify` re-checks the trimmed
   files. Trimmed files are still generated output — the next generate run rewrites them from the
@@ -346,7 +346,7 @@ full trace.
 - `assets/mapping-viewer/viewer.css` + `viewer.js` — the viewer's page styles and script; render-mapping.mjs
   inlines them into `index.html` (edit the viewer here, not in the generator's HTML template).
 - `scripts/check-mapping-view.mjs` — headless-browser check of the viewer (step 10).
-- `.agents/skills/skill-authoring/SKILL.md`, `.agents/skills/agent-authoring/SKILL.md` — how to
+- `${CLAUDE_SKILL_DIR}/../skill-authoring/SKILL.md`, `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md` — how to
   fill the skill and agent templates well (steps 3, 5, 7).
 - `.agents/agents/agentic-artifact-reviewer.md` — the quality pass in step 11.
-- `.agents/skills/trim-the-fat/SKILL.md` — the optional trim in step 11 (user-invoked only).
+- `${CLAUDE_SKILL_DIR}/../trim-the-fat/SKILL.md` — the optional trim in step 11 (user-invoked only).

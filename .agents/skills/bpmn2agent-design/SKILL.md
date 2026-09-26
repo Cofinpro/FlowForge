@@ -32,7 +32,7 @@ them but the spec schema has no field to persist them — see `assets/workflow-s
 `pattern` definition, which stores only the resulting choice):
 
 ```bash
-node .agents/skills/bpmn2agent-analyze/scripts/inventory.mjs \
+node ${CLAUDE_SKILL_DIR}/../bpmn2agent-analyze/scripts/inventory.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" <meta.sourceBpmn.path>
 ```
 
@@ -175,7 +175,7 @@ obviously fine; that trains the user to stop reading the questions, same rule an
 gaps.
 
 While going through the lanes, apply `agent-authoring`'s "Should this be an agent at all?" and split
-rule (`.agents/skills/agent-authoring/SKILL.md`). A lane whose tasks need clearly different tools or
+rule (`${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md`). A lane whose tasks need clearly different tools or
 permissions, or that spans unrelated domains, may really be two roles; that's a question for the
 user in step 7 (the lane structure belongs to the diagram), not a split you make in the spec.
 
@@ -193,7 +193,7 @@ frontmatter fields nothing downstream reads — every field should trace to a co
 ## 6a. Check the orchestration against the knowledge base
 
 Before writing the plan, run `orchestration-design`'s review mode
-(`.agents/skills/orchestration-design/SKILL.md`) over the draft decisions from steps 3–6. It covers
+(`${CLAUDE_SKILL_DIR}/../orchestration-design/SKILL.md`) over the draft decisions from steps 3–6. It covers
 what the two rubrics don't: handoff contracts, a checkpoint *before* every side-effecting or
 outward-facing step, a defined outcome when a loop hits `maxLoops`, fallbacks, resume, and what
 context each worker gets. For a larger diagram, delegate the review to the
@@ -207,7 +207,7 @@ path); it returns findings routed `design`, `bpmn` or `question`.
 - `question` findings: add them to `openQuestions` and surface them in step 7.
 
 Design questions the rubrics leave open ("orchestrator agent or Workflow script here?", "does this
-lane need its own model?") are answered from `.agents/skills/agentic-workflow-kb/` — FAQ first, then
+lane need its own model?") are answered from `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` — FAQ first, then
 its references — or by the `agentic-kb-librarian` agent, which also asks the "Agentic Workflows"
 notebook and records the answer when the knowledge base has none. Quote the citation tag when a
 recommendation to the user rests on it.
@@ -289,8 +289,8 @@ fresh step 7 confirmation scoped to just the change before writing.
   human-checkpoint/loop-cap/state-resume detail, and how to phrase the choice for a business user.
 - `assets/workflow-spec.schema.yaml` — the schema every write in step 8 must conform to.
 - `.agents/skills/new-agent/agent-template.md` — the naming convention `roles.*.agentName` follows.
-- `.agents/skills/orchestration-design/SKILL.md` — the review in step 6a.
-- `.agents/skills/agent-authoring/SKILL.md` — lane/agent split rule used in step 5.
-- `.agents/skills/agentic-workflow-kb/` — cited answers to design questions (FAQ + references).
+- `${CLAUDE_SKILL_DIR}/../orchestration-design/SKILL.md` — the review in step 6a.
+- `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md` — lane/agent split rule used in step 5.
+- `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` — cited answers to design questions (FAQ + references).
 - `.agents/agents/agentic-workflow-architect.md`, `.agents/agents/agentic-kb-librarian.md` — the
   agents step 6a can delegate to.

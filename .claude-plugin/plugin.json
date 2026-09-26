@@ -1,0 +1,14 @@
+{
+  "name": "lanecraft",
+  "version": "0.1.0",
+  "description": "BPMN 2.0 process diagram in, reviewable Claude Code agents, skills, hooks, scripts and orchestrator out, each file traced back to its BPMN element.",
+  "author": { "name": "Cofinpro" },
+  "repository": "https://github.com/Cofinpro/lanecraft",
+  "keywords": ["bpmn", "agentic-workflow", "skills", "agents", "orchestration"],
+  "skills": "./.agents/skills/",
+  "agents": [
+    "./.agents/agents/agentic-artifact-reviewer.md",
+    "./.agents/agents/agentic-kb-librarian.md",
+    "./.agents/agents/agentic-workflow-architect.md"
+  ]
+}

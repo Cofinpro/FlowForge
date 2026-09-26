@@ -19,7 +19,7 @@ actually worked by re-running.
 ## 1. Run `verify.mjs`
 
 ```bash
-node .agents/skills/bpmn2agent-verify/scripts/verify.mjs \
+node ${CLAUDE_SKILL_DIR}/scripts/verify.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" \
   generated/<workflow>
 ```

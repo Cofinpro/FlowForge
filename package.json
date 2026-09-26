@@ -1,0 +1,19 @@
+{
+  "name": "lanecraft",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dev tooling for the lanecraft Claude Code plugin (release, commit linting). The plugin itself needs no build.",
+  "scripts": {
+    "prepare": "husky",
+    "validate": "claude plugin validate .",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@release-it/bumper": "^8.0.1",
+    "@release-it/conventional-changelog": "^12.0.2",
+    "husky": "^9.1.7",
+    "release-it": "^21.1.0"
+  }
+}

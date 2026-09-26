@@ -73,7 +73,7 @@ groups and the new drill-down planes. `isMarkerVisible="true"` on every exclusiv
 ### 5. Validate
 
 ```bash
-.agents/skills/bpmn-authoring/scripts/validate.sh <file>.bpmn
+${CLAUDE_SKILL_DIR}/scripts/validate.sh <file>.bpmn
 ```
 
 Runs, in order: XSD schema check (xmllint) → bpmn-moddle parse warnings → `bpmnlint:recommended`
@@ -85,7 +85,7 @@ detail and a table of typical errors with fixes. All tooling is fetched on deman
 ### 6. Render and eyeball
 
 ```bash
-node .agents/skills/bpmn-authoring/scripts/render.mjs "$BPMN_TOOLS_CACHE" <file>.bpmn <outDir>
+node ${CLAUDE_SKILL_DIR}/scripts/render.mjs "$BPMN_TOOLS_CACHE" <file>.bpmn <outDir>
 ```
 
 (Needs `playwright` + a Chromium install in that cache dir — `validate.sh`'s cache setup installs

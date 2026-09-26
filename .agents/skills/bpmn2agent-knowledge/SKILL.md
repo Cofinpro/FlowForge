@@ -113,7 +113,7 @@ alike — in `generated/<workflow>/knowledge/faq/` with `scripts/notebook-faq.py
 `references/notebook-extraction.md` §FAQ log). On a re-run, read `knowledge/faq/README.md` first and
 re-ask only what it doesn't answer or what the changed diagram makes stale. Questions about how to
 build the agentic side (patterns, agents, skills, checkpoints) rather than the business domain go to
-`.agents/skills/agentic-workflow-kb/` instead — it already has cited answers.
+`${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` instead — it already has cited answers.
 
 ## 5. Extract reference material per element
 
