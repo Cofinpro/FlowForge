@@ -45,9 +45,12 @@ The six categories, in the order they run and print:
    is every file explainable (claimed by an element, bundled inside a recorded skill/agent
    directory, listed in `knowledge.refs` — for `generated/<workflow>/knowledge/*.md` — or the one
    legitimate top-level orchestration file, matched by its expected `pattern.chosen` path)?
-5. **lint** — does every hook `*.settings.json` parse and pair with its script; does every plain
-   script/hook `.mjs` pass `node --check`; does a Workflow script's `meta` literal and wrapped body
-   parse?
+5. **lint** — does every plain script/hook `.mjs` pass `node --check`; does a Workflow script's
+   `meta` literal and wrapped body parse? For `outputLayout: claude-dir` also: does
+   `.claude/settings.json` parse and register exactly the scripts in `.claude/hooks/`; is every
+   installable file inside `.claude/`; does no script under `.claude/` import an npm package (and
+   is there no `package.json` there)? Legacy layout: does every hook `*.settings.json` parse and
+   pair with its script?
 6. **no-red** — no `kind: unresolved` element, no unanswered `openQuestions[]`, and (if rendered)
    `mapping/workflow-mapped.bpmn` itself still validates.
 
@@ -68,8 +71,9 @@ the fix actually belongs, not by which category found it (a `spec-schema` failur
 - **Missing/bad generated file → `bpmn2agent-generate`.** The spec's decisions are fine, but what
   was actually written doesn't match them or doesn't parse: a `generatedPaths` entry that's missing
   on disk, a file with no `bpmn:` header (or one that doesn't parse), a header naming the wrong
-  source file, a header missing an element the spec says it should cover, a hook
-  `*.settings.json` with no paired script or invalid JSON, a script/hook that fails `node --check`,
+  source file, a header missing an element the spec says it should cover, a `settings.json` that
+  doesn't register a hook script (or a legacy hook `*.settings.json` with no paired script), a
+  script that imports an npm package, a script/hook that fails `node --check`,
   a Workflow script whose `meta` isn't a pure literal or whose body doesn't parse once wrapped.
   Phrase it as: *"'<file path>' should exist/parse/say X but doesn't — this needs re-generating,
   not re-planning."*

@@ -544,9 +544,20 @@ function rectsOverlap(a, b) {
   return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 }
 
+// Containers (lanes, pools, groups, expanded sub-processes) span whole regions; counting them as
+// obstacles leaves no free candidate anywhere in a laned diagram and pushes every annotation into
+// the fallback stack far below the diagram. Only real elements block a position.
+const CONTAINER_TYPES = new Set(['bpmn:Lane', 'bpmn:Participant', 'bpmn:Group']);
+
+function isContainerShape(pe) {
+  const type = pe.bpmnElement && pe.bpmnElement.$type;
+  if (CONTAINER_TYPES.has(type)) return true;
+  return type === 'bpmn:SubProcess' && pe.isExpanded === true;
+}
+
 function collectExistingRects(plane) {
   return (plane.planeElement || [])
-    .filter((pe) => pe.$type === 'bpmndi:BPMNShape' && pe.bounds)
+    .filter((pe) => pe.$type === 'bpmndi:BPMNShape' && pe.bounds && !isContainerShape(pe))
     .map((pe) => ({ x: pe.bounds.x, y: pe.bounds.y, width: pe.bounds.width, height: pe.bounds.height }));
 }
 
@@ -575,7 +586,8 @@ function placeAnnotation(plane, sourceShapeDi, width, height) {
     }
   }
 
-  const idx = occupied.length;
+  plane.__fallbackCount = (plane.__fallbackCount || 0) + 1;
+  const idx = plane.__fallbackCount - 1;
   const rect = {
     x: Math.max(0, b.x + b.width + 30),
     y: Math.max(0, b.y + b.height + 40 + idx * (height + 15)),

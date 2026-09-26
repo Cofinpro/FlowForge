@@ -12,7 +12,7 @@ result under `elements.<id>`, and surface every `not-generated`/`unresolved` dec
 | Lane | Agent (`roles.<id>`) | One subagent per lane, named per `.agents/skills/new-agent/agent-template.md` (`{domain}-{role}`, kebab-case, no "-expert"). All elements in that lane become the agent's checklist items and/or its skills. |
 | `userTask` / `manualTask` | Human checkpoint (`kind: human-checkpoint`) | Generated as an `AskUserQuestion` call inside the owning skill/agent — options + a recommendation, never a bare prompt. No file is generated for the task itself; it becomes a step in whatever skill/script precedes it. |
 | `serviceTask` | Skill, or an agent checklist item — see decision below | |
-| `scriptTask` | Script inside a skill (`scripts/*.mjs` or similar), `kind: script` | Deterministic, no LLM call. Lives under the skill **of the lane it's in**, not as a standalone skill, unless it's shared across lanes (then it's its own skill, same as a reusable `serviceTask`) — concretely: `generated/<workflow>/skills/<agentName>/scripts/<name>.mjs`, where `<agentName>` is that lane's own `roles.<id>.agentName` (`generate`'s "lane skill", step 3). `generated/<workflow>/skills/<workflow>/` (matching the workflow name itself, not any lane's `agentName`) is **reserved** for the skill-chain top-level skill (see the pattern row below) — never reuse it for a lane's scripts, even if the lane happens to be named the same as the workflow. |
+| `scriptTask` | Script inside a skill (`scripts/*.mjs` or similar), `kind: script` | Deterministic, no LLM call. Lives under the skill **of the lane it's in**, not as a standalone skill, unless it's shared across lanes (then it's its own skill, same as a reusable `serviceTask`) — concretely: `generated/<workflow>/.claude/skills/<agentName>/scripts/<name>.mjs` (legacy layout: without `.claude/`), where `<agentName>` is that lane's own `roles.<id>.agentName` (`generate`'s "lane skill", step 3). `generated/<workflow>/skills/<workflow>/` (matching the workflow name itself, not any lane's `agentName`) is **reserved** for the skill-chain top-level skill (see the pattern row below) — never reuse it for a lane's scripts, even if the lane happens to be named the same as the workflow. |
 | `businessRuleTask` / gateway condition | Hook or script — see decision below | |
 | Gateway (any type), loop back-edge, multi-instance marker | Orchestrator logic (`kind: orchestrator`) | Never generated as a file of its own kind; it becomes control flow inside whichever pattern `pattern-rubric.md` selects (branch in a Workflow script, delegation logic in an orchestrator agent, or a hook's block/allow decision). Record it in `elements.<id>` anyway — the spec is the trace target even for elements that produce no standalone file. |
 | `startEvent` / `endEvent` | Orchestrator logic (`kind: orchestrator`) if it does real routing work (e.g. a start event with a form, an end event a loop can short-circuit to); otherwise `kind: not-generated` with `reason: "Start/end event — structural marker only, no generated artifact."` | Same treatment as a gateway either way: never a file of its own. Every BPMN process has at least one of each, so don't leave this element type unmapped by omission. |
@@ -53,11 +53,28 @@ loop, not inside a step the agent chooses to run. Relevant hook events, at a gla
 | `Stop` | The main agent is about to stop responding | ...must force a validation pass before the agent is allowed to consider a task finished (e.g. "don't stop until the checklist artifact exists"). |
 | `SubagentStop` | A delegated subagent is about to finish | ...same as `Stop`, scoped to one delegated skill/agent invocation rather than the whole session. |
 
-Generate a **script** (inside the owning skill, `kind: script`) when the rule is instead a step the
-workflow explicitly runs as part of its own control flow — a data check, a graph traversal, a
-threshold comparison feeding a gateway decision — rather than something that must intercept a tool
-call. Most `businessRuleTask`s map here; hooks are the exception, reserved for enforcement that would
-otherwise depend on the agent remembering to self-police.
+Otherwise the rule is a step the workflow runs itself. Generate a **script** (inside the owning
+skill, `kind: script`) only when the check is purely mechanical on structured input — a count, a
+threshold, a field that must be present, a graph traversal — so that the same input always gives
+the same answer. A rule that needs reading and judgment (an INVEST or Definition-of-Ready
+checklist, "is this consistent with the Fachkonzept?") is **not** a script: make it a `skill` with
+the checklist bundled under `references/` when it is long or reused, else an `agent-checklist`
+item. Hooks stay the exception, reserved for enforcement that would otherwise depend on the agent
+remembering to self-police.
+
+### Keep the script count low
+
+The generated setup is installed by copying one folder, so every script is something the user has
+to trust, maintain and run without an install step:
+
+- A script exists only for a `scriptTask`, a mechanical `businessRuleTask` (above) or a `hook`.
+  Never add helper scripts the diagram doesn't ask for — no run-state manager, commit helper,
+  trace-matrix builder or rubric loader; the model does that bookkeeping from the skill text.
+- One self-contained `.mjs` file per script, Node built-ins only (`node:fs`, `node:path`, …). No
+  npm packages, no `lib/` folder, no `package.json`, no install or setup script. Structured data
+  the script reads is JSON, not YAML. `bpmn2agent-verify` fails a claude-dir output that breaks
+  this.
+- When in doubt between script and skill text, choose skill text.
 
 ### `callActivity` / collapsed `subProcess` → reusable skill vs. sub-workflow
 
@@ -93,7 +110,7 @@ that becomes one skill:
   treatment of `kind: human-checkpoint`/`kind: orchestrator` elements.
 - **Inner `scriptTask`**: `kind: script`, its own bundled file under the container skill's own
   directory — `generated/<workflow>/skills/<container-skill-name>/scripts/<name>.mjs` — same as any
-  other script bundled inside a skill (the `skillRoots` allowance `bpmn2agent-verify` already
+  other script bundled inside a skill (`.claude/skills/...` in the claude-dir layout; the `skillRoots` allowance `bpmn2agent-verify` already
   grants to every file under a recorded `skills/<name>/` directory covers this without any special
   case).
 - **Inner `startEvent`/`endEvent`**: `kind: not-generated`, `reason: "Start/end event of the
@@ -165,9 +182,9 @@ and a data object "Antrag" (request).
 | Element | Rubric applied | `kind` | Result |
 |---|---|---|---|
 | Lane "Reviewer" | Lane → agent | — | `roles.reviewer` → agent `approval-reviewer` |
-| "Antragsnummer vergeben" | `scriptTask` → script | `script` | `scripts/assign-request-number.mjs` inside a skill |
+| "Antragsnummer vergeben" | `scriptTask` → script | `script` | `.claude/skills/approval-reviewer/scripts/assign-request-number.mjs` (built-ins only) |
 | "Risikobewertung erstellen" | `serviceTask`, reused, has its own rubric/template | `skill` | skill `risk-assessment/` with its own `references/` |
-| "Betrag > Grenzwert?" | `businessRuleTask` gating a write (the approval record must not be written above the threshold without escalation) | `hook` | `PreToolUse` hook blocking the write tool until the threshold check passes |
+| "Betrag > Grenzwert?" | `businessRuleTask` gating a write (the approval record must not be written above the threshold without escalation) | `hook` | `.claude/hooks/approval-threshold-guard.mjs`, a `PreToolUse` hook registered in `.claude/settings.json`, blocking the write tool until the threshold check passes |
 | "Antrag genehmigen" | `userTask` → human checkpoint | `human-checkpoint` | `AskUserQuestion` step inside the `approval-reviewer` agent's flow |
 | Gateway "Genehmigt?" | Gateway → orchestrator logic | `orchestrator` | A branch in whichever pattern `pattern-rubric.md` selects for this diagram (here: skill chain + hooks, since it's linear with one human gate — see that reference) |
 | Data object "Antrag" | Data object → artifact contract | `artifact-contract` | `artifacts.antrag`: `pathPattern: "artifacts/antrag/{id}.md"`, `producer: ServiceTask_Risikobewertung`, `consumers: [UserTask_Genehmigen]` |

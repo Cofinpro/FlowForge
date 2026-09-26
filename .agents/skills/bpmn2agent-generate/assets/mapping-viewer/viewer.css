@@ -101,6 +101,7 @@ details.files label { display: block; font-weight: 600; font-size: 12px; color: 
 details.files > summary { cursor: pointer; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; min-height: 24px; }
 ul.file-list, ul.plain-list { list-style: none; margin: 0; padding: 0; }
 ul.file-list li, ul.plain-list li { padding: 4px 0; border-bottom: 1px solid #eee; font-size: 13px; word-break: break-all; }
+ul.file-list li > a { display: inline-block; min-height: 24px; min-width: 24px; line-height: 24px; }
 .chips { display: block; margin-top: 2px; }
 .chip { font-size: 12px; min-height: 24px; border: 1px solid #b5b5b5; background: #fff; border-radius: 12px; padding: 2px 8px; margin: 2px 4px 0 0; cursor: pointer; word-break: normal; }
 .chip:hover { background: #eef3fb; }

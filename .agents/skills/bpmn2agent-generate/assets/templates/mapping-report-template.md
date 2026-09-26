@@ -73,8 +73,8 @@ colours" section — this table is the textual mirror of what `mapping/workflow-
     instead of a bare dash, so a reader knows where the logic actually lives); "—" for
     not-generated/unresolved too.
   - "Notes": for not-generated/unresolved, the element's `reason` verbatim (this is the grey/red
-    annotation text). For a gate, its kind + maxLoops. For a hook, the paired settings-snippet
-    path (see hook-script-template.mjs's pairing note). Otherwise blank.
+    annotation text). For a gate, its kind + maxLoops. For a hook, its event and matcher as
+    registered in `.claude/settings.json`. Otherwise blank.
 }}
 | {{label}} | {{bpmnType}} | {{laneLabel}} | {{kind}} | {{generatedPaths joined}} | {{reason / gate / pairing note}} |
 

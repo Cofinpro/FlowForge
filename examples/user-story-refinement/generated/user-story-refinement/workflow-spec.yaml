@@ -1,0 +1,1031 @@
+# workflow-spec.yaml — confirmed by bpmn2agent-design (mapping plan accepted by the business user)
+meta:
+  workflowName: user-story-refinement
+  sourceBpmn:
+    path: user-story-refinement.bpmn
+    sha256: d97297a43b126c8347e285fe736065ea49205df1296ac47660c3287e4b5258d7
+  language: de
+  generatorVersion: 0.1.0
+  outputLayout: claude-dir
+  created: '2026-09-26T09:53:22.108Z'
+  updated: '2026-09-26T10:35:16.157Z'
+roles:
+  product-owner:
+    bpmnLaneId: Lane_ProductOwner
+    label: Product Owner / BA
+    agentName: story-product-owner
+  ux-design:
+    bpmnLaneId: Lane_UxResearchDesign
+    label: UX & Design
+    agentName: story-ux-designer
+  entwicklung:
+    bpmnLaneId: Lane_Entwicklung
+    label: Entwicklung / Tech Lead
+    agentName: story-tech-lead
+  qa-test:
+    bpmnLaneId: Lane_QaTest
+    label: QA / Test
+    agentName: story-qa
+elements:
+  Start_FeedbackEingegangen:
+    bpmnType: startEvent
+    label: Nutzer- oder Stakeholder-Feedback eingegangen
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  I1:
+    bpmnType: serviceTask
+    label: Feedback erfassen & als Problem formulieren
+    lane: product-owner
+    kind: skill
+    outputs:
+      - artifact: feedback-eintrag
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-triage/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+  I2:
+    bpmnType: serviceTask
+    label: Verwandte Stories & Epics im Backlog suchen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: product-backlog
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-triage/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+  Gw_Bug:
+    bpmnType: exclusiveGateway
+    label: Fehlverhalten einer bestehenden Funktion?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    condition: >-
+      Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward
+      branch continues without asking.
+  End_BugUebergeben:
+    bpmnType: endEvent
+    label: An Fehlerbearbeitung übergeben
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Gw_Bezug:
+    bpmnType: exclusiveGateway
+    label: Wie hängt das Anliegen mit dem Backlog zusammen?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    condition: >-
+      Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward
+      branch continues without asking.
+  End_AnStoryUebergeben:
+    bpmnType: endEvent
+    label: Als Änderung an offene Story übergeben
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  End_FeedbackGeparkt:
+    bpmnType: endEvent
+    label: Feedback im Opportunity Backlog geparkt
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  K1:
+    bpmnType: userTask
+    label: Anliegen mit Feedbackgeber klären
+    lane: product-owner
+    kind: human-checkpoint
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    gate:
+      kind: human
+      criteria:
+        - The problem behind the wish is confirmed by the feedback giver
+        - Expected outcome and urgency are known
+  K2:
+    bpmnType: serviceTask
+    label: Gegen Epic-Ziel & Fachkonzept prüfen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: epic-fachkonzept
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  Gw_Fachkonzept:
+    bpmnType: exclusiveGateway
+    label: Mit dem Fachkonzept vereinbar?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    condition: >-
+      Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward
+      branch continues without asking.
+  End_FachkonzeptAenderung:
+    bpmnType: endEvent
+    label: Fachkonzept-Änderung beantragt
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Par_KlaerungSplit:
+    bpmnType: parallelGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  K3:
+    bpmnType: serviceTask
+    label: Ist-/Soll-Delta beschreiben
+    lane: product-owner
+    kind: skill
+    outputs:
+      - artifact: ist-soll-delta
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  K5:
+    bpmnType: serviceTask
+    label: Betroffene Screens & Abläufe identifizieren
+    lane: ux-design
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  K4:
+    bpmnType: serviceTask
+    label: Technische Auswirkungen grob einschätzen
+    lane: entwicklung
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  Par_KlaerungJoin:
+    bpmnType: parallelGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Gw_Unsicherheit:
+    bpmnType: exclusiveGateway
+    label: Relevante Unsicherheit offen?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    condition: >-
+      Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward
+      branch continues without asking.
+  K6:
+    bpmnType: serviceTask
+    label: Klickbaren Prototyp mit Nutzern testen
+    lane: ux-design
+    kind: skill
+    outputs:
+      - artifact: prototyp-testergebnisse
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  B4:
+    bpmnType: serviceTask
+    label: Time-boxed Spike durchführen
+    lane: entwicklung
+    kind: skill
+    outputs:
+      - artifact: spike-report
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+  Merge_Validierung:
+    bpmnType: exclusiveGateway
+    lane: ux-design
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  B5:
+    bpmnType: userTask
+    label: Erkenntnisse auswerten
+    lane: product-owner
+    kind: human-checkpoint
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    gate:
+      kind: human
+      criteria:
+        - Users confirm the problem and want the solution (prototype test)
+        - The spike shows feasibility at acceptable cost
+        - The expected behaviour change is plausible
+  Gw_Erkenntnis:
+    bpmnType: exclusiveGateway
+    label: Tragen die Erkenntnisse die Story?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    condition: >-
+      Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward
+      branch continues without asking.
+  End_AnliegenVerworfen:
+    bpmnType: endEvent
+    label: Anliegen verworfen
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Merge_Einordnung:
+    bpmnType: exclusiveGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  C1:
+    bpmnType: serviceTask
+    label: Story unter Epic in User Story Map einordnen
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+  Merge_Formulierung:
+    bpmnType: exclusiveGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  C2:
+    bpmnType: serviceTask
+    label: Story im Connextra-Format formulieren
+    lane: product-owner
+    kind: skill
+    outputs:
+      - artifact: story-karte
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+  C3:
+    bpmnType: serviceTask
+    label: Bezug zu Epic, Fachkonzept & Feedback dokumentieren
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+  C4:
+    bpmnType: businessRuleTask
+    label: INVEST-Selbstcheck durchführen
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    gate:
+      kind: critic
+      criteria:
+        - Independent
+        - Negotiable
+        - Valuable
+        - Estimable
+        - Small
+        - Testable
+        - Demonstrable in the sprint review
+        - >-
+          At the cap (3rd failed check in this pass): continue with a visible "risk: loop cap reached" note; the counter
+          restarts on each pass
+      maxLoops: 3
+  Gw_Invest:
+    bpmnType: exclusiveGateway
+    label: INVEST erfüllt?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Merge_Refinement:
+    bpmnType: exclusiveGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  D1:
+    bpmnType: userTask
+    label: Refinement mit Three Amigos ansetzen
+    lane: product-owner
+    kind: human-checkpoint
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+    gate:
+      kind: human
+      criteria:
+        - Participants who will build and test the story are invited
+  Par_AmigosSplit:
+    bpmnType: parallelGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  D2a:
+    bpmnType: serviceTask
+    label: Wert & Fachregeln erläutern (Was)
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  D2d:
+    bpmnType: serviceTask
+    label: Wireframes & Interaktionsfluss beilegen
+    lane: ux-design
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  D2b:
+    bpmnType: serviceTask
+    label: Umsetzung & Abhängigkeiten klären (Wie)
+    lane: entwicklung
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  D2c:
+    bpmnType: serviceTask
+    label: Randfälle & Negativszenarien identifizieren
+    lane: qa-test
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  Par_AmigosJoin:
+    bpmnType: parallelGateway
+    lane: qa-test
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  D3:
+    bpmnType: serviceTask
+    label: Akzeptanzkriterien in Given-When-Then formulieren
+    lane: qa-test
+    kind: skill
+    outputs:
+      - artifact: given-when-then-szenarien
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  D4:
+    bpmnType: serviceTask
+    label: Beispieltabellen ergänzen (Specification by Example)
+    lane: qa-test
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+  Merge_Schaetzung:
+    bpmnType: exclusiveGateway
+    lane: entwicklung
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  D5:
+    bpmnType: userTask
+    label: Story Points schätzen (Planning Poker)
+    lane: entwicklung
+    kind: human-checkpoint
+    outputs:
+      - artifact: story-point-schaetzung
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+    gate:
+      kind: human
+      criteria:
+        - >-
+          Converged: highest and lowest card at most one scale step apart, or the team accepts the majority value
+          (outliers documented)
+        - At most 3 rounds per pass (counter restarts on each pass); in round 3 take the majority value with a risk note
+        - Team states its maximum story size for one sprint (default 8 points)
+      maxLoops: 3
+  Gw_Schaetzung:
+    bpmnType: exclusiveGateway
+    label: Schätzungen konvergiert?
+    lane: entwicklung
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Gw_Sprintgroesse:
+    bpmnType: exclusiveGateway
+    label: Passt die Story in einen Sprint?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    gate:
+      kind: critic
+      criteria:
+        - Estimate within the team maximum story size from planning poker (default 8 points, about 1-5 ideal days)
+        - 'At the cap: escalate to the PO (discard / park / continue to prioritisation with visible risk)'
+      maxLoops: 3
+  D6:
+    bpmnType: serviceTask
+    label: Story vertikal schneiden (Splitting-Muster)
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+    condition: >-
+      Every part story runs through "Story im Connextra-Format formulieren" and the rest of the flow one after another
+      (stories/{storyId}-1, -2, ...), each with its own run state; parts inherit loops.split from the parent, so
+      splitting is capped at 3 levels in total.
+  E1:
+    bpmnType: businessRuleTask
+    label: Definition of Ready prüfen
+    lane: qa-test
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+  E2:
+    bpmnType: serviceTask
+    label: Begriffe mit Domänenmodell abgleichen
+    lane: entwicklung
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+  E3:
+    bpmnType: serviceTask
+    label: Auf Fake- & Waisen-Story prüfen
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+  Gw_Ready:
+    bpmnType: exclusiveGateway
+    label: Definition of Ready erfüllt?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    gate:
+      kind: critic
+      criteria:
+        - Definition of Ready checklist passes (dor-befund)
+        - No domain-model deviation left
+        - Neither fake nor orphan story
+        - '"Nicht mehr relevant" is confirmed by the user'
+        - >-
+          Total budget: 3 returns into refinement (Merge_Refinement), counters never reset; at the cap escalate to the
+          PO (discard / park / continue with visible risk)
+      maxLoops: 3
+  E5:
+    bpmnType: serviceTask
+    label: Nachgelagerten Spike durchführen
+    lane: entwicklung
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+  End_StoryVerworfen:
+    bpmnType: endEvent
+    label: Story verworfen
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  Par_PlausiSplit:
+    bpmnType: parallelGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  P1:
+    bpmnType: serviceTask
+    label: Auf Duplikate & Überschneidungen prüfen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: product-backlog
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  P7:
+    bpmnType: serviceTask
+    label: Konsistenz mit bestehenden Abläufen prüfen
+    lane: ux-design
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  P3:
+    bpmnType: serviceTask
+    label: Abhängigkeiten & Reihenfolge prüfen
+    lane: entwicklung
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  P2:
+    bpmnType: serviceTask
+    label: Akzeptanzkriterien gegen bestehende Stories abgleichen
+    lane: qa-test
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  Par_PlausiJoin:
+    bpmnType: parallelGateway
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  P4:
+    bpmnType: serviceTask
+    label: Plausibilitätsbefund zusammenführen
+    lane: product-owner
+    kind: skill
+    outputs:
+      - artifact: plausibilitaetsbefund
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  Gw_Plausibel:
+    bpmnType: exclusiveGateway
+    label: Konsistent mit dem übrigen Backlog?
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    gate:
+      kind: critic
+      criteria:
+        - No contradiction with other stories or the living documentation
+        - No unmerged duplicate
+        - Duplicate verdict and merge proposal are confirmed by the user before "Story in bestehende Story überführt"
+        - Counts against the same refinement budget as Gw_Ready; at the cap escalate to the PO
+      maxLoops: 3
+  P6:
+    bpmnType: serviceTask
+    label: Mit bestehender Story zusammenführen
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  End_StoryZusammengefuehrt:
+    bpmnType: endEvent
+    label: Story in bestehende Story überführt
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  P5:
+    bpmnType: serviceTask
+    label: Betroffene Stories zur Anpassung markieren
+    lane: product-owner
+    kind: skill
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+  E4:
+    bpmnType: userTask
+    label: Story priorisieren & in Ready-Spalte stellen
+    lane: product-owner
+    kind: human-checkpoint
+    outputs:
+      - artifact: sprint-reife-user-story
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge:
+      - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    gate:
+      kind: human
+      criteria:
+        - 'Position in the backlog confirmed by the PO (WSJF suggestion: Cost of Delay asked here / story points)'
+        - Change proposals for affected stories approved; nothing is written into the backlog tool by the workflow
+  End_StorySprintReady:
+    bpmnType: endEvent
+    label: Story sprint-ready
+    lane: product-owner
+    kind: orchestrator
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+artifacts:
+  feedback-eintrag:
+    pathPattern: stories/{storyId}/01_feedback.md
+    producer: I1
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+      - field: backlog
+        required: true
+      - field: fachkonzept
+        required: true
+  product-backlog:
+    pathPattern: '{backlog} (existing project backlog and user story map, read-only)'
+    consumers:
+      - I2
+      - P1
+  epic-fachkonzept:
+    pathPattern: '{fachkonzept} (existing epic and Fachkonzept documents, read-only)'
+    consumers:
+      - K2
+  ist-soll-delta:
+    pathPattern: stories/{storyId}/02_ist-soll-delta.md
+    producer: K3
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+  prototyp-testergebnisse:
+    pathPattern: stories/{storyId}/03_prototyp-test.md
+    producer: K6
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+  spike-report:
+    pathPattern: stories/{storyId}/03_spike-report.md
+    producer: B4
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+  story-karte:
+    pathPattern: stories/{storyId}/04_story.md
+    producer: C2
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+      - field: epic
+        required: true
+      - field: feedback
+        required: true
+      - field: parentStory
+        required: false
+  given-when-then-szenarien:
+    pathPattern: stories/{storyId}/05_akzeptanzkriterien.md
+    producer: D3
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+  story-point-schaetzung:
+    pathPattern: stories/{storyId}/06_schaetzung.md
+    producer: D5
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+      - field: storyPoints
+        required: true
+      - field: maxStorySize
+        required: true
+  plausibilitaetsbefund:
+    pathPattern: stories/{storyId}/08_plausibilitaet.md
+    producer: P4
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+  sprint-reife-user-story:
+    pathPattern: stories/{storyId}/10_ready-story.md
+    producer: E4
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+      - field: epic
+        required: true
+      - field: storyPoints
+        required: true
+      - field: priority
+        required: true
+  dor-befund:
+    pathPattern: stories/{storyId}/07_dor-befund.md
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: version
+        required: true
+      - field: status
+        required: true
+    producer:
+      - E1
+      - E2
+      - E3
+    consumers:
+      - Gw_Ready
+  aenderungsvorschlaege:
+    pathPattern: stories/{storyId}/09_aenderungsvorschlaege.md
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: status
+        required: true
+    producer:
+      - P5
+      - P6
+    consumers:
+      - E4
+  uebergabe:
+    pathPattern: stories/{storyId}/99_uebergabe.md
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: status
+        required: true
+      - field: target
+        required: true
+    producer:
+      - End_BugUebergeben
+      - End_AnStoryUebergeben
+      - End_FeedbackGeparkt
+      - End_FachkonzeptAenderung
+      - End_AnliegenVerworfen
+      - End_StoryVerworfen
+      - End_StoryZusammengefuehrt
+  run-state:
+    pathPattern: stories/{storyId}/00_run.md
+    frontmatter:
+      - field: storyId
+        required: true
+      - field: parentStory
+        required: false
+      - field: position
+        required: true
+      - field: checkpoints
+        required: true
+      - field: loops
+        required: true
+      - field: status
+        required: true
+    producer:
+      - Start_FeedbackEingegangen
+      - D6
+    consumers:
+      - K1
+      - B5
+      - D1
+      - D5
+      - E4
+      - Gw_Invest
+      - Gw_Schaetzung
+      - Gw_Sprintgroesse
+      - Gw_Ready
+      - Gw_Plausibel
+openQuestions:
+  - elementId: Gw_Fachkonzept
+    question: >-
+      The sources treat a conflict with the Fachkonzept as a trigger to refine model and language with the domain
+      experts, not a hard stop. Keep the end event "Fachkonzept-Änderung beantragt" or loop back?
+    source: 'NotebookLM: The Product - Business Design [triage-klaerung-1: 7, 9, 10, 11]'
+    answer: >-
+      Keep the diagram as drawn. The change request names the conflicting term or rule and a proposal so it involves the
+      domain experts concretely.
+    answeredAt: '2026-09-26T10:11:53.539Z'
+  - elementId: K4
+    question: >-
+      Non-functional requirements (performance, security, capacity) are not checked explicitly anywhere. Where should
+      they go?
+    source: 'NotebookLM: The Product - Business Design [triage-klaerung-1: 23, 24, 25, 26]'
+    answer: >-
+      Into existing steps: "Technische Auswirkungen grob einschätzen" and the Definition-of-Ready checklist. No new BPMN
+      step.
+    answeredAt: '2026-09-26T10:11:53.539Z'
+  - elementId: K3
+    question: Should the steps require a measurable target (expected behaviour change and metric) for every story?
+    source: 'NotebookLM: The Product - Business Design [triage-klaerung-1: 16, 17, 18]'
+    answer: >-
+      Yes: "Ist-/Soll-Delta beschreiben" and "Story im Connextra-Format formulieren" ask for the expected behaviour
+      change and a metric. No new step.
+    answeredAt: '2026-09-26T10:11:53.539Z'
+  - elementId: E4
+    question: Should "Story priorisieren & in Ready-Spalte stellen" suggest a prioritisation method?
+    source: 'NotebookLM: The Product - Business Design [backlog-plausibilitaet-1: 33-40]'
+    answer: 'Yes: suggest a position via Weighted Shortest Job First (Cost of Delay ÷ story points); the PO decides.'
+    answeredAt: '2026-09-26T10:11:53.539Z'
+  - elementId: P6
+    question: >-
+      The merge path (Gw_Plausibel -> "Mit bestehender Story zusammenführen" -> end) passes no human approval. Add a
+      userTask to the BPMN or confirm inside the flow?
+    source: 'agentic-workflow-architect review [human-in-the-loop-1: 8, 9, 10, 28]'
+    answer: Confirm inside the flow before the end event; the workflow only writes a merge proposal. No BPMN change.
+    answeredAt: '2026-09-26T10:26:14.274Z'
+  - elementId: D6
+    question: >-
+      A vertical split yields several part stories. Continue with the first and keep the rest as drafts, or process all
+      of them one after another?
+    source: agentic-workflow-architect review
+    answer: >-
+      Process all part stories one after another in the same run (stories/{storyId}-1, -2, ...), each through the rest
+      of the flow.
+    answeredAt: '2026-09-26T10:26:14.276Z'
+knowledge:
+  notebooks:
+    - id: 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      title: The Product - Business Design
+      mappedTo:
+        - Lane_ProductOwner
+        - Lane_UxResearchDesign
+        - Lane_Entwicklung
+        - Lane_QaTest
+  mode: notebook
+  refs:
+    Start_FeedbackEingegangen: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    I1: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    I2: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    Gw_Bug: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    End_BugUebergeben: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    Gw_Bezug: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    End_AnStoryUebergeben: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    End_FeedbackGeparkt: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    K1: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K2: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Gw_Fachkonzept: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    End_FachkonzeptAenderung: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Par_KlaerungSplit: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K3: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K5: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K4: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Par_KlaerungJoin: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Gw_Unsicherheit: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K6: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    B4: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Merge_Validierung: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    B5: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Gw_Erkenntnis: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    End_AnliegenVerworfen: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    Merge_Einordnung: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C1: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    Merge_Formulierung: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C2: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C3: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C4: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    Gw_Invest: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    Merge_Refinement: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D1: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    Par_AmigosSplit: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D2a: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D2d: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D2b: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D2c: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    Par_AmigosJoin: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D3: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D4: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    Merge_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D5: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    Gw_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    Gw_Sprintgroesse: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D6: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    E1: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    E2: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    E3: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    Gw_Ready: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    E5: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    End_StoryVerworfen: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    Par_PlausiSplit: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P1: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P7: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P3: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P2: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    Par_PlausiJoin: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P4: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    Gw_Plausibel: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P6: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    End_StoryZusammengefuehrt: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P5: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    E4: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    End_StorySprintReady: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+pattern:
+  chosen: skill-chain-hooks
+  rationale: >-
+    Dein Diagramm wird von einem Menschen begleitet: fünfmal entscheidet oder bestätigt jemand aus dem Team. Einige
+    Verzweigungen verlangen ein Urteil (Bug oder Story? passt es zum Fachkonzept? tragen die Erkenntnisse?). Diese
+    Urteile schlage ich mit Begründung vor, und du bestätigst jeden Ausgang und jeden Rücksprung – so bleibt die
+    Entscheidung bei euch. Ich baue es deshalb als geführten Ablauf: ein Einstiegs-Skill geht die sechs Phasen der Reihe
+    nach durch, ruft je Phase einen Skill mit den Checklisten aus dem Notebook auf und hält an euren Prüfpunkten an.
+    Parallele Blöcke arbeitet er als getrennte Perspektiven nacheinander ab, jede schreibt zuerst ihren eigenen
+    Abschnitt. Schleifen haben feste Obergrenzen; bei Definition of Ready, Backlog-Konsistenz und Sprintgröße fragt er
+    dich an der Grenze, statt einfach weiterzumachen.
+  alternativesConsidered:
+    - pattern: orchestrator-agent
+      whyNot: >-
+        Six gateways need judgement (Gw_Bug, Gw_Bezug, Gw_Fachkonzept, Gw_Erkenntnis, Gw_Ready, Gw_Plausibel), which
+        points to the orchestrator row. Every exit and loop-back of these is confirmed by the user instead, so a person
+        makes the call, as with a gateway right after a checkpoint. A coordinator agent plus one agent per lane and its
+        own run-state file would add independence for the parallel checks, but the business user chose the lighter
+        guided flow.
+    - pattern: workflow-script
+      whyNot: >-
+        The flow pauses five times for people (clarification, evaluation, refinement meeting, planning poker,
+        prioritisation); a Workflow script cannot stop for them mid-run.

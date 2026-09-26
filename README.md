@@ -35,8 +35,8 @@ Dann Claude Code in dem Ordner starten, in dem das `.bpmn` liegt, und die Pipeli
 ```
 
 oder einfach sagen: *„Mach aus meinem Prozessdiagramm einen Claude-Workflow.“* Das Ergebnis landet
-unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, nach der mitgelieferten
-`README.md`.
+unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, mit einer Kopie von
+`generated/<workflow>/.claude/` ins Projekt.
 
 Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-lanecraft>`.
 Noch kein Diagramm? `bpmn-authoring` hilft beim Zeichnen eines gültigen, sauber gelayouteten `.bpmn`.
@@ -73,7 +73,8 @@ flowchart LR
 das Diagramm später, fragt ein neuer Lauf nur nach neuen oder geänderten Elementen.
 
 Grob übersetzt: Lane → Agent, `serviceTask` → Skill, `userTask` → menschlicher Prüfpunkt,
-`scriptTask`/Regel → Skript (Hook nur, wenn ein Tool-Aufruf wirklich blockiert werden muss),
+`scriptTask`/mechanische Regel → Skript, Prüfung mit Urteil (INVEST, DoR) → Skill-Text, Hook nur, wenn
+ein Tool-Aufruf wirklich blockiert werden muss,
 Gateways und Schleifen → Steuerlogik mit Obergrenze, Datenobjekt → Artefaktvertrag. Die vollständigen
 Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
 
@@ -81,13 +82,20 @@ Regeln stehen in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
 
 ```text
 generated/<workflow>/
+  .claude/                   # alles, was installiert wird, im Aufbau eines Projekt-.claude/
+    agents/  skills/         #   die Artefakte
+    hooks/  settings.json    #   nur bei Hooks; settings.json meldet jeden Hook an
+    workflows/               #   nur beim Muster Workflow-Skript
+  README.md                  # Installation in einer Zeile, für den Anwender
   workflow-spec.yaml         # die Spezifikation, über die alle Stufen reden
-  README.md                  # Installationsanleitung für den Anwender
-  agents/  skills/  hooks/   # die Artefakte
-  <workflow>.workflow.mjs    # nur beim Muster Workflow-Skript
   knowledge/                 # destilliertes Fachwissen + FAQ mit Belegstellen
   mapping/                   # report.md, farbiges workflow-mapped.bpmn, index.html, PNGs
 ```
+
+Installiert wird mit einer Kopie: `cp -R generated/<workflow>/.claude/. <projekt>/.claude/`. Kein
+Installationsskript, kein `npm install`: Skripte gibt es nur für echte `scriptTask`s, mechanische
+Regeln und Hooks, jeweils eine Datei mit Node-Bordmitteln. Das Beispiel `dark-factory` ist noch im
+alten Aufbau (ohne `.claude/`, Hooks als einzelne Snippets); `verify.mjs` prüft beide.
 
 Die Mapping-Ansicht (`mapping/index.html`) färbt jedes BPMN-Element nach Ergebnis und verlinkt es mit
 seiner Datei.
@@ -102,8 +110,10 @@ Das ist ein Schnappschuss; das daraus entstandene Dark-Factory-Plugin wird im Re
 `ai-sdlc-dojo-2026-factory` von Hand weitergepflegt.
 
 **[`examples/user-story-refinement/`](examples/user-story-refinement/)**: eine neue User Story aus
-Feedback erstellen und verfeinern. Ein Diagramm mit vier Lanes und sechs Phasen, noch nicht durch
-die Pipeline gelaufen, also ein guter Kandidat zum Ausprobieren.
+Feedback erstellen und verfeinern. Ein Diagramm mit vier Lanes und sechs Phasen, als erstes Beispiel
+im neuen Aufbau durch die Pipeline gelaufen: 7 Skills unter
+[`generated/user-story-refinement/.claude/`](examples/user-story-refinement/generated/user-story-refinement/.claude/),
+installierbar mit einer Kopie, ohne Agenten, Skripte und Hooks.
 
 ![User-Story-Refinement als BPMN](examples/user-story-refinement/user-story-refinement.png)
 

@@ -99,6 +99,16 @@ definitions:
       generatorVersion:
         type: string
         description: semver of the bpmn2agent-* skill family that produced this spec.
+      outputLayout:
+        type: string
+        enum: [claude-dir, legacy]
+        description: >
+          Where generate puts the files a user installs. claude-dir (every new spec): everything
+          under generated/<workflow>/.claude/ in the exact layout of a project's .claude/ folder
+          (skills/, agents/, hooks/, workflows/, one settings.json), so installing is a single copy.
+          legacy (the default when absent, older specs such as the dark-factory example): skills/,
+          agents/, hooks/*.hook.settings.json snippets and <workflow>.workflow.mjs directly under
+          generated/<workflow>/.
       created:
         type: string
         format: date-time
@@ -169,9 +179,10 @@ definitions:
         type: array
         items: { type: string }
         description: >
-          Repo-relative paths (under generated/<workflow>/) of files produced for this element: a
-          skill directory, a script file, a hook config entry, or the anchor of an agent-checklist
-          section. Empty or absent when kind is not-generated or unresolved.
+          Repo-relative paths (under generated/<workflow>/, and under generated/<workflow>/.claude/
+          for meta.outputLayout claude-dir) of files produced for this element: a skill directory,
+          a script file, a hook script, or the anchor of an agent-checklist section. Empty or
+          absent when kind is not-generated or unresolved.
       reason:
         type: string
         description: Required when kind is not-generated or unresolved — why, and what a human should do about it. Surfaces verbatim in the mapping report and as the grey/red annotation in the mapped BPMN.

@@ -32,11 +32,9 @@ Authoring notes for whoever fills this template (bpmn2agent-generate step 6):
 - Pick {{hookEvent}} from mapping-rubric.md's event table (PreToolUse/PostToolUse/Stop/
   SubagentStop) based on what the BPMN rule actually needs to gate — don't default to PreToolUse
   without checking.
-- Pair this file with hook-settings-snippet-template.json using the SAME basename
-  (e.g. check-threshold.hook.mjs + check-threshold.hook.settings.json) — the settings snippet
-  carries no bpmn frontmatter of its own (it must stay clean JSON for the user to merge verbatim
-  into their settings.json); traceability for the JSON snippet flows through this paired script's
-  header instead. Document this pairing explicitly in the mapping report's element row so a reader
-  (or bpmn2agent-verify) can find the settings snippet from the script and vice versa.
-- Write to exactly the path in elements.<id>.generatedPaths.
+- Register this file in the one .claude/settings.json (settings-template.json):
+  "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/<name>.mjs". settings.json carries no
+  bpmn frontmatter (plain JSON); traceability flows through this script's header.
+- Node built-ins only: no npm imports, nothing to install.
+- Write to exactly the path in elements.<id>.generatedPaths (.claude/hooks/<name>.mjs).
 */
