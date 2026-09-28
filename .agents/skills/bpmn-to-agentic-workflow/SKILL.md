@@ -31,7 +31,8 @@ Ask every question via `AskUserQuestion` with options and a recommendation, in t
 
 Gather, asking only where context doesn't already answer it:
 
-- **Source `.bpmn`** — glob for `*.bpmn` if not named; confirm when several candidates exist.
+- **Source `.bpmn`** — glob for `*.bpmn` if not named; confirm when several candidates exist. No
+  diagram yet → run `bpmn-process-design` first and use the file it writes.
 - **Workflow name** — kebab-case; default to the `.bpmn` basename and confirm. Output goes to
   `generated/<workflow>/`; tell the user.
 - **Language** — for questions and generated `README.md`s (generated skills/agents/scripts stay

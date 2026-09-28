@@ -41,7 +41,9 @@ unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, mit ein
 `generated/<workflow>/.claude/` ins Projekt.
 
 Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-lanecraft>`.
-Noch kein Diagramm? `bpmn-authoring` hilft beim Zeichnen eines gültigen, sauber gelayouteten `.bpmn`.
+Noch kein Diagramm? `bpmn-process-design` entwirft den Prozess aus deinem Ziel und dem Wissen in einem
+Notebook und zeichnet ihn gleich pipeline-tauglich; `bpmn-authoring` hilft beim Zeichnen oder Ändern
+eines gültigen, sauber gelayouteten `.bpmn` von Hand.
 
 **Voraussetzungen:** `node`, `python3`, `xmllint`. Die npm-Pakete (`bpmn-moddle`, `bpmnlint`,
 `js-yaml`, `ajv`, `playwright`) installieren die Skripte beim ersten Lauf nach
@@ -175,6 +177,8 @@ Im Zweifel gewinnt das einfachere Muster.
 - **Labels in deiner Sprache**: sie bleiben wörtlich erhalten und tauchen in den Skills wieder auf.
 
 `bpmn-authoring` hilft beim Zeichnen und prüft das Diagramm gegen XSD, bpmn-moddle und bpmnlint.
+`bpmn-process-design` hält sich an diese Regeln, wenn es den Prozess aus deinem Ziel und einem
+Notebook selbst entwirft.
 Die vollständigen Regeln stehen in
 [`mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md) und
 [`pattern-rubric.md`](.agents/skills/bpmn2agent-design/references/pattern-rubric.md), knapp
@@ -280,6 +284,7 @@ installierbar mit einer Kopie, ohne Agenten, Skripte und Hooks.
 .agents/skills/                       # Skills (echte Dateien); .claude/skills/<name> sind Symlinks
   bpmn-to-agentic-workflow            #   Einstieg: führt die Pipeline Ende-zu-Ende
   bpmn2agent-analyze … -verify        #   die fünf Stufen (siehe oben)
+  bpmn-process-design                 #   Prozess aus Ziel + Notebook entwerfen und als pipeline-taugliches BPMN zeichnen
   bpmn-authoring                      #   BPMN von Hand schreiben: XSD, bpmn-moddle, bpmnlint, Layout
   agentic-workflow-kb                 #   Wissensbasis Agentic Design: FAQ + Referenzen mit Belegstellen
   orchestration-design                #   Orchestrierung prüfen (Übergaben, Prüfpunkte, Schleifen)

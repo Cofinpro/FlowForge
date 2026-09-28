@@ -58,6 +58,7 @@ erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm daz
 
 | Stufe | Skill | Liest | Schreibt |
 |---|---|---|---|
+| 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in lanecraft-Notation, `knowledge/faq/` |
 | 0 | `bpmn-authoring` | – | das `.bpmn` (XSD, bpmn-moddle, bpmnlint, Layout) |
 | 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved` |
 | 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
