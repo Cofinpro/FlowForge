@@ -5,7 +5,8 @@ gibt und wo man was ändert. Die Verzeichnisübersicht steht in `README.md`.
 
 ## Idee in einem Satz
 
-Ein Fachanwender zeichnet einen Prozess als BPMN (Lane = Rolle), eine Kette von Skills übersetzt
+Ein Fachanwender zeichnet einen Prozess als BPMN (Lane = Rolle) oder lässt ihn von
+`bpmn-process-design` aus Ziel und Notebook entwerfen; eine Kette von Skills übersetzt
 ihn Schritt für Schritt in eine Spezifikation (`workflow-spec.yaml`), lässt die Übersetzung vom
 Fachanwender bestätigen und schreibt daraus Agenten, Skills, Skripte, Hooks und genau eine
 Orchestrierungsdatei, jede mit Rückverweis auf ihr BPMN-Element.
@@ -14,6 +15,7 @@ Orchestrierungsdatei, jede mit Rückverweis auf ihr BPMN-Element.
 
 ```mermaid
 flowchart LR
+  Z["0 process-design<br/>Ziel + Notebook"] -. optional .-> B
   B[".bpmn<br/>(bpmn-authoring)"] --> A["1 analyze<br/>Inventar, Lücken erfragen"]
   A --> K["2 knowledge<br/>Fachwissen erden"]
   K --> D["3 design<br/>Mapping + Muster"]
@@ -58,7 +60,8 @@ erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm daz
 
 | Stufe | Skill | Liest | Schreibt |
 |---|---|---|---|
-| 0 | `bpmn-authoring` | – | das `.bpmn` (XSD, bpmn-moddle, bpmnlint, Layout) |
+| 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in lanecraft-Notation, `knowledge/faq/` |
+| 0 | `bpmn-authoring` | – | das `.bpmn` von Hand (XSD, bpmn-moddle, bpmnlint, Layout) |
 | 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved` |
 | 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
 | 3 | `bpmn2agent-design` | Spec, Rubriken | bestätigte Spec: `kind`, Pfade, Muster, Rollen, Artefakte |
@@ -163,7 +166,7 @@ Zwei Arten von Wissen, zwei Orte:
 | Frage | Was tut die Rolle, welche Kriterien gelten? | Welches Muster, wie schneidet man Agenten, wo gehört ein Prüfpunkt hin? |
 | Quelle | Notebooks des Anwenders, Web, vorhandene Repo-Dokumente | NotebookLM-Notebook „Agentic Workflows“ |
 | Ablage | `generated/<workflow>/knowledge/` | `.agents/skills/agentic-workflow-kb/` |
-| Wer | `bpmn2agent-knowledge` | design und generate über die Helfer unten |
+| Wer | `bpmn-process-design` (Entwurf), `bpmn2agent-knowledge` | design und generate über die Helfer unten |
 
 Beide folgen demselben Muster in drei Schichten, billigste zuerst:
 
@@ -224,6 +227,7 @@ die Struktur des Diagramms).
 |---|---|
 | die Übersetzung eines BPMN-Elements ändern | `bpmn2agent-design/references/mapping-rubric.md` |
 | die Musterwahl ändern | `bpmn2agent-design/references/pattern-rubric.md` |
+| die Notation neu entworfener Prozesse ändern | `bpmn-process-design/SKILL.md` §4; muss zu `mapping-rubric.md` passen |
 | ein Feld in der Spec ergänzen | `workflow-spec.schema.yaml`, dann analyze/design/generate/verify nachziehen |
 | Aussehen erzeugter Agenten/Skills ändern | `bpmn2agent-generate/assets/templates/` |
 | eine Prüfung ergänzen | `bpmn2agent-verify/scripts/verify.mjs` |

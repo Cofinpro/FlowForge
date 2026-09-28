@@ -4,7 +4,8 @@
 
 **BPMN-2.0-Prozess rein, prüfbare Claude-Code-Artefakte raus.**
 
-Ein Fachanwender zeichnet einen Prozess als BPMN-Diagramm (Lane = Rolle). lanecraft übersetzt ihn
+Ein Fachanwender zeichnet einen Prozess als BPMN-Diagramm (Lane = Rolle) oder lässt ihn aus seinem
+Ziel und einem Notebook entwerfen. lanecraft übersetzt ihn
 mit der `bpmn2agent`-Pipeline in Agenten, Skills, Hooks, Skripte und genau einen Orchestrator
 (Skill-Kette, Workflow-Skript oder Orchestrator-Agent). Jede erzeugte Datei verweist auf das
 BPMN-Element, aus dem sie entstanden ist, und das wird in beide Richtungen geprüft.
@@ -41,7 +42,10 @@ unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, mit ein
 `generated/<workflow>/.claude/` ins Projekt.
 
 Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-lanecraft>`.
-Noch kein Diagramm? `bpmn-authoring` hilft beim Zeichnen eines gültigen, sauber gelayouteten `.bpmn`.
+
+**Noch kein Diagramm?** `/lanecraft:bpmn-process-design` fragt nach deinem Ziel, recherchiert den
+Prozess im Notebook, lässt dich den Entwurf bestätigen und zeichnet ein `.bpmn`, das die Pipeline
+ohne Rückfragen verarbeitet. Ein Diagramm von Hand zeichnen oder ändern: `/lanecraft:bpmn-authoring`.
 
 **Voraussetzungen:** `node`, `python3`, `xmllint`. Die npm-Pakete (`bpmn-moddle`, `bpmnlint`,
 `js-yaml`, `ajv`, `playwright`) installieren die Skripte beim ersten Lauf nach
@@ -93,6 +97,7 @@ neue Notebook-Antworten landen nur in einem Checkout dieses Repos. Das Fachwisse
 
 ```mermaid
 flowchart LR
+  Z["0 process-design<br/>Ziel + Notebook"] -. optional .-> B
   B[".bpmn"] --> A["1 analyze<br/>Inventar, Lücken erfragen"]
   A --> K["2 knowledge<br/>Fachwissen erden"]
   K --> D["3 design<br/>Mapping + Muster"]
@@ -106,14 +111,16 @@ flowchart LR
 
 | Stufe | Skill | Ergebnis |
 |---|---|---|
+| 0 | `bpmn-process-design` (optional) | `.bpmn` in lanecraft-Notation, aus Ziel und Notebook entworfen |
 | 1 | `bpmn2agent-analyze` | `workflow-spec.yaml` als Entwurf; meldet nicht unterstützte Konstrukte mit Umbauvorschlag |
 | 2 | `bpmn2agent-knowledge` | belegtes Fachwissen je Lane/Aufgabe, offene Fragen an das Diagramm |
 | 3 | `bpmn2agent-design` | Entscheidung je Element, Orchestrierungsmuster, Rollen; Mapping-Plan zur Bestätigung |
 | 4 | `bpmn2agent-generate` | alle Dateien unter `generated/<workflow>/` |
 | 5 | `bpmn2agent-verify` | Bericht: Schema, Hash, Trace in beide Richtungen, Lint, keine offenen Punkte |
 
-`bpmn-to-agentic-workflow` ist der Einstieg und führt die fünf Stufen samt Rücksprüngen. Ändert sich
-das Diagramm später, fragt ein neuer Lauf nur nach neuen oder geänderten Elementen.
+`bpmn-to-agentic-workflow` ist der Einstieg und führt die fünf Stufen samt Rücksprüngen; ohne
+Diagramm startet er mit Stufe 0. Ändert sich das Diagramm später, fragt ein neuer Lauf nur nach
+neuen oder geänderten Elementen.
 
 Was aus welchem BPMN-Element wird, steht im nächsten Abschnitt.
 
@@ -174,8 +181,8 @@ Im Zweifel gewinnt das einfachere Muster.
   Ablageorte.
 - **Labels in deiner Sprache**: sie bleiben wörtlich erhalten und tauchen in den Skills wieder auf.
 
-`bpmn-authoring` hilft beim Zeichnen und prüft das Diagramm gegen XSD, bpmn-moddle und bpmnlint.
-Die vollständigen Regeln stehen in
+`bpmn-process-design` zeichnet nach genau diesen Regeln. `bpmn-authoring` hilft beim Zeichnen von
+Hand und prüft gegen XSD, bpmn-moddle und bpmnlint. Die vollständigen Regeln stehen in
 [`mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md) und
 [`pattern-rubric.md`](.agents/skills/bpmn2agent-design/references/pattern-rubric.md), knapp
 zusammengefasst in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
@@ -195,12 +202,16 @@ zu jeder Aussage die Textstelle.
    die für den Prozess gelten sollen. Weniger, dafür passende Quellen sind besser als viele.
 2. In Claude Code den MCP-Server `gemini-notebook-mcp` einrichten und einmal `nlm login` im
    Terminal ausführen.
-3. Die Pipeline starten. In Stufe 2 (`bpmn2agent-knowledge`) zeigt sie eure Notebooks zur Auswahl
+3. Ohne Diagramm: `bpmn-process-design` entwirft den Prozess aus dem Notebook.
+4. Die Pipeline starten. In Stufe 2 (`bpmn2agent-knowledge`) zeigt sie eure Notebooks zur Auswahl
    und fragt, welches Notebook welche Lanes oder Aufgaben abdeckt. Mehrere Notebooks gehen auch,
    z. B. eines je Fachbereich.
 
 ### Was mit dem Notebook passiert
 
+- **Der Prozess wird entworfen** (nur mit `bpmn-process-design`). Phasen, Rollen, Prüfpunkte und
+  Übergaben kommen aus dem Notebook; jede Aufgabe nennt ihre Quelle, Schritte ohne Beleg sind
+  `⚠ unverified`.
 - **Das Diagramm wird gegengeprüft.** Je Phase fragt die Pipeline das Notebook, welche Schritte,
   Prüfungen oder Rollen die Quellen kennen, die im Diagramm fehlen. Jeder Befund wird zu einer Frage
   an dich. Das Diagramm oder die Planung ändert sich nur, wenn du zustimmst.
@@ -210,7 +221,8 @@ zu jeder Aussage die Textstelle.
   landen als `references/` in den erzeugten Skills.
 - **Jede Antwort wird aufbewahrt.** `generated/<workflow>/knowledge/faq/` enthält jede Frage an das
   Notebook im Wortlaut, die Antwort unverändert und zu jeder Belegnummer Quelle und zitierte
-  Textstelle. Ein späterer Lauf schaut dort zuerst nach und fragt das Notebook nur, was noch fehlt.
+  Textstelle. Ein späterer Lauf, auch Stufe 2 nach `bpmn-process-design`, schaut dort zuerst
+  nach und fragt das Notebook nur, was noch fehlt.
 
 ### Belegstufen
 
@@ -280,6 +292,7 @@ installierbar mit einer Kopie, ohne Agenten, Skripte und Hooks.
 .agents/skills/                       # Skills (echte Dateien); .claude/skills/<name> sind Symlinks
   bpmn-to-agentic-workflow            #   Einstieg: führt die Pipeline Ende-zu-Ende
   bpmn2agent-analyze … -verify        #   die fünf Stufen (siehe oben)
+  bpmn-process-design                 #   Prozess aus Ziel + Notebook entwerfen und als pipeline-taugliches BPMN zeichnen
   bpmn-authoring                      #   BPMN von Hand schreiben: XSD, bpmn-moddle, bpmnlint, Layout
   agentic-workflow-kb                 #   Wissensbasis Agentic Design: FAQ + Referenzen mit Belegstellen
   orchestration-design                #   Orchestrierung prüfen (Übergaben, Prüfpunkte, Schleifen)
