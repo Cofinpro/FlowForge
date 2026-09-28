@@ -1,6 +1,8 @@
 name: Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       increment:
@@ -19,12 +21,35 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  # On push: release only if a feat, fix or breaking change landed since the last tag.
+  check:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: "github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'chore: release')"
+    outputs:
+      release: ${{ steps.check.outputs.release }}
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+      - id: check
+        run: |
+          if [ "${{ github.event_name }}" = workflow_dispatch ]; then echo release=true >> "$GITHUB_OUTPUT"; exit 0; fi
+          last=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if git log --format=%B "${last:+$last..}HEAD" | grep -qE '^(feat|fix)(\(.+\))?!?:|^BREAKING CHANGE'; then
+            echo release=true >> "$GITHUB_OUTPUT"
+          else
+            echo "No feat/fix since ${last:-the first commit}, skipping release."
+            echo release=false >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -39,8 +64,8 @@ jobs:
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          INCREMENT: ${{ inputs.increment }}
-          DRY_RUN: ${{ inputs.dry-run }}
+          INCREMENT: ${{ inputs.increment || 'auto' }}
+          DRY_RUN: ${{ inputs.dry-run || false }}
         run: |
           args=(--ci)
           [ "$INCREMENT" != auto ] && args+=("$INCREMENT")

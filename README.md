@@ -357,11 +357,14 @@ Muss mit `RESULT: PASS`, `no reference problems`, `smoke test ok`, `story smoke 
 
 - **CI** (`.github/workflows/ci.yml`): bei jedem Push auf `main` und jedem PR wird das Plugin
   validiert; bei PRs werden zusätzlich die Commit-Nachrichten geprüft.
-- **Release** (`.github/workflows/release.yml`): von Hand unter *Actions → Release → Run workflow*,
-  nur auf `main`. Die Erhöhung ist `auto` (aus den Commits: `feat:` → minor, `fix:` → patch,
+- **Release** (`.github/workflows/release.yml`): automatisch bei jedem Push auf `main`, sofern seit
+  dem letzten Tag ein `feat:`, `fix:` oder Breaking Change dazukam; reine `docs:`/`chore:`-Merges
+  lösen keins aus. Von Hand unter *Actions → Release → Run workflow*, nur auf `main`, dort ist die
+  Erhöhung wählbar: `auto` (aus den Commits: `feat:` → minor, `fix:` → patch,
   `feat!:`/`BREAKING CHANGE:` → major) oder fest `patch`/`minor`/`major`, optional als Probelauf.
   Der Workflow setzt die Version in `plugin.json` und `package.json`, schreibt `CHANGELOG.md`, taggt
   `vX.Y.Z` und legt das GitHub-Release an.
 
 Nutzer bekommen Updates nur, wenn die Version in `plugin.json` steigt. Deshalb läuft jede
-Auslieferung über den Release-Workflow (lokal geht auch `npm run release`).
+Auslieferung über den Release-Workflow (lokal geht auch `npm run release`). Pusht der Workflow nicht
+auf `main` (Branch-Schutz), braucht der Bot dort eine Ausnahme.
