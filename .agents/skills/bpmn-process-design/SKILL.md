@@ -1,6 +1,6 @@
 ---
 name: bpmn-process-design
-description: Designs a new process from what the user wants to build plus domain knowledge from Gemini notebooks (NotebookLM, via gemini-notebook-mcp), and draws it as an agent-ready BPMN 2.0 diagram in the lanecraft notation (lane = role/agent, serviceTask = AI, userTask = human checkpoint, scriptTask = script, data object = handoff, capped loops) that the bpmn2agent pipeline turns into agents and skills without rework. Use for "model a process for X", "draw the BPMN for what I want to build", "design a workflow from my notebook", or when a user has a goal but no diagram yet. To edit an existing .bpmn use bpmn-authoring; to turn a finished diagram into agents use bpmn-to-agentic-workflow.
+description: Designs a new process from what the user wants to build plus domain knowledge from Gemini notebooks (NotebookLM, via gemini-notebook-mcp), and draws it as an agent-ready BPMN 2.0 diagram in the lanecraft notation (lane = role, serviceTask = AI, userTask = human checkpoint, scriptTask = script, data object = handoff, capped loops) that the bpmn2agent pipeline turns into agents and skills without rework. Use for "model a process for X", "draw the BPMN for what I want to build", "design a workflow from my notebook", or when a user has a goal but no diagram yet. To edit an existing .bpmn use bpmn-authoring; to turn a finished diagram into agents use bpmn-to-agentic-workflow.
 ---
 
 # Design an agent-ready BPMN process
