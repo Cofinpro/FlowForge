@@ -51,7 +51,7 @@ model-only steps `⚠ unverified`.
 
 | Draw | when the step … | pipeline makes |
 |---|---|---|
-| Lane | is a role (one function or knowledge area) | agent role; its steps become skills or checklist items |
+| Lane | is a role (one function or knowledge area) | role; own agent only under the orchestrator-agent pattern, else a perspective in the skills |
 | `serviceTask` | reads, writes or judges | skill or checklist item (AI) |
 | `userTask` | is a human decision, approval or input | checkpoint: Claude proposes, the human chooses |
 | `scriptTask` | is purely mechanical; same input, same result | script in the lane's skill |
