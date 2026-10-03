@@ -34,7 +34,9 @@ Categories, in run order:
 3. **element-to-artifact** — every element/lane has a spec entry; every `generatedPaths` entry exists.
 4. **artifact-to-element** — every file has a correct `bpmn:` header and is claimed by an element,
    bundled in a recorded skill/agent directory, listed in `knowledge.refs`, or is the one
-   orchestration file for `pattern.chosen`.
+   orchestration file for `pattern.chosen`, or a context hook
+   (`.claude/hooks/<workflow>-write-guard.mjs` / `-memory-cap.mjs`) that a store in `contextSources`
+   needs: a live store with write tools, a memory store.
 5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal and its body parses;
    `.claude/settings.json` registers exactly the `.claude/hooks/` scripts; installables sit inside
    `.claude/`, with no npm imports or `package.json` there (legacy layout: each hook

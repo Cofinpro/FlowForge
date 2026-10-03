@@ -831,6 +831,18 @@ if (!spec) {
 
   // claude-dir: .claude/settings.json must reference exactly the hook scripts under .claude/hooks/.
   const hookScripts = allFiles.filter((f) => f.startsWith('.claude/hooks/') && f.endsWith('.mjs'));
+  // Context hooks (bpmn2agent-generate step 6a) belong to stores, not to one element's generatedPaths,
+  // like the top-level orchestration file. They count as explained only at the exact expected path
+  // AND only when the spec has a store that needs them (live store with write tools / memory store).
+  const contextHookPaths = new Set();
+  if (workflowName && outputLayout === 'claude-dir') {
+    const stores = Object.values(spec.contextSources || {});
+    const hasLiveWrite = stores.some(
+      (s) => s.art === 'live' && s.tools && s.tools !== 'unresolved' && (s.tools.write || []).length
+    );
+    if (hasLiveWrite) contextHookPaths.add(`.claude/hooks/${workflowName}-write-guard.mjs`);
+    if (stores.some((s) => s.art === 'gedaechtnis')) contextHookPaths.add(`.claude/hooks/${workflowName}-memory-cap.mjs`);
+  }
   const expectedTopLevelPathSet = new Set(expectedTopLevelPaths);
   const topLevelBudget = patternChosen === 'mixed' ? Infinity : 1;
   let topLevelUsed = 0;
@@ -929,7 +941,7 @@ if (!spec) {
 
     const claimingSet = claimedBy.get(relPath) || new Set();
     const underRoot = [...skillRoots].some((root) => relPath === root || relPath.startsWith(root + '/'));
-    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md';
+    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md' || contextHookPaths.has(relPath);
 
     if (unsupportedType) {
       artCat.warn(`"${relPath}": unknown file type, no bpmn header convention defined for it — header not checked`);
