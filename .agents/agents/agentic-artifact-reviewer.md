@@ -27,6 +27,12 @@ A directory (usually `generated/<workflow>/`) or a list of files. For generated 
    and loop from the spec appears with its condition and `maxLoops` behaviour; every human
    checkpoint uses options plus a recommendation; side effects come after their checkpoint; a
    Workflow script passes each `agent()` the paths and constraints it needs.
+   Where the spec has `contextSources`, also check: a live-store write in a step with no
+   `userTask` before it (`design`); tool lists (`tools:`, `permissions.allow`) broader than the
+   lane's stores need, wildcards, or write tools in read-only lanes (`design`); a memory store whose
+   text lacks the fixed sections or whose cap hook is missing (`generate`); a step that needs
+   knowledge but whose `## Kontextquellen` section or `references/` lacks the store (`generate`);
+   a store in the spec that no step reads (`design`).
 3. Respect the pipeline's own conventions — `bpmn:` frontmatter, verbatim BPMN labels inside
    English text, the templates' regenerate boundary, the JSON reporting block. They are not
    findings.

@@ -147,6 +147,7 @@ legt `bpmn2agent-design` dir als Mapping-Plan zur Bestätigung vor, bevor etwas 
 | **Zugeklappter Teilprozess** / **Call Activity** | eine Phase mit eigenem Innenleben | ein wiederverwendbarer Skill oder ein eigener Teil-Workflow |
 | **Mehrfachinstanz** | dasselbe je Element einer Menge | ein Schritt je Element, z. B. je Epic |
 | **Datenobjekt** | ein Arbeitsergebnis | ein **Artefaktvertrag**: fester Ablageort und Kopfdaten (`status`, `version`), über die die Schritte sich übergeben und ein Lauf fortgesetzt werden kann |
+| **Data Store** | ein dauerhafter Datenbestand (Handbuch, Tickets, Lernnotizen) | eine **Kontextquelle**, je nach `Art:` Wissensreferenz, Tool-Freigabe oder Gedächtnisdatei (siehe [Kontextquellen](#kontextquellen)) |
 | **Fehler-Randereignis** | ein Fehlerpfad | ein Fehlerzweig in der Steuerlogik |
 
 Noch nicht unterstützt: Pools mit Nachrichtenflüssen, Timer- und Nachrichtenereignisse,
@@ -179,6 +180,8 @@ Im Zweifel gewinnt das einfachere Muster.
 - **`Input: … Output: …` in die Dokumentation** jeder Aufgabe schreiben und die wichtigen
   Arbeitsergebnisse als **Datenobjekte** einzeichnen. Daraus werden Eingaben, Ausgaben und
   Ablageorte.
+- **Datenquellen als Data Store** einzeichnen, mit `Art:` und `Ort:` in der Dokumentation, und vor
+  jedes Schreiben in ein Live-System einen User Task setzen.
 - **Labels in deiner Sprache**: sie bleiben wörtlich erhalten und tauchen in den Skills wieder auf.
 
 `bpmn-process-design` zeichnet nach genau diesen Regeln. `bpmn-authoring` hilft beim Zeichnen von
@@ -186,6 +189,29 @@ Hand und prüft gegen XSD, bpmn-moddle und bpmnlint. Die vollständigen Regeln s
 [`mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md) und
 [`pattern-rubric.md`](.agents/skills/bpmn2agent-design/references/pattern-rubric.md), knapp
 zusammengefasst in [`ARCHITECTURE.md`](ARCHITECTURE.md#übersetzungsregeln).
+
+## Kontextquellen
+
+Ein Schritt ist nur so gut wie die Daten, die er sieht. Zeichne deshalb jede dauerhafte Datenquelle
+als **Data Store** und schreibe zwei Zeilen in seine Dokumentation: `Art:` (`wissen`, `live` oder
+`gedächtnis`) und `Ort:` (`notebook:<Titel>`, `mcp:<Server>`, `cli:<Befehl>`, eine URL,
+`datei:<Pfad>` oder `websearch`). Ob ein Schritt liest oder schreibt, sagt allein die Pfeilrichtung.
+Die Pipeline macht daraus Wissensreferenzen, Tool-Freigaben, einen Schreibschutz und ein Gedächtnis
+über Läufe hinweg. Fehlt eine Angabe, fragt sie nach, statt zu raten.
+
+Beispiel aus der Fixture
+[`context-flow.bpmn`](.agents/skills/bpmn2agent-verify/fixtures/context-flow.bpmn):
+
+| Data Store | `Art:` / `Ort:` | Pfeil | wird zu |
+|---|---|---|---|
+| Support-Handbuch | `wissen` / `notebook:Support-Handbuch` | → „Antwort entwerfen“ | belegte Referenz im Skill des Schritts |
+| Jira-Tickets Projekt LANE | `live` / `mcp:atlassian` | → „Ticket analysieren“, „Kommentar im Ticket posten“ → | Lese-Tools in der Allowlist; Schreib-Tool nur hinter dem User Task „Antwort freigeben“ und einem `ask`-Hook |
+| Lernnotizen Support | `gedächtnis` / `datei:.claude/memory/context-flow/lernnotizen-support.md` | → „Ticket analysieren“, „Lernnotiz fortschreiben“ → | kuratierte Datei, höchstens 150 Zeilen, mit Cap-Hook |
+
+Das prozessweite Eingangsdatum „Ticket-ID“ wird zum `argument-hint` des erzeugten Orchestrators.
+Schreibt ein Schritt in einen Live-Store, ohne dass auf jedem Pfad ein User Task davorliegt, meldet
+`bpmn2agent-verify` einen Fehler (Gegenprobe: `context-flow-unguarded.bpmn`). Notation, Regeln und
+was bewusst fehlt: [`ARCHITECTURE.md`](ARCHITECTURE.md#kontextquellen).
 
 ## Fachwissen aus Gemini-Notebooks
 
@@ -253,7 +279,7 @@ und beantwortet Fragen dazu, wie man Agenten und Skills baut, nicht zu eurem Fac
 generated/<workflow>/
   .claude/                   # alles, was installiert wird, im Aufbau eines Projekt-.claude/
     agents/  skills/         #   die Artefakte
-    hooks/  settings.json    #   nur bei Hooks; settings.json meldet jeden Hook an
+    hooks/  settings.json    #   nur bei Hooks oder Stores; settings.json meldet jeden Hook an
     workflows/               #   nur beim Muster Workflow-Skript
   README.md                  # Installation in einer Zeile, für den Anwender
   workflow-spec.yaml         # die Spezifikation, über die alle Stufen reden

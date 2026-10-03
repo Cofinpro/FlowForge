@@ -24,6 +24,11 @@ If a rubric is missing, say so in `summary` and skip rubric checks.
    `artifacts`, `openQuestions`, `knowledge`.
 2. Run orchestration-design's review mode, and agent-authoring's split rule and tool/model
    guidance per role. Every unanswered or weakly answered question is a finding.
+   For `contextSources`, also flag: a write into a `live` store with no `userTask` before it on
+   every path (`bpmn`); `live` tool lists broader than the lane needs, i.e. wildcards or write tools
+   in a read-only lane (`design`); a `gedaechtnis` store without a writer, a reader or `maxLines`
+   (`bpmn` or `design`); a task that needs knowledge but has no store input (`question`); a store
+   with no `readers` (`question`).
 3. Classify each finding's route: `design` (fixable in the spec), `bpmn` (the diagram must
    change — goes to the user, loop A) or `question` (needs a business decision).
 
