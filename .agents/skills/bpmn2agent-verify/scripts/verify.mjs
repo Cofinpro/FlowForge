@@ -25,7 +25,7 @@
 // Exit code: 0 iff every check category below has zero "fail"-level findings (warnings don't
 // block). 2 on a CLI usage error (bad args / <generatedDir> not a directory).
 //
-// ── What this checks (six categories, run in this order) ──────────────────────────────────
+// ── What this checks (six categories, plus context-sources when applicable, run in this order) ──────────────────────────────────
 //  1. spec-schema         workflow-spec.yaml parses as YAML and validates against
 //                          bpmn2agent-design/assets/workflow-spec.schema.yaml (ajv, draft-07).
 //  2. source-bpmn          sha256 of the recorded meta.sourceBpmn.path matches
@@ -36,6 +36,9 @@
 //                          spec.elements entry; every BPMN lane has a roles.* entry; every
 //                          not-generated/unresolved element has a reason; every generatedPaths
 //                          entry for a skill/script/hook/artifact-contract element exists on disk.
+//  3b. context-sources    (only when the diagram has data stores / ioSpecification input-output, or the
+//                          spec has contextSources / workflowIO; otherwise the category does not appear
+//                          and output is identical to older versions). See the block below.
 //  4. artifact-to-element  every file actually on disk under <generatedDir> (except a short,
 //                          documented exception list) carries a valid bpmn header whose `file`
 //                          matches the spec's source .bpmn and whose `elements` are real spec
@@ -136,8 +139,9 @@ if (!existsSync(generatedDir) || !statSync(generatedDir).isDirectory()) {
 const categories = [];
 function category(id, title) {
   const cat = { id, title, findings: [] };
-  cat.fail = (message) => cat.findings.push({ level: 'fail', message });
-  cat.warn = (message) => cat.findings.push({ level: 'warn', message });
+  // `route` (optional): the pipeline stage the fix belongs to (analyze | design | generate); SKILL.md §2.
+  cat.fail = (message, route) => cat.findings.push({ level: 'fail', message, ...(route ? { route } : {}) });
+  cat.warn = (message, route) => cat.findings.push({ level: 'warn', message, ...(route ? { route } : {}) });
   cat.info = (message) => cat.findings.push({ level: 'info', message });
   categories.push(cat);
   return cat;
@@ -456,6 +460,10 @@ if (!spec || !inventory) {
   }
 
   const flowNodeIds = new Set((inventory.flowNodes || []).map((n) => n.id));
+  // data stores and process input/output are real diagram elements too (spec kinds context-source /
+  // workflow-input / workflow-output), they just are not flow nodes
+  for (const d of inventory.dataStores || []) flowNodeIds.add(d.id);
+  for (const io of [...(inventory.processIO?.inputs || []), ...(inventory.processIO?.outputs || [])]) flowNodeIds.add(io.id);
   const needsGeneratedPaths = new Set(['skill', 'script', 'hook', 'artifact-contract']);
   const payloadKinds = new Set(['skill', 'script', 'hook']);
 
@@ -511,6 +519,266 @@ if (!spec || !inventory) {
         elCat.fail(`artifacts.${id}.consumers references "${consumer}", not a known element`);
       }
     }
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// 3b. context-sources — data stores, process input/output, write guard (plan: docs/plans/kontextquellen)
+//   Only created when there is something to check, so specs/diagrams without stores or ioSpecification
+//   verify exactly as before. Each finding carries the route (analyze | design) the fix belongs to.
+//   (1) every store / process-IO element has elements.<id> (kind context-source / workflow-input /
+//       workflow-output) and a contextSources entry (by bpmnElement) / workflowIO       -> design
+//   (2) contextSources.*.readers/writers (and art/ort type) match the diagram           -> analyze (stale spec)
+//   (3) WRITE GUARD: a task that writes into a live store must be preceded by a userTask on EVERY
+//       sequence-flow path from the start                                                -> analyze (diagram)
+//   (4) live-store write inside a workflow-script phase                                  -> design
+//   (5) tools: unresolved                                                                -> design (warning)
+//   (6) gedaechtnis store without writer or reader in the spec                           -> analyze
+// ---------------------------------------------------------------------------------------------
+const ioInventory = inventory?.processIO || { inputs: [], outputs: [] };
+const ctxDataStores = inventory?.dataStores || [];
+const hasIoSpecEntries = [...ioInventory.inputs, ...ioInventory.outputs].some((io) => io.source === 'ioSpecification');
+const ctxNewStyle = !!(spec && (spec.contextSources || spec.workflowIO || ctxDataStores.length || hasIoSpecEntries));
+if (spec && inventory && ctxNewStyle) {
+  const ctxCat = category('context-sources', 'Context sources (data stores, process input/output, write guard)');
+  const specElements = spec.elements || {};
+  const nodeById = new Map((inventory.flowNodes || []).map((n) => [n.id, n]));
+  const labelOf = (id) => nodeById.get(id)?.name || specElements[id]?.label || id;
+  const ctxSources = spec.contextSources || {};
+  const sourcesByElement = new Map(); // bpmnElement -> [[key, entry], ...]
+  for (const [key, cs] of Object.entries(ctxSources)) {
+    if (!sourcesByElement.has(cs.bpmnElement)) sourcesByElement.set(cs.bpmnElement, []);
+    sourcesByElement.get(cs.bpmnElement).push([key, cs]);
+  }
+  const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+  const names = (ids) => ids.map((i) => `"${labelOf(i)}"`).join(', ');
+
+  // (1) + (2) per data store -------------------------------------------------------------
+  for (const store of ctxDataStores) {
+    const el = specElements[store.id];
+    if (!el) {
+      ctxCat.fail(`Data store "${store.name || store.id}" (${store.id}) has no entry in spec.elements — it must be kind: context-source`, 'design');
+    } else if (el.kind !== 'context-source') {
+      ctxCat.fail(`elements.${store.id} ("${store.name || store.id}") is kind: ${el.kind}, but the diagram draws it as a data store — it must be kind: context-source`, 'design');
+    }
+    const entries = sourcesByElement.get(store.id) || [];
+    if (!entries.length) {
+      ctxCat.fail(`Data store "${store.name || store.id}" (${store.id}) has no contextSources entry (bpmnElement: ${store.id}) — the spec does not say what kind of source it is or how it is reached`, 'design');
+    }
+    for (const [key, cs] of entries) {
+      if (cs.name !== store.name) ctxCat.warn(`contextSources.${key}.name is "${cs.name}", the diagram label is "${store.name}" (labels stay verbatim)`, 'analyze');
+      if (store.art && cs.art !== store.art) {
+        ctxCat.fail(`Data store "${store.name}": the diagram says Art "${store.art}", contextSources.${key}.art says "${cs.art}" — the spec is out of date`, 'analyze');
+      }
+      if (store.ort && cs.ort?.type !== store.ort.type) {
+        ctxCat.fail(`Data store "${store.name}": the diagram says Ort type "${store.ort.type}", contextSources.${key}.ort.type says "${cs.ort?.type}" — the spec is out of date`, 'analyze');
+      } else if (store.ort && store.ort.ref && cs.ort?.ref && cs.ort.ref !== store.ort.ref) {
+        ctxCat.warn(`Data store "${store.name}": the diagram says Ort "${store.ort.ref}", contextSources.${key}.ort.ref says "${cs.ort.ref}"`, 'analyze');
+      }
+      const specReaders = cs.readers || [];
+      const specWriters = cs.writers || [];
+      for (const [role, specIds, diagramIds] of [['readers', specReaders, store.readers || []], ['writers', specWriters, store.writers || []]]) {
+        if (!sameSet(specIds, diagramIds)) {
+          const missing = diagramIds.filter((i) => !specIds.includes(i));
+          const extra = specIds.filter((i) => !diagramIds.includes(i));
+          ctxCat.fail(
+            `Data store "${store.name}": contextSources.${key}.${role} does not match the arrows in the diagram` +
+            `${missing.length ? ` — the diagram also has ${names(missing)}` : ''}${extra.length ? ` — the spec lists ${names(extra)}, which the diagram does not connect` : ''}; ` +
+            `the spec is out of date`,
+            'analyze'
+          );
+        }
+      }
+    }
+  }
+  // spec entries for stores the diagram no longer has
+  const diagramStoreIds = new Set(ctxDataStores.map((d) => d.id));
+  for (const [key, cs] of Object.entries(ctxSources)) {
+    if (!diagramStoreIds.has(cs.bpmnElement)) {
+      ctxCat.fail(`contextSources.${key} ("${cs.name}") points at ${cs.bpmnElement}, which is not a data store in the diagram — the spec is out of date`, 'analyze');
+    }
+  }
+
+  // (1) process input/output ------------------------------------------------------------
+  const io = spec.workflowIO;
+  for (const [dir, list, kind] of [['input', ioInventory.inputs, 'workflow-input'], ['output', ioInventory.outputs, 'workflow-output']]) {
+    // a data-object-by-convention entry only counts once the spec uses the new vocabulary at all
+    // (ctxNewStyle); older specs treat those data objects as plain artifact contracts.
+    for (const item of list) {
+      const el = specElements[item.id];
+      if (!el) {
+        ctxCat.fail(`Process ${dir} "${item.name || item.id}" (${item.id}) has no entry in spec.elements — it must be kind: ${kind}`, 'design');
+      } else if (el.kind !== kind) {
+        ctxCat.fail(`elements.${item.id} ("${item.name || item.id}") is kind: ${el.kind}, but it is the process ${dir} — it must be kind: ${kind}`, 'design');
+      }
+    }
+    if (list.length && !io?.[dir]) {
+      ctxCat.fail(`The diagram has a process ${dir} (${list.map((i) => `"${i.name || i.id}"`).join(', ')}) but the spec has no workflowIO.${dir}`, 'design');
+    }
+    if (!list.length && io?.[dir]) {
+      ctxCat.fail(`spec.workflowIO.${dir} exists, but the diagram has no process ${dir} — the spec is out of date`, 'analyze');
+    }
+    const art = io?.[dir]?.artifact;
+    if (art && !(spec.artifacts || {})[art]) {
+      ctxCat.fail(`workflowIO.${dir}.artifact "${art}" is not an entry in spec.artifacts`, 'design');
+    }
+  }
+
+  // (5) unresolved tools, (6) memory needs a writer and a reader ------------------------
+  for (const [key, cs] of Object.entries(ctxSources)) {
+    if (cs.tools === 'unresolved') {
+      ctxCat.warn(`Data store "${cs.name}": its tools could not be resolved (source "${cs.ort?.type}${cs.ort?.ref ? ':' + cs.ort.ref : ''}" not reachable when the mapping was made) — no tool access will be generated for it; connect it and redo the mapping for this store`, 'design');
+    }
+    if (cs.art === 'gedaechtnis') {
+      const missingParts = [!(cs.writers || []).length && 'step that writes it', !(cs.readers || []).length && 'step that reads it'].filter(Boolean);
+      if (missingParts.length) {
+        ctxCat.fail(`Memory store "${cs.name}" (contextSources.${key}) has no ${missingParts.join(' and no ')} in the spec — a memory only makes sense if one step learns into it and another reads it; draw the missing arrow`, 'analyze');
+      }
+    }
+  }
+
+  // (3) + (4) live-store writes ---------------------------------------------------------
+  const liveWrites = []; // { storeName, writerId }
+  const liveSeen = new Set();
+  const addLiveWrite = (storeName, writerId) => {
+    if (liveSeen.has(storeName + '|' + writerId)) return;
+    liveSeen.add(storeName + '|' + writerId);
+    liveWrites.push({ storeName, writerId });
+  };
+  for (const store of ctxDataStores) {
+    // the spec's art wins (it is what design confirmed); the diagram's is the fallback
+    const entries = sourcesByElement.get(store.id) || [];
+    const art = entries[0]?.[1]?.art ?? store.art;
+    if (art !== 'live') continue;
+    for (const w of store.writers || []) addLiveWrite(store.name || store.id, w);
+  }
+
+  if (liveWrites.length) {
+    // Flow graph over ALL scopes, flattened: a sub-process (or a callActivity whose calledElement is a
+    // process in this file) is entered at its inner start events and left from its inner end
+    // events, so a userTask nested inside a sub-process guards the paths that run through it, and an
+    // unguarded inner path is found like any other. A container node C is split into the entry
+    // node C and a pseudo exit node "C#exit"; plain sequence flows leave from the exit node.
+    // Boundary events: for a host that is not a userTask the edge host -> boundary event is added
+    // (so the handler is as guarded as the host's entry); for a userTask host the boundary event hangs
+    // off the host's predecessors (the approval has not been given when the boundary fires). For a
+    // sub-process host the boundary hangs off its ENTRY: conservative, it may over-report a handler
+    // that can only fire after an inner approval. Event sub-processes have no incoming flow, so
+    // their inner start events count as extra roots.
+    // Loops: "guarded" is computed as reachability from the roots in the graph in which userTask
+    // nodes are not expanded (a reached userTask stops the walk). A write task reached that way has at
+    // least one userTask-free path from a start, whatever the cycles look like; a BFS with a visited set
+    // terminates on cycles and a path re-entering through a loop-back edge is not mistaken for a guarded one.
+    // A writer that is itself a userTask counts as human-performed and is not flagged.
+    const scopeById = new Map((inventory.scopes || []).map((sc) => [sc.id, sc]));
+    const flowNodes = inventory.flowNodes || [];
+    const innerScopeOf = (n) => {
+      if (n.bpmnType === 'bpmn:SubProcess' || n.bpmnType === 'bpmn:Transaction') return scopeById.has(n.id) ? n.id : null;
+      if (n.bpmnType === 'bpmn:CallActivity' && n.calledElement && scopeById.has(n.calledElement)) return n.calledElement;
+      return null;
+    };
+    const exitId = (n) => (innerScopeOf(n) ? `${n.id}#exit` : n.id);
+    const adj = new Map();
+    const addEdge = (a, b) => {
+      if (!adj.has(a)) adj.set(a, new Set());
+      adj.get(a).add(b);
+    };
+    const inScope = (scopeId) => flowNodes.filter((n) => n.scopeId === scopeId && n.bpmnType !== 'bpmn:BoundaryEvent');
+    const entriesOf = (scopeId) => {
+      const nodes = inScope(scopeId);
+      const starts = nodes.filter((n) => n.bpmnType === 'bpmn:StartEvent');
+      if (starts.length) return starts;
+      return nodes.filter((n) => !(n.incoming || []).length && !scopeById.get(n.id)?.triggeredByEvent);
+    };
+    const endsOf = (scopeId) => inScope(scopeId).filter((n) => !(n.outgoing || []).length);
+    const preds = new Map(); // node id -> predecessor ids (for userTask boundary events)
+    for (const sf of inventory.sequenceFlows || []) {
+      const src = nodeById.get(sf.source);
+      if (!src) continue;
+      addEdge(exitId(src), sf.target);
+      if (!preds.has(sf.target)) preds.set(sf.target, []);
+      preds.get(sf.target).push(exitId(src));
+    }
+    const roots = [];
+    for (const n of flowNodes) {
+      const inner = innerScopeOf(n);
+      if (inner) {
+        const entries = entriesOf(inner);
+        for (const e of entries) addEdge(n.id, e.id);
+        const ends = endsOf(inner);
+        for (const e of ends) addEdge(exitId(e), `${n.id}#exit`);
+        if (!entries.length) addEdge(n.id, `${n.id}#exit`);
+      }
+      for (const b of n.attachedBoundaryEvents || []) {
+        if (n.bpmnType === 'bpmn:UserTask') {
+          if ((preds.get(n.id) || []).length) for (const p of preds.get(n.id)) addEdge(p, b);
+          else roots.push(b);
+        } else {
+          addEdge(n.id, b);
+        }
+      }
+    }
+    const calledProcessIds = new Set(flowNodes.filter((n) => n.bpmnType === 'bpmn:CallActivity' && n.calledElement && scopeById.has(n.calledElement)).map((n) => n.calledElement));
+    for (const sc of inventory.scopes || []) {
+      if (sc.scopeType === 'process' && !calledProcessIds.has(sc.id)) for (const e of entriesOf(sc.id)) roots.push(e.id);
+      else if (sc.triggeredByEvent) for (const e of entriesOf(sc.id)) roots.push(e.id);
+    }
+    const isUserTask = (id) => nodeById.get(id)?.bpmnType === 'bpmn:UserTask';
+    const parent = new Map();
+    const queue = [];
+    for (const r of roots) if (!parent.has(r)) { parent.set(r, null); queue.push(r); }
+    while (queue.length) {
+      const cur = queue.shift();
+      if (isUserTask(cur)) continue; // an approval step: everything behind it is guarded on this route
+      for (const nxt of adj.get(cur) || []) {
+        if (parent.has(nxt)) continue;
+        parent.set(nxt, cur);
+        queue.push(nxt);
+      }
+    }
+    const pathTo = (id) => {
+      const out = [];
+      for (let cur = id; cur != null; cur = parent.get(cur)) if (!cur.endsWith('#exit')) out.push(labelOf(cur));
+      return out.reverse();
+    };
+    for (const { storeName, writerId } of liveWrites) {
+      if (!parent.has(writerId) || isUserTask(writerId)) continue;
+      ctxCat.fail(
+        `"${labelOf(writerId)}" writes into the live system "${storeName}" without a human approval first: ` +
+        `on at least one route from the start (${pathTo(writerId).map((l) => `"${l}"`).join(' → ')}) nobody has approved before the write happens. ` +
+        `Draw an approval step (a user task) in front of "${labelOf(writerId)}" that every route to it passes — and that a loop cannot skip on its first pass.`,
+        'analyze'
+      );
+    }
+
+    // (4) a live write may not sit in a workflow-script phase (that pattern has no human checkpoints)
+    const chosen = spec.pattern?.chosen;
+    const ancestors = (id) => {
+      const out = [id];
+      for (let sc = scopeById.get(nodeById.get(id)?.scopeId); sc; sc = scopeById.get(sc.parentScopeId)) out.push(sc.id);
+      return out;
+    };
+    for (const { storeName, writerId } of liveWrites) {
+      let where = null;
+      if (chosen === 'workflow-script') where = 'the workflow is built as a workflow script';
+      else if (chosen === 'mixed') {
+        const ph = (spec.pattern.phases || []).find((p) => p.pattern === 'workflow-script' && ancestors(writerId).some((a) => (p.elements || []).includes(a)));
+        if (ph) where = `its phase "${ph.name}" is built as a workflow script`;
+      }
+      if (where) {
+        ctxCat.fail(
+          `"${labelOf(writerId)}" writes into the live system "${storeName}", but ${where} — that pattern cannot pause for a human approval. ` +
+          `Choose skill chain with hooks or an orchestrator agent for this step.`,
+          'design'
+        );
+      }
+    }
+  }
+  if (!ctxCat.findings.length) {
+    ctxCat.info(
+      `${ctxDataStores.length} data store(s), ${ioInventory.inputs.length} process input(s), ${ioInventory.outputs.length} process output(s) traced; ` +
+      `${liveWrites.length} live-store write(s) guarded by an approval`
+    );
   }
 }
 
@@ -799,7 +1067,7 @@ if (jsonMode) {
     if (cat.findings.length === 0) console.log('  (no findings)');
     for (const f of cat.findings) {
       const lines = f.message.split('\n');
-      console.log(`  ${icon[f.level] || '-'} ${lines[0]}`);
+      console.log(`  ${icon[f.level] || '-'} ${lines[0]}${f.route ? ` [fix in bpmn2agent-${f.route}]` : ''}`);
       for (const extra of lines.slice(1)) console.log(`      ${extra}`);
     }
   }
