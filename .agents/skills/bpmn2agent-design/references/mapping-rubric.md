@@ -132,8 +132,9 @@ Anything else (e.g. `live` + `websearch`, `gedächtnis` + `mcp:`) is invalid.
   the mapping plan. Server not connected → `tools: unresolved` (verify warns, generate emits no tools,
   never a wildcard).
 - **Place them.** Where lanes are agents (`orchestrator-agent`), the needed read tools go into that
-  lane agent's `tools:`, least privilege per role. Otherwise they go into `.claude/settings.json` →
-  `permissions.allow` (union of all read tools) and the plan says openly "Lesezugriff nicht pro Rolle
+  lane agent's `tools:`, least privilege per role (a lane that writes also gets that store's write
+tools; they stay behind the `userTask` and the hook). Otherwise they go into `.claude/settings.json` →
+  `permissions.allow` (union of all read tools; write tools never go there) and the plan says openly "Lesezugriff nicht pro Rolle
   getrennt". **If the roles need different privileges, that is a signal for `orchestrator-agent`**
   (see `pattern-rubric.md`).
 

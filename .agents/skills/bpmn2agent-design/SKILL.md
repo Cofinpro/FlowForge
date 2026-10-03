@@ -54,6 +54,13 @@ Sort the spec's `elements` into:
   to re-run `bpmn2agent-analyze` once the `.bpmn` is updated. Leave it → set `kind: not-generated`
   (not `unresolved`) with the same reason text, and set that element's `openQuestions` entry to
   `answer: "known gap — not generated"`, `answeredAt: <now>`; it needs no further rubric work.
+- **Unguarded live write** — a task in `contextSources.<id>.writers` of an `art: live` store that
+  can be reached from a start event without passing a `userTask`. Check on the inventory's
+  `flowNodes`/`sequenceFlows`: drop every `userTask`; if the writer is still reachable (loops
+  included), it is unguarded. This is a diagram defect (`mapping-rubric.md` → "Writing into a live
+  store"): tell the user in business words which write lacks a confirmation step, **stop the whole
+  design pass** and point them at `bpmn-authoring`, then `bpmn2agent-analyze`. Never invent a
+  checkpoint in the spec.
 - **Already decided** — concrete `kind` from a previous design pass. Leave as-is unless the element
   is in the analyze diff's new/changed set.
 
@@ -70,7 +77,7 @@ element:
   the user's project: `.claude/skills/<name>/SKILL.md`, `.claude/skills/<name>/scripts/<x>.mjs`,
   `.claude/agents/<name>.md`, `.claude/hooks/<name>.mjs` (hook registration goes into the one
   `.claude/settings.json`, which no element claims). Empty for `orchestrator`, `human-checkpoint`,
-  `not-generated` and `unresolved`.
+  `context-source`, `workflow-input`, `workflow-output`, `not-generated` and `unresolved`.
 - `reason` — required for `not-generated`/`unresolved`; it appears verbatim in the mapping report.
 - `knowledge` — for `skill`/`agent-checklist`/`human-checkpoint`/`hook` only: notebook ids mapped to
   the element or its lane, else its `knowledge.refs` path, else `"websearch"`/`"model-only"` per
@@ -81,8 +88,38 @@ element:
 - `inputs`/`outputs` — carry forward from analysis; add only artifacts the decision itself
   introduces (e.g. a sub-workflow's intermediate artifacts).
 
+Data stores and process-wide input/output get `kind: context-source` / `workflow-input` /
+`workflow-output` (the rubric's table; a convention input/output data object takes the `workflow-*`
+kind, not `artifact-contract`). Their content is step 3a.
+
 Don't ask about individual rubric applications. Save every genuinely uncertain call for the step-7
 confirmation.
+
+## 3a. Resolve context sources
+
+For every `contextSources.<id>` (valid Art × Ort pairs: `mapping-rubric.md` → "Data stores → context
+sources"; analyze settled invalid ones, ask again only if one slipped through):
+
+- **`art: live` → `tools: {read, write}`**, per `Ort` type (rule and heuristic in the rubric's "Live
+  stores: tools and placement"; don't restate them in the spec):
+  - `mcp:<server>` — ToolSearch with query `mcp__<server>__` (raise `max_results` to cover the
+    server). Nothing found or server not connected → `tools: unresolved`. Classify by name
+    (`get/list/search/read/fetch/view` read; `create/update/delete/add/post/edit/transition/push`
+    write; unclear = write); a `readOnlyHint` in the tool metadata wins. Keep only tools the
+    store's readers/writers plausibly need (from their label and documentation); `write` stays
+    empty when the store has no writers.
+  - `cli:<cmd>` — `command -v <cmd>` and its `--help` for the subcommands (nothing runs beyond
+    that); patterns `Bash(<cmd> <subcmd>:*)`, same heuristic. Not installed → `unresolved`.
+  - `notebook:` — treat as `mcp:gemini-notebook-mcp`: `read: [mcp__gemini-notebook-mcp__notebook_query]`;
+    write tools only when the store has writers.
+  - URL → `read: [WebFetch]`; `datei:` → `read: [Read]` (plus `Edit`/`Write` under `write` if the
+    store has writers).
+- **`art: gedaechtnis` → `memory: {path, maxLines: 150}`.** `path` is `ort.ref`; without one,
+  `.claude/memory/<meta.workflowName>/<store id>.md`. No `tools`.
+- **`art: wissen`**: nothing to resolve (knowledge already extracted); no `tools`/`memory`.
+
+Each store's and each workflow-I/O element's `elements.<id>` entry keeps its `kind` and has no
+`generatedPaths`.
 
 ## 4. Apply the pattern rubric
 
@@ -90,6 +127,11 @@ Load `references/pattern-rubric.md` and walk its decision table with step 1's to
 `judgementGateways[]` is a heuristic: don't count a gateway that only routes on a preceding human
 checkpoint's answer toward `judgementBranchCount` (recompute before consulting the table). Repeat per
 `scopes[].signals` for every sub-workflow; each gets its own pattern under the same `elements` map.
+
+Add the two context-store signals the inventory doesn't carry: `liveWriteCount` per phase (writers of
+`art: live` stores) and `roleToolSpread` (from step 3a's tools per lane). A phase with a live write is
+never `workflow-script`; differing role privileges are a signal for `orchestrator-agent` (both in
+the rubric). The step-2 guard check already ran, so no write here lacks its `userTask`.
 
 Write `pattern.rationale` in the business phrasing of the rubric's "Explaining the choice" section.
 Add an `alternativesConsidered` entry when the signals were close to another row.
@@ -107,6 +149,21 @@ ask:
 - a hook needs a tool matcher, or a lane's skills touch production artifacts or external APIs →
   propose a `tools:` allowlist.
 
+Place the live-store tools from step 3a (placement rule: `mapping-rubric.md` → "Live stores: tools
+and placement"):
+
+- **`orchestrator-agent`** (also an orchestrator-agent phase of `mixed`): each lane agent gets
+  `roles.<lane>.tools` with the read tools of the stores its tasks read, the write tools of the
+  stores its tasks write, and the built-ins its skills need (`Read`, `Grep`, `Glob`, `Write` for its
+  artifacts and memory file). Nothing for stores it doesn't touch. `unresolved` stores add nothing.
+- **Any other pattern**: the union of all read tools goes into `.claude/settings.json` →
+  `permissions.allow`; write tools never do (the user is asked at the call, backed by the
+  PreToolUse hook generate emits). Say in the plan: "Lesezugriff nicht pro Rolle getrennt". If
+  `roleToolSpread` holds, also recommend `orchestrator-agent` there.
+
+No spec field holds the `permissions.allow` list; generate derives it from
+`contextSources.*.tools.read`.
+
 Apply agent-authoring's "Should this be an agent at all?" and split rule to every lane. A lane that
 should become two agents or a skill is a question for step 7 (the lane belongs to the diagram), not
 a split you make; when the user agrees, record the reason in the spec.
@@ -115,7 +172,9 @@ a split you make; when the user agrees, record the reason in the spec.
 
 For each `artifacts.<id>` (from analysis plus step 3's additions), fill `pathPattern` and
 `frontmatter`. Artifacts crossing a gate or loop get `version` and `status` frontmatter. Add no
-field that no producer or consumer reads.
+field that no producer or consumer reads. The artifact behind `workflowIO.input` carries a
+frontmatter field (`required: true`) for every name in `workflowIO.input.required`; the one behind
+`workflowIO.output` is the contract for the end result.
 
 ## 6a. Check the orchestration against the knowledge base
 
@@ -154,6 +213,20 @@ lane/role, then element, e.g.:
 > Insgesamt baue ich das als eine Abfolge von Checklisten, die an deinem Prüfpunkt pausiert
 > (siehe Begründung oben) — kein separates Steuerprogramm nötig.
 
+Add a part "Kontextquellen" with one entry per store, for the user to confirm: name verbatim, Art and
+Ort in plain words, who reads and who writes it (by task name), and the access split in business
+language, e.g.:
+
+> **"Jira-Tickets Projekt LANE"** (live, Atlassian) — "Ticket analysieren" liest, "Kommentar im Ticket
+> posten" schreibt (erst nach deiner Freigabe in "Antwort freigeben", und Claude Code fragt beim
+> Schreiben zusätzlich nach). Lesezugriff nicht pro Rolle getrennt.
+> *Technisch — lesen: `mcp__atlassian__getJiraIssue`; schreiben: `mcp__atlassian__addCommentToJiraIssue`.*
+
+Gedächtnis: file path and the 150-line cap; `unresolved` tools: say that the server wasn't reachable
+and that the step stays without tool access until it is. Tool names appear only in the italic
+technical line. Also name the process input with its required fields, and the output. Where
+`roleToolSpread` holds and the pattern isn't `orchestrator-agent`, recommend it here.
+
 Include the pattern and rationale ("how it runs"), any model/tools proposals from step 5, open
 questions from 6a, and every `not-generated`/`unresolved` element with its reason. Fold every
 pending pattern or model/tools question into this one confirmation. Offer at least:
@@ -168,8 +241,9 @@ pending pattern or model/tools question into this one confirmation. Offer at lea
 ## 8. Write the confirmed spec
 
 Only after confirmation, write the decisions into `generated/<workflow>/workflow-spec.yaml`: every
-element's `kind`/`generatedPaths`/`reason`/`knowledge`/`gate`, `roles.*.modelTier`/`tools` where set,
-`artifacts.*`, `pattern`, `openQuestions`; update `meta.updated`; delete
+element's `kind`/`generatedPaths`/`reason`/`knowledge`/`gate` (including the store and workflow-I/O
+entries), `roles.*.modelTier`/`tools` where set, `artifacts.*`, `contextSources.*.tools`/`memory`
+and `workflowIO` as confirmed, `pattern`, `openQuestions`; update `meta.updated`; delete
 `workflow-spec.draft.yaml`. Validate: run
 `node ${CLAUDE_SKILL_DIR}/../bpmn2agent-verify/scripts/verify.mjs "$cacheDir" generated/<workflow>`
 and read only its spec-schema section (other categories may fail this early). Fix until it passes.
@@ -190,10 +264,10 @@ before writing.
 
 ## Reference files
 
-- `references/mapping-rubric.md` — element → `kind` table, sub-decisions, v1 supported constructs,
-  mapping-view colours.
-- `references/pattern-rubric.md` — signals, pattern table, per-pattern generation/checkpoint/loop
-  cap/resume detail, business phrasing.
+- `references/mapping-rubric.md` — element → `kind` table, sub-decisions, data stores → context
+  sources (Art × Ort, tools and placement, write guard), v1 supported constructs, mapping-view colours.
+- `references/pattern-rubric.md` — signals (incl. live writes, role tool spread), pattern table,
+  per-pattern generation/checkpoint/loop cap/resume detail, business phrasing.
 - `assets/workflow-spec.schema.yaml` — the schema for step 8.
 - `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md` — naming and split rule (step 5).
 - `${CLAUDE_SKILL_DIR}/../orchestration-design/SKILL.md` — inline fallback review (step 6a).
