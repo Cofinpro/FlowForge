@@ -1,6 +1,8 @@
 ---
 name: {{agentName}}
 description: {{One sentence: what this role covers in the generated workflow, derived from the BPMN lane label "{{laneLabel}}", plus when it's invoked (e.g. "the {{workflow}} skill chain's {{laneLabel}} step").}}
+{{`tools: {{roles.<lane>.tools joined by ", "}}` — only when design set `roles.<lane>.tools`; otherwise
+delete this line so the agent inherits everything. Never add a tool design didn't list.}}
 bpmn:
   file: {{sourceBpmnPath}}
   elements: [{{elementIds}}]
@@ -31,8 +33,18 @@ checklist done, confirm every step fired in order:
   'risk: loop cap reached' instead of looping again)."}}
 - [ ] {{...one item per remaining element...}}
 
-<!-- regenerate boundary: bpmn2agent-generate only rewrites the checklist bullets and the domain
-     knowledge section above a re-run; anything you add below this line is preserved. -->
+{{Add this section only when a task of this lane is in some `contextSources.<id>.readers` or
+  `.writers`; same bullets as skill-template.md's `## Kontextquellen` (wissen / live read / live write
+  "nur nach Freigabe" / unresolved / gedächtnis read-first / gedächtnis write-integrate), store names
+  verbatim, tools only from `contextSources.<id>.tools`.}}
+
+## Kontextquellen
+
+- **{{storeName}}** ({{art}}, {{read|write}}): {{what to fetch or write for this step}} with
+  `{{tool}}`{{; for a write: " — nur nach Freigabe", after "{{approval userTask label}}"}}.
+
+<!-- regenerate boundary: bpmn2agent-generate only rewrites the checklist bullets, the Kontextquellen
+     section and the domain knowledge section above a re-run; anything you add below this line is preserved. -->
 
 ## Domain knowledge
 
@@ -78,6 +90,9 @@ Authoring notes for whoever fills this template (bpmn2agent-generate step 5):
   with kind human-checkpoint, orchestrator, or agent-checklist. A lane whose elements are ALL
   kind: script gets a skill wrapper instead (assets/templates/skill-template.md), never this file —
   see SKILL.md step 3.
+- `tools:` is filled only from `roles.<lane>.tools` (orchestrator-agent lanes; design placed the
+  store's tools there). Where the lane's agent has no entry, leave the line out; don't derive tools
+  from the stores yourself.
 - Follows agent-authoring's naming convention:
   {{workflow}}-{{role}}, kebab-case, no "-expert" suffix.
 -->

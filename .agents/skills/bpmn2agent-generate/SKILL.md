@@ -34,9 +34,10 @@ generated/<workflow>/
   .claude/                              ← the whole installable payload, copied as-is
     agents/<name>.md
     skills/<name>/SKILL.md              (+ references/, assets/, scripts/ only where design put a script)
-    hooks/<name>.mjs                    (only for kind: hook)
+    hooks/<name>.mjs                    (kind: hook, plus <workflow>-write-guard / -memory-cap, step 6a)
     workflows/<workflow>.workflow.mjs   (workflow-script pattern only)
-    settings.json                       (only when there are hooks: registers every hook)
+    settings.json                       (only with hooks or read-tool permissions: step 6)
+  (memory files are not generated: they appear in the user's project at run time)
   README.md                             ← install + what was generated (meta.language)
   workflow-spec.yaml  knowledge/  mapping/   ← review material, never copied
 ```
@@ -83,6 +84,7 @@ Every file written carries `bpmn: {file: <repo-relative source .bpmn path>, elem
   ```
 - **`.claude/settings.json`**: no header (JSON, copied into the user's project); traceability runs
   through the hook scripts it registers.
+- **Context hooks** (step 6a): `elements` = the `StoreRef_…` ids of the stores they guard.
 
 Quote BPMN labels **verbatim** wherever they appear. Everything else is English, except `README.md`,
 which is in `meta.language`.
@@ -100,6 +102,7 @@ Before writing, decide per `roles.<id>` what to materialize from its elements
   `orchestrator-agent` (or a `mixed` phase using it) **and** the lane has a `human-checkpoint`,
   `orchestrator` or `agent-checklist` element — the roster the orchestrator dispatches via `Agent`.
   Never for `skill-chain-hooks` or `workflow-script`; there the lane's logic lives inline in the step-7 file.
+  Its `tools:` line comes from `roles.<lane>.tools` and nowhere else (omitted when unset).
 - **Reusable skill** (`.claude/skills/<name>/`, one per `kind: skill` element or one shared dir when
   the rubric grouped several): for every pattern, at exactly the element's `generatedPaths`. A
   skill-backed collapsed `subProcess`/`callActivity` folds its inner elements into this one skill as
@@ -107,7 +110,8 @@ Before writing, decide per `roles.<id>` what to materialize from its elements
   (inner `scriptTask` → `scripts/<inner-name>.mjs` inside it); no separate file per inner element.
 
 Every path must equal an existing `elements.<id>.generatedPaths` entry — never invent one — except
-the one top-level orchestration file from step 7, whose path goes in the mapping report's pattern section.
+the one top-level orchestration file from step 7 (its path goes in the mapping report's pattern
+section) and the two context hooks from step 6a (listed in the report's "Context hooks" table).
 
 ## 4. Materialize scripts (`kind: script`)
 
@@ -142,6 +146,22 @@ feeds, the loop hitting `gate.maxLoops`; list them as open items in the generate
     against `gate.maxLoops`; at the cap, proceed with an explicit "risk: loop cap reached" note;
   - `hook` → narrate that the gated tool call exists and what the hook does (the hook fires on its own).
 
+**Context sources in the text.** A step that is in some `contextSources.<id>.readers` or `.writers`
+gets a `## Kontextquellen` section (the skill, lane skill, specialist agent, or chain skill /
+orchestrator that owns the step), one bullet per store with the store name verbatim — see
+`assets/templates/skill-template.md` for the wording per Art. Per store: what this step needs from
+it, the tool from `contextSources.<id>.tools` (read tools for readers, write tools for writers,
+marked "nur nach Freigabe" and naming the `userTask` before the write; `unresolved` → no tool, say
+so). `wissen` stores point at the task's `references/domain-knowledge.md` section. A `gedaechtnis`
+store: readers load the memory file first (missing or empty is fine); the writer integrates new
+insights into the fixed sections *Bewährt*, *Vermeiden*, *Offene Muster* instead of appending and
+keeps the file within `memory.maxLines`.
+
+**Process input and output.** With `workflowIO.input`, the top-level skill gets `argument-hint`
+(one `[field]` per `required` entry), an `## Input` section that asks for a missing required field
+via `AskUserQuestion` before step 1, and for `workflowIO.output` a last step naming the end result's
+contract (`artifacts.<output>`). The orchestrator agent and Workflow script do the same in step 7.
+
 Agent files (steps 3 and 7): apply `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md`'s "Writing an
 agent"; the template's checklist, `bpmn:` frontmatter and reporting block already cover prompt
 sections and report format — add `tools`/`model` only where design decided them.
@@ -153,10 +173,34 @@ Write each hook script at its `generatedPaths` (`.claude/hooks/<name>.mjs`) from
 event table (`PreToolUse`/`PostToolUse`/`Stop`/`SubagentStop`), the gate condition from
 `condition`/`gate.criteria`.
 
-Then write **one** `.claude/settings.json` from `assets/templates/settings-template.json`: one entry
-per hook under `hooks.<Event>`, `matcher` for tool events,
-`"command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/<name>.mjs"`. Nothing else (no permissions,
-model, env) — it must be safe to copy or merge by its `hooks` key. No hooks → no `settings.json`.
+Then write **one** `.claude/settings.json` from `assets/templates/settings-template.json`:
+
+- `hooks`: one entry per hook (step 6a's two included) under `hooks.<Event>`, `matcher` for tool
+  events, `"command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/<name>.mjs"`.
+- `permissions.allow`: the union of `contextSources.*.tools.read` of live stores whose readers are
+  in lanes **without** a generated agent (lanes with one get theirs through `tools:`). Never a write
+  tool, never a wildcard, nothing for `tools: unresolved`. No such store → no `permissions` key.
+
+Nothing else (no model, env) — it must be safe to merge by its `hooks` and `permissions.allow` keys.
+Neither hooks nor permissions → no `settings.json`.
+
+## 6a. Materialize the context hooks
+
+Only for stores in `contextSources`; each hook is one file per workflow, header per step 2 with the
+`StoreRef_…` ids, Node built-ins only, and claims no `generatedPaths` entry (list both in the
+mapping report's "Context hooks" table):
+
+- **Write guard**, when a `live` store has `tools.write`: `.claude/hooks/<workflow>-write-guard.mjs`
+  from `assets/templates/hook-ask-template.mjs`. PreToolUse, matcher = the write tools of all such
+  stores (plus `Bash` for `cli:` patterns, checked against the command); answers
+  `permissionDecision: "ask"` with the store name and approval step label. `tools: unresolved` →
+  that store is skipped and the report says so.
+- **Memory cap**, when a `gedaechtnis` store exists: `.claude/hooks/<workflow>-memory-cap.mjs` from
+  `assets/templates/hook-memory-cap-template.mjs`. PostToolUse on `Write|Edit|MultiEdit`; over
+  `memory.maxLines` lines it exits 2 with the "verdichten" message.
+
+Smoke-test both with piped payloads before moving on (a guarded write, a read, a memory file at the
+cap and one line over); expectations are in the templates' header comments.
 
 ## 7. Materialize the one top-level orchestration file
 
@@ -165,7 +209,8 @@ Exactly one, by `pattern.chosen` (for `mixed`, one per phase):
 - **`skill-chain-hooks`**: already written in step 5.
 - **`workflow-script`**: `assets/templates/workflow-script-template.mjs` →
   `.claude/workflows/<workflow>.workflow.mjs`. If a `workflow-authoring` skill is available read it;
-  otherwise follow the template's comments. One `phase()` per contiguous run of elements; `agent()`
+  otherwise follow the template's comments. With `workflowIO.input` the template reads the required fields from `args` and returns `blocked`
+  when one is missing. One `phase()` per contiguous run of elements; `agent()`
   per `serviceTask`; `pipeline()` for the fan-out of a `parallelGateway`/`inclusiveGateway`/
   multi-instance marker unless the next stage needs all results together (then `parallel()`); plain
   `if`/`while` for deterministic conditions and loop caps. **The Workflow script never runs
@@ -173,7 +218,8 @@ Exactly one, by `pattern.chosen` (for `mixed`, one per phase):
 - **`orchestrator-agent`**: `assets/templates/orchestrator-agent-template.md` →
   `.claude/agents/<workflow>-orchestrator.md`, roster = step 3's specialists. It owns every
   `orchestrator` decision and every `human-checkpoint` pause-and-ask. Only the orchestrator calls
-  `Agent` on other generated agents.
+  `Agent` on other generated agents. With `workflowIO` it gets the `## Input` section (ask for a
+  missing required field first) and the end-result contract line.
 - **`mixed`**: one file per `pattern.phases[]` entry (`{name, pattern, elements}`), each per its own
   pattern. No `pattern.phases` → send it back to design; don't infer. At each phase boundary, the
   last element of one phase and the first of the next note the hand-off in their owning file.
@@ -186,11 +232,15 @@ fill every placeholder, delete sections that don't apply (no hooks → no "Hooks
 - What was generated; `generated/<workflow>/` as the only place written; payload (`.claude/`) vs.
   review material.
 - Install is one copy: `cp -R generated/<workflow>/.claude/. <project>/.claude/`. Only merge case:
-  an existing `.claude/settings.json` — merge the `hooks` key by hand (name the events). Suggest an
+  an existing `.claude/settings.json` — merge the `hooks` and `permissions.allow` keys by hand (name
+  the events). Suggest an
   `ls` for name clashes. No install script, no `npm install`.
 - `.codex/`/other runtimes: skills only (copy `.claude/skills/*`); hooks, Workflow script and
   subagents marked **Claude-only**.
 - The Workflow-script section (if any): runs only when the user explicitly invokes it.
+- With `contextSources`: "Voraussetzungen" (MCP servers, CLIs, notebooks; nothing is connected for
+  the user, no `.mcp.json`), "Gedächtnis" (path, cap, who reads and writes), which hooks guard what,
+  the permissions merge, and the required input from `workflowIO`.
 - Every `openQuestions[]` entry with `answer: null`, and the eval scenarios from step 5 as open items.
 - Pointers to `mapping/report.md` and `mapping/index.html`.
 
@@ -198,7 +248,10 @@ fill every placeholder, delete sections that don't apply (no hooks → no "Hooks
 
 From `assets/templates/mapping-report-template.md` — English, labels verbatim. One row per element
 (`label`/`bpmnType`/`lane`/`kind`/`generatedPaths`/notes); the pattern section with
-`pattern.rationale` and **every `pattern.alternativesConsidered` entry verbatim**; grey
+`pattern.rationale` and **every `pattern.alternativesConsidered` entry verbatim**; a "Context sources" section with one
+subsection per store (Art, Ort, readers/writers, tool split, "Lesezugriff nicht pro Rolle getrennt"
+where the read tools sit in `permissions.allow`, write guard or why it was skipped) plus the context
+hooks table; grey
 (`not-generated`) and red (`unresolved`) sections with `reason` verbatim; a roles table. Its "Review
 status" section (nothing red, or how many red elements and open questions remain) is what the user
 approves against. Every path listed must exist and match `generatedPaths` exactly —
@@ -222,14 +275,19 @@ node ${CLAUDE_SKILL_DIR}/scripts/check-mapping-view.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" generated/<workflow>/mapping/index.html
 ```
 
-It must print `mapping view ok` (offline it checks only the fallback; say so).
+It must print `mapping view ok` (offline it checks only the fallback; say so) and a `red elements:`
+line. Data stores and process input/output are turquoise (`context-source`); a store with no
+`elements` entry shows red like any unmapped node. Add `--no-red` to fail on red.
 
 ## 11. Self-check before handoff
 
 - Every file from steps 4–9 carries the step-2 header — spot-check a script, a skill, an agent, the README.
 - `node --check` every script/hook `.mjs`. Workflow script: wrap everything after
   `export const meta` in `(async () => {…})();` before `node --check`.
-- `.claude/settings.json` (if any) parses and registers every `.claude/hooks/*.mjs`.
+- `.claude/settings.json` (if any) parses and registers every `.claude/hooks/*.mjs`; its
+  `permissions.allow` holds no write tool and no wildcard.
+- Every store name in a `## Kontextquellen` section matches the BPMN label verbatim, and every tool
+  there appears in that store's `contextSources.<id>.tools`.
 - Step 4's rule holds: no `.mjs` under `.claude/` imports anything but `node:*` or relative files; no
   `package.json` in the payload.
 - Every `generatedPaths` path exists; nothing written outside `generatedPaths`, the step-7 file,
@@ -258,6 +316,8 @@ decision — design or the diagram — before verify can pass), and open reviewe
 - `assets/templates/script-template.mjs` — `kind: script` (step 4).
 - `assets/templates/hook-script-template.mjs`, `settings-template.json` — hooks and their one
   `settings.json` (step 6).
+- `assets/templates/hook-ask-template.mjs`, `hook-memory-cap-template.mjs` — write guard and memory
+  cap (step 6a).
 - `assets/templates/workflow-script-template.mjs`, `orchestrator-agent-template.md` — step 7.
 - `assets/templates/README-template.md` (step 8), `mapping-report-template.md` (step 9).
 - `scripts/render-mapping.mjs`, `scripts/check-mapping-view.mjs` — step 10.

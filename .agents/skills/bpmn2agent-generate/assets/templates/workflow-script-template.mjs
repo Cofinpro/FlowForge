@@ -18,6 +18,14 @@ export const meta = {
 // "Workflow scripts" section, which must say this explicitly per pattern-rubric.md's Workflow
 // script detail.
 
+{{Only when the spec has `workflowIO.input`: document the input right here, as a comment, and read it
+  from `args` — `meta` stays a pure literal, so it can't carry the arg list. A script can't ask the
+  user, so a missing required field ends the run with a `blocked` result the caller acts on:}}
+// Input (args): {{field1}}, {{field2}} — {{description per field, from artifacts.<input>.frontmatter}}.
+const { {{field1}}, {{field2}} } = args ?? {}
+const missing = [{{'field1', 'field2'}}].filter((k) => !args?.[k])
+if (missing.length) return { status: 'blocked', summary: 'missing required input', missing }
+
 {{one phase per contiguous run of elements sharing this workflow-script phase, in BPMN flow order}}
 phase('{{phaseTitle}}')
 log('{{one-line narrator message for this phase, from the phase\'s elements\' labels}}')
@@ -50,6 +58,8 @@ if ({{loopCounter}} >= {{maxLoops}}) {
   log('{{elementLabel}}: loop cap reached ({{maxLoops}}) — proceeding with a risk flag instead of looping again.')
 }
 
+{{When `workflowIO.output` is set, `finalResultShape` follows the output artifact's contract
+  (`artifacts.<output>` frontmatter fields) and the comment names it.}}
 return {{finalResultShape}}
 
 /*
@@ -74,6 +84,9 @@ branch):
   sub-workflow when mapping-rubric.md promoted a callActivity to its own pattern) — this path
   isn't in any single element's generatedPaths since it spans the whole phase/diagram; record it
   in the mapping report's own "generated artifacts" list instead (see mapping-report-template.md).
+- A phase that writes into a live context store never belongs here (no human checkpoint possible);
+  design's pattern rubric rules it out. If a spec reaches this template with such a writer, send it
+  back to bpmn2agent-design instead of approximating an approval.
 - No AskUserQuestion / human-checkpoint calls belong in this template — a diagram with a real
   human checkpoint shouldn't have resolved to pattern.chosen: workflow-script in the first place
   (pattern-rubric.md's Workflow-script "when not"); if bpmn2agent-generate reaches this template

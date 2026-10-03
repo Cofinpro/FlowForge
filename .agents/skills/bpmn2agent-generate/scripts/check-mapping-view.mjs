@@ -4,9 +4,12 @@
 // its one question ("is anything red, and where?"), that every element can be found (level tree,
 // search, kind filter), that history and deep links work, and that it stays operable without a mouse.
 //
-// Usage: node check-mapping-view.mjs <cacheDir> <mapping/index.html> [--shots <dir>]
+// Usage: node check-mapping-view.mjs <cacheDir> <mapping/index.html> [--shots <dir>] [--no-red]
 //   cacheDir  same tool cache as render-mapping.mjs (playwright is installed there by validate.sh)
 //   --shots   optional: write desktop / narrow / offline screenshots into <dir>
+//   --no-red  optional: also fail when the viewer lists red elements (unmapped, unresolved, open
+//             question — e.g. a data store without an elements entry). Without it the red elements
+//             are only printed ("red elements: ..."), since a red view is a finding, not a viewer bug.
 //
 // Prints "mapping view ok" and exits 0, or lists every failed check and exits 1. The viewer loads
 // bpmn-js from cdn.jsdelivr.net; when that is unreachable the diagram checks are skipped (the
@@ -17,11 +20,12 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const args = process.argv.slice(2);
+const noRed = args.includes('--no-red');
 const shotsIdx = args.indexOf('--shots');
 const shotsDir = shotsIdx >= 0 ? path.resolve(args[shotsIdx + 1]) : null;
-const [cacheDir, htmlArg] = args.filter((_, i) => shotsIdx < 0 || (i !== shotsIdx && i !== shotsIdx + 1));
+const [cacheDir, htmlArg] = args.filter((a, i) => a !== '--no-red' && (shotsIdx < 0 || (i !== shotsIdx && i !== shotsIdx + 1)));
 if (!cacheDir || !htmlArg) {
-  console.error('Usage: node check-mapping-view.mjs <cacheDir> <mapping/index.html> [--shots <dir>]');
+  console.error('Usage: node check-mapping-view.mjs <cacheDir> <mapping/index.html> [--shots <dir>] [--no-red]');
   process.exit(2);
 }
 const url = pathToFileURL(path.resolve(htmlArg)).href;
@@ -34,6 +38,7 @@ const shot = async (page, name) => { if (shotsDir) await page.screenshot({ path:
 
 const browser = await chromium.launch();
 let offline = false;
+let redReport = '';
 try {
   // ── desktop ──
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -44,13 +49,20 @@ try {
   offline = await page.evaluate(() => typeof BpmnJS === 'undefined');
 
   const summary = await page.evaluate(() => SUMMARY);
+  redReport = summary.red.length
+    ? `red elements: ${summary.red.length} (${summary.red.join(', ')})`
+    : 'red elements: none';
+  if (noRed) check(!summary.red.length, `the view has ${summary.red.length} red element(s): ${summary.red.join(', ')}`);
   const statusText = await page.textContent('#status');
   check(statusText.trim().length > 0, 'review status block is empty');
   check((await page.$$('#status .red-item')).length === summary.red.length,
     `review status lists ${(await page.$$('#status .red-item')).length} red element(s), spec has ${summary.red.length}`);
   const legendNames = await page.$$eval('#legend .legend-item .name', (els) => els.map((e) => e.textContent.trim()));
-  check(legendNames.length === 9 && legendNames.every((n) => n && !/^[a-z]+(-[a-z]+)*$/.test(n)),
-    `legend must show 9 human-readable kind names, got: ${legendNames.join(', ')}`);
+  // 9 kinds, 10 when the diagram has data stores / process I/O (context-source, one shared legend entry).
+  const legendSize = await page.evaluate(() => LEGEND.length);
+  check((legendSize === 9 || legendSize === 10) && legendNames.length === legendSize
+      && legendNames.every((n) => n && !/^[a-z]+(-[a-z]+)*$/.test(n)),
+    `legend must show 9 or 10 human-readable kind names matching LEGEND, got: ${legendNames.join(', ')}`);
 
   const docOverflow = await page.evaluate(() => document.documentElement.scrollHeight - innerHeight);
   check(docOverflow <= 0, `desktop page scrolls vertically by ${docOverflow} px (canvas and sidebar should fill the window)`);
@@ -304,4 +316,5 @@ if (failures.length) {
   for (const f of failures) console.error('  ✗', f);
   process.exit(1);
 }
+console.log(redReport);
 console.log(offline ? 'mapping view ok (offline, diagram skipped)' : 'mapping view ok');
