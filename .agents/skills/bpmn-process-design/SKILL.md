@@ -1,6 +1,6 @@
 ---
 name: bpmn-process-design
-description: Designs a new process from what the user wants to build plus domain knowledge from Gemini notebooks (NotebookLM, via gemini-notebook-mcp), and draws it as an agent-ready BPMN 2.0 diagram in the lanecraft notation (lane = role, serviceTask = AI, userTask = human checkpoint, scriptTask = script, data object = handoff, capped loops) that the bpmn2agent pipeline turns into agents and skills without rework. Use for "model a process for X", "draw the BPMN for what I want to build", "design a workflow from my notebook", or when a user has a goal but no diagram yet. To edit an existing .bpmn use bpmn-authoring; to turn a finished diagram into agents use bpmn-to-agentic-workflow.
+description: Designs a new process from what the user wants to build plus domain knowledge from Gemini notebooks (NotebookLM, via gemini-notebook-mcp), and draws it as an agent-ready BPMN 2.0 diagram in the lanecraft notation (lane = role, serviceTask = AI, userTask = human checkpoint, scriptTask = script, data object = handoff, data store = context source, capped loops) that the bpmn2agent pipeline turns into agents and skills without rework. Use for "model a process for X", "draw the BPMN for what I want to build", "design a workflow from my notebook", or when a user has a goal but no diagram yet. To edit an existing .bpmn use bpmn-authoring; to turn a finished diagram into agents use bpmn-to-agentic-workflow.
 ---
 
 # Design an agent-ready BPMN process
@@ -59,6 +59,10 @@ model-only steps `⚠ unverified`.
 | exclusive / parallel gateway | branches, joins or loops | orchestrator logic |
 | collapsed `subProcess` | is a phase with its own sequence | reusable skill or sub-workflow |
 | data object | is a result a later step needs | artifact contract |
+| data store `Art: wissen` | holds reference knowledge a step must know | cited reference in the reading skill, loaded at generation |
+| data store `Art: live` | holds data read or changed at run time | tool allowlist + `## Kontextquellen` in the skill |
+| data store `Art: gedächtnis` | keeps learnings across runs | curated memory file with a size cap |
+| process input / output | is what a run needs to start / finally delivers | argument contract with required fields / result contract |
 
 - 2–6 lanes, one per role, never one per task. A role that only decides is a human lane of
   `userTask`s.
@@ -71,6 +75,17 @@ model-only steps `⚠ unverified`.
   (`Nein (max. 3×)`, default 3), and has a way out (escalation `userTask` or end).
 - Results cross lanes as data objects. Every task gets
   `<bpmn:documentation>Input: … Output: … Quelle: <FAQ entry id | URL | ⚠ unverified></bpmn:documentation>`.
+- A data store is a business data set named in business terms ("Jira-Tickets Projekt LANE"), not a
+  system; several stores may share one source. Its documentation carries `Art: wissen | live |
+  gedächtnis` and `Quelle: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> |
+  websearch`. Notebooks picked in step 2 are candidates for `wissen` stores.
+- Valid pairs: `wissen` with `notebook:`, URL, `datei:`, `websearch`, or `mcp:` (a snapshot, only if
+  the server is connected); `live` with `mcp:`, `cli:`, `notebook:`, URL or `datei:`; `gedächtnis`
+  with `datei:` only (default `.claude/memory/<workflow>/<store>.md`). Anything else: pick another
+  Art or Quelle.
+- Read or write follows only the arrow: store → task reads, task → store writes. No `Zugriff:` line.
+- A `userTask` precedes every write to a `live` store, on every path.
+- A `gedächtnis` store needs a `serviceTask` that writes it and a reader; writing needs no approval.
 - A phase over ~8 steps becomes a collapsed `subProcess` with its own lanes.
 - One pool; no message flows, timer or message events, event sub-processes or compensation
   (rewrites: `${CLAUDE_SKILL_DIR}/../bpmn2agent-analyze/references/unsupported.md`). Error
@@ -78,15 +93,23 @@ model-only steps `⚠ unverified`.
 
 ## 5. Confirm the outline
 
+For each step ask: "What must this step know, and where does it live?" Every answer is a store
+(Art, Quelle), a data object from an earlier step, or the process input; nothing means the step
+needs no context. Does it write anywhere? Then name the store and the `userTask` before it.
+
 Before drawing, show: lanes with what each becomes, then per phase the steps with type
-(AI / human / script / rule) and source, gateways with answers, loops with caps, data objects. Ask:
-draw as is / change what / ask the notebook more. Repeat until confirmed; never draw an unconfirmed
-design.
+(AI / human / script / rule) and source, gateways with answers, loops with caps, data objects. Add
+a store table (name, Art, Quelle, readers, writers) and the process input with its required fields
+and the result the run delivers. Ask: draw as is / change what / ask the notebook more. Repeat until
+confirmed; never draw an unconfirmed design.
 
 ## 6. Draw
 
 Follow `${CLAUDE_SKILL_DIR}/../bpmn-authoring/SKILL.md` steps 2–7, starting from its
-`assets/skeleton.bpmn`. Use readable ids (`Task_FeedbackFormulieren`, `Gw_InvestErfuellt`).
+`assets/skeleton.bpmn`. Use readable ids (`Task_FeedbackFormulieren`, `Gw_InvestErfuellt`). Draw
+stores and the process input/output with its data store and `ioSpecification` conventions
+(`${CLAUDE_SKILL_DIR}/../bpmn-authoring/references/xml-and-di.md` and `layout.md`); a
+convention-based input is a data object no task produces.
 
 ## 7. Check it's agent-ready
 
