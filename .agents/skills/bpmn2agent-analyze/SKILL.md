@@ -1,6 +1,6 @@
 ---
 name: bpmn2agent-analyze
-description: Reads a hand-drawn .bpmn, validates and inventories it, flags constructs the pipeline can't generate yet (pools/message flows, timer/message events, event sub-processes, compensation), asks the business user about gaps only, and writes the draft generated/<workflow>/workflow-spec.yaml. On a changed .bpmn it diffs by element id and asks only about what changed. Never edits the .bpmn. Use when a diagram is new or changed, before bpmn2agent-knowledge.
+description: Reads a hand-drawn .bpmn, validates and inventories it, flags constructs the pipeline can't generate yet (pools/message flows, timer/message events, event sub-processes, compensation), asks the business user about gaps only (incl. data stores and process input/output), and writes the draft generated/<workflow>/workflow-spec.yaml. On a changed .bpmn it diffs by element id and asks only about what changed. Never edits the .bpmn. Use when a diagram is new or changed, before bpmn2agent-knowledge.
 bpmn:
   file: docs/planning/bpmn-to-agentic-workflow.bpmn
   elements:
@@ -50,8 +50,10 @@ node ${CLAUDE_SKILL_DIR}/scripts/inventory.mjs \
 ```
 
 Prints JSON: scopes with pattern-rubric signals, lanes, flow nodes, sequence flows, data objects and
-associations, annotations, `meta.sha256` and `findings[]`. Save it to a scratch file; later steps
-reuse it. How to read role hints, task types and annotations: `references/conventions.md`. What each
+associations, `dataStores[]` (parsed `Art:`/`Ort:`, readers, writers), `processIO` (workflow input and
+output), annotations, `meta.sha256` and `findings[]`. Save it to a scratch file; later steps
+reuse it. How to read role hints, task types, annotations, data stores and process input/output:
+`references/conventions.md`. What each
 `unresolved` finding means and which rewrite to suggest: `references/unsupported.md`.
 
 ## 4. Flag unsupported elements
@@ -83,7 +85,22 @@ Ask only about these gaps, never about generation decisions and never about an e
   as a note (rename to a typed task in `bpmn-authoring`). Don't write a `kind`.
 - **Unclear multi-instance collection**: `multiInstance.collectionHint` is `null` or came only from an
   annotation/name pattern. Ask what the collection is (e.g. "one per epic").
+- **`store-missing-art-ort` finding**: the store has no readable `Art:` or `Ort:` line. Ask for the
+  missing value as concrete options (the three Arts; the Orts that fit the Art, see the matrix in
+  `references/conventions.md`), recommending the one the store's name and readers suggest.
+- **`store-invalid-art-ort` finding**: offer the two repairs, a valid Ort for that Art or a different Art
+  for that Ort (e.g. `gedächtnis` + `mcp:` becomes `live` + `mcp:` or `gedächtnis` + `datei:`), with a
+  recommendation.
+- **`memory-store-incomplete` finding**: a `gedächtnis` store needs a writing `serviceTask` and a reader.
+  Ask which task should write or read it (options: the tasks in the diagram), or whether the store is
+  really `wissen`/`live`.
+- **`store-without-associations` finding**: ask which task reads or writes it, or whether to drop it.
+- **Several `processIO.inputs[]` or `outputs[]`**: ask which one is the workflow's real input/result
+  (`workflowIO` holds one each); the others stay plain artifacts.
 - **Every unresolved finding from step 4.**
+
+A store gap is answered in the spec only: record `art`/`ort` as the user confirmed and tell them to fix
+the `Art:`/`Ort:` lines in the `.bpmn` (in `bpmn-authoring`) so the diagram and spec stay in sync.
 
 ## 6. Write the spec draft
 
@@ -104,6 +121,19 @@ Write (or merge, step 7) `generated/<workflow>/workflow-spec.yaml`:
   `pathPattern` defaults to `generated/<workflow>/artifacts/<id>/{id}.md`. `producer`/`consumers` from
   associations; `producer` is an array when more than one element has a real `dataOutputAssociation`
   into it (both are producers, not consumers).
+- **`contextSources`**: one per `dataStores[]` entry, as the schema defines it. Id = kebab-case of the
+  store name; `name` verbatim; `bpmnElement` = the reference id; `art` and `ort` (`{type, ref}`) as parsed
+  or as confirmed in step 5; `readers`/`writers` from the inventory (the store's arrows alone decide
+  read vs. write). Leave `tools` and `memory` unset (design resolves them). Each store also gets
+  `elements.<storeRefId>` (`bpmnType: dataStoreReference`, `label` verbatim, `kind: context-source` as a
+  proposal).
+- **`workflowIO`**: from `processIO`. `input.artifact`/`output.artifact` = the artifact id of the chosen
+  entry. A real `dataInput`/`dataOutput` gets its own `artifacts.<id>` (kebab-case of its name; `producer`
+  unset for an input, `consumers`/`producer` from `readers`/`writers`) and `elements.<id>` (`bpmnType:
+  dataInput|dataOutput`, `kind: workflow-input|workflow-output`). A convention entry is an ordinary data
+  object artifact; its `elements.<refId>` gets `kind: workflow-input|workflow-output` instead of
+  `artifact-contract`. For a real input, `input.required` = its name as a camelCase field (`Ticket-ID`
+  becomes `ticketId`); for a convention input leave it unset. Omit `workflowIO` when `processIO` is empty.
 - **`pattern`**, **`knowledge`**: leave unset (design and knowledge own them).
 - **`openQuestions`**: one per gap from steps 4–5 the user deferred, keys `elementId`, `question`,
   `answer`. Record the user's answer when given; `answer: null` when deferred.
@@ -124,13 +154,14 @@ If the spec already exists:
 
 1. Compare its `meta.sourceBpmn.sha256` with the inventory's `meta.sha256`. Equal: tell the user
    nothing changed and stop (or confirm they meant to re-run).
-2. Otherwise diff by element id across `flowNodes`/`dataObjects`/`lanes` vs. the spec's
-   `elements`/`artifacts`/`roles`, comparing `bpmnType`, `label`, `lane`, `documentation`,
-   `multiInstance`, `eventDefinitions`. Classify each id as new, changed, removed or unchanged.
+2. Otherwise diff by element id across `flowNodes`/`dataObjects`/`dataStores`/`processIO`/`lanes` vs. the
+   spec's `elements`/`artifacts`/`contextSources`/`workflowIO`/`roles`, comparing `bpmnType`, `label`, `lane`, `documentation`,
+   `multiInstance`, `eventDefinitions`; for a store also `art`, `ort`, `readers`, `writers`. Classify each id as new, changed, removed or unchanged.
 3. Interview (step 5) only new and changed elements with a gap. Never touch an unchanged element's
    `kind`/`reason`/`generatedPaths` or other later-stage decisions.
 4. Removed elements: flag them to the user; don't delete without confirmation, especially roles or
-   artifacts still referenced (`elements.*.lane`, `artifacts.*.producer`/`consumers`).
+   artifacts or stores still referenced (`elements.*.lane`, `artifacts.*.producer`/`consumers`,
+   `workflowIO`).
 5. Update `meta.sourceBpmn.sha256` and `meta.updated`; merge into the existing file instead of
    rewriting it, so untouched sections stay byte-identical.
 
