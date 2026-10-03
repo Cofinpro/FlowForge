@@ -77,12 +77,12 @@ model-only steps `⚠ unverified`.
   `<bpmn:documentation>Input: … Output: … Quelle: <FAQ entry id | URL | ⚠ unverified></bpmn:documentation>`.
 - A data store is a business data set named in business terms ("Jira-Tickets Projekt LANE"), not a
   system; several stores may share one source. Its documentation carries `Art: wissen | live |
-  gedächtnis` and `Quelle: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> |
+  gedächtnis` and `Ort: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> |
   websearch`. Notebooks picked in step 2 are candidates for `wissen` stores.
 - Valid pairs: `wissen` with `notebook:`, URL, `datei:`, `websearch`, or `mcp:` (a snapshot, only if
   the server is connected); `live` with `mcp:`, `cli:`, `notebook:`, URL or `datei:`; `gedächtnis`
   with `datei:` only (default `.claude/memory/<workflow>/<store>.md`). Anything else: pick another
-  Art or Quelle.
+  Art or Ort.
 - Read or write follows only the arrow: store → task reads, task → store writes. No `Zugriff:` line.
 - A `userTask` precedes every write to a `live` store, on every path.
 - A `gedächtnis` store needs a `serviceTask` that writes it and a reader; writing needs no approval.
@@ -94,12 +94,12 @@ model-only steps `⚠ unverified`.
 ## 5. Confirm the outline
 
 For each step ask: "What must this step know, and where does it live?" Every answer is a store
-(Art, Quelle), a data object from an earlier step, or the process input; nothing means the step
+(Art, Ort), a data object from an earlier step, or the process input; nothing means the step
 needs no context. Does it write anywhere? Then name the store and the `userTask` before it.
 
 Before drawing, show: lanes with what each becomes, then per phase the steps with type
 (AI / human / script / rule) and source, gateways with answers, loops with caps, data objects. Add
-a store table (name, Art, Quelle, readers, writers) and the process input with its required fields
+a store table (name, Art, Ort, readers, writers) and the process input with its required fields
 and the result the run delivers. Ask: draw as is / change what / ask the notebook more. Repeat until
 confirmed; never draw an unconfirmed design.
 

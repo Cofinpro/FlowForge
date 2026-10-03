@@ -107,11 +107,11 @@ artifacts:
 ## Data stores → context sources
 
 A `dataStoreReference` is one business data set (e.g. "Jira-Tickets Projekt LANE"), not a system.
-Its documentation carries `Art:` and `Quelle:`; reading or writing comes only from the arrow
+Its documentation carries `Art:` and `Ort:`; reading or writing comes only from the arrow
 direction (store → task = read, task → store = write). A missing line or a combination not in the
 matrix is a question for the business user, never a guess.
 
-| Art | Allowed `Quelle:` | Loaded | Becomes |
+| Art | Allowed `Ort:` | Loaded | Becomes |
 |---|---|---|---|
 | `wissen` | `notebook:`, URL, `datei:`, `websearch` | at generation | `knowledge/<taskId>.md` → skill `references/` |
 | `wissen` | `mcp:` | at generation (snapshot), only if the server is connected | same |

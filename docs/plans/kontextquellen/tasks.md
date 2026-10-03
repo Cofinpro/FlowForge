@@ -36,7 +36,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 - **Neue Element-Kinds:** `context-source`, `workflow-input`, `workflow-output`.
 - **Rubrik:**
   - Zeilen für Data Store je Art und für Prozess-I/O
-  - die Art×Quelle-Matrix
+  - die Art×Ort-Matrix
   - die Regel „Schreiben in Live-Store braucht `userTask`, nicht workflow-script“
   - Platzierung der Tools (Agent-`tools:` vs. `permissions.allow`)
   - Farbe Türkis in der Farbtabelle
@@ -57,7 +57,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - `.agents/skills/bpmn2agent-verify/fixtures/context-flow-unguarded.bpmn`
 - **XML und DI:**
   - `dataStore` (Root) + `dataStoreReference` (sichtbar, 50×50), Dokumentation mit
-    `Art:`/`Quelle:`
+    `Art:`/`Ort:`
   - prozessweite `ioSpecification` mit `dataInput`/`dataOutput` + `inputSet`/`outputSet`
   - DI-Hinweis: Shapes für dataInput/dataOutput sind nötig, damit bpmn-js sie zeichnet;
     bpmnlint verlangt sie nicht
@@ -81,7 +81,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - Regeln: Store = fachlicher Datenbestand; Pfeilrichtung = lesen/schreiben; `userTask` vor
     Schreiben in Live-Stores; Gedächtnis braucht Schreiber und Leser
 - **Outline (§5):** pro Schritt die Frage „Was muss dieser Schritt wissen, und wo liegt es?“.
-  Die Bestätigungsübersicht zeigt Stores mit Art, Quelle, Lesern und Schreibern sowie die
+  Die Bestätigungsübersicht zeigt Stores mit Art, Ort, Lesern und Schreibern sowie die
   Prozess-Eingabe mit Pflichtfeldern.
 - **Abhängig von:** nur plan.md (läuft parallel zu T1/T2).
 - **Abnahme:** `npm run validate` grün. Der Text bleibt schlank (Skill-Authoring-Regeln).
@@ -96,13 +96,13 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - `.agents/skills/bpmn2agent-analyze/SKILL.md`
   - `.agents/skills/bpmn2agent-analyze/references/conventions.md`
 - **inventory.mjs:**
-  - `dataStoreReference` mit Name, Dokumentation (geparste `Art:`/`Quelle:`), Scope
+  - `dataStoreReference` mit Name, Dokumentation (geparste `Art:`/`Ort:`), Scope
   - Leser und Schreiber aus den Data Associations
   - prozessweite `ioSpecification`
   - Konventions-I/O: Data Object ohne Erzeuger, das gelesen wird, und Data Object ohne Leser
 - **SKILL.md:**
   - `contextSources` und `workflowIO` in den Spec-Entwurf schreiben
-  - per `AskUserQuestion` nachfragen bei: fehlendem `Art:`/`Quelle:`, ungültiger Kombination,
+  - per `AskUserQuestion` nachfragen bei: fehlendem `Art:`/`Ort:`, ungültiger Kombination,
     Gedächtnis ohne Schreiber oder Leser
   - Stores in den ID-Diff bei geänderten Diagrammen aufnehmen
 - **Abnahme:**
@@ -119,7 +119,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - `.agents/skills/bpmn2agent-knowledge/SKILL.md`
   - `.agents/skills/bpmn2agent-knowledge/references/notebook-extraction.md`
 - **Inhalt:**
-  - Wissens-Stores ersetzen §2 „welches Notebook für welche Lane“. Die Quelle wird je nach
+  - Wissens-Stores ersetzen §2 „welches Notebook für welche Lane“. Der Ort wird je nach
     Typ aufgelöst (`notebook:` über notebook_list per Titel, URL per WebFetch, `datei:` als
     lokales Doc, `websearch`, `mcp:` als Snapshot nur bei verbundenem Server).
   - Pro lesendem Task `knowledge/<taskId>.md`, ein Abschnitt pro Store.
@@ -144,7 +144,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - nicht verbunden → `unresolved`
 - **Platzierung:** Agent-`tools:` bei orchestrator-agent, sonst `permissions.allow`.
 - **Musterwahl:** Eine Phase mit Schreiben in einen Live-Store wird nicht workflow-script.
-- **Mapping-Plan:** listet je Store Art, Quelle, Leser/Schreiber und die Tool-Aufteilung zur
+- **Mapping-Plan:** listet je Store Art, Ort, Leser/Schreiber und die Tool-Aufteilung zur
   Bestätigung, inkl. „Lesezugriff nicht pro Rolle getrennt“, wo zutreffend.
 - **Abnahme:** Die Spec der Fixture hat vollständige `contextSources.*.tools` (oder
   `unresolved`) und `elements.*` für alle Stores.
@@ -205,7 +205,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - `README.md`
   - `.agents/skills/agentic-workflow-kb/references/process-to-agents.md`
   - `.agents/skills/agentic-workflow-kb/references/multi-agent-handoffs.md`
-- **ARCHITECTURE.md:** Abschnitt Kontextquellen (Notation, Art×Quelle, Weg durch die Stufen).
+- **ARCHITECTURE.md:** Abschnitt Kontextquellen (Notation, Art×Ort, Weg durch die Stufen).
 - **README.md:** Kurzbeschreibung + Beispiel aus der Fixture.
 - **Agent-Definitionen:** `agentic-workflow-architect` und `agentic-artifact-reviewer` prüfen
   Stores mit: ungeschütztes Schreiben, zu breite Tool-Listen, Gedächtnis ohne Cap.

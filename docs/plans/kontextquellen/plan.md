@@ -14,22 +14,22 @@ Pipeline (`inventory.mjs` überspringt es, die Mapping-Ansicht würde es rot fä
 
 ## Notation
 
-Jede dauerhafte Quelle ist ein **Data Store** (Zylinder). Seine Dokumentation trägt zwei Zeilen:
+Jede dauerhafte Quelle ist ein **Data Store** (Zylinder). Seine Dokumentation trägt zwei Zeilen (`Ort:` statt `Quelle:`, weil die Task-Dokumentation `Quelle:` schon für die Herkunft belegt):
 
 ```
 Art: wissen | live | gedächtnis
-Quelle: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | websearch
+Ort: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | websearch
 ```
 
 - **Lesen/Schreiben ergibt sich nur aus der Pfeilrichtung.** Store → Task heißt lesen,
   Task → Store heißt schreiben. Es gibt keine `Zugriff:`-Zeile.
 - **Ein Store ist ein fachlicher Datenbestand**, z. B. „Jira-Tickets Projekt LANE“, und kein
-  System. Mehrere Stores dürfen dieselbe `Quelle:` haben.
+  System. Mehrere Stores dürfen denselben `Ort:` haben.
 - **Fehlt eine Zeile, fragt analyze nach.** Unsinnige Kombinationen (Matrix unten) ebenfalls.
 
-### Art × Quelle
+### Art × Ort
 
-| Art | erlaubte Quelle | geladen | wird zu |
+| Art | erlaubter Ort | geladen | wird zu |
 |---|---|---|---|
 | `wissen` | `notebook:`, URL, `datei:`, `websearch` | bei der Generierung | `knowledge/<taskId>.md` → Skill-`references/` |
 | `wissen` | `mcp:` | bei der Generierung (Snapshot), nur wenn der Server verbunden ist | wie oben |
@@ -89,7 +89,7 @@ Quelle: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | 
 ### Gedächtnis
 
 - **Ablage:** `.claude/memory/<workflow>/<store>.md` relativ zum cwd des Laufs, überschreibbar
-  mit `Quelle: datei:<Pfad>`. Das Gedächtnis liegt im Projekt der Nutzerin, nicht im Plugin.
+  mit `Ort: datei:<Pfad>`. Das Gedächtnis liegt im Projekt der Nutzerin, nicht im Plugin.
 - **Format:** ein kuratiertes Dokument mit festen Abschnitten (*Bewährt*, *Vermeiden*,
   *Offene Muster*) und höchstens 150 Zeilen. Der schreibende Task führt neue Erkenntnisse ein,
   statt sie anzuhängen.
@@ -115,7 +115,7 @@ contextSources:
     name: Jira-Tickets Projekt LANE        # Label wörtlich
     bpmnElement: DataStore_JiraTickets
     art: live                               # wissen | live | gedaechtnis
-    quelle: { type: mcp, ref: atlassian }   # notebook|mcp|cli|url|datei|websearch
+    ort: { type: mcp, ref: atlassian }   # notebook|mcp|cli|url|datei|websearch
     readers: [Task_TicketAnalysieren]
     writers: [Task_KommentarPosten]
     tools:                                  # nur art: live; oder: unresolved

@@ -329,7 +329,7 @@ definitions:
 
   contextSource:
     type: object
-    required: [name, bpmnElement, art, quelle]
+    required: [name, bpmnElement, art, ort]
     additionalProperties: false
     properties:
       name:
@@ -343,9 +343,9 @@ definitions:
         description: >
           wissen = reference knowledge loaded at generation time into knowledge/<taskId>.md; live = a
           system read (and maybe written) at run time through tools; gedaechtnis = a curated memory
-          file read at the start and written at the end of a run. Valid Art x Quelle combinations are
+          file read at the start and written at the end of a run. Valid Art x Ort combinations are
           in mapping-rubric.md.
-      quelle:
+      ort:
         type: object
         required: [type]
         additionalProperties: false
@@ -356,7 +356,7 @@ definitions:
             type: string
             description: >
               notebook title, MCP server name, CLI command, URL or file path, as written after the
-              prefix of the diagram's "Quelle:" line. Omitted for websearch.
+              prefix of the diagram's "Ort:" line. Omitted for websearch.
       readers:
         type: array
         items: { type: string }
@@ -392,7 +392,7 @@ definitions:
             type: string
             description: >
               Memory file relative to the run's cwd; default .claude/memory/<workflow>/<store>.md,
-              overridden by the diagram's "Quelle: datei:<path>".
+              overridden by the diagram's "Ort: datei:<path>".
           maxLines:
             type: integer
             minimum: 1
@@ -403,7 +403,7 @@ definitions:
           properties: { art: { const: wissen } }
         then:
           properties:
-            quelle:
+            ort:
               properties:
                 type: { enum: [notebook, mcp, url, datei, websearch] }
             tools: false
@@ -412,7 +412,7 @@ definitions:
           properties: { art: { const: live } }
         then:
           properties:
-            quelle:
+            ort:
               properties:
                 type: { enum: [notebook, mcp, cli, url, datei] }
             memory: false
@@ -420,7 +420,7 @@ definitions:
           properties: { art: { const: gedaechtnis } }
         then:
           properties:
-            quelle:
+            ort:
               properties:
                 type: { const: datei }
             tools: false
