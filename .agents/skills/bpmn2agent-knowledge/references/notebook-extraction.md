@@ -2,8 +2,9 @@
 
 Detail for `bpmn2agent-knowledge` §4/§5. Load this when actually querying, not before.
 
-Contents: Challenge queries · Extraction queries · Citing local repo docs · Citation format ·
-Evidence marking and frontmatter · Knowledge files persist · Chunking · FAQ log · Keep it short
+Contents: Challenge queries · Extraction queries · Store-driven extraction · Citing local repo docs ·
+Citation format · Evidence marking and frontmatter · Knowledge files persist · Chunking · FAQ log ·
+Keep it short
 
 ## Challenge queries
 
@@ -43,13 +44,62 @@ Per element likely to become a skill, agent or gate/critic; skip elements likely
 Run only the ones relevant to the element (a `scriptTask` rarely needs domain knowledge, a lane
 rarely needs a checklist).
 
+## Store-driven extraction
+
+Per reading task of a `wissen` store (SKILL.md §1), run the extraction queries relevant to that task
+against **each store it reads, separately**; the store's `ort.type` picks the route:
+
+| `ort.type` | Route | Cited as |
+|---|---|---|
+| `notebook` | `notebook_query` on the notebook found by title (`new_conversation: true`, one question per call, log the FAQ) | notebook source name + quote |
+| `url` | `WebFetch` the page, distill what answers the query | page title + URL |
+| `datei` | §Citing local repo docs | file title + relative path |
+| `websearch` | `WebSearch` queries scoped to the task | page title + URL |
+| `mcp` | read through the server's read tools once; snapshot only | `<server>`, tool name, date |
+
+All five yield `evidence: cited`. An unresolved store (title not found, server not connected, file
+missing) has no section; it is an open question instead, never filled from model knowledge.
+
+One file per reading task, `knowledge/<taskId>.md`, one section per store, named with the store label
+verbatim:
+
+```markdown
+---
+element: Task_AntwortEntwerfen
+evidence: cited
+sources: ["Support-Handbuch"]
+bpmn:
+  file: <meta.sourceBpmn.path>
+  elements: [Task_AntwortEntwerfen]
+---
+
+## Support-Handbuch
+
+_Ort: notebook:Support-Handbuch_
+
+Procedure, checklist, terminology for this task, each claim cited [^1].
+
+[^1]: "Support-Handbuch", NotebookLM source, queried 2026-10-03 — "short verbatim quote".
+```
+
+- `element` is the reading task's id; `bpmn.elements` lists only that id (the stores are named in the
+  section headings and `sources:`).
+- `sources:` lists every store's source (notebook title, URL, repo path, server), in section order.
+  `evidence:` is the dominant tier over all sections.
+- Footnotes are one list at the file bottom, numbered across sections. The citation format below
+  applies per section; a section without a footnote is not `cited`.
+- Each section follows the length target at the end of this file; scale it down when a task reads
+  several stores.
+
 ## Citing local repo docs (mode (d))
 
-No query to run; point at the reviewed file(s) instead. Per element:
+Used for fallback (d) and for `datei:` stores. No query to run; point at the reviewed file(s)
+instead. Per element:
 
 - **Cite directly**: if the file already answers the extraction query briefly and on point (e.g.
   `bpmn2agent-design/references/mapping-rubric.md` for a mapping-decision element), set
-  `knowledge.refs.<elementId>` to its repo-relative path and write no `knowledge/*.md`.
+  `knowledge.refs.<elementId>` to its repo-relative path and write no `knowledge/*.md`. For a
+  `datei:` store only when it is the task's sole `wissen` store; otherwise distill it as a section.
 - **Distill**: if it is long, broader than this element, or needs combining with another source,
   write a normal `knowledge/<element-or-lane>.md` citing it like any source (file title instead of
   notebook name, relative path instead of URL).
@@ -78,7 +128,7 @@ Approvals above €10,000 require a second signer [^1].
 
 | Tier | Frontmatter value | Meaning |
 |---|---|---|
-| Cited | `cited` | Backed by at least one notebook or WebSearch citation (footnote present). |
+| Cited | `cited` | Backed by at least one notebook, page, repo-file or snapshot citation (footnote present). |
 | Inferred | `inferred` | Reasoned from cited material or from the BPMN itself, no direct source claim. |
 | Unverified | `unverified` | Model knowledge only — no notebook, no search, mode (b) from SKILL.md §3. |
 
