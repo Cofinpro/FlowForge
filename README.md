@@ -155,6 +155,9 @@ Event-Teilprozesse, Kompensation. `bpmn2agent-analyze` meldet sie und schlägt e
 (z. B. „bis zu 3 Versuche“ statt eines Timers). Bleibst du dabei, wird das Element eine bewusste,
 grau markierte Lücke.
 
+Alle Elemente mit Regeln, Kontextquellen, Farblegende und Checkliste auf einer Seite:
+[`BPMN-NOTATION.md`](BPMN-NOTATION.md).
+
 ### Wie die Teile zusammenspielen
 
 `pattern-rubric.md` zählt im Diagramm menschliche Aufgaben, Parallelität, Mehrfachinstanzen,
