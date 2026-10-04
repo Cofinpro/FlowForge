@@ -3,12 +3,12 @@ meta:
   workflowName: user-story-refinement
   sourceBpmn:
     path: user-story-refinement.bpmn
-    sha256: d97297a43b126c8347e285fe736065ea49205df1296ac47660c3287e4b5258d7
+    sha256: 0fc6b3fa6d0326b22db772e2cee8277f02452a4604cf6f215787b36e208a8f35
   language: de
   generatorVersion: 0.1.0
   outputLayout: claude-dir
   created: '2026-09-26T09:53:22.108Z'
-  updated: '2026-09-26T10:35:16.157Z'
+  updated: '2026-10-04T08:18:02.587Z'
 roles:
   product-owner:
     bpmnLaneId: Lane_ProductOwner
@@ -39,6 +39,9 @@ elements:
     label: Feedback erfassen & als Problem formulieren
     lane: product-owner
     kind: skill
+    inputs:
+      - artifact: feedback
+        required: true
     outputs:
       - artifact: feedback-eintrag
     generatedPaths:
@@ -690,6 +693,38 @@ elements:
     kind: orchestrator
     generatedPaths:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  StoreRef_MethodikPhase1:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Eingang & Triage"
+    kind: context-source
+  StoreRef_MethodikPhase2:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Fachliche Klärung"
+    kind: context-source
+  StoreRef_MethodikPhase3:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Story formulieren"
+    kind: context-source
+  StoreRef_MethodikPhase4:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Refinement"
+    kind: context-source
+  StoreRef_MethodikPhase5:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Definition of Ready"
+    kind: context-source
+  StoreRef_MethodikPhase6:
+    bpmnType: dataStoreReference
+    label: "Product-Methodik: Plausibilität & Freigabe"
+    kind: context-source
+  DataInput_Feedback:
+    bpmnType: dataInput
+    label: Feedback
+    kind: workflow-input
+  DO_ReadyStory_Ref:
+    bpmnType: dataObjectReference
+    label: Sprint-reife User Story
+    kind: workflow-output
 artifacts:
   feedback-eintrag:
     pathPattern: stories/{storyId}/01_feedback.md
@@ -883,6 +918,85 @@ artifacts:
       - Gw_Sprintgroesse
       - Gw_Ready
       - Gw_Plausibel
+  feedback:
+    pathPattern: generated/user-story-refinement/artifacts/feedback/{id}.md
+    consumers:
+      - I1
+contextSources:
+  product-methodik-eingang-triage:
+    name: "Product-Methodik: Eingang & Triage"
+    bpmnElement: StoreRef_MethodikPhase1
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - I1
+      - I2
+  product-methodik-fachliche-klaerung:
+    name: "Product-Methodik: Fachliche Klärung"
+    bpmnElement: StoreRef_MethodikPhase2
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - K2
+      - K3
+      - K4
+  product-methodik-story-formulieren:
+    name: "Product-Methodik: Story formulieren"
+    bpmnElement: StoreRef_MethodikPhase3
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - C1
+      - C2
+      - C3
+      - C4
+  product-methodik-refinement:
+    name: "Product-Methodik: Refinement"
+    bpmnElement: StoreRef_MethodikPhase4
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - D2a
+      - D3
+      - D4
+      - D6
+  product-methodik-definition-of-ready:
+    name: "Product-Methodik: Definition of Ready"
+    bpmnElement: StoreRef_MethodikPhase5
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - E1
+      - E3
+  product-methodik-plausibilitaet-freigabe:
+    name: "Product-Methodik: Plausibilität & Freigabe"
+    bpmnElement: StoreRef_MethodikPhase6
+    art: wissen
+    ort:
+      type: notebook
+      ref: The Product - Business Design
+    readers:
+      - P1
+      - P4
+      - P6
+      - P5
+workflowIO:
+  input:
+    artifact: feedback
+    required:
+      - feedback
+  output:
+    artifact: sprint-reife-user-story
 openQuestions:
   - elementId: Gw_Fachkonzept
     question: >-
@@ -930,6 +1044,83 @@ openQuestions:
       Process all part stories one after another in the same run (stories/{storyId}-1, -2, ...), each through the rest
       of the flow.
     answeredAt: '2026-09-26T10:26:14.276Z'
+  - elementId: K5
+    question: >-
+      No knowledge store is drawn for "Betroffene Screens & Abläufe identifizieren". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: K6
+    question: >-
+      No knowledge store is drawn for "Klickbaren Prototyp mit Nutzern testen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: D2d
+    question: >-
+      No knowledge store is drawn for "Wireframes & Interaktionsfluss beilegen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: P7
+    question: >-
+      No knowledge store is drawn for "Konsistenz mit bestehenden Abläufen prüfen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: B4
+    question: >-
+      No knowledge store is drawn for "Time-boxed Spike durchführen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: D2b
+    question: >-
+      No knowledge store is drawn for "Umsetzung & Abhängigkeiten klären (Wie)". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: E2
+    question: >-
+      No knowledge store is drawn for "Begriffe mit Domänenmodell abgleichen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: E5
+    question: >-
+      No knowledge store is drawn for "Nachgelagerten Spike durchführen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: P3
+    question: >-
+      No knowledge store is drawn for "Abhängigkeiten & Reihenfolge prüfen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: D2c
+    question: >-
+      No knowledge store is drawn for "Randfälle & Negativszenarien identifizieren". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: P2
+    question: >-
+      No knowledge store is drawn for "Akzeptanzkriterien gegen bestehende Stories abgleichen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
+    answeredAt: '2026-10-04T08:30:45.725Z'
 knowledge:
   notebooks:
     - id: 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
@@ -939,24 +1130,43 @@ knowledge:
         - Lane_UxResearchDesign
         - Lane_Entwicklung
         - Lane_QaTest
+        - I1
+        - I2
+        - K2
+        - K3
+        - K4
+        - C1
+        - C2
+        - C3
+        - C4
+        - D2a
+        - D3
+        - D4
+        - D6
+        - E1
+        - E3
+        - P1
+        - P4
+        - P5
+        - P6
   mode: notebook
   refs:
     Start_FeedbackEingegangen: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
-    I1: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
-    I2: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
+    I1: generated/user-story-refinement/knowledge/I1.md
+    I2: generated/user-story-refinement/knowledge/I2.md
     Gw_Bug: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     End_BugUebergeben: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     Gw_Bezug: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     End_AnStoryUebergeben: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     End_FeedbackGeparkt: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     K1: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
-    K2: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K2: generated/user-story-refinement/knowledge/K2.md
     Gw_Fachkonzept: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     End_FachkonzeptAenderung: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     Par_KlaerungSplit: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
-    K3: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K3: generated/user-story-refinement/knowledge/K3.md
     K5: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
-    K4: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K4: generated/user-story-refinement/knowledge/K4.md
     Par_KlaerungJoin: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     Gw_Unsicherheit: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     K6: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
@@ -966,44 +1176,44 @@ knowledge:
     Gw_Erkenntnis: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     End_AnliegenVerworfen: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     Merge_Einordnung: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
-    C1: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C1: generated/user-story-refinement/knowledge/C1.md
     Merge_Formulierung: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
-    C2: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
-    C3: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
-    C4: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+    C2: generated/user-story-refinement/knowledge/C2.md
+    C3: generated/user-story-refinement/knowledge/C3.md
+    C4: generated/user-story-refinement/knowledge/C4.md
     Gw_Invest: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
     Merge_Refinement: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D1: generated/user-story-refinement/knowledge/phase-4-refinement.md
     Par_AmigosSplit: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D2a: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D2a: generated/user-story-refinement/knowledge/D2a.md
     D2d: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D2b: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D2c: generated/user-story-refinement/knowledge/phase-4-refinement.md
     Par_AmigosJoin: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D3: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D4: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D3: generated/user-story-refinement/knowledge/D3.md
+    D4: generated/user-story-refinement/knowledge/D4.md
     Merge_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D5: generated/user-story-refinement/knowledge/phase-4-refinement.md
     Gw_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
     Gw_Sprintgroesse: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D6: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    E1: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    D6: generated/user-story-refinement/knowledge/D6.md
+    E1: generated/user-story-refinement/knowledge/E1.md
     E2: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
-    E3: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+    E3: generated/user-story-refinement/knowledge/E3.md
     Gw_Ready: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
     E5: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
     End_StoryVerworfen: generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
     Par_PlausiSplit: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
-    P1: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P1: generated/user-story-refinement/knowledge/P1.md
     P7: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     P3: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     P2: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     Par_PlausiJoin: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
-    P4: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P4: generated/user-story-refinement/knowledge/P4.md
     Gw_Plausibel: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
-    P6: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P6: generated/user-story-refinement/knowledge/P6.md
     End_StoryZusammengefuehrt: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
-    P5: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    P5: generated/user-story-refinement/knowledge/P5.md
     E4: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     End_StorySprintReady: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
 pattern:
