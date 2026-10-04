@@ -14,6 +14,13 @@
   <bpmn:dataStore id="DataStore_MethodikPhase6" />
   <bpmn:process id="Process_UserStoryErstellenVerfeinern" name="Neue User Story aus Feedback erstellen &amp; verfeinern" isExecutable="false">
     <bpmn:documentation>Weg einer neuen User Story in einem laufenden IT-Projekt: Produktvision, Epics, Fachkonzept und Backlog existieren bereits. Auslöser ist Feedback von Nutzern oder Stakeholdern. Triage (Bug, Änderung an offener Story, neue Story unter einem Epic, parken), leichtgewichtige fachliche Klärung gegen Epic-Ziel und Fachkonzept, Spike oder Prototyp nur bei echter Unsicherheit, Story formulieren und gegen INVEST prüfen, Three-Amigos-Refinement, Definition of Ready und abschließend eine Plausibilitätsprüfung gegen die übrigen Stories im Backlog (Duplikate, widersprüchliche Akzeptanzkriterien, Abhängigkeiten, Ablaufkonsistenz). Wissensbasis: NotebookLM-Notebook &quot;The Product - Business Design&quot;.</bpmn:documentation>
+    <bpmn:ioSpecification id="IoSpec_UserStory">
+      <bpmn:dataInput id="DataInput_Feedback" name="Feedback" />
+      <bpmn:inputSet id="InputSet_UserStory">
+        <bpmn:dataInputRefs>DataInput_Feedback</bpmn:dataInputRefs>
+      </bpmn:inputSet>
+      <bpmn:outputSet id="OutputSet_UserStory" />
+    </bpmn:ioSpecification>
     <bpmn:laneSet id="LaneSet_UserStory">
       <bpmn:lane id="Lane_ProductOwner" name="Product Owner / BA">
         <bpmn:flowNodeRef>Start_FeedbackEingegangen</bpmn:flowNodeRef>
@@ -98,7 +105,9 @@
       <bpmn:incoming>F01</bpmn:incoming>
       <bpmn:outgoing>F02</bpmn:outgoing>
       <bpmn:property id="Property_MethodikPhase1_I1" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataInput_Feedback_I1" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I1"><bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase1_I1</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_DataInput_Feedback_I1"><bpmn:sourceRef>DataInput_Feedback</bpmn:sourceRef><bpmn:targetRef>Property_DataInput_Feedback_I1</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Feedback_Ref"><bpmn:targetRef>DO_Feedback_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="I2" name="Verwandte Stories &amp; Epics im Backlog suchen">
@@ -705,6 +714,8 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
       <bpmndi:BPMNShape id="E4_di" bpmnElement="E4"><dc:Bounds x="10370" y="285" width="140" height="90" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_StorySprintReady_di" bpmnElement="End_StorySprintReady"><dc:Bounds x="10642" y="312" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="10682" y="316" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DO_Feedback_Ref_di" bpmnElement="DO_Feedback_Ref"><dc:Bounds x="462" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="410" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataInput_Feedback_di" bpmnElement="DataInput_Feedback"><dc:Bounds x="190" y="230" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="178" y="212" width="60" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_DataInput_Feedback_I1_di" bpmnElement="DataIn_DataInput_Feedback_I1"><di:waypoint x="226" y="255" /><di:waypoint x="430" y="255" /><di:waypoint x="430" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOut_DO_Feedback_Ref_di" bpmnElement="DataOut_DO_Feedback_Ref"><di:waypoint x="480" y="285" /><di:waypoint x="480" y="240" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Backlog_Ref_di" bpmnElement="DO_Backlog_Ref"><dc:Bounds x="682" y="190" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="630" y="150" width="140" height="36" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_DO_Backlog_Ref_di" bpmnElement="DataIn_DO_Backlog_Ref"><di:waypoint x="700" y="240" /><di:waypoint x="700" y="285" /></bpmndi:BPMNEdge>
