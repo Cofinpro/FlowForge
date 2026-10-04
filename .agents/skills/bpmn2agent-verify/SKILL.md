@@ -48,8 +48,10 @@ Plus **context-sources**, run after element-to-artifact and only when the diagra
 a process `dataInput`/`dataOutput`, or the spec has `contextSources`/`workflowIO` (otherwise absent,
 output unchanged). Each finding ends with `[fix in bpmn2agent-<route>]`:
 
-- every store and process input/output has an `elements.<id>` entry (`context-source` /
-  `workflow-input` / `workflow-output`) and a `contextSources` entry / `workflowIO` → design
+- every store and every real (`ioSpecification`) process input/output has an `elements.<id>` entry
+  (`context-source` / `workflow-input` / `workflow-output`) and a `contextSources` entry /
+  `workflowIO` → design; a data object that only looks like an input or output by convention needs
+  one only if it is the one the user picked, the rest stay plain artifacts
 - `contextSources.*.readers`/`writers` (and `art`, `ort.type`) match the diagram's arrows → analyze (stale spec)
 - **write guard:** a task writing into a `live` store needs a `userTask` on **every** path from the
   start (loops and sub-processes included: a loop's first pass must be guarded too) → analyze,

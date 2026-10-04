@@ -602,9 +602,14 @@ if (spec && inventory && ctxNewStyle) {
   // (1) process input/output ------------------------------------------------------------
   const io = spec.workflowIO;
   for (const [dir, list, kind] of [['input', ioInventory.inputs, 'workflow-input'], ['output', ioInventory.outputs, 'workflow-output']]) {
-    // a data-object-by-convention entry only counts once the spec uses the new vocabulary at all
-    // (ctxNewStyle); older specs treat those data objects as plain artifact contracts.
-    for (const item of list) {
+    // A real ioSpecification entry is always the process input/output and needs its element entry.
+    // A data-object-by-convention entry is only a candidate: the user picks at most one per direction
+    // (bpmn2agent-analyze step 5) and the spec marks that one with the workflow-* kind; every other
+    // candidate stays an ordinary artifact contract and is not checked here. Convention entries only
+    // count once the spec uses the new vocabulary at all (ctxNewStyle).
+    const real = list.filter((i) => i.source === 'ioSpecification');
+    const chosenByConvention = list.filter((i) => i.source !== 'ioSpecification' && specElements[i.id]?.kind === kind);
+    for (const item of real) {
       const el = specElements[item.id];
       if (!el) {
         ctxCat.fail(`Process ${dir} "${item.name || item.id}" (${item.id}) has no entry in spec.elements — it must be kind: ${kind}`, 'design');
@@ -612,8 +617,9 @@ if (spec && inventory && ctxNewStyle) {
         ctxCat.fail(`elements.${item.id} ("${item.name || item.id}") is kind: ${el.kind}, but it is the process ${dir} — it must be kind: ${kind}`, 'design');
       }
     }
-    if (list.length && !io?.[dir]) {
-      ctxCat.fail(`The diagram has a process ${dir} (${list.map((i) => `"${i.name || i.id}"`).join(', ')}) but the spec has no workflowIO.${dir}`, 'design');
+    if ((real.length || chosenByConvention.length) && !io?.[dir]) {
+      const named = [...real, ...chosenByConvention];
+      ctxCat.fail(`The diagram has a process ${dir} (${named.map((i) => `"${i.name || i.id}"`).join(', ')}) but the spec has no workflowIO.${dir}`, 'design');
     }
     if (!list.length && io?.[dir]) {
       ctxCat.fail(`spec.workflowIO.${dir} exists, but the diagram has no process ${dir} — the spec is out of date`, 'analyze');
