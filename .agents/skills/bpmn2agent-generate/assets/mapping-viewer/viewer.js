@@ -415,6 +415,13 @@ function showDetails(id, opts) {
     html += '<dt>' + escapeHtml(STRINGS.callsLabel) + '</dt><dd><button type="button" class="link-btn" data-open-level="' + escapeHtml(called.id) + '">' +
       escapeHtml(fill(STRINGS.openCalled, { name: called.name })) + '</button></dd>';
   }
+  const cost = COST_DATA && COST_DATA.byElement[id];
+  const sharedCost = COST_DATA && COST_DATA.shared[id];
+  if (cost) {
+    html += '<dt>' + escapeHtml(STRINGS.costLabel) + '</dt><dd>' + escapeHtml(fill(STRINGS.costElement, { usd: usd(cost.usd), requests: cost.requests, share: (cost.share * 100).toFixed(1) })) + '</dd>';
+  } else if (sharedCost) {
+    html += '<dt>' + escapeHtml(STRINGS.costLabel) + '</dt><dd>' + escapeHtml(fill(STRINGS.costShared, { skill: sharedCost.skill, n: sharedCost.elements, usd: usd(sharedCost.usd) })) + '</dd>';
+  }
   html += '<dt>' + escapeHtml(STRINGS.viewLabel) + '</dt><dd>' + escapeHtml(entry.viewPath.join(' › ')) + '</dd>';
   if (entry.lane) {
     html += '<dt>' + escapeHtml(STRINGS.laneLabel) + '</dt><dd>' + escapeHtml(entry.lane) + '</dd>';
@@ -581,6 +588,15 @@ function decorate() {
           escapeHtml(fill(STRINGS.overlayRed, { n: level.redTotal })) + '</span>',
       });
     }
+    const cost = COST_DATA && COST_DATA.byElement[el.id];
+    if (cost) {
+      overlays.add(el.id, 'run-cost', {
+        position: { bottom: 14, right: 0 },
+        scale: { min: 0.6, max: 1 },
+        html: '<span class="cost-badge" title="' + escapeHtml(fill(STRINGS.costElement, { usd: usd(cost.usd), requests: cost.requests, share: (cost.share * 100).toFixed(1) })) + '">' +
+          usd(cost.usd) + '</span>',
+      });
+    }
     const entry = MAPPING_DATA[el.id];
     const gfx = entry && el.type !== 'label' && registry.getGraphics(el);
     if (!gfx || gfx.querySelector(':scope > title')) return;
@@ -708,8 +724,35 @@ function offlineHtml() {
     escapeHtml(STRINGS.rendersLink) + '</a></li></ul></div>';
 }
 
+function usd(n) { return (Math.round(n * 100) / 100).toFixed(2); }
+
+// Run cost (render-mapping.mjs --cost): summary, lanes and the most expensive elements.
+function renderCost() {
+  const el = document.getElementById('cost');
+  if (!COST_DATA || !el) return;
+  const c = COST_DATA;
+  let html = '<p class="status-line ' + (c.ok ? 'status-ok' : 'status-red') + '">' +
+    escapeHtml(fill(STRINGS.costSummary, { usd: usd(c.totalUsd), session: c.sessionId.slice(0, 8), prices: c.pricesVersion })) + '</p>';
+  if (!c.ok) html += '<p class="status-note">' + escapeHtml(STRINGS.costNotReconciled) + '</p>';
+  html += '<p class="status-note">' + escapeHtml(fill(STRINGS.costOrchestration, { usd: usd(c.orchestrationUsd) })) + '</p>';
+  if (c.unassignedUsd) html += '<p class="status-note">' + escapeHtml(fill(STRINGS.costUnassigned, { usd: usd(c.unassignedUsd) })) + '</p>';
+  html += '<h3>' + escapeHtml(STRINGS.costLanes) + '</h3><ul class="plain-list">' + c.byLane.map(function (l) {
+    return '<li>' + escapeHtml(l.name) + ' <span class="cost-amount">' + usd(l.costUsd) + ' USD</span></li>';
+  }).join('') + '</ul>';
+  if (c.top.length) {
+    html += '<h3>' + escapeHtml(STRINGS.costTop) + '</h3><ul class="plain-list">' + c.top.map(function (t) {
+      const entry = MAPPING_DATA[t.id];
+      return '<li><button type="button" class="link-btn" data-reveal="' + escapeHtml(t.id) + '">' + escapeHtml(entry ? entry.label : t.id) +
+        '</button> <span class="cost-amount">' + usd(t.usd) + ' USD</span></li>';
+    }).join('') + '</ul>';
+  }
+  el.innerHTML = html;
+  wireReveal(el);
+}
+
 async function boot() {
   renderStatus();
+  renderCost();
   renderNav();
   renderLegend();
   renderFilesList();

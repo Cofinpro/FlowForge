@@ -312,7 +312,8 @@ node ${CLAUDE_SKILL_DIR}/scripts/render-mapping.mjs \
 ```
 
 Produces `mapping/workflow-mapped.bpmn`, `index.html` and `renders/*.png`; the author's `.bpmn` is
-never written. Then:
+never written. After a run, add `--cost <cost.json>` (from `bpmn2agent-cost`) for a cost badge per
+element, a run-cost section and a cost row in the details; without it nothing changes. Then:
 
 ```bash
 node ${CLAUDE_SKILL_DIR}/scripts/check-mapping-view.mjs \
