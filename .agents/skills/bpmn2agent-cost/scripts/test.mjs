@@ -95,3 +95,69 @@ test('claude -p total is compared within 1 percent', () => {
   assert.equal(buildReport({ ...s, map: MAP, prices, claudeTotal: total * 1.005 }).ok, true)
   assert.equal(buildReport({ ...s, map: MAP, prices, claudeTotal: total * 1.05 }).ok, false)
 })
+
+// ---- the generated ledger hook ---------------------------------------------------------------
+import { spawnSync } from 'node:child_process'
+import { installCostLedger } from '../../bpmn2agent-generate/scripts/install-cost-ledger.mjs'
+import { readLedger } from './read-usage.mjs'
+
+const SPEC = {
+  meta: { workflowName: 'wf', outputLayout: 'claude-dir', sourceBpmn: { path: 'wf.bpmn' }, generatorVersion: '0.1.0' },
+  pattern: { chosen: 'orchestrator-agent' },
+  roles: { po: { label: 'Product Owner', agentName: 'wf-po' }, qa: { label: 'QA', agentName: 'wf-qa' } },
+  elements: {
+    C1: { kind: 'skill', label: 'Story einordnen', lane: 'po', generatedPaths: ['generated/wf/.claude/skills/story-writing/SKILL.md'] },
+    K2: { kind: 'skill', label: 'Story prüfen', lane: 'qa', generatedPaths: ['generated/wf/.claude/skills/story-check/SKILL.md'] },
+    K3: { kind: 'skill', label: 'Story freigeben', lane: 'qa', generatedPaths: ['generated/wf/.claude/skills/story-check/SKILL.md'] },
+    Start: { kind: 'orchestrator', generatedPaths: ['generated/wf/.claude/skills/wf/SKILL.md'] },
+  },
+}
+
+function runHook(project, transcript, payload = {}) {
+  const hook = path.join(project, '.claude', 'hooks', 'wf-cost-ledger.mjs')
+  return spawnSync('node', [hook], { input: JSON.stringify({ transcript_path: transcript, ...payload }), env: { ...process.env, CLAUDE_PROJECT_DIR: project }, encoding: 'utf8' })
+}
+
+test('install writes hook, map and settings; re-running changes nothing', () => {
+  const dir = tmp()
+  installCostLedger(SPEC, dir)
+  const first = fs.readFileSync(path.join(dir, '.claude', 'settings.json'), 'utf8')
+  installCostLedger(SPEC, dir)
+  assert.equal(fs.readFileSync(path.join(dir, '.claude', 'settings.json'), 'utf8'), first)
+  const settings = JSON.parse(first)
+  for (const ev of ['SubagentStop', 'Stop', 'SessionEnd']) assert.equal(settings.hooks[ev].length, 1)
+  const map = JSON.parse(fs.readFileSync(path.join(dir, '.claude', 'hooks', 'wf-cost-map.json'), 'utf8'))
+  assert.deepEqual(map.skills['story-check'], ['K2', 'K3'])
+  assert.deepEqual(map.orchestration.skills, ['wf'])
+  assert.equal(installCostLedger({ ...SPEC, meta: { ...SPEC.meta, outputLayout: undefined } }, tmp()).skipped, 'legacy output layout')
+})
+
+test('hook ledger matches the reader, is idempotent and records cost-state', () => {
+  const project = tmp()
+  installCostLedger(SPEC, project)
+  const fx = makeFixture(path.join(project, 'transcripts'))
+  const r1 = runHook(project, fx.transcript)
+  assert.equal(r1.status, 0, r1.stderr)
+  const ledger = path.join(project, '.claude', 'runs', 'wf', 'ledger.jsonl')
+  const lines1 = fs.readFileSync(ledger, 'utf8').trim().split('\n')
+  assert.equal(lines1.length, 6) // 5 requests + cost-state
+  // second event (and one handed the subagent's own transcript path) adds nothing
+  runHook(project, fx.transcript)
+  runHook(project, path.join(fx.dir, 'sess-1', 'subagents', 'agent-a1.jsonl'))
+  assert.equal(fs.readFileSync(ledger, 'utf8').trim().split('\n').length, 6)
+
+  const fromLedger = readLedger(ledger)
+  const fromTranscript = readSession(fx.transcript)
+  const key = (rs) => rs.map((r) => [r.requestId, r.model, JSON.stringify(r.usage), r.agentType ?? null, r.description ?? null]).sort()
+  assert.deepEqual(key(fromLedger.requests), key(fromTranscript.requests))
+  const rep = buildReport({ requests: fromLedger.requests, costState: fromLedger.costStates.get('sess-1').costState, map: MAP, prices, sessionId: 'sess-1' })
+  assert.equal(rep.ok, true, JSON.stringify(rep.checks))
+})
+
+test('hook never fails the run: bad payload and missing transcript exit 0', () => {
+  const project = tmp()
+  installCostLedger(SPEC, project)
+  const hook = path.join(project, '.claude', 'hooks', 'wf-cost-ledger.mjs')
+  assert.equal(spawnSync('node', [hook], { input: 'not json', encoding: 'utf8' }).status, 0)
+  assert.equal(runHook(project, '/nonexistent/x.jsonl').status, 0)
+})

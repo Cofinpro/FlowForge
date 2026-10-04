@@ -35,9 +35,11 @@ generated/<workflow>/
     agents/<name>.md
     skills/<name>/SKILL.md              (+ references/, assets/, scripts/ only where design put a script)
     hooks/<name>.mjs                    (kind: hook, plus <workflow>-write-guard / -memory-cap, step 6a)
+    hooks/<workflow>-cost-ledger.mjs    (always, step 6b) + <workflow>-cost-map.json
     workflows/<workflow>.workflow.mjs   (workflow-script pattern only)
     settings.json                       (only with hooks or read-tool permissions: step 6)
-  (memory files are not generated: they appear in the user's project at run time)
+  (memory files and `.claude/runs/<workflow>/ledger.jsonl` are not generated: they appear in the user's
+   project at run time)
   README.md                             ← install + what was generated (meta.language)
   workflow-spec.yaml  knowledge/  mapping/   ← review material, never copied
 ```
@@ -213,6 +215,26 @@ mapping report's "Context hooks" table):
 Smoke-test both with piped payloads before moving on (a guarded write, a read, a memory file at the
 cap and one line over); expectations are in the templates' header comments.
 
+## 6b. Add run-cost tracking
+
+Always, for `claude-dir` output (the legacy layout is left alone). Run
+`node ${CLAUDE_SKILL_DIR}/scripts/install-cost-ledger.mjs "$cacheDir" generated/<workflow>` after
+steps 5–7, once the skills and the orchestration file exist; re-run it after any spec change. It
+writes, deterministically:
+
+- `.claude/hooks/<workflow>-cost-ledger.mjs` from `assets/templates/hook-cost-ledger-template.mjs`:
+  on `SubagentStop`, `Stop` and `SessionEnd` it appends each finished API request once to
+  `.claude/runs/<workflow>/ledger.jsonl` (raw token counts, no prices) and never fails the run. Its
+  header lists no element (it belongs to the whole workflow) and claims no `generatedPaths` entry.
+- `.claude/hooks/<workflow>-cost-map.json` from the spec (`scripts/build-cost-map.mjs`): which skill
+  names, agent types and element ids in a transcript belong to which BPMN element, lane and phase.
+  It is data, not a script, and carries the `bpmn` trace as a JSON key.
+- the three registrations in `.claude/settings.json`.
+
+Nothing is priced here: the lanecraft plugin's `bpmn2agent-cost` reads the ledger and the map after a
+run. Smoke-test the hook with a piped payload (`{"transcript_path": …}`); the template header has the
+expectation.
+
 ## 7. Materialize the one top-level orchestration file
 
 Exactly one, by `pattern.chosen` (for `mixed`, one per phase):
@@ -255,6 +277,9 @@ Include:
 - With `contextSources`: "Voraussetzungen" (MCP servers, CLIs, notebooks; nothing is connected for
   the user, no `.mcp.json`), "Gedächtnis" (path, cap, who reads and writes), which hooks guard what,
   the permissions merge, and the required input from `workflowIO`.
+- Run costs: the ledger hook records every run into `.claude/runs/<workflow>/ledger.jsonl`; add
+  `.claude/runs/` to `.gitignore`; with the lanecraft plugin installed, `/bpmn2agent-cost` reports the
+  cost per BPMN element (the plugin carries the logic and the price table, this payload only the data).
 - Every `openQuestions[]` entry with `answer: null`, and the eval scenarios from step 5 as open items.
 - Pointers to `mapping/report.md` and `mapping/index.html`.
 
@@ -309,6 +334,8 @@ line. Data stores and process input/output are rose (`context-source`); a store 
   there appears in that store's `contextSources.<id>.tools`.
 - Step 4's rule holds: no `.mjs` under `.claude/` imports anything but `node:*` or relative files; no
   `package.json` in the payload.
+- Step 6b ran: `<workflow>-cost-ledger.mjs` and `<workflow>-cost-map.json` exist and the three events
+  are registered in `.claude/settings.json`.
 - Every `generatedPaths` path exists; nothing written outside `generatedPaths`, the step-7 file,
   `.claude/settings.json`, or companion material inside a generated `skills/<name>/` or
   `agents/<name>/` dir; nothing outside `generated/<workflow>/`.
@@ -337,6 +364,8 @@ decision, by design or in the diagram, before verify can pass), and open reviewe
   `settings.json` (step 6).
 - `assets/templates/hook-ask-template.mjs`, `hook-memory-cap-template.mjs`: write guard and memory
   cap (step 6a).
+- `assets/templates/hook-cost-ledger-template.mjs`, `scripts/install-cost-ledger.mjs`,
+  `scripts/build-cost-map.mjs`: run-cost tracking (step 6b).
 - `assets/templates/workflow-script-template.mjs`, `orchestrator-agent-template.md`: step 7.
 - `assets/templates/README-template.md` (step 8), `mapping-report-template.md` (step 9).
 - `scripts/render-mapping.mjs`, `scripts/check-mapping-view.mjs`: step 10.

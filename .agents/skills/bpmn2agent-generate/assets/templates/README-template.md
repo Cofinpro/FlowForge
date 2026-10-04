@@ -75,6 +75,10 @@ inside your project, not in the copied `.claude/`), at most {{maxLines}} lines i
   process)." and "`{{workflow}}-memory-cap.mjs` — rejects a write that makes a memory file longer than
   its cap and asks Claude to condense it." A store whose tools could not be resolved has no guard;
   say so.}}
+- **Kostenprotokoll** (`hooks/{{workflow}}-cost-ledger.mjs`, `hooks/{{workflow}}-cost-map.json`): schreibt
+  nach jedem Lauf die verbrauchten Tokens nach `.claude/runs/{{workflow}}/ledger.jsonl` (ohne Preise,
+  ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: lanecraft-Plugin installieren,
+  danach `/bpmn2agent-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
 - **Permissions** (`settings.json` → `permissions.allow`): {{the read tools allowed without a prompt,
   for stores read by non-agent lanes; "Lesezugriff nicht pro Rolle getrennt" — every role may use
   them. Write tools are never pre-approved.}}

@@ -135,13 +135,13 @@ export function readSession(transcript) {
 
 /** Reads ledger.jsonl lines written by the generated cost-ledger hook. */
 export function readLedger(file) {
-  const requests = []
+  const requests = new Map() // keyed by requestId: a line written twice counts once
   const costStates = new Map()
   for (const { entry } of jsonLines(file)) {
     if (entry.kind === 'cost-state') costStates.set(entry.sessionId, entry)
-    else if (entry.kind === 'request') requests.push(entry)
+    else if (entry.kind === 'request') requests.set(`${entry.sessionId}/${entry.requestId}`, entry)
   }
-  return { requests, costStates }
+  return { requests: [...requests.values()], costStates }
 }
 
 /** Cost of one usage record in USD; throws for a model without a price. */

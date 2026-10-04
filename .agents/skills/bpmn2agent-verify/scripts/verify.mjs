@@ -107,6 +107,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { buildCostMap } from '../../bpmn2agent-generate/scripts/build-cost-map.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -884,6 +885,17 @@ if (!spec) {
     if (hasLiveWrite) contextHookPaths.add(`.claude/hooks/${workflowName}-write-guard.mjs`);
     if (stores.some((s) => s.art === 'gedaechtnis')) contextHookPaths.add(`.claude/hooks/${workflowName}-memory-cap.mjs`);
   }
+  // Cost tracking (bpmn2agent-generate step 6b): a ledger hook and its cost map, one pair per workflow,
+  // explained like the context hooks. Missing is a warning (output from before cost tracking).
+  const costHookPath = workflowName && outputLayout === 'claude-dir' ? `.claude/hooks/${workflowName}-cost-ledger.mjs` : null;
+  const costMapPath = workflowName && outputLayout === 'claude-dir' ? `.claude/hooks/${workflowName}-cost-map.json` : null;
+  if (costHookPath && !(allFiles.includes(costHookPath) && allFiles.includes(costMapPath))) {
+    artCat.warn(
+      `run-cost tracking is missing ("${costHookPath}" / "${costMapPath}") — this output was generated before cost ` +
+      `tracking; re-run bpmn2agent-generate step 6b so bpmn2agent-cost can attribute run costs`,
+      'generate'
+    );
+  }
   const expectedTopLevelPathSet = new Set(expectedTopLevelPaths);
   const topLevelBudget = patternChosen === 'mixed' ? Infinity : 1;
   let topLevelUsed = 0;
@@ -926,6 +938,30 @@ if (!spec) {
         for (const c of commands) {
           if (/CLAUDE_PLUGIN_ROOT/.test(c)) artCat.fail(`"${relPath}": hook command "${c}" uses \${CLAUDE_PLUGIN_ROOT}; a project .claude/ needs $CLAUDE_PROJECT_DIR`);
         }
+      }
+      continue;
+    }
+
+    if (relPath === costMapPath) {
+      try {
+        const onDisk = JSON.parse(readFileSync(path.join(generatedDir, relPath), 'utf8'));
+        const expected = buildCostMap(spec);
+        if (JSON.stringify(onDisk) !== JSON.stringify(expected)) {
+          const missing = Object.keys(expected.elements).filter((id) => !onDisk.elements?.[id]);
+          const foreign = Object.keys(onDisk.elements || {}).filter((id) => !expected.elements[id]);
+          artCat.fail(
+            `"${relPath}" does not match the spec` +
+            (missing.length ? `; elements missing from it: [${missing.join(', ')}]` : '') +
+            (foreign.length ? `; elements it lists that the spec does not have as cost-bearing: [${foreign.join(', ')}]` : '') +
+            ' — re-run bpmn2agent-generate step 6b',
+            'generate'
+          );
+        }
+        for (const skill of Object.keys(onDisk.skills || {})) {
+          if (!allFiles.includes(`.claude/skills/${skill}/SKILL.md`)) artCat.fail(`"${relPath}" names skill "${skill}", which does not exist under .claude/skills/`, 'generate');
+        }
+      } catch (e) {
+        artCat.fail(`"${relPath}" is not valid JSON: ${e.message}`, 'generate');
       }
       continue;
     }
@@ -982,7 +1018,7 @@ if (!spec) {
 
     const claimingSet = claimedBy.get(relPath) || new Set();
     const underRoot = [...skillRoots].some((root) => relPath === root || relPath.startsWith(root + '/'));
-    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md' || contextHookPaths.has(relPath);
+    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md' || contextHookPaths.has(relPath) || relPath === costHookPath;
 
     if (unsupportedType) {
       artCat.warn(`"${relPath}": unknown file type, no bpmn header convention defined for it — header not checked`);
