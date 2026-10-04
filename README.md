@@ -317,6 +317,11 @@ nur nach einer Freigabe direkt davor geschrieben wird.
 
 ![User-Story-Refinement als BPMN](examples/user-story-refinement/user-story-refinement.png)
 
+**[`examples/lanecraft/`](examples/lanecraft/)**: lanecraft selbst als BPMN. Sechs Lanes von der
+Prozessmodellierung bis zu Prüfung & Übergabe, sieben menschliche Prüfpunkte, beide Schleifen der
+Pipeline und neun Data Stores aller drei Arten. Bisher nur gezeichnet, nicht durch die Pipeline
+gelaufen.
+
 ## Inhalt des Repos
 
 ```text

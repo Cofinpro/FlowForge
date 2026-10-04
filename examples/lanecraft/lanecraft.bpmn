@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Lanecraft" targetNamespace="https://example.com/bpmn/lanecraft">
+  <bpmn:dataStore id="DataStore_AgenticFaq" />
+  <bpmn:dataStore id="DataStore_AgenticNotebook" />
+  <bpmn:dataStore id="DataStore_FachNotebooks" />
+  <bpmn:dataStore id="DataStore_Notation" />
+  <bpmn:dataStore id="DataStore_Projekt" />
+  <bpmn:dataStore id="DataStore_Rubrik" />
+  <bpmn:dataStore id="DataStore_Vorlagen" />
+  <bpmn:dataStore id="DataStore_Wissensbasis" />
+  <bpmn:process id="Process_Lanecraft" name="lanecraft: BPMN-Prozess in Claude-Code-Workflow übersetzen" isExecutable="false">
+    <bpmn:documentation>Der Ablauf, den dieses Repo selbst umsetzt: ein Fachanwender bringt ein Ziel oder ein BPMN-Diagramm mit; optional entwirft bpmn-process-design den Prozess aus Notebook-Wissen, dann übersetzen die fünf Stufen-Skills bpmn2agent-analyze, -knowledge, -design, -generate und -verify ihn über die workflow-spec.yaml in Agenten, Skills, Hooks, Skripte und genau eine Orchestrierungsdatei unter generated/&lt;workflow&gt;/. Einstieg und Steuerung der Schleifen: bpmn-to-agentic-workflow. Helfer: agentic-workflow-architect, agentic-kb-librarian, agentic-artifact-reviewer, orchestration-design, agent-authoring, skill-authoring, trim-the-fat. Quelle: ARCHITECTURE.md.</bpmn:documentation>
+    <bpmn:ioSpecification id="IoSpec_Lanecraft">
+      <bpmn:dataInput id="DataInput_Ziel" name="Prozessziel oder BPMN-Diagramm" />
+      <bpmn:dataOutput id="DataOutput_Workflow" name="Generierter Workflow (generated/&lt;workflow&gt;/)" />
+      <bpmn:inputSet id="InputSet_Lanecraft"><bpmn:dataInputRefs>DataInput_Ziel</bpmn:dataInputRefs></bpmn:inputSet>
+      <bpmn:outputSet id="OutputSet_Lanecraft"><bpmn:dataOutputRefs>DataOutput_Workflow</bpmn:dataOutputRefs></bpmn:outputSet>
+    </bpmn:ioSpecification>
+    <bpmn:laneSet id="LaneSet_Lanecraft">
+      <bpmn:lane id="Lane_Fachanwender" name="Fachanwender">
+        <bpmn:flowNodeRef>Start_Anfrage</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Intake</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_DiagrammVorhanden</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Entwurf</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Luecken</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Fachfragen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Mapping</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Mapping</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_DiagrammAendern</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Befunde</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Befunde</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_DiagrammAendern2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>U_Installation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Installieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Uebergeben</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Prozessmodellierung" name="Prozessmodellierung">
+        <bpmn:flowNodeRef>P_Recherche</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Zeichnen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P_Zeichnen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P_Validieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_DiagrammGueltig</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AnalyseWissen" name="Analyse &amp; Fachwissen">
+        <bpmn:flowNodeRef>Merge_Analyse</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_Inventar</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Luecken</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Luecken</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>A_SpecEntwurf</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K_Extrahieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>K_Hinterfragen</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_AgenticDesign" name="Agentic Design">
+        <bpmn:flowNodeRef>Merge_Design</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D_Zuordnen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D_Rollen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D_Pruefen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D_Plan</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>D_Spec</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Generierung" name="Generierung">
+        <bpmn:flowNodeRef>Merge_Generierung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Artefakte</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Orchestrierung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Rendern</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>G_Review</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_PruefungUebergabe" name="Prüfung &amp; Übergabe">
+        <bpmn:flowNodeRef>V_Pruefen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>V_Routen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Verify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Merge_Uebergabe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>V_Uebergabe</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>V_Kopieren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Installiert</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_Anfrage" name="Prozess soll zum Claude-Workflow werden">
+      <bpmn:documentation>Ein Fachanwender hat ein Ziel oder ein gezeichnetes BPMN-Diagramm und möchte daraus prüfbare Claude-Code-Artefakte. Einstieg ist der Skill bpmn-to-agentic-workflow.</bpmn:documentation>
+      <bpmn:outgoing>F01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="U_Intake" name="Ziel, Diagramm &amp; Wissensquellen angeben">
+      <bpmn:documentation>Input: Prozessziel oder Pfad zum .bpmn, Wunschname, Sprache. Output: Bestätigte Intake-Angaben: .bpmn (falls vorhanden), Workflow-Name in kebab-case, Sprache für Fragen und README, ob Gemini-Notebooks den Prozess abdecken. Bei vorhandenem generated/&lt;workflow&gt;/ ist es ein Folgelauf. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §1</bpmn:documentation>
+      <bpmn:incoming>F01</bpmn:incoming>
+      <bpmn:outgoing>F02</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Ziel_Intake" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Ziel_Intake"><bpmn:sourceRef>DataInput_Ziel</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Ziel_Intake</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_DiagrammVorhanden" name="Gibt es schon ein BPMN-Diagramm?" default="F03">
+      <bpmn:incoming>F02</bpmn:incoming>
+      <bpmn:outgoing>F03</bpmn:outgoing>
+      <bpmn:outgoing>F04</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P_Recherche" name="Prozess im Notebook recherchieren">
+      <bpmn:documentation>Input: Ziel, Auslöser, Endzustände, Beteiligte; gewählte Fach-Notebooks. Output: Prozessentwurf: Lanes, Schritte je Phase mit Typ (KI/Mensch/Skript/Regel) und Quelle, Gateways, Schleifen mit Obergrenze, Datenobjekte, Store-Tabelle, Prozess-Ein-/Ausgabe; jede Notebook-Antwort im FAQ unter generated/&lt;workflow&gt;/knowledge/faq/. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §1-5</bpmn:documentation>
+      <bpmn:incoming>F04</bpmn:incoming>
+      <bpmn:outgoing>F05</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_FachNB_Recherche" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_FachNB_Recherche"><bpmn:sourceRef>StoreRef_FachNotebooksRecherche</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_FachNB_Recherche</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Entwurf"><bpmn:targetRef>DO_Entwurf</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="U_Entwurf" name="Prozessentwurf bestätigen">
+      <bpmn:documentation>Input: Prozessentwurf. Output: Entscheidung: so zeichnen, ändern oder Notebook weiter befragen. Nie wird ein unbestätigter Entwurf gezeichnet. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §5</bpmn:documentation>
+      <bpmn:incoming>F05</bpmn:incoming>
+      <bpmn:outgoing>F06</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Entwurf_U" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Entwurf_U"><bpmn:sourceRef>DO_Entwurf</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Entwurf_U</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Merge_Zeichnen">
+      <bpmn:incoming>F06</bpmn:incoming>
+      <bpmn:incoming>F11</bpmn:incoming>
+      <bpmn:outgoing>F07</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="P_Zeichnen" name="BPMN-Diagramm zeichnen">
+      <bpmn:documentation>Input: Bestätigter Prozessentwurf, lanecraft-Notation, Skeleton und Layout-Raster aus bpmn-authoring. Output: &lt;workflow&gt;.bpmn mit Lanes, typisierten Tasks, Datenobjekten, Data Stores (Art/Ort) und Input/Output-Dokumentation an jedem Task. Quelle: datei:.agents/skills/bpmn-authoring/SKILL.md §2-4</bpmn:documentation>
+      <bpmn:incoming>F07</bpmn:incoming>
+      <bpmn:outgoing>F08</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Notation_Zeichnen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Notation_Zeichnen"><bpmn:sourceRef>StoreRef_Notation</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Notation_Zeichnen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Bpmn"><bpmn:targetRef>DO_Bpmn</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="P_Validieren" name="Diagramm validieren &amp; rendern">
+      <bpmn:documentation>Input: &lt;workflow&gt;.bpmn. Output: Ergebnis von validate.sh (XSD, bpmn-moddle, bpmnlint) und inventory.mjs (findings leer, kein untypisierter Task), PNG je Ebene via render.mjs. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §7</bpmn:documentation>
+      <bpmn:incoming>F08</bpmn:incoming>
+      <bpmn:outgoing>F09</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="Gw_DiagrammGueltig" name="Diagramm gültig &amp; agent-ready?" default="F10">
+      <bpmn:incoming>F09</bpmn:incoming>
+      <bpmn:outgoing>F10</bpmn:outgoing>
+      <bpmn:outgoing>F11</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Merge_Analyse">
+      <bpmn:incoming>F03</bpmn:incoming>
+      <bpmn:incoming>F10</bpmn:incoming>
+      <bpmn:incoming>F42</bpmn:incoming>
+      <bpmn:outgoing>F12</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:scriptTask id="A_Inventar" name="BPMN validieren &amp; inventarisieren">
+      <bpmn:documentation>Input: .bpmn-Diagramm. Output: Element-Inventar mit Signalen (menschliche Tasks, Parallelität, Schleifen), Data Stores und Prozess-Ein-/Ausgabe, Befunde zu nicht unterstützten Konstrukten; bei Folgeläufen Diff je Element-ID und sha256. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §1-4, scripts/inventory.mjs</bpmn:documentation>
+      <bpmn:incoming>F12</bpmn:incoming>
+      <bpmn:outgoing>F13</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Bpmn_Inventar" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Bpmn_Inventar"><bpmn:sourceRef>DO_Bpmn</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Bpmn_Inventar</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:scriptTask>
+    <bpmn:exclusiveGateway id="Gw_Luecken" name="Lücken oder nicht unterstützte Konstrukte?" default="F15">
+      <bpmn:incoming>F13</bpmn:incoming>
+      <bpmn:outgoing>F14</bpmn:outgoing>
+      <bpmn:outgoing>F15</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="U_Luecken" name="Lücken im Diagramm klären">
+      <bpmn:documentation>Input: Befunde aus dem Inventar: fehlende Namen, fehlende Art/Ort-Zeilen, Pools, Timer, Kompensation u. a. Output: Antworten des Fachanwenders; nicht unterstützte Elemente werden umgebaut oder bewusst not-generated. Das .bpmn wird nie von der Pipeline geändert. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §5</bpmn:documentation>
+      <bpmn:incoming>F14</bpmn:incoming>
+      <bpmn:outgoing>F16</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Merge_Luecken">
+      <bpmn:incoming>F15</bpmn:incoming>
+      <bpmn:incoming>F16</bpmn:incoming>
+      <bpmn:outgoing>F17</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="A_SpecEntwurf" name="Spec-Entwurf schreiben">
+      <bpmn:documentation>Input: Inventar, Antworten zu den Lücken. Output: generated/&lt;workflow&gt;/workflow-spec.yaml als Entwurf: jedes Element kind: unresolved, contextSources, workflowIO, meta mit sha256. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §6-7</bpmn:documentation>
+      <bpmn:incoming>F17</bpmn:incoming>
+      <bpmn:outgoing>F18</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_SpecEntwurf"><bpmn:targetRef>DO_SpecEntwurf</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="K_Extrahieren" name="Fachwissen je Task extrahieren">
+      <bpmn:documentation>Input: Spec-Entwurf, Wissens-Stores je lesendem Task, sonst Notebook je Lane; Fallback WebSearch, Repo-Dokumente oder Modellwissen (unverified). Output: knowledge/&lt;taskId&gt;.md mit einem belegten Abschnitt je Store, FAQ-Einträge in knowledge/faq/, knowledge.refs in der Spec. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §1-3, §5</bpmn:documentation>
+      <bpmn:incoming>F18</bpmn:incoming>
+      <bpmn:outgoing>F19</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_SpecEntwurf_Extr" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_FachNB_Extr" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_SpecEntwurf_Extr"><bpmn:sourceRef>DO_SpecEntwurf</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_SpecEntwurf_Extr</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_FachNB_Extr"><bpmn:sourceRef>StoreRef_FachNotebooksWissen</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_FachNB_Extr</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Wissen"><bpmn:targetRef>DO_Wissen</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="K_Hinterfragen" name="Diagramm mit Fachwissen hinterfragen">
+      <bpmn:documentation>Input: Wissenspaket, Spec-Entwurf, Challenge-Queries an dieselben Quellen. Output: openQuestions in der Spec: was die Quelle nahelegt, das Diagramm aber nicht hat. Agentic-Design-Fragen werden für design 6a vorgemerkt. Nie stilles Umbauen. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §4</bpmn:documentation>
+      <bpmn:incoming>F19</bpmn:incoming>
+      <bpmn:outgoing>F20</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_FachNB_Hinterfragen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_FachNB_Hinterfragen"><bpmn:sourceRef>StoreRef_FachNotebooksWissen</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_FachNB_Hinterfragen</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="U_Fachfragen" name="Offene Fachfragen beantworten">
+      <bpmn:documentation>Input: openQuestions aus der Wissensprüfung. Output: Antwort je Frage in der Spec; verlangt eine Antwort eine Diagrammänderung, geht sie an den Modellierer zurück. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §4</bpmn:documentation>
+      <bpmn:incoming>F20</bpmn:incoming>
+      <bpmn:outgoing>F21</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Merge_Design">
+      <bpmn:incoming>F21</bpmn:incoming>
+      <bpmn:incoming>F29</bpmn:incoming>
+      <bpmn:incoming>F41</bpmn:incoming>
+      <bpmn:outgoing>F22</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="D_Zuordnen" name="Elemente zuordnen &amp; Muster wählen">
+      <bpmn:documentation>Input: Spec mit Wissen und Antworten, Wissenspaket, Mapping- und Muster-Rubrik. Output: kind je Element (skill, Checkliste, Checkpoint, script, hook, Steuerlogik, context-source), Live-Tools per ToolSearch aufgelöst, Orchestrierungsmuster mit Begründung und verworfenen Alternativen. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §2-4</bpmn:documentation>
+      <bpmn:incoming>F22</bpmn:incoming>
+      <bpmn:outgoing>F23</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Wissen_Zuordnen" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_Rubrik_Zuordnen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Wissen_Zuordnen"><bpmn:sourceRef>DO_Wissen</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Wissen_Zuordnen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_Rubrik_Zuordnen"><bpmn:sourceRef>StoreRef_Rubrik</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Rubrik_Zuordnen</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D_Rollen" name="Rollen, Tools &amp; Artefaktverträge festlegen">
+      <bpmn:documentation>Input: Zuordnung und Muster. Output: roles (agentName, modelTier, tools) je Lane und artifacts (Pfadmuster, Frontmatter, Erzeuger, Verbraucher) je Datenobjekt; schneidet Rollen nach agent-authoring. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §5-6</bpmn:documentation>
+      <bpmn:incoming>F23</bpmn:incoming>
+      <bpmn:outgoing>F24</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D_Pruefen" name="Entwurf gegen Wissensbasis prüfen">
+      <bpmn:documentation>Input: workflow-spec.draft.yaml, .bpmn, vorgemerkte Agentic-Design-Fragen. Output: Befunde des agentic-workflow-architect (geroutet design, bpmn oder Frage) gegen orchestration-design; offene Designfragen beantwortet der agentic-kb-librarian aus der Wissensbasis, sonst aus dem Notebook, und hält die neue Antwort im FAQ fest. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §6a; .agents/agents/agentic-workflow-architect.md; .agents/agents/agentic-kb-librarian.md</bpmn:documentation>
+      <bpmn:incoming>F24</bpmn:incoming>
+      <bpmn:outgoing>F25</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Wissensbasis_Pruefen" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_AgenticNotebook_Pruefen" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_AgenticFaq_Pruefen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Wissensbasis_Pruefen"><bpmn:sourceRef>StoreRef_Wissensbasis</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Wissensbasis_Pruefen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_AgenticNotebook_Pruefen"><bpmn:sourceRef>StoreRef_AgenticNotebook</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_AgenticNotebook_Pruefen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_AgenticFaq_Pruefen"><bpmn:sourceRef>StoreRef_AgenticFaq</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_AgenticFaq_Pruefen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_AgenticFaq"><bpmn:targetRef>StoreRef_AgenticFaq</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="D_Plan" name="Mapping-Plan schreiben">
+      <bpmn:documentation>Input: Geprüfter Spec-Entwurf. Output: Mapping-Plan in Fachsprache: was aus jedem Element wird, Muster, Rollen, Prüfpunkte, Kontextquellen mit Tools. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §7</bpmn:documentation>
+      <bpmn:incoming>F25</bpmn:incoming>
+      <bpmn:outgoing>F26</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_MappingPlan"><bpmn:targetRef>DO_MappingPlan</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="U_Mapping" name="Mapping-Plan bestätigen">
+      <bpmn:documentation>Input: Mapping-Plan. Output: Angenommen, einzelne Elemente anpassen oder Diagramm muss sich ändern. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §7; .agents/skills/bpmn-to-agentic-workflow/SKILL.md §4</bpmn:documentation>
+      <bpmn:incoming>F26</bpmn:incoming>
+      <bpmn:outgoing>F27</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_MappingPlan_U" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MappingPlan_U"><bpmn:sourceRef>DO_MappingPlan</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_MappingPlan_U</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Mapping" name="Mapping-Plan angenommen?" default="F28">
+      <bpmn:incoming>F27</bpmn:incoming>
+      <bpmn:outgoing>F28</bpmn:outgoing>
+      <bpmn:outgoing>F29</bpmn:outgoing>
+      <bpmn:outgoing>F30</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_DiagrammAendern" name="Lauf beendet, Diagramm wird überarbeitet">
+      <bpmn:documentation>Schleife A: der Fachanwender ändert das .bpmn mit bpmn-authoring und startet neu; analyze vergleicht dann je Element-ID.</bpmn:documentation>
+      <bpmn:incoming>F30</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="D_Spec" name="Bestätigte Spec schreiben">
+      <bpmn:documentation>Input: Angenommener Mapping-Plan. Output: Bestätigte generated/&lt;workflow&gt;/workflow-spec.yaml; sicherer Punkt zum Fortsetzen in einer neuen Sitzung. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §8-9</bpmn:documentation>
+      <bpmn:incoming>F28</bpmn:incoming>
+      <bpmn:outgoing>F31</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Spec"><bpmn:targetRef>DO_Spec</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Merge_Generierung">
+      <bpmn:incoming>F31</bpmn:incoming>
+      <bpmn:incoming>F40</bpmn:incoming>
+      <bpmn:outgoing>F32</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="G_Artefakte" name="Skills, Agenten, Hooks &amp; Skripte schreiben">
+      <bpmn:documentation>Input: Bestätigte Spec, Generierungs-Vorlagen, knowledge/*.md. Output: generated/&lt;workflow&gt;/.claude/ mit skills/, agents/, hooks/*.mjs, settings.json; jede Datei mit bpmn: {file, elements}; Write-Guard- und Memory-Cap-Hook bei Kontextquellen. Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §1-6a; skill-authoring; agent-authoring</bpmn:documentation>
+      <bpmn:incoming>F32</bpmn:incoming>
+      <bpmn:outgoing>F33</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Spec_Artefakte" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_Vorlagen_Artefakte" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Spec_Artefakte"><bpmn:sourceRef>DO_Spec</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Spec_Artefakte</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_Vorlagen_Artefakte"><bpmn:sourceRef>StoreRef_Vorlagen</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Vorlagen_Artefakte</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Artefakte"><bpmn:targetRef>DO_Artefakte</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="G_Orchestrierung" name="Orchestrierung, README &amp; Mapping-Bericht schreiben">
+      <bpmn:documentation>Input: Spec, geschriebene Artefakte. Output: Genau eine Orchestrierungsdatei (Skill-Kette, Workflow-Skript oder Orchestrator-Agent), README.md, mapping/report.md. Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §7-9</bpmn:documentation>
+      <bpmn:incoming>F33</bpmn:incoming>
+      <bpmn:outgoing>F34</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="G_Rendern" name="Mapping-Ansicht rendern">
+      <bpmn:documentation>Input: Spec, .bpmn. Output: mapping/workflow-mapped.bpmn (farbig), index.html, PNGs. Quelle: datei:.agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs</bpmn:documentation>
+      <bpmn:incoming>F34</bpmn:incoming>
+      <bpmn:outgoing>F35</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="G_Review" name="Erzeugte Dateien reviewen">
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/. Output: Selbstcheck (Header, node --check, settings.json) und Befunde des agentic-artifact-reviewer; generate-Befunde sofort umgesetzt, hohe design-Befunde zurück ins Design, trim nur mit Zustimmung (trim-the-fat). Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §11; .agents/agents/agentic-artifact-reviewer.md</bpmn:documentation>
+      <bpmn:incoming>F35</bpmn:incoming>
+      <bpmn:outgoing>F36</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="V_Pruefen" name="Generierten Workflow statisch prüfen">
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/, Quell-.bpmn. Output: Ergebnis von verify.mjs in den Kategorien spec-schema, source-bpmn, element-to-artifact, artifact-to-element, lint, no-red und ggf. context-sources. Quelle: datei:.agents/skills/bpmn2agent-verify/scripts/verify.mjs</bpmn:documentation>
+      <bpmn:incoming>F36</bpmn:incoming>
+      <bpmn:outgoing>F37</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Artefakte_Pruefen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Artefakte_Pruefen"><bpmn:sourceRef>DO_Artefakte</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Artefakte_Pruefen</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="V_Routen" name="Befunde übersetzen &amp; routen">
+      <bpmn:documentation>Input: verify.mjs-Ergebnis. Output: Prüfbericht in Fachsprache, jeder Befund mit Ziel: analyze, design oder generate. Quelle: datei:.agents/skills/bpmn2agent-verify/SKILL.md §2</bpmn:documentation>
+      <bpmn:incoming>F37</bpmn:incoming>
+      <bpmn:outgoing>F38</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Pruefbericht"><bpmn:targetRef>DO_Pruefbericht</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Verify" name="Prüfung bestanden?" default="F39">
+      <bpmn:incoming>F38</bpmn:incoming>
+      <bpmn:outgoing>F39</bpmn:outgoing>
+      <bpmn:outgoing>F40</bpmn:outgoing>
+      <bpmn:outgoing>F41</bpmn:outgoing>
+      <bpmn:outgoing>F42</bpmn:outgoing>
+      <bpmn:outgoing>F43</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="U_Befunde" name="Über offene Befunde entscheiden">
+      <bpmn:documentation>Input: Prüfbericht nach der dritten Runde oder bei unverändert wiederkehrendem Befund. Output: Entscheidung: als unverifiziert übergeben oder Diagramm ändern. Nie wird am Cap Erfolg gemeldet. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §6</bpmn:documentation>
+      <bpmn:incoming>F43</bpmn:incoming>
+      <bpmn:outgoing>F44</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Befunde" name="Wie geht es weiter?" default="F45">
+      <bpmn:incoming>F44</bpmn:incoming>
+      <bpmn:outgoing>F45</bpmn:outgoing>
+      <bpmn:outgoing>F46</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_DiagrammAendern2" name="Lauf beendet, Diagramm wird überarbeitet">
+      <bpmn:documentation>Schleife A nach erreichter Prüf-Obergrenze.</bpmn:documentation>
+      <bpmn:incoming>F46</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:exclusiveGateway id="Merge_Uebergabe">
+      <bpmn:incoming>F39</bpmn:incoming>
+      <bpmn:incoming>F45</bpmn:incoming>
+      <bpmn:outgoing>F47</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="V_Uebergabe" name="Übergabe berichten">
+      <bpmn:documentation>Input: Prüfbericht, Spec, generated/&lt;workflow&gt;/. Output: Bericht in der Sprache des Anwenders: Anzahl Agenten/Skills/Skripte/Hooks, Orchestrierungsdatei und Muster, Ort, offene Punkte (rot/grau, offene Fragen), ggf. Vermerk unverifiziert, Installationshinweis. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §7</bpmn:documentation>
+      <bpmn:incoming>F47</bpmn:incoming>
+      <bpmn:outgoing>F48</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Pruefbericht_Uebergabe" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Pruefbericht_Uebergabe"><bpmn:sourceRef>DO_Pruefbericht</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Pruefbericht_Uebergabe</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Workflow"><bpmn:targetRef>DataOutput_Workflow</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="U_Installation" name="Installation entscheiden">
+      <bpmn:documentation>Input: Übergabebericht. Output: Ob und wohin der generierte Workflow installiert wird. Die Pipeline schreibt nie selbst in ein echtes .claude/. Quelle: datei:ARCHITECTURE.md §Ergebnis und Rückverfolgbarkeit</bpmn:documentation>
+      <bpmn:incoming>F48</bpmn:incoming>
+      <bpmn:outgoing>F49</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Installieren" name="Jetzt ins Projekt installieren?" default="F50">
+      <bpmn:incoming>F49</bpmn:incoming>
+      <bpmn:outgoing>F50</bpmn:outgoing>
+      <bpmn:outgoing>F51</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="End_Uebergeben" name="Workflow übergeben, nicht installiert">
+      <bpmn:incoming>F50</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:scriptTask id="V_Kopieren" name="Nach Projekt-.claude/ kopieren">
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/.claude/, Zielprojekt. Output: cp -R generated/&lt;workflow&gt;/.claude/. &lt;projekt&gt;/.claude/; hooks in einer vorhandenen settings.json von Hand zusammenführen. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §7</bpmn:documentation>
+      <bpmn:incoming>F51</bpmn:incoming>
+      <bpmn:outgoing>F52</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Projekt"><bpmn:targetRef>StoreRef_Projekt</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:scriptTask>
+    <bpmn:endEvent id="End_Installiert" name="Workflow installiert">
+      <bpmn:incoming>F52</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="F01" sourceRef="Start_Anfrage" targetRef="U_Intake" />
+    <bpmn:sequenceFlow id="F02" sourceRef="U_Intake" targetRef="Gw_DiagrammVorhanden" />
+    <bpmn:sequenceFlow id="F03" sourceRef="Gw_DiagrammVorhanden" targetRef="Merge_Analyse" name="Ja" />
+    <bpmn:sequenceFlow id="F04" sourceRef="Gw_DiagrammVorhanden" targetRef="P_Recherche" name="Nein">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F05" sourceRef="P_Recherche" targetRef="U_Entwurf" />
+    <bpmn:sequenceFlow id="F06" sourceRef="U_Entwurf" targetRef="Merge_Zeichnen" />
+    <bpmn:sequenceFlow id="F07" sourceRef="Merge_Zeichnen" targetRef="P_Zeichnen" />
+    <bpmn:sequenceFlow id="F08" sourceRef="P_Zeichnen" targetRef="P_Validieren" />
+    <bpmn:sequenceFlow id="F09" sourceRef="P_Validieren" targetRef="Gw_DiagrammGueltig" />
+    <bpmn:sequenceFlow id="F10" sourceRef="Gw_DiagrammGueltig" targetRef="Merge_Analyse" name="Ja" />
+    <bpmn:sequenceFlow id="F11" sourceRef="Gw_DiagrammGueltig" targetRef="Merge_Zeichnen" name="Nein (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F12" sourceRef="Merge_Analyse" targetRef="A_Inventar" />
+    <bpmn:sequenceFlow id="F13" sourceRef="A_Inventar" targetRef="Gw_Luecken" />
+    <bpmn:sequenceFlow id="F14" sourceRef="Gw_Luecken" targetRef="U_Luecken" name="Ja">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ja</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F15" sourceRef="Gw_Luecken" targetRef="Merge_Luecken" name="Nein" />
+    <bpmn:sequenceFlow id="F16" sourceRef="U_Luecken" targetRef="Merge_Luecken" />
+    <bpmn:sequenceFlow id="F17" sourceRef="Merge_Luecken" targetRef="A_SpecEntwurf" />
+    <bpmn:sequenceFlow id="F18" sourceRef="A_SpecEntwurf" targetRef="K_Extrahieren" />
+    <bpmn:sequenceFlow id="F19" sourceRef="K_Extrahieren" targetRef="K_Hinterfragen" />
+    <bpmn:sequenceFlow id="F20" sourceRef="K_Hinterfragen" targetRef="U_Fachfragen" />
+    <bpmn:sequenceFlow id="F21" sourceRef="U_Fachfragen" targetRef="Merge_Design" />
+    <bpmn:sequenceFlow id="F22" sourceRef="Merge_Design" targetRef="D_Zuordnen" />
+    <bpmn:sequenceFlow id="F23" sourceRef="D_Zuordnen" targetRef="D_Rollen" />
+    <bpmn:sequenceFlow id="F24" sourceRef="D_Rollen" targetRef="D_Pruefen" />
+    <bpmn:sequenceFlow id="F25" sourceRef="D_Pruefen" targetRef="D_Plan" />
+    <bpmn:sequenceFlow id="F26" sourceRef="D_Plan" targetRef="U_Mapping" />
+    <bpmn:sequenceFlow id="F27" sourceRef="U_Mapping" targetRef="Gw_Mapping" />
+    <bpmn:sequenceFlow id="F28" sourceRef="Gw_Mapping" targetRef="D_Spec" name="Ja" />
+    <bpmn:sequenceFlow id="F29" sourceRef="Gw_Mapping" targetRef="Merge_Design" name="Elemente anpassen (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Elemente anpassen (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F30" sourceRef="Gw_Mapping" targetRef="End_DiagrammAendern" name="Diagramm ändern">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Diagramm ändern</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F31" sourceRef="D_Spec" targetRef="Merge_Generierung" />
+    <bpmn:sequenceFlow id="F32" sourceRef="Merge_Generierung" targetRef="G_Artefakte" />
+    <bpmn:sequenceFlow id="F33" sourceRef="G_Artefakte" targetRef="G_Orchestrierung" />
+    <bpmn:sequenceFlow id="F34" sourceRef="G_Orchestrierung" targetRef="G_Rendern" />
+    <bpmn:sequenceFlow id="F35" sourceRef="G_Rendern" targetRef="G_Review" />
+    <bpmn:sequenceFlow id="F36" sourceRef="G_Review" targetRef="V_Pruefen" />
+    <bpmn:sequenceFlow id="F37" sourceRef="V_Pruefen" targetRef="V_Routen" />
+    <bpmn:sequenceFlow id="F38" sourceRef="V_Routen" targetRef="Gw_Verify" />
+    <bpmn:sequenceFlow id="F39" sourceRef="Gw_Verify" targetRef="Merge_Uebergabe" name="Ja" />
+    <bpmn:sequenceFlow id="F40" sourceRef="Gw_Verify" targetRef="Merge_Generierung" name="Generierungsfehler (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Generierungsfehler (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F41" sourceRef="Gw_Verify" targetRef="Merge_Design" name="Mapping-Problem (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Mapping-Problem (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F42" sourceRef="Gw_Verify" targetRef="Merge_Analyse" name=".bpmn geändert (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">.bpmn geändert (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F43" sourceRef="Gw_Verify" targetRef="U_Befunde" name="Obergrenze erreicht">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Obergrenze erreicht</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F44" sourceRef="U_Befunde" targetRef="Gw_Befunde" />
+    <bpmn:sequenceFlow id="F45" sourceRef="Gw_Befunde" targetRef="Merge_Uebergabe" name="Als unverifiziert übergeben" />
+    <bpmn:sequenceFlow id="F46" sourceRef="Gw_Befunde" targetRef="End_DiagrammAendern2" name="Diagramm ändern">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Diagramm ändern</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F47" sourceRef="Merge_Uebergabe" targetRef="V_Uebergabe" />
+    <bpmn:sequenceFlow id="F48" sourceRef="V_Uebergabe" targetRef="U_Installation" />
+    <bpmn:sequenceFlow id="F49" sourceRef="U_Installation" targetRef="Gw_Installieren" />
+    <bpmn:sequenceFlow id="F50" sourceRef="Gw_Installieren" targetRef="End_Uebergeben" name="Nein" />
+    <bpmn:sequenceFlow id="F51" sourceRef="Gw_Installieren" targetRef="V_Kopieren" name="Ja">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ja</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="F52" sourceRef="V_Kopieren" targetRef="End_Installiert" />
+    <bpmn:dataObject id="DO_Entwurf_Obj" />
+    <bpmn:dataObjectReference id="DO_Entwurf" name="Prozessentwurf" dataObjectRef="DO_Entwurf_Obj" />
+    <bpmn:dataObject id="DO_Bpmn_Obj" />
+    <bpmn:dataObjectReference id="DO_Bpmn" name=".bpmn-Diagramm" dataObjectRef="DO_Bpmn_Obj" />
+    <bpmn:dataObject id="DO_SpecEntwurf_Obj" />
+    <bpmn:dataObjectReference id="DO_SpecEntwurf" name="workflow-spec.yaml (Entwurf)" dataObjectRef="DO_SpecEntwurf_Obj" />
+    <bpmn:dataObject id="DO_Wissen_Obj" />
+    <bpmn:dataObjectReference id="DO_Wissen" name="Wissenspaket (knowledge/)" dataObjectRef="DO_Wissen_Obj" />
+    <bpmn:dataObject id="DO_MappingPlan_Obj" />
+    <bpmn:dataObjectReference id="DO_MappingPlan" name="Mapping-Plan" dataObjectRef="DO_MappingPlan_Obj" />
+    <bpmn:dataObject id="DO_Spec_Obj" />
+    <bpmn:dataObjectReference id="DO_Spec" name="workflow-spec.yaml (bestätigt)" dataObjectRef="DO_Spec_Obj" />
+    <bpmn:dataObject id="DO_Artefakte_Obj" />
+    <bpmn:dataObjectReference id="DO_Artefakte" name="Claude-Code-Artefakte (.claude/)" dataObjectRef="DO_Artefakte_Obj" />
+    <bpmn:dataObject id="DO_Pruefbericht_Obj" />
+    <bpmn:dataObjectReference id="DO_Pruefbericht" name="Prüfbericht" dataObjectRef="DO_Pruefbericht_Obj" />
+    <bpmn:dataStoreReference id="StoreRef_FachNotebooksRecherche" name="Fach-Notebooks: Prozessrecherche" dataStoreRef="DataStore_FachNotebooks">
+      <bpmn:documentation>Art: live
+Ort: mcp:gemini-notebook-mcp</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Notation" name="BPMN-Notation lanecraft" dataStoreRef="DataStore_Notation">
+      <bpmn:documentation>Art: wissen
+Ort: datei:BPMN-NOTATION.md</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_FachNotebooksWissen" name="Fach-Notebooks: Wissensextraktion" dataStoreRef="DataStore_FachNotebooks">
+      <bpmn:documentation>Art: live
+Ort: mcp:gemini-notebook-mcp</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Rubrik" name="Mapping- &amp; Muster-Rubrik" dataStoreRef="DataStore_Rubrik">
+      <bpmn:documentation>Art: wissen
+Ort: datei:.agents/skills/bpmn2agent-design/references/</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Wissensbasis" name="Agentic-Design-Wissensbasis" dataStoreRef="DataStore_Wissensbasis">
+      <bpmn:documentation>Art: wissen
+Ort: datei:.agents/skills/agentic-workflow-kb/references/</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_AgenticNotebook" name="Notebook „Agentic Workflows“" dataStoreRef="DataStore_AgenticNotebook">
+      <bpmn:documentation>Art: live
+Ort: mcp:gemini-notebook-mcp</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_AgenticFaq" name="Agentic-Design-FAQ" dataStoreRef="DataStore_AgenticFaq">
+      <bpmn:documentation>Art: gedächtnis
+Ort: datei:.agents/skills/agentic-workflow-kb/faq/</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Vorlagen" name="Generierungs-Vorlagen" dataStoreRef="DataStore_Vorlagen">
+      <bpmn:documentation>Art: wissen
+Ort: datei:.agents/skills/bpmn2agent-generate/assets/templates/</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Projekt" name="Claude-Projekt des Anwenders" dataStoreRef="DataStore_Projekt">
+      <bpmn:documentation>Art: live
+Ort: datei:&lt;projekt&gt;/.claude/</bpmn:documentation>
+    </bpmn:dataStoreReference>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Lanecraft">
+    <bpmndi:BPMNPlane id="BPMNPlane_Lanecraft" bpmnElement="Process_Lanecraft">
+      <bpmndi:BPMNShape id="Lane_Fachanwender_di" bpmnElement="Lane_Fachanwender" isHorizontal="true"><dc:Bounds x="160" y="40" width="7662" height="330" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Prozessmodellierung_di" bpmnElement="Lane_Prozessmodellierung" isHorizontal="true"><dc:Bounds x="160" y="370" width="7662" height="480" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_AnalyseWissen_di" bpmnElement="Lane_AnalyseWissen" isHorizontal="true"><dc:Bounds x="160" y="850" width="7662" height="480" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_AgenticDesign_di" bpmnElement="Lane_AgenticDesign" isHorizontal="true"><dc:Bounds x="160" y="1330" width="7662" height="480" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Generierung_di" bpmnElement="Lane_Generierung" isHorizontal="true"><dc:Bounds x="160" y="1810" width="7662" height="480" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_PruefungUebergabe_di" bpmnElement="Lane_PruefungUebergabe" isHorizontal="true"><dc:Bounds x="160" y="2290" width="7662" height="500" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_Anfrage_di" bpmnElement="Start_Anfrage"><dc:Bounds x="260" y="222" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="218" y="264" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Intake_di" bpmnElement="U_Intake"><dc:Bounds x="366" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_DiagrammVorhanden_di" bpmnElement="Gw_DiagrammVorhanden" isMarkerVisible="true"><dc:Bounds x="576" y="215" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="526" y="167" width="150" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_Recherche_di" bpmnElement="P_Recherche"><dc:Bounds x="696" y="520" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Entwurf_di" bpmnElement="U_Entwurf"><dc:Bounds x="906" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Zeichnen_di" bpmnElement="Merge_Zeichnen" isMarkerVisible="true"><dc:Bounds x="1116" y="545" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_Zeichnen_di" bpmnElement="P_Zeichnen"><dc:Bounds x="1236" y="520" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P_Validieren_di" bpmnElement="P_Validieren"><dc:Bounds x="1446" y="520" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_DiagrammGueltig_di" bpmnElement="Gw_DiagrammGueltig" isMarkerVisible="true"><dc:Bounds x="1656" y="545" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1606" y="497" width="150" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Analyse_di" bpmnElement="Merge_Analyse" isMarkerVisible="true"><dc:Bounds x="1776" y="1025" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="A_Inventar_di" bpmnElement="A_Inventar"><dc:Bounds x="1896" y="1000" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Luecken_di" bpmnElement="Gw_Luecken" isMarkerVisible="true"><dc:Bounds x="2106" y="1025" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2139" y="979" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Luecken_di" bpmnElement="U_Luecken"><dc:Bounds x="2226" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Luecken_di" bpmnElement="Merge_Luecken" isMarkerVisible="true"><dc:Bounds x="2436" y="1025" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="A_SpecEntwurf_di" bpmnElement="A_SpecEntwurf"><dc:Bounds x="2556" y="1000" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K_Extrahieren_di" bpmnElement="K_Extrahieren"><dc:Bounds x="2766" y="1000" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="K_Hinterfragen_di" bpmnElement="K_Hinterfragen"><dc:Bounds x="2976" y="1000" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Fachfragen_di" bpmnElement="U_Fachfragen"><dc:Bounds x="3186" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Design_di" bpmnElement="Merge_Design" isMarkerVisible="true"><dc:Bounds x="3396" y="1505" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D_Zuordnen_di" bpmnElement="D_Zuordnen"><dc:Bounds x="3516" y="1480" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D_Rollen_di" bpmnElement="D_Rollen"><dc:Bounds x="3726" y="1480" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D_Pruefen_di" bpmnElement="D_Pruefen"><dc:Bounds x="3936" y="1480" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D_Plan_di" bpmnElement="D_Plan"><dc:Bounds x="4146" y="1480" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Mapping_di" bpmnElement="U_Mapping"><dc:Bounds x="4356" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Mapping_di" bpmnElement="Gw_Mapping" isMarkerVisible="true"><dc:Bounds x="4566" y="215" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4599" y="169" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_DiagrammAendern_di" bpmnElement="End_DiagrammAendern"><dc:Bounds x="4738" y="222" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="4782" y="219" width="110" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="D_Spec_di" bpmnElement="D_Spec"><dc:Bounds x="4686" y="1480" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Generierung_di" bpmnElement="Merge_Generierung" isMarkerVisible="true"><dc:Bounds x="4896" y="1985" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_Artefakte_di" bpmnElement="G_Artefakte"><dc:Bounds x="5016" y="1960" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_Orchestrierung_di" bpmnElement="G_Orchestrierung"><dc:Bounds x="5226" y="1960" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_Rendern_di" bpmnElement="G_Rendern"><dc:Bounds x="5436" y="1960" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="G_Review_di" bpmnElement="G_Review"><dc:Bounds x="5646" y="1960" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="V_Pruefen_di" bpmnElement="V_Pruefen"><dc:Bounds x="5856" y="2440" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="V_Routen_di" bpmnElement="V_Routen"><dc:Bounds x="6066" y="2440" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Verify_di" bpmnElement="Gw_Verify" isMarkerVisible="true"><dc:Bounds x="6276" y="2465" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6309" y="2419" width="140" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Befunde_di" bpmnElement="U_Befunde"><dc:Bounds x="6396" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Befunde_di" bpmnElement="Gw_Befunde" isMarkerVisible="true"><dc:Bounds x="6606" y="215" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6556" y="167" width="150" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_DiagrammAendern2_di" bpmnElement="End_DiagrammAendern2"><dc:Bounds x="6733" y="222" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="6777" y="219" width="110" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Merge_Uebergabe_di" bpmnElement="Merge_Uebergabe" isMarkerVisible="true"><dc:Bounds x="6726" y="2465" width="50" height="50" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="V_Uebergabe_di" bpmnElement="V_Uebergabe"><dc:Bounds x="6846" y="2440" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="U_Installation_di" bpmnElement="U_Installation"><dc:Bounds x="7056" y="190" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Installieren_di" bpmnElement="Gw_Installieren" isMarkerVisible="true"><dc:Bounds x="7266" y="215" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7216" y="167" width="150" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Uebergeben_di" bpmnElement="End_Uebergeben"><dc:Bounds x="7438" y="222" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="7482" y="219" width="110" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="V_Kopieren_di" bpmnElement="V_Kopieren"><dc:Bounds x="7386" y="2440" width="140" height="100" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Installiert_di" bpmnElement="End_Installiert"><dc:Bounds x="7596" y="2472" width="36" height="36" /><bpmndi:BPMNLabel><dc:Bounds x="7640" y="2469" width="110" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataInput_Ziel_di" bpmnElement="DataInput_Ziel"><dc:Bounds x="210" y="112" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="168" y="166" width="120" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Entwurf_di" bpmnElement="DO_Entwurf"><dc:Bounds x="748" y="432" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="716" y="384" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Bpmn_di" bpmnElement="DO_Bpmn"><dc:Bounds x="1288" y="432" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1256" y="384" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_SpecEntwurf_di" bpmnElement="DO_SpecEntwurf"><dc:Bounds x="2608" y="912" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2576" y="864" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Wissen_di" bpmnElement="DO_Wissen"><dc:Bounds x="2818" y="912" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2786" y="864" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_MappingPlan_di" bpmnElement="DO_MappingPlan"><dc:Bounds x="4198" y="1392" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4166" y="1344" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Spec_di" bpmnElement="DO_Spec"><dc:Bounds x="4738" y="1392" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4706" y="1344" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Artefakte_di" bpmnElement="DO_Artefakte"><dc:Bounds x="5068" y="1872" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="5036" y="1824" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DO_Pruefbericht_di" bpmnElement="DO_Pruefbericht"><dc:Bounds x="6118" y="2352" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6086" y="2304" width="100" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataOutput_Workflow_di" bpmnElement="DataOutput_Workflow"><dc:Bounds x="7696" y="2352" width="36" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7654" y="2406" width="120" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_FachNotebooksRecherche_di" bpmnElement="StoreRef_FachNotebooksRecherche"><dc:Bounds x="741" y="675" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="706" y="729" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Notation_di" bpmnElement="StoreRef_Notation"><dc:Bounds x="1281" y="675" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1246" y="729" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_FachNotebooksWissen_di" bpmnElement="StoreRef_FachNotebooksWissen"><dc:Bounds x="2911" y="1155" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="2876" y="1209" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Rubrik_di" bpmnElement="StoreRef_Rubrik"><dc:Bounds x="3561" y="1635" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3526" y="1689" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Wissensbasis_di" bpmnElement="StoreRef_Wissensbasis"><dc:Bounds x="3851" y="1635" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3816" y="1689" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_AgenticNotebook_di" bpmnElement="StoreRef_AgenticNotebook"><dc:Bounds x="3981" y="1635" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="3946" y="1689" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_AgenticFaq_di" bpmnElement="StoreRef_AgenticFaq"><dc:Bounds x="4111" y="1635" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4076" y="1689" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Vorlagen_di" bpmnElement="StoreRef_Vorlagen"><dc:Bounds x="5061" y="2115" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="5026" y="2169" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Projekt_di" bpmnElement="StoreRef_Projekt"><dc:Bounds x="7431" y="2595" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="7396" y="2649" width="120" height="42" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F01_di" bpmnElement="F01"><di:waypoint x="296" y="240" /><di:waypoint x="366" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F02_di" bpmnElement="F02"><di:waypoint x="506" y="240" /><di:waypoint x="576" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F03_di" bpmnElement="F03"><di:waypoint x="601" y="265" /><di:waypoint x="601" y="1050" /><di:waypoint x="1776" y="1050" /><bpmndi:BPMNLabel><dc:Bounds x="607" y="271" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F04_di" bpmnElement="F04"><di:waypoint x="626" y="240" /><di:waypoint x="661" y="240" /><di:waypoint x="661" y="570" /><di:waypoint x="696" y="570" /><bpmndi:BPMNLabel><dc:Bounds x="634" y="220" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F05_di" bpmnElement="F05"><di:waypoint x="836" y="570" /><di:waypoint x="976" y="570" /><di:waypoint x="976" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F06_di" bpmnElement="F06"><di:waypoint x="1046" y="240" /><di:waypoint x="1141" y="240" /><di:waypoint x="1141" y="545" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F07_di" bpmnElement="F07"><di:waypoint x="1166" y="570" /><di:waypoint x="1236" y="570" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F08_di" bpmnElement="F08"><di:waypoint x="1376" y="570" /><di:waypoint x="1446" y="570" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F09_di" bpmnElement="F09"><di:waypoint x="1586" y="570" /><di:waypoint x="1656" y="570" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10"><di:waypoint x="1706" y="570" /><di:waypoint x="1801" y="570" /><di:waypoint x="1801" y="1025" /><bpmndi:BPMNLabel><dc:Bounds x="1712" y="550" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F11_di" bpmnElement="F11"><di:waypoint x="1681" y="595" /><di:waypoint x="1681" y="800" /><di:waypoint x="1141" y="800" /><di:waypoint x="1141" y="595" /><bpmndi:BPMNLabel><dc:Bounds x="1301" y="804" width="86" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F12_di" bpmnElement="F12"><di:waypoint x="1826" y="1050" /><di:waypoint x="1896" y="1050" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F13_di" bpmnElement="F13"><di:waypoint x="2036" y="1050" /><di:waypoint x="2106" y="1050" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F14_di" bpmnElement="F14"><di:waypoint x="2131" y="1025" /><di:waypoint x="2131" y="240" /><di:waypoint x="2226" y="240" /><bpmndi:BPMNLabel><dc:Bounds x="2105" y="1001" width="20" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F15_di" bpmnElement="F15"><di:waypoint x="2156" y="1050" /><di:waypoint x="2436" y="1050" /><bpmndi:BPMNLabel><dc:Bounds x="2162" y="1056" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F16_di" bpmnElement="F16"><di:waypoint x="2366" y="240" /><di:waypoint x="2461" y="240" /><di:waypoint x="2461" y="1025" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F17_di" bpmnElement="F17"><di:waypoint x="2486" y="1050" /><di:waypoint x="2556" y="1050" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F18_di" bpmnElement="F18"><di:waypoint x="2696" y="1050" /><di:waypoint x="2766" y="1050" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F19_di" bpmnElement="F19"><di:waypoint x="2906" y="1050" /><di:waypoint x="2976" y="1050" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F20_di" bpmnElement="F20"><di:waypoint x="3116" y="1050" /><di:waypoint x="3256" y="1050" /><di:waypoint x="3256" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F21_di" bpmnElement="F21"><di:waypoint x="3326" y="240" /><di:waypoint x="3361" y="240" /><di:waypoint x="3361" y="1530" /><di:waypoint x="3396" y="1530" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F22_di" bpmnElement="F22"><di:waypoint x="3446" y="1530" /><di:waypoint x="3516" y="1530" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F23_di" bpmnElement="F23"><di:waypoint x="3656" y="1530" /><di:waypoint x="3726" y="1530" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F24_di" bpmnElement="F24"><di:waypoint x="3866" y="1530" /><di:waypoint x="3936" y="1530" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F25_di" bpmnElement="F25"><di:waypoint x="4076" y="1530" /><di:waypoint x="4146" y="1530" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F26_di" bpmnElement="F26"><di:waypoint x="4286" y="1530" /><di:waypoint x="4426" y="1530" /><di:waypoint x="4426" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F27_di" bpmnElement="F27"><di:waypoint x="4496" y="240" /><di:waypoint x="4566" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F28_di" bpmnElement="F28"><di:waypoint x="4591" y="265" /><di:waypoint x="4591" y="1530" /><di:waypoint x="4686" y="1530" /><bpmndi:BPMNLabel><dc:Bounds x="4597" y="271" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F29_di" bpmnElement="F29"><di:waypoint x="4591" y="215" /><di:waypoint x="4591" y="65" /><di:waypoint x="3421" y="65" /><di:waypoint x="3421" y="1505" /><bpmndi:BPMNLabel><dc:Bounds x="3621" y="68" width="167" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F30_di" bpmnElement="F30"><di:waypoint x="4616" y="240" /><di:waypoint x="4738" y="240" /><bpmndi:BPMNLabel><dc:Bounds x="4618" y="246" width="93" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F31_di" bpmnElement="F31"><di:waypoint x="4826" y="1530" /><di:waypoint x="4921" y="1530" /><di:waypoint x="4921" y="1985" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F32_di" bpmnElement="F32"><di:waypoint x="4946" y="2010" /><di:waypoint x="5016" y="2010" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F33_di" bpmnElement="F33"><di:waypoint x="5156" y="2010" /><di:waypoint x="5226" y="2010" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F34_di" bpmnElement="F34"><di:waypoint x="5366" y="2010" /><di:waypoint x="5436" y="2010" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F35_di" bpmnElement="F35"><di:waypoint x="5576" y="2010" /><di:waypoint x="5646" y="2010" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F36_di" bpmnElement="F36"><di:waypoint x="5786" y="2010" /><di:waypoint x="5926" y="2010" /><di:waypoint x="5926" y="2440" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F37_di" bpmnElement="F37"><di:waypoint x="5996" y="2490" /><di:waypoint x="6066" y="2490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F38_di" bpmnElement="F38"><di:waypoint x="6206" y="2490" /><di:waypoint x="6276" y="2490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F39_di" bpmnElement="F39"><di:waypoint x="6326" y="2490" /><di:waypoint x="6726" y="2490" /><bpmndi:BPMNLabel><dc:Bounds x="6332" y="2496" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F40_di" bpmnElement="F40"><di:waypoint x="6301" y="2515" /><di:waypoint x="6301" y="2690" /><di:waypoint x="4921" y="2690" /><di:waypoint x="4921" y="2035" /><bpmndi:BPMNLabel><dc:Bounds x="4821" y="2049" width="92" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F41_di" bpmnElement="F41"><di:waypoint x="6301" y="2515" /><di:waypoint x="6301" y="2720" /><di:waypoint x="3421" y="2720" /><di:waypoint x="3421" y="1555" /><bpmndi:BPMNLabel><dc:Bounds x="3321" y="1569" width="92" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F42_di" bpmnElement="F42"><di:waypoint x="6301" y="2515" /><di:waypoint x="6301" y="2750" /><di:waypoint x="1801" y="2750" /><di:waypoint x="1801" y="1075" /><bpmndi:BPMNLabel><dc:Bounds x="1701" y="1089" width="92" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F43_di" bpmnElement="F43"><di:waypoint x="6301" y="2465" /><di:waypoint x="6301" y="240" /><di:waypoint x="6396" y="240" /><bpmndi:BPMNLabel><dc:Bounds x="6309" y="2210" width="117" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F44_di" bpmnElement="F44"><di:waypoint x="6536" y="240" /><di:waypoint x="6606" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F45_di" bpmnElement="F45"><di:waypoint x="6631" y="265" /><di:waypoint x="6631" y="2400" /><di:waypoint x="6751" y="2400" /><di:waypoint x="6751" y="2465" /><bpmndi:BPMNLabel><dc:Bounds x="6637" y="271" width="167" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F46_di" bpmnElement="F46"><di:waypoint x="6656" y="240" /><di:waypoint x="6733" y="240" /><bpmndi:BPMNLabel><dc:Bounds x="6660" y="206" width="70" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F47_di" bpmnElement="F47"><di:waypoint x="6776" y="2490" /><di:waypoint x="6846" y="2490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F48_di" bpmnElement="F48"><di:waypoint x="6986" y="2490" /><di:waypoint x="7126" y="2490" /><di:waypoint x="7126" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F49_di" bpmnElement="F49"><di:waypoint x="7196" y="240" /><di:waypoint x="7266" y="240" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F50_di" bpmnElement="F50"><di:waypoint x="7316" y="240" /><di:waypoint x="7438" y="240" /><bpmndi:BPMNLabel><dc:Bounds x="7322" y="220" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F51_di" bpmnElement="F51"><di:waypoint x="7291" y="265" /><di:waypoint x="7291" y="2490" /><di:waypoint x="7386" y="2490" /><bpmndi:BPMNLabel><dc:Bounds x="7297" y="271" width="30" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F52_di" bpmnElement="F52"><di:waypoint x="7526" y="2490" /><di:waypoint x="7596" y="2490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Ziel_Intake_di" bpmnElement="DataIn_Ziel_Intake"><di:waypoint x="246" y="137" /><di:waypoint x="436" y="137" /><di:waypoint x="436" y="190" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Entwurf_di" bpmnElement="DataOut_Entwurf"><di:waypoint x="766" y="520" /><di:waypoint x="766" y="482" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Entwurf_U_di" bpmnElement="DataIn_Entwurf_U"><di:waypoint x="784" y="457" /><di:waypoint x="956" y="457" /><di:waypoint x="956" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Bpmn_di" bpmnElement="DataOut_Bpmn"><di:waypoint x="1306" y="520" /><di:waypoint x="1306" y="482" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Bpmn_Inventar_di" bpmnElement="DataIn_Bpmn_Inventar"><di:waypoint x="1324" y="457" /><di:waypoint x="1946" y="457" /><di:waypoint x="1946" y="1000" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_SpecEntwurf_di" bpmnElement="DataOut_SpecEntwurf"><di:waypoint x="2626" y="1000" /><di:waypoint x="2626" y="962" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_SpecEntwurf_Extr_di" bpmnElement="DataIn_SpecEntwurf_Extr"><di:waypoint x="2644" y="937" /><di:waypoint x="2796" y="937" /><di:waypoint x="2796" y="1000" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Wissen_di" bpmnElement="DataOut_Wissen"><di:waypoint x="2836" y="1000" /><di:waypoint x="2836" y="962" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Wissen_Zuordnen_di" bpmnElement="DataIn_Wissen_Zuordnen"><di:waypoint x="2854" y="937" /><di:waypoint x="3566" y="937" /><di:waypoint x="3566" y="1480" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_MappingPlan_di" bpmnElement="DataOut_MappingPlan"><di:waypoint x="4216" y="1480" /><di:waypoint x="4216" y="1442" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MappingPlan_U_di" bpmnElement="DataIn_MappingPlan_U"><di:waypoint x="4234" y="1417" /><di:waypoint x="4396" y="1417" /><di:waypoint x="4396" y="290" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Spec_di" bpmnElement="DataOut_Spec"><di:waypoint x="4756" y="1480" /><di:waypoint x="4756" y="1442" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Spec_Artefakte_di" bpmnElement="DataIn_Spec_Artefakte"><di:waypoint x="4774" y="1417" /><di:waypoint x="5036" y="1417" /><di:waypoint x="5036" y="1960" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Artefakte_di" bpmnElement="DataOut_Artefakte"><di:waypoint x="5086" y="1960" /><di:waypoint x="5086" y="1922" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Artefakte_Pruefen_di" bpmnElement="DataIn_Artefakte_Pruefen"><di:waypoint x="5104" y="1897" /><di:waypoint x="5896" y="1897" /><di:waypoint x="5896" y="2440" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Pruefbericht_di" bpmnElement="DataOut_Pruefbericht"><di:waypoint x="6136" y="2440" /><di:waypoint x="6136" y="2402" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Pruefbericht_Uebergabe_di" bpmnElement="DataIn_Pruefbericht_Uebergabe"><di:waypoint x="6154" y="2377" /><di:waypoint x="6896" y="2377" /><di:waypoint x="6896" y="2440" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Workflow_di" bpmnElement="DataOut_Workflow"><di:waypoint x="6946" y="2440" /><di:waypoint x="6946" y="2377" /><di:waypoint x="7696" y="2377" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_FachNB_Recherche_di" bpmnElement="DataIn_FachNB_Recherche"><di:waypoint x="766" y="675" /><di:waypoint x="766" y="620" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Notation_Zeichnen_di" bpmnElement="DataIn_Notation_Zeichnen"><di:waypoint x="1306" y="675" /><di:waypoint x="1306" y="620" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_FachNB_Extr_di" bpmnElement="DataIn_FachNB_Extr"><di:waypoint x="2924" y="1155" /><di:waypoint x="2924" y="1130" /><di:waypoint x="2856" y="1130" /><di:waypoint x="2856" y="1100" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_FachNB_Hinterfragen_di" bpmnElement="DataIn_FachNB_Hinterfragen"><di:waypoint x="2948" y="1155" /><di:waypoint x="2948" y="1130" /><di:waypoint x="3026" y="1130" /><di:waypoint x="3026" y="1100" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Rubrik_Zuordnen_di" bpmnElement="DataIn_Rubrik_Zuordnen"><di:waypoint x="3586" y="1635" /><di:waypoint x="3586" y="1580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Wissensbasis_Pruefen_di" bpmnElement="DataIn_Wissensbasis_Pruefen"><di:waypoint x="3876" y="1635" /><di:waypoint x="3876" y="1610" /><di:waypoint x="3961" y="1610" /><di:waypoint x="3961" y="1580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_AgenticNotebook_Pruefen_di" bpmnElement="DataIn_AgenticNotebook_Pruefen"><di:waypoint x="4006" y="1635" /><di:waypoint x="4006" y="1580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_AgenticFaq_Pruefen_di" bpmnElement="DataIn_AgenticFaq_Pruefen"><di:waypoint x="4124" y="1635" /><di:waypoint x="4124" y="1610" /><di:waypoint x="4036" y="1610" /><di:waypoint x="4036" y="1580" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_AgenticFaq_di" bpmnElement="DataOut_AgenticFaq"><di:waypoint x="4061" y="1580" /><di:waypoint x="4061" y="1595" /><di:waypoint x="4148" y="1595" /><di:waypoint x="4148" y="1635" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Vorlagen_Artefakte_di" bpmnElement="DataIn_Vorlagen_Artefakte"><di:waypoint x="5086" y="2115" /><di:waypoint x="5086" y="2060" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Projekt_di" bpmnElement="DataOut_Projekt"><di:waypoint x="7456" y="2540" /><di:waypoint x="7456" y="2595" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -289,6 +289,8 @@ die Struktur des Diagramms).
 - `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau,
   mit Wissens-Stores und dem Product Backlog als Live-Store (`cli:gh`) samt Freigaben und Write-Guard;
   die Notebook-Frage dahinter liegt in `notebook-faq/`.
+- `examples/lanecraft/` – dieser Ablauf selbst als BPMN in lanecraft-Notation (sechs Lanes, neun
+  Stores); nur gezeichnet, noch nicht durch die Pipeline gelaufen.
 
 ## Wo ändere ich was?
 
