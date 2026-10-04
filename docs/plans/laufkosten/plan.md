@@ -1,6 +1,8 @@
 # Laufkosten je BPMN-Element messen
 
-Status: Entwurf, abgestimmt am 2026-10-04. Aufgaben: [`tasks.md`](tasks.md).
+Status: umgesetzt am 2026-10-04 (T0 bis T8), Abweichungen und Befunde in [`spike.md`](spike.md).
+Offen für einen echten Lauf: die Felder der Hook-Payloads, das Verhalten des Workflow-Tools und der
+Abgleich mit OpenTelemetry (siehe spike.md „Offen für T8“). Aufgaben: [`tasks.md`](tasks.md).
 
 ## Ziel
 
