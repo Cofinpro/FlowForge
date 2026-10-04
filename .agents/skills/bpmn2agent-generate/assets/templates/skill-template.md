@@ -5,8 +5,9 @@ description: {{One sentence: the procedure this skill runs, derived from the BPM
   reaches '{{elementLabel}}'." Trigger-worthy per this repo's sibling skills, not a bare restatement
   of the element name.}}
 {{Skill-chain top-level skill only, and only when the spec has `workflowIO.input`: add the line
-`argument-hint: [{{field1}}] [{{field2}}]` here — one bracketed name per `workflowIO.input.required`
-entry. Delete this note otherwise.}}
+`argument-hint: "[{{field1}}] [{{field2}}]"` here — one bracketed name per `workflowIO.input.required`
+entry, the whole value in double quotes (unquoted, `[a] [b]` is not valid YAML and `verify` fails on it).
+Delete this note otherwise.}}
 bpmn:
   file: {{sourceBpmnPath}}
   elements: [{{elementIds}}]

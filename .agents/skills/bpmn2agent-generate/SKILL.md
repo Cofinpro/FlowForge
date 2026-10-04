@@ -158,7 +158,7 @@ insights into the fixed sections *Bewährt*, *Vermeiden*, *Offene Muster* instea
 keeps the file within `memory.maxLines`.
 
 **Process input and output.** With `workflowIO.input`, the top-level skill gets `argument-hint`
-(one `[field]` per `required` entry), an `## Input` section that asks for a missing required field
+(one `[field]` per `required` entry, the whole value one quoted string: `argument-hint: "[a] [b]"`), an `## Input` section that asks for a missing required field
 via `AskUserQuestion` before step 1, and for `workflowIO.output` a last step naming the end result's
 contract (`artifacts.<output>`). The orchestrator agent and Workflow script do the same in step 7.
 
