@@ -2,7 +2,9 @@
 // Renders the "mapping view" for a bpmn2agent workflow-spec: a colour-coded copy of the author's
 // .bpmn (never mutates the original), a self-contained HTML viewer, and per-plane PNGs.
 //
-// Usage: node render-mapping.mjs <cacheDir> <spec.yaml> <file.bpmn> <outDir>
+// Usage: node render-mapping.mjs <cacheDir> <spec.yaml> <file.bpmn> <outDir> [--cost <cost.json>]
+//   --cost  cost.json written by bpmn2agent-cost: adds a cost badge per element, a run-cost section
+//           and a cost row in the element details. Without it the view is unchanged.
 //   cacheDir  same tool cache bpmn-authoring/scripts/validate.sh uses (bpmn-moddle, bpmnlint,
 //             playwright already installed there by validate.sh; js-yaml is installed into the
 //             same cache by this script on first run, the same way — see ensureYaml() below).
@@ -80,9 +82,13 @@ import { fileURLToPath } from 'node:url';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 
-const [, , cacheDir, specPath, bpmnPath, outDirArg] = process.argv;
-if (!cacheDir || !specPath || !bpmnPath || !outDirArg) {
-  console.error('Usage: node render-mapping.mjs <cacheDir> <spec.yaml> <file.bpmn> <outDir>');
+const rawArgs = process.argv.slice(2);
+const costFlag = rawArgs.indexOf('--cost');
+const costPath = costFlag >= 0 ? rawArgs[costFlag + 1] : null;
+const positional = rawArgs.filter((_, i) => costFlag < 0 || (i !== costFlag && i !== costFlag + 1));
+const [cacheDir, specPath, bpmnPath, outDirArg] = positional;
+if (!cacheDir || !specPath || !bpmnPath || !outDirArg || (costFlag >= 0 && !costPath)) {
+  console.error('Usage: node render-mapping.mjs <cacheDir> <spec.yaml> <file.bpmn> <outDir> [--cost <cost.json>]');
   process.exit(2);
 }
 const outDir = path.resolve(outDirArg);
@@ -126,6 +132,16 @@ const STRINGS = {
     statusRed: ['1 red element — must be resolved before approval.', '{n} red elements — must be resolved before approval.'],
     statusGrey: ['1 element deliberately not generated (grey) — not an error.', '{n} elements deliberately not generated (grey) — not an error.'],
     legendTitle: 'Legend',
+    costTitle: 'Run cost',
+    costSummary: '{usd} USD for the run ({session}); prices {prices}.',
+    costNotReconciled: 'The cost report did not reconcile; do not rely on these numbers.',
+    costOrchestration: 'Orchestration: {usd} USD',
+    costUnassigned: 'Not attributed to an element: {usd} USD',
+    costLanes: 'By lane',
+    costTop: 'Most expensive elements',
+    costLabel: 'Run cost',
+    costElement: '{usd} USD, {requests} request(s), {share} % of the transcripts',
+    costShared: 'Shares the skill “{skill}” with {n} elements: {usd} USD together',
     panelTitle: 'Element details',
     noSelection: 'Click an element in the diagram or pick one under “Levels and elements”.',
     noMappingData: 'This shape has no mapping of its own.',
@@ -226,6 +242,16 @@ const STRINGS = {
     statusRed: ['1 rotes Element — vor der Freigabe zu klären.', '{n} rote Elemente — vor der Freigabe zu klären.'],
     statusGrey: ['1 Element bewusst nicht generiert (grau) — kein Fehler.', '{n} Elemente bewusst nicht generiert (grau) — kein Fehler.'],
     legendTitle: 'Legende',
+    costTitle: 'Laufkosten',
+    costSummary: '{usd} USD für den Lauf ({session}); Preise {prices}.',
+    costNotReconciled: 'Der Kostenbericht ging nicht auf; diese Zahlen sind nicht belastbar.',
+    costOrchestration: 'Orchestrierung: {usd} USD',
+    costUnassigned: 'Keinem Element zugeordnet: {usd} USD',
+    costLanes: 'Je Lane',
+    costTop: 'Teuerste Elemente',
+    costLabel: 'Laufkosten',
+    costElement: '{usd} USD, {requests} Anfrage(n), {share} % der Transkripte',
+    costShared: 'Teilt sich den Skill „{skill}“ mit {n} Elementen: zusammen {usd} USD',
     panelTitle: 'Element-Details',
     noSelection: 'Element im Diagramm anklicken oder unter „Ebenen und Elemente“ wählen.',
     noMappingData: 'Diese Form hat kein eigenes Mapping.',
@@ -348,6 +374,7 @@ async function main() {
     entries[id] = { ...cls, id, bo: info.bo, containerBo: info.containerBo, topProcessId: info.topProcessId, subProcessChain: info.subProcessChain };
   }
   const strings = stringsFor(fullStrings, entries);
+  const costData = costPath ? loadCostData(costPath, entries) : null;
 
   // Colour + annotate.
   let usedColorExtension = false;
@@ -389,7 +416,7 @@ async function main() {
 
   const html = buildHtml({
     spec, strings, lang, mappedXml, entries, processInfos, outDir, index, annotationOwner,
-    planes: new Set(planeByBpmnElementId.keys()),
+    planes: new Set(planeByBpmnElementId.keys()), costData,
   });
   const indexHtmlPath = path.join(outDir, 'index.html');
   writeFileSync(indexHtmlPath, html);
@@ -419,6 +446,31 @@ function assertSameKeys(a, b, where) {
 }
 
 // Drops the context-source strings when no element uses them (see OPTIONAL_KINDS).
+// cost.json (bpmn2agent-cost) -> what the viewer needs. Only elements the report attributed to a single
+// element get a badge; a skill shared by several elements is shown in each element's details instead.
+function loadCostData(file, entries) {
+  const report = JSON.parse(readFileSync(file, 'utf8'));
+  const total = report.totals.transcriptUsd || 1;
+  const byElement = {};
+  const shared = {};
+  for (const row of report.byUnit) {
+    const known = (row.elements || []).filter((id) => entries[id]);
+    if (row.type === 'element' && known.length) {
+      byElement[row.id] = { usd: row.costUsd, requests: row.requests, share: row.costUsd / total };
+    } else if (row.type === 'skill') {
+      for (const id of known) shared[id] = { skill: row.id, usd: row.costUsd, elements: row.elements.length };
+    }
+  }
+  const rowOf = (type) => report.byUnit.find((r) => r.type === type)?.costUsd ?? 0;
+  return {
+    sessionId: report.sessionId, pricesVersion: report.pricesVersion, ok: report.ok,
+    totalUsd: report.totals.sessionUsd, transcriptUsd: report.totals.transcriptUsd,
+    orchestrationUsd: rowOf('orchestration'), unassignedUsd: rowOf('unassigned'),
+    byElement, shared, byLane: report.byLane,
+    top: Object.entries(byElement).sort((a, b) => b[1].usd - a[1].usd).slice(0, 8).map(([id, v]) => ({ id, ...v })),
+  };
+}
+
 function stringsFor(base, entries) {
   const used = new Set(Object.values(entries).flatMap((e) => [e.kind, e.colorKey]));
   const out = { ...base, kindNames: { ...base.kindNames }, kindHelp: { ...base.kindHelp } };
@@ -715,7 +767,7 @@ function embed(obj) {
   return JSON.stringify(obj).replace(/</g, '\\u003c');
 }
 
-function buildHtml({ spec, strings, lang, mappedXml, entries, processInfos, outDir, index, annotationOwner, planes }) {
+function buildHtml({ spec, strings, lang, mappedXml, entries, processInfos, outDir, index, annotationOwner, planes, costData }) {
   const roleLabel = (roleId) => {
     if (!roleId) return null;
     const role = spec.roles && spec.roles[roleId];
@@ -870,6 +922,10 @@ ${viewerCss}</style>
         <h2 id="h-status">${t('statusTitle')}</h2>
         <div id="status"></div>
       </section>
+      ${costData ? `<section aria-labelledby="h-cost">
+        <h2 id="h-cost">${t('costTitle')}</h2>
+        <div id="cost"></div>
+      </section>` : ''}
       <section id="nav" aria-labelledby="h-nav">
         <h2 id="h-nav">${t('navTitle')}</h2>
         <label for="nav-search">${t('searchLabel')}</label>
@@ -916,6 +972,7 @@ const FILES_LIST = ${embed(filesList)};
 const PROCESS_LIST = ${embed(processList)};
 const LEGEND = ${embed(legend)};
 const MAPPED_BPMN_XML = ${embed(mappedXml)};
+const COST_DATA = ${embed(costData)};
 </script>
 <script>
 ${viewerJs}</script>

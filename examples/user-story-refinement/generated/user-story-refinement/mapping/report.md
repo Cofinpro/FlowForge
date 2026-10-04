@@ -221,6 +221,7 @@ Process output: sprint-reife-user-story — contract for the end result, written
 | Hook | Event / matcher | Guards | Purpose |
 |---|---|---|---|
 | `.claude/hooks/user-story-refinement-write-guard.mjs` | PreToolUse / `Bash` | "Product Backlog & User Story Map", "Product Backlog: freigegebene Änderungen" | Asks before writing into a live store: every gh call that is not a listed read, also inside compound commands, after env or in bash -c. Does not pin repo or project (accepted risk, see open questions). |
+| `.claude/hooks/user-story-refinement-cost-ledger.mjs` | SubagentStop, Stop, SessionEnd | – | Records run token usage; `user-story-refinement-cost-map.json` beside it maps it to elements. |
 
 No memory store, so no memory cap.
 

@@ -36,8 +36,12 @@ Categories, in run order:
    bundled in a recorded skill/agent directory, listed in `knowledge.refs`, or is the one
    orchestration file for `pattern.chosen`, or a context hook
    (`.claude/hooks/<workflow>-write-guard.mjs` / `-memory-cap.mjs`) that a store in `contextSources`
-   needs: a live store with write tools, a memory store.
-5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal and its body parses;
+   needs: a live store with write tools, a memory store. The cost ledger hook and
+   `.claude/hooks/<workflow>-cost-map.json` are expected for every `claude-dir` output: missing is a
+   warning (generated before cost tracking), a map that differs from what the spec yields is a failure
+   (route: generate).
+5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal, its body parses and every `agent()` label starts with an
+   element id of the spec (route: generate);
    `.claude/settings.json` registers exactly the `.claude/hooks/` scripts; installables sit inside
    `.claude/`, with no npm imports or `package.json` there (legacy layout: each hook
    `*.settings.json` parses and pairs with its script).

@@ -122,3 +122,7 @@ a { color: #1565C0; }
   .nav-row { padding-left: calc(min(var(--depth, 0), 3) * 16px); }
   .nav-els { padding-left: calc(min(var(--depth, 0), 3) * 16px + 24px) !important; }
 }
+
+.cost-badge { display: inline-block; background: #1f2937; color: #fff; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 10px; white-space: nowrap; }
+.cost-amount { float: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+#cost h3 { font-size: 13px; margin: 10px 0 4px; }

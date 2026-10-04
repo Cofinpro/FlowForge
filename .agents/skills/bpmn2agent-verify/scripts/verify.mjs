@@ -107,6 +107,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { buildCostMap } from '../../bpmn2agent-generate/scripts/build-cost-map.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -290,6 +291,41 @@ function isWorkflowScriptShaped(content) {
   if (lines[idx] && lines[idx].trimStart().startsWith('// bpmn: ')) idx++;
   while (lines[idx] !== undefined && lines[idx].trim() === '') idx++;
   return !!(lines[idx] && lines[idx].trim().startsWith('export const meta'));
+}
+
+// Index just past the ")" that closes the "(" at openIdx, skipping string/template/comment contents.
+function findMatchingParen(s, openIdx) {
+  let depth = 0;
+  for (let i = openIdx; i < s.length; i++) {
+    const c = s[i];
+    if (c === "'" || c === '"' || c === '`') {
+      for (i++; i < s.length && s[i] !== c; i++) if (s[i] === '\\') i++;
+    } else if (c === '/' && s[i + 1] === '/') {
+      while (i < s.length && s[i] !== '\n') i++;
+    } else if (c === '(') depth++;
+    else if (c === ')' && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+// bpmn2agent-cost attributes cost by the element id a dispatched step's label starts with. Problems
+// found in a Workflow script: an agent() call without label, or a literal label whose first word is
+// not an element id of the spec. A label that starts with ${...} (built per item) is not checkable.
+function checkAgentLabels(content, elementIds) {
+  const problems = [];
+  for (const m of content.matchAll(/(?<![\w.$])agent\s*\(/g)) {
+    const open = m.index + m[0].length - 1;
+    const end = findMatchingParen(content, open);
+    if (end < 0) continue;
+    const call = content.slice(open, end);
+    const line = content.slice(0, m.index).split('\n').length;
+    const label = call.match(/\blabel\s*:\s*(['"`])([\s\S]*?)\1/);
+    if (!/\blabel\s*:/.test(call)) problems.push(`line ${line}: agent() call has no label (cost cannot be attributed to a BPMN element)`);
+    else if (label && !label[2].startsWith('${') && !elementIds.has(label[2].split(/\s+/)[0])) {
+      problems.push(`line ${line}: agent() label "${label[2].slice(0, 40)}" does not start with a BPMN element id of the spec`);
+    }
+  }
+  return problems;
 }
 
 function checkMetaLiteral(content) {
@@ -849,6 +885,17 @@ if (!spec) {
     if (hasLiveWrite) contextHookPaths.add(`.claude/hooks/${workflowName}-write-guard.mjs`);
     if (stores.some((s) => s.art === 'gedaechtnis')) contextHookPaths.add(`.claude/hooks/${workflowName}-memory-cap.mjs`);
   }
+  // Cost tracking (bpmn2agent-generate step 6b): a ledger hook and its cost map, one pair per workflow,
+  // explained like the context hooks. Missing is a warning (output from before cost tracking).
+  const costHookPath = workflowName && outputLayout === 'claude-dir' ? `.claude/hooks/${workflowName}-cost-ledger.mjs` : null;
+  const costMapPath = workflowName && outputLayout === 'claude-dir' ? `.claude/hooks/${workflowName}-cost-map.json` : null;
+  if (costHookPath && !(allFiles.includes(costHookPath) && allFiles.includes(costMapPath))) {
+    artCat.warn(
+      `run-cost tracking is missing ("${costHookPath}" / "${costMapPath}") — this output was generated before cost ` +
+      `tracking; re-run bpmn2agent-generate step 6b so bpmn2agent-cost can attribute run costs`,
+      'generate'
+    );
+  }
   const expectedTopLevelPathSet = new Set(expectedTopLevelPaths);
   const topLevelBudget = patternChosen === 'mixed' ? Infinity : 1;
   let topLevelUsed = 0;
@@ -891,6 +938,30 @@ if (!spec) {
         for (const c of commands) {
           if (/CLAUDE_PLUGIN_ROOT/.test(c)) artCat.fail(`"${relPath}": hook command "${c}" uses \${CLAUDE_PLUGIN_ROOT}; a project .claude/ needs $CLAUDE_PROJECT_DIR`);
         }
+      }
+      continue;
+    }
+
+    if (relPath === costMapPath) {
+      try {
+        const onDisk = JSON.parse(readFileSync(path.join(generatedDir, relPath), 'utf8'));
+        const expected = buildCostMap(spec);
+        if (JSON.stringify(onDisk) !== JSON.stringify(expected)) {
+          const missing = Object.keys(expected.elements).filter((id) => !onDisk.elements?.[id]);
+          const foreign = Object.keys(onDisk.elements || {}).filter((id) => !expected.elements[id]);
+          artCat.fail(
+            `"${relPath}" does not match the spec` +
+            (missing.length ? `; elements missing from it: [${missing.join(', ')}]` : '') +
+            (foreign.length ? `; elements it lists that the spec does not have as cost-bearing: [${foreign.join(', ')}]` : '') +
+            ' — re-run bpmn2agent-generate step 6b',
+            'generate'
+          );
+        }
+        for (const skill of Object.keys(onDisk.skills || {})) {
+          if (!allFiles.includes(`.claude/skills/${skill}/SKILL.md`)) artCat.fail(`"${relPath}" names skill "${skill}", which does not exist under .claude/skills/`, 'generate');
+        }
+      } catch (e) {
+        artCat.fail(`"${relPath}" is not valid JSON: ${e.message}`, 'generate');
       }
       continue;
     }
@@ -947,7 +1018,7 @@ if (!spec) {
 
     const claimingSet = claimedBy.get(relPath) || new Set();
     const underRoot = [...skillRoots].some((root) => relPath === root || relPath.startsWith(root + '/'));
-    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md' || contextHookPaths.has(relPath);
+    const budgetExempt = relPath === 'README.md' || relPath === 'mapping/report.md' || contextHookPaths.has(relPath) || relPath === costHookPath;
 
     if (unsupportedType) {
       artCat.warn(`"${relPath}": unknown file type, no bpmn header convention defined for it — header not checked`);
@@ -1016,6 +1087,9 @@ for (const { relPath, abs, content } of mjsFilesToLint) {
     } catch (e) {
       lintCat.fail(`"${relPath}": ${e.message}`);
       continue;
+    }
+    for (const problem of checkAgentLabels(content, new Set(Object.keys(spec?.elements || {})))) {
+      lintCat.fail(`"${relPath}": ${problem}`, 'generate');
     }
     try {
       wrapCheckWorkflowScript(content, tmpDir);

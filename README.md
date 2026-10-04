@@ -282,7 +282,7 @@ und beantwortet Fragen dazu, wie man Agenten und Skills baut, nicht zu eurem Fac
 generated/<workflow>/
   .claude/                   # alles, was installiert wird, im Aufbau eines Projekt-.claude/
     agents/  skills/         #   die Artefakte
-    hooks/  settings.json    #   nur bei Hooks oder Stores; settings.json meldet jeden Hook an
+    hooks/  settings.json    #   Kostenprotokoll immer, Write-Guard/Memory-Cap bei Stores; settings.json meldet jeden Hook an
     workflows/               #   nur beim Muster Workflow-Skript
   README.md                  # Installation in einer Zeile, für den Anwender
   workflow-spec.yaml         # die Spezifikation, über die alle Stufen reden
@@ -297,6 +297,25 @@ alten Aufbau (ohne `.claude/`, Hooks als einzelne Snippets); `verify.mjs` prüft
 
 Die Mapping-Ansicht (`mapping/index.html`) färbt jedes BPMN-Element nach Ergebnis und verlinkt es mit
 seiner Datei.
+
+## Was hat ein Lauf gekostet?
+
+Jeder erzeugte Workflow bringt ein Kostenprotokoll mit: Ein Hook schreibt nach jedem Lauf die
+verbrauchten Tokens in `.claude/runs/<workflow>/ledger.jsonl` (ohne Preise, ohne Netz; nimm
+`.claude/runs/` in die `.gitignore` auf). Mit dem lanecraft-Plugin rechnet der Skill
+`bpmn2agent-cost` daraus die Kosten je BPMN-Element, Lane und Phase und gleicht die Summe mit der
+Session ab:
+
+```text
+/lanecraft:bpmn2agent-cost
+```
+
+Das Ergebnis ist `cost.md` neben dem Protokoll. In der Mapping-Ansicht erscheinen die Kosten als
+Badge am Element (`render-mapping.mjs … --cost cost.json`). Für belastbare Zahlen wiederholt
+`cost-bench.mjs` denselben Lauf mehrfach und nennt Median und Streuung je Element; jeder Lauf kostet
+echtes Geld, deshalb braucht er ein ausdrückliches `--confirm`. Voraussetzung ist, dass jeder
+Agentenaufruf mit der Element-ID beginnt; das erzeugt `bpmn2agent-generate` und prüft `verify`. Wie
+das funktioniert und wo die Grenzen liegen: [`ARCHITECTURE.md`](ARCHITECTURE.md#laufkosten).
 
 ## Beispiele
 
@@ -328,6 +347,7 @@ gelaufen.
 .agents/skills/                       # Skills (echte Dateien); .claude/skills/<name> sind Symlinks
   bpmn-to-agentic-workflow            #   Einstieg: führt die Pipeline Ende-zu-Ende
   bpmn2agent-analyze … -verify        #   die fünf Stufen (siehe oben)
+  bpmn2agent-cost                     #   nach einem Lauf: Kosten je BPMN-Element, Lane und Phase
   bpmn-process-design                 #   Prozess aus Ziel + Notebook entwerfen und als pipeline-taugliches BPMN zeichnen
   bpmn-authoring                      #   BPMN von Hand schreiben: XSD, bpmn-moddle, bpmnlint, Layout
   agentic-workflow-kb                 #   Wissensbasis Agentic Design: FAQ + Referenzen mit Belegstellen

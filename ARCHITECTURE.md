@@ -190,7 +190,7 @@ Fixtures unter `.agents/skills/bpmn2agent-verify/fixtures/` (`context-flow.bpmn`
 generated/<workflow>/
   .claude/                   # Nutzlast im Aufbau eines Projekt-.claude/ (meta.outputLayout: claude-dir)
     agents/  skills/         #   die Artefakte; skills/<x>/scripts/ nur für echte Skript-Elemente
-    hooks/*.mjs              #   bei kind: hook; dazu Write-Guard und Memory-Cap bei Kontextquellen
+    hooks/*.mjs              #   bei kind: hook; dazu Write-Guard und Memory-Cap bei Kontextquellen, immer Kostenprotokoll und -karte
     settings.json            #   meldet jeden Hook an ("$CLAUDE_PROJECT_DIR"/.claude/hooks/…), permissions.allow für Lese-Tools
     workflows/<workflow>.workflow.mjs  # nur beim Muster Workflow-Skript
   workflow-spec.yaml         # die Drehscheibe
@@ -224,6 +224,44 @@ Dazu kommt, nur wenn das Diagramm Stores oder Prozess-Ein-/Ausgabe hat, die Kate
 
 Die Mapping-Ansicht färbt jedes Element nach Ergebnis (erzeugt, Steuerlogik, bewusst nicht erzeugt,
 rot = offen) und verlinkt es mit seiner Datei.
+
+## Laufkosten
+
+Was ein Lauf eines erzeugten Workflows gekostet hat und welcher Teil des Diagramms wie viel davon,
+lässt sich ohne Schätzung durch das Modell messen: Tokens stehen exakt in den Session-Transkripten,
+Preise in einer Tabelle, und die BPMN-Element-ID steckt in jedem Label. Design und Messergebnisse:
+`docs/plans/laufkosten/plan.md` und `spike.md`.
+
+**Der Payload trägt Daten, das Plugin die Logik.**
+
+| Teil | liegt in | Aufgabe |
+|---|---|---|
+| `hooks/<workflow>-cost-ledger.mjs` | erzeugter Payload (generate 6b, immer) | hängt bei `SubagentStop`, `Stop` und `SessionEnd` jede abgeschlossene API-Anfrage einmal an `.claude/runs/<workflow>/ledger.jsonl` an: rohe Token-Zahlen, keine Preise, kein Netz, bricht nie einen Lauf ab |
+| `hooks/<workflow>-cost-map.json` | erzeugter Payload | schlüsselt auf, welcher Skill, Agent-Typ und welche Element-ID im Transkript zu welchem Element, welcher Lane und welcher Phase gehört; `verify` prüft sie gegen die Spec |
+| `bpmn2agent-cost` | lanecraft-Plugin | `cost-report.mjs` rechnet mit `prices.json`, ordnet zu und gleicht ab; `cost-bench.mjs` wiederholt Läufe; `render-mapping.mjs --cost` blendet die Kosten in die Mapping-Ansicht ein |
+
+**Zuordnung je API-Anfrage** (erste Regel, die passt): Beschreibung des Subagents beginnt mit einer
+Element-ID → dieses Element; Agent-Typ des Orchestrators → *Orchestrierung*; `attributionSkill` ist
+ein Skill der Karte → sein Element (teilen sich mehrere Elemente den Skill, die Skill-Gruppe);
+Agent-Typ einer Lane → diese Lane; Hauptthread → *Orchestrierung*; sonst *nicht zugeordnet*. Nichts
+wird verteilt oder geschätzt. Voraussetzung ist die Label-Konvention: jeder `agent()`-Aufruf und jede
+`Agent`-Beschreibung beginnt mit `<elementId> <Label>`; `verify` prüft das für Workflow-Skripte.
+
+**Abgleich.** Eine API-Antwort steht in mehreren Transkriptzeilen, endgültige Ausgabe-Tokens trägt nur
+die letzte; je `requestId` zählt die mit den meisten. Danach stimmen die Tokens je Modell mit dem
+`cost-state` der Session überein (bei einem durchgehenden Lauf exakt) und der Preis reproduziert
+dessen `costUSD`; an echten Läufen geprüft. Was nur in `cost-state` steht, sind Hilfsaufrufe (etwa
+das WebSearch-Hilfsmodell) und wird als eigener Eimer ausgewiesen; die Gesamtsumme ist immer
+Transkripte plus Hilfsaufrufe. Ein Preis, der bei exakt passenden Tokens nicht aufgeht, ein Modell
+ohne Preis oder ein `total_cost_usd` aus `claude -p`, das um mehr als 1 % abweicht, sind Fehler. Ist
+die Session fortgesetzt oder geleert worden, steht `cost-state` hinter dem Transkript oder deckt
+nur den letzten Prozess ab; das ist eine Warnung, und die Transkriptsumme gilt.
+
+**Grenzen.** Das Transkriptformat ist intern und kann sich mit jeder Claude-Code-Version ändern; der
+Leser scheitert dann laut statt still falsch zu summieren. Kosten außerhalb von Claude (Gemini/
+NotebookLM über MCP) werden gezählt, aber nicht bepreist. OpenTelemetry (`claude_code.cost.usage`
+mit `agent.name`, `skill.name`) taugt als Gegenprobe über viele Läufe und fürs Dashboard, kennt aber
+keine Element-ID und gibt `agent.name` nur mit `OTEL_LOG_TOOL_DETAILS=1` preis.
 
 ## Wissensschicht
 
@@ -263,6 +301,7 @@ Keine eigenen Stufen; die Stufen-Skills rufen sie an festen Stellen auf.
 | `agent-authoring` | Skill | Rolle schneiden (design 5), Agenten schreiben (generate) |
 | `skill-authoring` | Skill | Skills schreiben (generate 5) |
 | `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11; bei Stores auch Tool-Listen, Cap und Write-Guard |
+| `bpmn2agent-cost` | Skill | nach einem Lauf: Kosten je Element, Lane und Phase mit Abgleich, Streuung über wiederholte Läufe (siehe [Laufkosten](#laufkosten)) |
 | `trim-the-fat` | Skill, nur auf Anforderung | kürzt Skills, ohne ihr Verhalten zu ändern; generate 11, nur wenn der Anwender zustimmt |
 
 Befunde der Prüf-Agenten tragen ein Ziel: `design` (in der Spec lösbar), `generate` (Formulierung,
@@ -300,6 +339,7 @@ die Struktur des Diagramms).
 | die Musterwahl ändern | `bpmn2agent-design/references/pattern-rubric.md` |
 | die Notation neu entworfener Prozesse ändern | `bpmn-process-design/SKILL.md` §4; muss zu `mapping-rubric.md` passen |
 | Stores (Art × Ort, Tool-Auflösung, Schreibschutz) ändern | `mapping-rubric.md` („Data stores → context sources“), dann Schema, analyze, design, generate-Vorlagen und verify nachziehen; Design in `docs/plans/kontextquellen/plan.md` |
+| die Kostenmessung ändern (Zuordnung, Preise, Abgleich) | `bpmn2agent-cost/scripts/` (`cost-report.mjs`, `prices.json`); Hook und Karte: `bpmn2agent-generate/scripts/install-cost-ledger.mjs`, `build-cost-map.mjs` und `assets/templates/hook-cost-ledger-template.mjs`; Design in `docs/plans/laufkosten/plan.md` |
 | ein Feld in der Spec ergänzen | `workflow-spec.schema.yaml`, dann analyze/design/generate/verify nachziehen |
 | Aussehen erzeugter Agenten/Skills ändern | `bpmn2agent-generate/assets/templates/` |
 | eine Prüfung ergänzen | `bpmn2agent-verify/scripts/verify.mjs` |

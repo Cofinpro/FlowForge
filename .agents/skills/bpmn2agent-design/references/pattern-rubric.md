@@ -132,6 +132,12 @@ Two context-store rules apply on top of the table:
   Workflow-script phase resumes via its own journal. Log phase transitions as events so a resume can
   tell "mid-phase" from "between phases".
 
+## Cost attribution
+
+Whatever the pattern, every dispatched step (`agent()` label, orchestrator `Agent` description) starts
+with its BPMN element id. `bpmn2agent-cost` attributes a run's cost to elements by that prefix, so it
+is a generate rule, not a design choice.
+
 ## Explaining the choice to a non-technical business user
 
 Tie the explanation to the shape they drew, not to the pattern's name. Examples:

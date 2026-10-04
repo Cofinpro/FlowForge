@@ -27,7 +27,7 @@ cp -R generated/user-story-refinement/.claude/. <dein-projekt>/.claude/
 
 Kein Installationsskript, kein `npm install`. Hat dein Projekt schon eine `.claude/settings.json`,
 überschreibt die Kopie sie: dann vorher sichern und von Hand zusammenführen, nämlich den Eintrag unter
-`hooks.PreToolUse` (Matcher `Bash`) und die sechs Einträge unter `permissions.allow`. Hat dein Projekt
+`hooks.PreToolUse` (Matcher `Bash`), die drei Kostenprotokoll-Einträge (`SubagentStop`, `Stop`, `SessionEnd`) und die sechs Einträge unter `permissions.allow`. Hat dein Projekt
 schon Skills oder Hooks mit denselben Namen, vorher nachsehen:
 `ls <dein-projekt>/.claude/skills <dein-projekt>/.claude/hooks`.
 
@@ -102,7 +102,12 @@ Alle drei sind dasselbe GitHub-Backlog, nach Phase geschnitten.
   Einstiegs-Skill haben ihre Dateien dort (`K1`, `B5`, `D1`, `D5`, `E4`), dazu die Phasen-Dateien, auf die sie
   verweisen. Elf Aufgaben (UX & Design, Entwicklung / Tech Lead, QA / Test) behalten das Phasen-Wissen in
   `references/domain-knowledge.md`.
-- **Hook:** `hooks/user-story-refinement-write-guard.mjs`, angemeldet in `settings.json`.
+- **Hooks:** `hooks/user-story-refinement-write-guard.mjs` und `hooks/user-story-refinement-cost-ledger.mjs`,
+  angemeldet in `settings.json`.
+- **Kostenprotokoll** (`hooks/user-story-refinement-cost-ledger.mjs`, `hooks/user-story-refinement-cost-map.json`):
+  schreibt nach jedem Lauf die verbrauchten Tokens nach `.claude/runs/user-story-refinement/ledger.jsonl`
+  (ohne Preise, ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: lanecraft-Plugin
+  installieren, danach `/bpmn2agent-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
 - **Agenten, Skripte:** keine.
 
 Andere Umgebungen (z. B. `.codex/`): die Skills sind neutral geschrieben und lassen sich dorthin

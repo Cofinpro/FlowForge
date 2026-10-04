@@ -53,7 +53,9 @@ Walk the diagram in flow order:
 frontmatter {{fields}}; make sure the last specialist's output meets that contract before you report
 `done`."}}
 
-For each dispatch: give the specialist the specific step and the artifact(s) it needs (per
+For each dispatch, start the Agent call's `description` with the BPMN element id, then the label
+verbatim (`{{elementId}} {{elementLabel}}`). The run's cost is attributed to elements by that prefix.
+Give the specialist the specific step and the artifact(s) it needs (per
 `elements.<id>.inputs`/`outputs`), wait for its report before continuing (unless the diagram's own
 parallel/multi-instance structure says otherwise — dispatch those concurrently and wait for all
 before the merge, same as `parallel()` would model in a Workflow script), and parse its JSON report

@@ -129,6 +129,7 @@ colours" section — this table is the textual mirror of what `mapping/workflow-
 |---|---|---|---|
 | `{{.claude/hooks/<workflow>-write-guard.mjs}}` | PreToolUse / `{{write tools}}` | {{store names}} | Asks before writing into a live store. |
 | `{{.claude/hooks/<workflow>-memory-cap.mjs}}` | PostToolUse / `Write\|Edit\|MultiEdit` | {{store names}} | Exit 2 above the line cap. |
+| `.claude/hooks/{{workflow}}-cost-ledger.mjs` | SubagentStop, Stop, SessionEnd | – | Records run token usage; `{{workflow}}-cost-map.json` beside it maps it to elements. |
 
 ## Roles
 

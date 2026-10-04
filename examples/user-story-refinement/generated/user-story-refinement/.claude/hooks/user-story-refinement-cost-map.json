@@ -1,0 +1,454 @@
+{
+  "bpmn": {
+    "file": "user-story-refinement.bpmn",
+    "elements": [
+      "B4",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "D2a",
+      "D2b",
+      "D2c",
+      "D2d",
+      "D3",
+      "D4",
+      "D6",
+      "E1",
+      "E2",
+      "E3",
+      "E5",
+      "I1",
+      "I2",
+      "I4",
+      "I6",
+      "K2",
+      "K3",
+      "K4",
+      "K5",
+      "K6",
+      "P1",
+      "P10",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6",
+      "P7",
+      "P8"
+    ]
+  },
+  "workflow": "user-story-refinement",
+  "pattern": "skill-chain-hooks",
+  "generatorVersion": "0.1.0",
+  "orchestration": {
+    "skills": [
+      "user-story-refinement"
+    ],
+    "agentTypes": []
+  },
+  "humanCheckpoints": [
+    {
+      "id": "B5",
+      "label": "Erkenntnisse auswerten"
+    },
+    {
+      "id": "D1",
+      "label": "Refinement mit Three Amigos ansetzen"
+    },
+    {
+      "id": "D5",
+      "label": "Story Points schätzen (Planning Poker)"
+    },
+    {
+      "id": "E4",
+      "label": "Story priorisieren & Übernahme ins Backlog freigeben"
+    },
+    {
+      "id": "I3",
+      "label": "Änderungshinweis an offene Story freigeben"
+    },
+    {
+      "id": "I5",
+      "label": "Parken im Opportunity Backlog freigeben"
+    },
+    {
+      "id": "K1",
+      "label": "Anliegen mit Feedbackgeber klären"
+    },
+    {
+      "id": "P9",
+      "label": "Zusammenführung freigeben"
+    }
+  ],
+  "elements": {
+    "B4": {
+      "label": "Time-boxed Spike durchführen",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "C1": {
+      "label": "Story unter Epic in User Story Map einordnen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-writing"
+      ]
+    },
+    "C2": {
+      "label": "Story im Connextra-Format formulieren",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-writing"
+      ]
+    },
+    "C3": {
+      "label": "Bezug zu Epic, Fachkonzept & Feedback dokumentieren",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-writing"
+      ]
+    },
+    "C4": {
+      "label": "INVEST-Selbstcheck durchführen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-writing"
+      ]
+    },
+    "D2a": {
+      "label": "Wert & Fachregeln erläutern (Was)",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D2b": {
+      "label": "Umsetzung & Abhängigkeiten klären (Wie)",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D2c": {
+      "label": "Randfälle & Negativszenarien identifizieren",
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D2d": {
+      "label": "Wireframes & Interaktionsfluss beilegen",
+      "lane": "ux-design",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D3": {
+      "label": "Akzeptanzkriterien in Given-When-Then formulieren",
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D4": {
+      "label": "Beispieltabellen ergänzen (Specification by Example)",
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "D6": {
+      "label": "Story vertikal schneiden (Splitting-Muster)",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-refinement"
+      ]
+    },
+    "E1": {
+      "label": "Definition of Ready prüfen",
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-readiness"
+      ]
+    },
+    "E2": {
+      "label": "Begriffe mit Domänenmodell abgleichen",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-readiness"
+      ]
+    },
+    "E3": {
+      "label": "Auf Fake- & Waisen-Story prüfen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-readiness"
+      ]
+    },
+    "E5": {
+      "label": "Nachgelagerten Spike durchführen",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-readiness"
+      ]
+    },
+    "I1": {
+      "label": "Feedback erfassen & als Problem formulieren",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-triage"
+      ]
+    },
+    "I2": {
+      "label": "Verwandte Stories & Epics im Backlog suchen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-triage"
+      ]
+    },
+    "I4": {
+      "label": "Änderungshinweis an offener Story ergänzen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-publish"
+      ]
+    },
+    "I6": {
+      "label": "Feedback im Opportunity Backlog anlegen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-publish"
+      ]
+    },
+    "K2": {
+      "label": "Gegen Epic-Ziel & Fachkonzept prüfen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "K3": {
+      "label": "Ist-/Soll-Delta beschreiben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "K4": {
+      "label": "Technische Auswirkungen grob einschätzen",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "K5": {
+      "label": "Betroffene Screens & Abläufe identifizieren",
+      "lane": "ux-design",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "K6": {
+      "label": "Klickbaren Prototyp mit Nutzern testen",
+      "lane": "ux-design",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-clarification"
+      ]
+    },
+    "P1": {
+      "label": "Auf Duplikate & Überschneidungen prüfen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P10": {
+      "label": "Betroffene Stories im Backlog markieren",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-publish"
+      ]
+    },
+    "P2": {
+      "label": "Akzeptanzkriterien gegen bestehende Stories abgleichen",
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P3": {
+      "label": "Abhängigkeiten & Reihenfolge prüfen",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P4": {
+      "label": "Plausibilitätsbefund zusammenführen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P5": {
+      "label": "Anpassungen an betroffenen Stories vorschlagen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P6": {
+      "label": "Mit bestehender Story zusammenführen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-publish"
+      ]
+    },
+    "P7": {
+      "label": "Konsistenz mit bestehenden Abläufen prüfen",
+      "lane": "ux-design",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-check"
+      ]
+    },
+    "P8": {
+      "label": "Story im Backlog anlegen & in Ready-Spalte stellen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "story-backlog-publish"
+      ]
+    }
+  },
+  "skills": {
+    "story-backlog-check": [
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P7"
+    ],
+    "story-backlog-publish": [
+      "I4",
+      "I6",
+      "P10",
+      "P6",
+      "P8"
+    ],
+    "story-clarification": [
+      "B4",
+      "K2",
+      "K3",
+      "K4",
+      "K5",
+      "K6"
+    ],
+    "story-readiness": [
+      "E1",
+      "E2",
+      "E3",
+      "E5"
+    ],
+    "story-refinement": [
+      "D2a",
+      "D2b",
+      "D2c",
+      "D2d",
+      "D3",
+      "D4",
+      "D6"
+    ],
+    "story-triage": [
+      "I1",
+      "I2"
+    ],
+    "story-writing": [
+      "C1",
+      "C2",
+      "C3",
+      "C4"
+    ]
+  },
+  "agentTypes": {
+    "story-product-owner": "product-owner",
+    "story-qa": "qa-test",
+    "story-tech-lead": "entwicklung",
+    "story-ux-designer": "ux-design"
+  },
+  "lanes": {
+    "entwicklung": "Entwicklung / Tech Lead",
+    "product-owner": "Product Owner / BA",
+    "qa-test": "QA / Test",
+    "ux-design": "UX & Design"
+  }
+}
