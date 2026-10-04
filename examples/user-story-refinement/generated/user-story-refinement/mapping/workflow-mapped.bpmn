@@ -18,8 +18,21 @@
   <bpmn:category id="Category_Group_Phase6">
     <bpmn:categoryValue id="CategoryValue_Group_Phase6" value="6 Plausibilität gegen Backlog &#38; Freigabe" />
   </bpmn:category>
+  <bpmn:dataStore id="DataStore_MethodikPhase1" />
+  <bpmn:dataStore id="DataStore_MethodikPhase2" />
+  <bpmn:dataStore id="DataStore_MethodikPhase3" />
+  <bpmn:dataStore id="DataStore_MethodikPhase4" />
+  <bpmn:dataStore id="DataStore_MethodikPhase5" />
+  <bpmn:dataStore id="DataStore_MethodikPhase6" />
   <bpmn:process id="Process_UserStoryErstellenVerfeinern" name="Neue User Story aus Feedback erstellen &#38; verfeinern" isExecutable="false">
     <bpmn:documentation>Weg einer neuen User Story in einem laufenden IT-Projekt: Produktvision, Epics, Fachkonzept und Backlog existieren bereits. Auslöser ist Feedback von Nutzern oder Stakeholdern. Triage (Bug, Änderung an offener Story, neue Story unter einem Epic, parken), leichtgewichtige fachliche Klärung gegen Epic-Ziel und Fachkonzept, Spike oder Prototyp nur bei echter Unsicherheit, Story formulieren und gegen INVEST prüfen, Three-Amigos-Refinement, Definition of Ready und abschließend eine Plausibilitätsprüfung gegen die übrigen Stories im Backlog (Duplikate, widersprüchliche Akzeptanzkriterien, Abhängigkeiten, Ablaufkonsistenz). Wissensbasis: NotebookLM-Notebook "The Product - Business Design".</bpmn:documentation>
+    <bpmn:ioSpecification id="IoSpec_UserStory">
+      <bpmn:dataInput id="DataInput_Feedback" name="Feedback" />
+      <bpmn:inputSet id="InputSet_UserStory">
+        <bpmn:dataInputRefs>DataInput_Feedback</bpmn:dataInputRefs>
+      </bpmn:inputSet>
+      <bpmn:outputSet id="OutputSet_UserStory" />
+    </bpmn:ioSpecification>
     <bpmn:laneSet id="LaneSet_UserStory">
       <bpmn:lane id="Lane_ProductOwner" name="Product Owner / BA">
         <bpmn:flowNodeRef>Start_FeedbackEingegangen</bpmn:flowNodeRef>
@@ -103,6 +116,16 @@
       <bpmn:documentation>Input: Rohfeedback, Quelle und Absender. Output: Feedback-Eintrag - beobachtetes Problem statt gewünschter Lösung ('Ich muss Abweichungen schneller finden' statt 'Ich brauche einen Excel-Export'), betroffene Nutzerrolle, Häufigkeit, Dringlichkeit, Link zur Quelle.</bpmn:documentation>
       <bpmn:incoming>F01</bpmn:incoming>
       <bpmn:outgoing>F02</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase1_I1" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataInput_Feedback_I1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase1_I1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_DataInput_Feedback_I1">
+        <bpmn:sourceRef>DataInput_Feedback</bpmn:sourceRef>
+        <bpmn:targetRef>Property_DataInput_Feedback_I1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Feedback_Ref">
         <bpmn:targetRef>DO_Feedback_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -112,9 +135,14 @@
       <bpmn:incoming>F02</bpmn:incoming>
       <bpmn:outgoing>F03</bpmn:outgoing>
       <bpmn:property id="Property_DO_Backlog_Ref" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase1_I2" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref">
         <bpmn:sourceRef>DO_Backlog_Ref</bpmn:sourceRef>
         <bpmn:targetRef>Property_DO_Backlog_Ref</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I2">
+        <bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase1_I2</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Bug" name="Fehlverhalten einer bestehenden Funktion?" default="F05">
@@ -144,15 +172,25 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Kandidatenliste. Output: kurze Rückfrage beim Nutzer oder Stakeholder bestätigt - Problem hinter dem Wunsch, gewünschtes Ergebnis, Dringlichkeit, Ansprechpartner für das Refinement.</bpmn:documentation>
       <bpmn:incoming>F08</bpmn:incoming>
       <bpmn:outgoing>F09</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase2_K1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:serviceTask id="K2" name="Gegen Epic-Ziel &#38; Fachkonzept prüfen">
       <bpmn:documentation>Input: bestätigtes Anliegen, Epic mit Ziel-KPI, Fachkonzept (Fachregeln, Domänenmodell, Ubiquitous Language). Output: Befund - unterstützt das Anliegen das Epic-Ziel, welche Fachregeln und Begriffe sind betroffen, widerspricht es dem Fachkonzept?</bpmn:documentation>
       <bpmn:incoming>F09</bpmn:incoming>
       <bpmn:outgoing>F10</bpmn:outgoing>
       <bpmn:property id="Property_DO_Fachkonzept_Ref" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase2_K2" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Fachkonzept_Ref">
         <bpmn:sourceRef>DO_Fachkonzept_Ref</bpmn:sourceRef>
         <bpmn:targetRef>Property_DO_Fachkonzept_Ref</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K2">
+        <bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase2_K2</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Fachkonzept" name="Mit dem Fachkonzept vereinbar?" default="F12">
@@ -174,6 +212,11 @@
       <bpmn:documentation>Input: Befund zu Epic und Fachkonzept, Feedback-Eintrag. Output: Ist-/Soll-Delta - wie verhält sich das System heute, wie nach der Story, was gehört ausdrücklich nicht dazu.</bpmn:documentation>
       <bpmn:incoming>F13</bpmn:incoming>
       <bpmn:outgoing>F16</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K3">
+        <bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase2_K3</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_ScopeDelta_Ref">
         <bpmn:targetRef>DO_ScopeDelta_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -187,6 +230,11 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Architektur, betroffene Komponenten. Output: grobe Größe, betroffene Schnittstellen, offene technische Risiken (unbekannte APIs, Performance, Compliance-Grenzen).</bpmn:documentation>
       <bpmn:incoming>F15</bpmn:incoming>
       <bpmn:outgoing>F18</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K4">
+        <bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase2_K4</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:parallelGateway id="Par_KlaerungJoin">
       <bpmn:incoming>F16</bpmn:incoming>
@@ -226,6 +274,11 @@
       <bpmn:documentation>Input: Spike-Report oder Testergebnisse, Ist-/Soll-Delta. Output: Entscheidung weitermachen oder verwerfen mit Begründung; ggf. angepasstes Delta.</bpmn:documentation>
       <bpmn:incoming>F25</bpmn:incoming>
       <bpmn:outgoing>F26</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_B5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_B5">
+        <bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase2_B5</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gw_Erkenntnis" name="Tragen die Erkenntnisse die Story?" default="F27">
       <bpmn:incoming>F26</bpmn:incoming>
@@ -244,6 +297,11 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Epic, User Story Map (Backbone aus Aktivitäten und Nutzer-Tasks). Output: Platz der Story unter ihrem Nutzer-Task im Epic-Zweig.</bpmn:documentation>
       <bpmn:incoming>F29</bpmn:incoming>
       <bpmn:outgoing>F30</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase3_C1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Merge_Formulierung">
       <bpmn:incoming>F30</bpmn:incoming>
@@ -255,6 +313,11 @@
       <bpmn:documentation>Input: Platz in der Story Map, Nutzerrolle aus dem Fachkonzept, Problemformulierung, Ist-/Soll-Delta. Output: Story-Karte 'Als [Rolle] möchte ich [Ziel], damit [Nutzen]' - Nutzerziel statt 'Das System soll ...'. Die Karte ist ein Platzhalter für ein Gespräch, kein Vertrag.</bpmn:documentation>
       <bpmn:incoming>F31</bpmn:incoming>
       <bpmn:outgoing>F32</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C2" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C2">
+        <bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase3_C2</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_StoryKarte_Ref">
         <bpmn:targetRef>DO_StoryKarte_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -263,11 +326,21 @@
       <bpmn:documentation>Input: Story-Karte, Epic, Fachkonzept, Feedback-Eintrag. Output: Traceability-Eintrag Vision -&gt; Geschäftsziel -&gt; Epic -&gt; User Story, betroffene Fachkonzept-Kapitel und Link zum auslösenden Feedback.</bpmn:documentation>
       <bpmn:incoming>F32</bpmn:incoming>
       <bpmn:outgoing>F33</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C3">
+        <bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase3_C3</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:businessRuleTask id="C4" name="INVEST-Selbstcheck durchführen">
       <bpmn:documentation>Input: Story-Karte. Output: INVEST-Befund (Independent, Negotiable, Valuable, Estimable, Small, Testable) je Kriterium.</bpmn:documentation>
       <bpmn:incoming>F33</bpmn:incoming>
       <bpmn:outgoing>F34</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C4">
+        <bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase3_C4</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:businessRuleTask>
     <bpmn:exclusiveGateway id="Gw_Invest" name="INVEST erfüllt?" default="F35">
       <bpmn:incoming>F34</bpmn:incoming>
@@ -285,6 +358,11 @@
       <bpmn:documentation>Input: Story-Karte, INVEST-Befund. Output: Refinement-Termin mit PO/BA, Entwicklung und QA (Power of Three), UX bei Bedarf; Feedbackgeber optional eingeladen.</bpmn:documentation>
       <bpmn:incoming>F37</bpmn:incoming>
       <bpmn:outgoing>F38</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:parallelGateway id="Par_AmigosSplit">
       <bpmn:incoming>F38</bpmn:incoming>
@@ -297,6 +375,11 @@
       <bpmn:documentation>Input: Story-Karte, Fachkonzept, Ist-/Soll-Delta. Output: Fachregeln, gewünschtes Ergebnis, Wert - das 'Was', nicht das 'Wie'.</bpmn:documentation>
       <bpmn:incoming>F39</bpmn:incoming>
       <bpmn:outgoing>F43</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D2a" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D2a">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D2a</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D2d" name="Wireframes &#38; Interaktionsfluss beilegen">
       <bpmn:documentation>Input: betroffene Screens, bestehende Wireframes, Prototyp (falls getestet). Output: Wireframes/Mockups und Interaktionsfluss an der Story.</bpmn:documentation>
@@ -324,6 +407,11 @@
       <bpmn:documentation>Input: Fachregeln, Rand- und Negativfälle, Wireframes. Output: Akzeptanzkriterien als BDD-Szenarien (Gegeben / Wenn / Dann) auf der Rückseite der Karte.</bpmn:documentation>
       <bpmn:incoming>F47</bpmn:incoming>
       <bpmn:outgoing>F76</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D3">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D3</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Akzeptanz_Ref">
         <bpmn:targetRef>DO_Akzeptanz_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -332,6 +420,11 @@
       <bpmn:documentation>Input: Akzeptanzkriterien. Output: Beispieltabellen mit konkreten Werten statt abstrakter Regeln.</bpmn:documentation>
       <bpmn:incoming>F76</bpmn:incoming>
       <bpmn:outgoing>F77</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D4">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D4</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Merge_Schaetzung">
       <bpmn:incoming>F77</bpmn:incoming>
@@ -342,6 +435,11 @@
       <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, technischer Ansatz. Output: relative Schätzung in Story Points, vom Team gemeinsam verantwortet.</bpmn:documentation>
       <bpmn:incoming>F78</bpmn:incoming>
       <bpmn:outgoing>F79</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D5">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D5</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Schaetzung_Ref">
         <bpmn:targetRef>DO_Schaetzung_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -360,11 +458,21 @@
       <bpmn:documentation>Input: zu große Story, Akzeptanzkriterien. Output: kleinere Teil-Stories (1-3 Tage) durch vertikalen Schnitt: Slice the Cake, Basisnutzen zuerst, Referenzdaten fest verdrahten, Backend 'auf Krücken'. Jede Teil-Story wird neu formuliert.</bpmn:documentation>
       <bpmn:incoming>F51</bpmn:incoming>
       <bpmn:outgoing>F52</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D6" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D6">
+        <bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase4_D6</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:businessRuleTask id="E1" name="Definition of Ready prüfen">
       <bpmn:documentation>Input: verfeinerte Story, Akzeptanzkriterien, Schätzung. Output: DoR-Befund: INVEST erfüllt, konkrete Rolle statt 'der Nutzer', Akzeptanzkriterien bestätigt, Wireframes vorhanden, keine offenen Blocker, Größe unter Kapazitätsgrenze.</bpmn:documentation>
       <bpmn:incoming>F50</bpmn:incoming>
       <bpmn:outgoing>F53</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase5_E1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase5_E1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase5</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase5_E1</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:businessRuleTask>
     <bpmn:serviceTask id="E2" name="Begriffe mit Domänenmodell abgleichen">
       <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, Domänenmodell aus dem Fachkonzept. Output: Abweichungen von der Ubiquitous Language (Entitäten, Rollen, Regeln).</bpmn:documentation>
@@ -375,6 +483,11 @@
       <bpmn:documentation>Input: Story-Karte, Traceability-Eintrag. Output: Befund, ob die Story ein verkleideter Entwickler-Task oder ohne Bezug zu Epic/Ziel ist.</bpmn:documentation>
       <bpmn:incoming>F54</bpmn:incoming>
       <bpmn:outgoing>F55</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase5_E3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase5_E3">
+        <bpmn:sourceRef>StoreRef_MethodikPhase5</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase5_E3</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Ready" name="Definition of Ready erfüllt?" default="F57">
       <bpmn:incoming>F55</bpmn:incoming>
@@ -403,9 +516,14 @@
       <bpmn:incoming>F62</bpmn:incoming>
       <bpmn:outgoing>F66</bpmn:outgoing>
       <bpmn:property id="Property_DO_Backlog_Ref2" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase6_P1" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref2">
         <bpmn:sourceRef>DO_Backlog_Ref2</bpmn:sourceRef>
         <bpmn:targetRef>Property_DO_Backlog_Ref2</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P1">
+        <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase6_P1</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="P7" name="Konsistenz mit bestehenden Abläufen prüfen">
@@ -434,6 +552,11 @@
       <bpmn:documentation>Input: Befunde zu Duplikaten, Abläufen, Abhängigkeiten und Akzeptanzkriterien. Output: Plausibilitätsbefund - Duplikate, Widersprüche, Abhängigkeiten und betroffene Stories, je mit Fundstelle.</bpmn:documentation>
       <bpmn:incoming>F70</bpmn:incoming>
       <bpmn:outgoing>F71</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P4">
+        <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase6_P4</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Plausi_Ref">
         <bpmn:targetRef>DO_Plausi_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -448,6 +571,11 @@
       <bpmn:documentation>Input: neue Story, gefundenes Duplikat. Output: bestehende Story um die neuen Akzeptanzkriterien und den Feedback-Link ergänzt; die neue Story entfällt.</bpmn:documentation>
       <bpmn:incoming>F74</bpmn:incoming>
       <bpmn:outgoing>F75</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P6" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P6">
+        <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase6_P6</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_StoryZusammengefuehrt" name="Story in bestehende Story überführt">
       <bpmn:incoming>F75</bpmn:incoming>
@@ -456,11 +584,21 @@
       <bpmn:documentation>Input: Plausibilitätsbefund. Output: Abhängigkeitslinks und Anpassungshinweise an betroffenen oder überholten Stories. Ohne Befund entfällt dieser Schritt.</bpmn:documentation>
       <bpmn:incoming>F72</bpmn:incoming>
       <bpmn:outgoing>F80</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P5">
+        <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase6_P5</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:userTask id="E4" name="Story priorisieren &#38; in Ready-Spalte stellen">
       <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story. Output: priorisierte, sprint-reife User Story in der Ready-Spalte des Boards.</bpmn:documentation>
       <bpmn:incoming>F80</bpmn:incoming>
       <bpmn:outgoing>F81</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_E4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_E4">
+        <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
+        <bpmn:targetRef>Property_MethodikPhase6_E4</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_ReadyStory_Ref">
         <bpmn:targetRef>DO_ReadyStory_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
@@ -601,6 +739,30 @@
     <bpmn:dataObjectReference id="DO_Plausi_Ref" name="Plausibilitätsbefund" dataObjectRef="DO_Plausi" />
     <bpmn:dataObject id="DO_ReadyStory" />
     <bpmn:dataObjectReference id="DO_ReadyStory_Ref" name="Sprint-reife User Story" dataObjectRef="DO_ReadyStory" />
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase1" name="Product-Methodik: Eingang &#38; Triage" dataStoreRef="DataStore_MethodikPhase1">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase2" name="Product-Methodik: Fachliche Klärung" dataStoreRef="DataStore_MethodikPhase2">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase3" name="Product-Methodik: Story formulieren" dataStoreRef="DataStore_MethodikPhase3">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase4" name="Product-Methodik: Refinement" dataStoreRef="DataStore_MethodikPhase4">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase5" name="Product-Methodik: Definition of Ready" dataStoreRef="DataStore_MethodikPhase5">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase6" name="Product-Methodik: Plausibilität &#38; Freigabe" dataStoreRef="DataStore_MethodikPhase6">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
     <bpmn:group id="Group_Phase1" categoryValueRef="CategoryValue_Group_Phase1" />
     <bpmn:group id="Group_Phase2" categoryValueRef="CategoryValue_Group_Phase2" />
     <bpmn:group id="Group_Phase3" categoryValueRef="CategoryValue_Group_Phase3" />
@@ -608,265 +770,297 @@
     <bpmn:group id="Group_Phase5" categoryValueRef="CategoryValue_Group_Phase5" />
     <bpmn:group id="Group_Phase6" categoryValueRef="CategoryValue_Group_Phase6" />
     <bpmn:textAnnotation id="MapAnnot_1_TextAnnotation">
+      <bpmn:text>Prozess-Eingabe: feedback</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_1_Association" sourceRef="DataInput_Feedback" targetRef="MapAnnot_1_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_2_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_1_Association" sourceRef="Start_FeedbackEingegangen" targetRef="MapAnnot_1_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_2_TextAnnotation">
-      <bpmn:text>Skill: story-triage</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_2_Association" sourceRef="I1" targetRef="MapAnnot_2_TextAnnotation" />
+    <bpmn:association id="MapAnnot_2_Association" sourceRef="Start_FeedbackEingegangen" targetRef="MapAnnot_2_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_3_TextAnnotation">
       <bpmn:text>Skill: story-triage</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_3_Association" sourceRef="I2" targetRef="MapAnnot_3_TextAnnotation" />
+    <bpmn:association id="MapAnnot_3_Association" sourceRef="I1" targetRef="MapAnnot_3_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_4_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+      <bpmn:text>Skill: story-triage</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_4_Association" sourceRef="Gw_Bug" targetRef="MapAnnot_4_TextAnnotation" />
+    <bpmn:association id="MapAnnot_4_Association" sourceRef="I2" targetRef="MapAnnot_4_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_5_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_5_Association" sourceRef="End_BugUebergeben" targetRef="MapAnnot_5_TextAnnotation" />
+    <bpmn:association id="MapAnnot_5_Association" sourceRef="Gw_Bug" targetRef="MapAnnot_5_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_6_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_6_Association" sourceRef="Gw_Bezug" targetRef="MapAnnot_6_TextAnnotation" />
+    <bpmn:association id="MapAnnot_6_Association" sourceRef="End_BugUebergeben" targetRef="MapAnnot_6_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_7_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_7_Association" sourceRef="End_AnStoryUebergeben" targetRef="MapAnnot_7_TextAnnotation" />
+    <bpmn:association id="MapAnnot_7_Association" sourceRef="Gw_Bezug" targetRef="MapAnnot_7_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_8_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_8_Association" sourceRef="End_FeedbackGeparkt" targetRef="MapAnnot_8_TextAnnotation" />
+    <bpmn:association id="MapAnnot_8_Association" sourceRef="End_AnStoryUebergeben" targetRef="MapAnnot_8_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_9_TextAnnotation">
-      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_9_Association" sourceRef="K1" targetRef="MapAnnot_9_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_10_TextAnnotation">
-      <bpmn:text>Skill: story-clarification</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_10_Association" sourceRef="K2" targetRef="MapAnnot_10_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_11_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_11_Association" sourceRef="Gw_Fachkonzept" targetRef="MapAnnot_11_TextAnnotation" />
+    <bpmn:association id="MapAnnot_9_Association" sourceRef="End_FeedbackGeparkt" targetRef="MapAnnot_9_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_10_TextAnnotation">
+      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_10_Association" sourceRef="K1" targetRef="MapAnnot_10_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_11_TextAnnotation">
+      <bpmn:text>Skill: story-clarification</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_11_Association" sourceRef="K2" targetRef="MapAnnot_11_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_12_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_12_Association" sourceRef="End_FachkonzeptAenderung" targetRef="MapAnnot_12_TextAnnotation" />
+    <bpmn:association id="MapAnnot_12_Association" sourceRef="Gw_Fachkonzept" targetRef="MapAnnot_12_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_13_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_13_Association" sourceRef="Par_KlaerungSplit" targetRef="MapAnnot_13_TextAnnotation" />
+    <bpmn:association id="MapAnnot_13_Association" sourceRef="End_FachkonzeptAenderung" targetRef="MapAnnot_13_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_14_TextAnnotation">
-      <bpmn:text>Skill: story-clarification</bpmn:text>
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_14_Association" sourceRef="K3" targetRef="MapAnnot_14_TextAnnotation" />
+    <bpmn:association id="MapAnnot_14_Association" sourceRef="Par_KlaerungSplit" targetRef="MapAnnot_14_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_15_TextAnnotation">
       <bpmn:text>Skill: story-clarification</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_15_Association" sourceRef="K5" targetRef="MapAnnot_15_TextAnnotation" />
+    <bpmn:association id="MapAnnot_15_Association" sourceRef="K3" targetRef="MapAnnot_15_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_16_TextAnnotation">
       <bpmn:text>Skill: story-clarification</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_16_Association" sourceRef="K4" targetRef="MapAnnot_16_TextAnnotation" />
+    <bpmn:association id="MapAnnot_16_Association" sourceRef="K5" targetRef="MapAnnot_16_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_17_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+      <bpmn:text>Skill: story-clarification</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_17_Association" sourceRef="Par_KlaerungJoin" targetRef="MapAnnot_17_TextAnnotation" />
+    <bpmn:association id="MapAnnot_17_Association" sourceRef="K4" targetRef="MapAnnot_17_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_18_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_18_Association" sourceRef="Gw_Unsicherheit" targetRef="MapAnnot_18_TextAnnotation" />
+    <bpmn:association id="MapAnnot_18_Association" sourceRef="Par_KlaerungJoin" targetRef="MapAnnot_18_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_19_TextAnnotation">
-      <bpmn:text>Skill: story-clarification</bpmn:text>
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_19_Association" sourceRef="K6" targetRef="MapAnnot_19_TextAnnotation" />
+    <bpmn:association id="MapAnnot_19_Association" sourceRef="Gw_Unsicherheit" targetRef="MapAnnot_19_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_20_TextAnnotation">
       <bpmn:text>Skill: story-clarification</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_20_Association" sourceRef="B4" targetRef="MapAnnot_20_TextAnnotation" />
+    <bpmn:association id="MapAnnot_20_Association" sourceRef="K6" targetRef="MapAnnot_20_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_21_TextAnnotation">
+      <bpmn:text>Skill: story-clarification</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_21_Association" sourceRef="B4" targetRef="MapAnnot_21_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_22_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_21_Association" sourceRef="Merge_Validierung" targetRef="MapAnnot_21_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_22_TextAnnotation">
+    <bpmn:association id="MapAnnot_22_Association" sourceRef="Merge_Validierung" targetRef="MapAnnot_22_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_23_TextAnnotation">
       <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_22_Association" sourceRef="B5" targetRef="MapAnnot_22_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_23_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_23_Association" sourceRef="Gw_Erkenntnis" targetRef="MapAnnot_23_TextAnnotation" />
+    <bpmn:association id="MapAnnot_23_Association" sourceRef="B5" targetRef="MapAnnot_23_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_24_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_24_Association" sourceRef="End_AnliegenVerworfen" targetRef="MapAnnot_24_TextAnnotation" />
+    <bpmn:association id="MapAnnot_24_Association" sourceRef="Gw_Erkenntnis" targetRef="MapAnnot_24_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_25_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_25_Association" sourceRef="Merge_Einordnung" targetRef="MapAnnot_25_TextAnnotation" />
+    <bpmn:association id="MapAnnot_25_Association" sourceRef="End_AnliegenVerworfen" targetRef="MapAnnot_25_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_26_TextAnnotation">
-      <bpmn:text>Skill: story-writing</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_26_Association" sourceRef="C1" targetRef="MapAnnot_26_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_27_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_27_Association" sourceRef="Merge_Formulierung" targetRef="MapAnnot_27_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_28_TextAnnotation">
+    <bpmn:association id="MapAnnot_26_Association" sourceRef="Merge_Einordnung" targetRef="MapAnnot_26_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_27_TextAnnotation">
       <bpmn:text>Skill: story-writing</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_28_Association" sourceRef="C2" targetRef="MapAnnot_28_TextAnnotation" />
+    <bpmn:association id="MapAnnot_27_Association" sourceRef="C1" targetRef="MapAnnot_27_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_28_TextAnnotation">
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_28_Association" sourceRef="Merge_Formulierung" targetRef="MapAnnot_28_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_29_TextAnnotation">
       <bpmn:text>Skill: story-writing</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_29_Association" sourceRef="C3" targetRef="MapAnnot_29_TextAnnotation" />
+    <bpmn:association id="MapAnnot_29_Association" sourceRef="C2" targetRef="MapAnnot_29_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_30_TextAnnotation">
       <bpmn:text>Skill: story-writing</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_30_Association" sourceRef="C4" targetRef="MapAnnot_30_TextAnnotation" />
+    <bpmn:association id="MapAnnot_30_Association" sourceRef="C3" targetRef="MapAnnot_30_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_31_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+      <bpmn:text>Skill: story-writing</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_31_Association" sourceRef="Gw_Invest" targetRef="MapAnnot_31_TextAnnotation" />
+    <bpmn:association id="MapAnnot_31_Association" sourceRef="C4" targetRef="MapAnnot_31_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_32_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_32_Association" sourceRef="Merge_Refinement" targetRef="MapAnnot_32_TextAnnotation" />
+    <bpmn:association id="MapAnnot_32_Association" sourceRef="Gw_Invest" targetRef="MapAnnot_32_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_33_TextAnnotation">
-      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_33_Association" sourceRef="D1" targetRef="MapAnnot_33_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_34_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_34_Association" sourceRef="Par_AmigosSplit" targetRef="MapAnnot_34_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_35_TextAnnotation">
-      <bpmn:text>Skill: story-refinement</bpmn:text>
+    <bpmn:association id="MapAnnot_33_Association" sourceRef="Merge_Refinement" targetRef="MapAnnot_33_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_34_TextAnnotation">
+      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_35_Association" sourceRef="D2a" targetRef="MapAnnot_35_TextAnnotation" />
+    <bpmn:association id="MapAnnot_34_Association" sourceRef="D1" targetRef="MapAnnot_34_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_35_TextAnnotation">
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_35_Association" sourceRef="Par_AmigosSplit" targetRef="MapAnnot_35_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_36_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_36_Association" sourceRef="D2d" targetRef="MapAnnot_36_TextAnnotation" />
+    <bpmn:association id="MapAnnot_36_Association" sourceRef="D2a" targetRef="MapAnnot_36_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_37_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_37_Association" sourceRef="D2b" targetRef="MapAnnot_37_TextAnnotation" />
+    <bpmn:association id="MapAnnot_37_Association" sourceRef="D2d" targetRef="MapAnnot_37_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_38_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_38_Association" sourceRef="D2c" targetRef="MapAnnot_38_TextAnnotation" />
+    <bpmn:association id="MapAnnot_38_Association" sourceRef="D2b" targetRef="MapAnnot_38_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_39_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_39_Association" sourceRef="Par_AmigosJoin" targetRef="MapAnnot_39_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_40_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_40_Association" sourceRef="D3" targetRef="MapAnnot_40_TextAnnotation" />
+    <bpmn:association id="MapAnnot_39_Association" sourceRef="D2c" targetRef="MapAnnot_39_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_40_TextAnnotation">
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_40_Association" sourceRef="Par_AmigosJoin" targetRef="MapAnnot_40_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_41_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_41_Association" sourceRef="D4" targetRef="MapAnnot_41_TextAnnotation" />
+    <bpmn:association id="MapAnnot_41_Association" sourceRef="D3" targetRef="MapAnnot_41_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_42_TextAnnotation">
+      <bpmn:text>Skill: story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_42_Association" sourceRef="D4" targetRef="MapAnnot_42_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_43_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_42_Association" sourceRef="Merge_Schaetzung" targetRef="MapAnnot_42_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_43_TextAnnotation">
+    <bpmn:association id="MapAnnot_43_Association" sourceRef="Merge_Schaetzung" targetRef="MapAnnot_43_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_44_TextAnnotation">
       <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_43_Association" sourceRef="D5" targetRef="MapAnnot_43_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_44_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_44_Association" sourceRef="Gw_Schaetzung" targetRef="MapAnnot_44_TextAnnotation" />
+    <bpmn:association id="MapAnnot_44_Association" sourceRef="D5" targetRef="MapAnnot_44_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_45_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_45_Association" sourceRef="Gw_Sprintgroesse" targetRef="MapAnnot_45_TextAnnotation" />
+    <bpmn:association id="MapAnnot_45_Association" sourceRef="Gw_Schaetzung" targetRef="MapAnnot_45_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_46_TextAnnotation">
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_46_Association" sourceRef="Gw_Sprintgroesse" targetRef="MapAnnot_46_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_47_TextAnnotation">
       <bpmn:text>Skill: story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_46_Association" sourceRef="D6" targetRef="MapAnnot_46_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_47_TextAnnotation">
-      <bpmn:text>Skill: story-readiness</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_47_Association" sourceRef="E1" targetRef="MapAnnot_47_TextAnnotation" />
+    <bpmn:association id="MapAnnot_47_Association" sourceRef="D6" targetRef="MapAnnot_47_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_48_TextAnnotation">
       <bpmn:text>Skill: story-readiness</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_48_Association" sourceRef="E2" targetRef="MapAnnot_48_TextAnnotation" />
+    <bpmn:association id="MapAnnot_48_Association" sourceRef="E1" targetRef="MapAnnot_48_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_49_TextAnnotation">
       <bpmn:text>Skill: story-readiness</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_49_Association" sourceRef="E3" targetRef="MapAnnot_49_TextAnnotation" />
+    <bpmn:association id="MapAnnot_49_Association" sourceRef="E2" targetRef="MapAnnot_49_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_50_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_50_Association" sourceRef="Gw_Ready" targetRef="MapAnnot_50_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_51_TextAnnotation">
       <bpmn:text>Skill: story-readiness</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_51_Association" sourceRef="E5" targetRef="MapAnnot_51_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_52_TextAnnotation">
+    <bpmn:association id="MapAnnot_50_Association" sourceRef="E3" targetRef="MapAnnot_50_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_51_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_52_Association" sourceRef="End_StoryVerworfen" targetRef="MapAnnot_52_TextAnnotation" />
+    <bpmn:association id="MapAnnot_51_Association" sourceRef="Gw_Ready" targetRef="MapAnnot_51_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_52_TextAnnotation">
+      <bpmn:text>Skill: story-readiness</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_52_Association" sourceRef="E5" targetRef="MapAnnot_52_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_53_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_53_Association" sourceRef="Par_PlausiSplit" targetRef="MapAnnot_53_TextAnnotation" />
+    <bpmn:association id="MapAnnot_53_Association" sourceRef="End_StoryVerworfen" targetRef="MapAnnot_53_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_54_TextAnnotation">
-      <bpmn:text>Skill: story-backlog-check</bpmn:text>
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_54_Association" sourceRef="P1" targetRef="MapAnnot_54_TextAnnotation" />
+    <bpmn:association id="MapAnnot_54_Association" sourceRef="Par_PlausiSplit" targetRef="MapAnnot_54_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_55_TextAnnotation">
       <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_55_Association" sourceRef="P7" targetRef="MapAnnot_55_TextAnnotation" />
+    <bpmn:association id="MapAnnot_55_Association" sourceRef="P1" targetRef="MapAnnot_55_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_56_TextAnnotation">
       <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_56_Association" sourceRef="P3" targetRef="MapAnnot_56_TextAnnotation" />
+    <bpmn:association id="MapAnnot_56_Association" sourceRef="P7" targetRef="MapAnnot_56_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_57_TextAnnotation">
       <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_57_Association" sourceRef="P2" targetRef="MapAnnot_57_TextAnnotation" />
+    <bpmn:association id="MapAnnot_57_Association" sourceRef="P3" targetRef="MapAnnot_57_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_58_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+      <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_58_Association" sourceRef="Par_PlausiJoin" targetRef="MapAnnot_58_TextAnnotation" />
+    <bpmn:association id="MapAnnot_58_Association" sourceRef="P2" targetRef="MapAnnot_58_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_59_TextAnnotation">
-      <bpmn:text>Skill: story-backlog-check</bpmn:text>
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_59_Association" sourceRef="P4" targetRef="MapAnnot_59_TextAnnotation" />
+    <bpmn:association id="MapAnnot_59_Association" sourceRef="Par_PlausiJoin" targetRef="MapAnnot_59_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_60_TextAnnotation">
-      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+      <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_60_Association" sourceRef="Gw_Plausibel" targetRef="MapAnnot_60_TextAnnotation" />
+    <bpmn:association id="MapAnnot_60_Association" sourceRef="P4" targetRef="MapAnnot_60_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_61_TextAnnotation">
-      <bpmn:text>Skill: story-backlog-check</bpmn:text>
-    </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_61_Association" sourceRef="P6" targetRef="MapAnnot_61_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_62_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_62_Association" sourceRef="End_StoryZusammengefuehrt" targetRef="MapAnnot_62_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_63_TextAnnotation">
+    <bpmn:association id="MapAnnot_61_Association" sourceRef="Gw_Plausibel" targetRef="MapAnnot_61_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_62_TextAnnotation">
       <bpmn:text>Skill: story-backlog-check</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_63_Association" sourceRef="P5" targetRef="MapAnnot_63_TextAnnotation" />
+    <bpmn:association id="MapAnnot_62_Association" sourceRef="P6" targetRef="MapAnnot_62_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_63_TextAnnotation">
+      <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_63_Association" sourceRef="End_StoryZusammengefuehrt" targetRef="MapAnnot_63_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_64_TextAnnotation">
+      <bpmn:text>Skill: story-backlog-check</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_64_Association" sourceRef="P5" targetRef="MapAnnot_64_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_65_TextAnnotation">
       <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_64_Association" sourceRef="E4" targetRef="MapAnnot_64_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_65_TextAnnotation">
+    <bpmn:association id="MapAnnot_65_Association" sourceRef="E4" targetRef="MapAnnot_65_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_66_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_65_Association" sourceRef="End_StorySprintReady" targetRef="MapAnnot_65_TextAnnotation" />
+    <bpmn:association id="MapAnnot_66_Association" sourceRef="End_StorySprintReady" targetRef="MapAnnot_66_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_67_TextAnnotation">
+      <bpmn:text>Prozess-Ausgabe: sprint-reife-user-story</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_67_Association" sourceRef="DO_ReadyStory_Ref" targetRef="MapAnnot_67_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_68_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_68_Association" sourceRef="StoreRef_MethodikPhase1" targetRef="MapAnnot_68_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_69_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_69_Association" sourceRef="StoreRef_MethodikPhase2" targetRef="MapAnnot_69_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_70_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_70_Association" sourceRef="StoreRef_MethodikPhase3" targetRef="MapAnnot_70_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_71_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_71_Association" sourceRef="StoreRef_MethodikPhase4" targetRef="MapAnnot_71_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_72_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_72_Association" sourceRef="StoreRef_MethodikPhase5" targetRef="MapAnnot_72_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_73_TextAnnotation">
+      <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_73_Association" sourceRef="StoreRef_MethodikPhase6" targetRef="MapAnnot_73_TextAnnotation" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_UserStory">
     <bpmndi:BPMNPlane id="BPMNPlane_UserStory" bpmnElement="Process_UserStoryErstellenVerfeinern">
@@ -1176,6 +1370,17 @@
           <dc:Bounds x="410" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataInput_Feedback_di" bpmnElement="DataInput_Feedback" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="190" y="230" width="36" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="178" y="212" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_DataInput_Feedback_I1_di" bpmnElement="DataIn_DataInput_Feedback_I1">
+        <di:waypoint x="226" y="255" />
+        <di:waypoint x="430" y="255" />
+        <di:waypoint x="430" y="285" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataOut_DO_Feedback_Ref_di" bpmnElement="DataOut_DO_Feedback_Ref">
         <di:waypoint x="480" y="285" />
         <di:waypoint x="480" y="240" />
@@ -1280,7 +1485,7 @@
         <di:waypoint x="9780" y="285" />
         <di:waypoint x="9780" y="240" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="DO_ReadyStory_Ref_di" bpmnElement="DO_ReadyStory_Ref">
+      <bpmndi:BPMNShape id="DO_ReadyStory_Ref_di" bpmnElement="DO_ReadyStory_Ref" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
         <dc:Bounds x="10422" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="10370" y="150" width="140" height="36" />
@@ -1732,460 +1937,698 @@
         <di:waypoint x="10510" y="330" />
         <di:waypoint x="10642" y="330" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase1_di" bpmnElement="StoreRef_MethodikPhase1" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="565" y="440" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="520" y="492" width="140" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase1_I1_di" bpmnElement="DataIn_MethodikPhase1_I1">
+        <di:waypoint x="575" y="440" />
+        <di:waypoint x="575" y="410" />
+        <di:waypoint x="480" y="410" />
+        <di:waypoint x="480" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase1_I2_di" bpmnElement="DataIn_MethodikPhase1_I2">
+        <di:waypoint x="605" y="440" />
+        <di:waypoint x="605" y="410" />
+        <di:waypoint x="700" y="410" />
+        <di:waypoint x="700" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase2_di" bpmnElement="StoreRef_MethodikPhase2" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="1960" y="450" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1920" y="502" width="130" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K2_di" bpmnElement="DataIn_MethodikPhase2_K2">
+        <di:waypoint x="1970" y="450" />
+        <di:waypoint x="1970" y="420" />
+        <di:waypoint x="1680" y="420" />
+        <di:waypoint x="1680" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K3_di" bpmnElement="DataIn_MethodikPhase2_K3">
+        <di:waypoint x="2000" y="450" />
+        <di:waypoint x="2000" y="420" />
+        <di:waypoint x="2340" y="420" />
+        <di:waypoint x="2340" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K4_di" bpmnElement="DataIn_MethodikPhase2_K4">
+        <di:waypoint x="2010" y="475" />
+        <di:waypoint x="2060" y="475" />
+        <di:waypoint x="2060" y="915" />
+        <di:waypoint x="2300" y="915" />
+        <di:waypoint x="2300" y="945" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase3_di" bpmnElement="StoreRef_MethodikPhase3" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="4835" y="190" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="4795" y="150" width="130" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C2_di" bpmnElement="DataIn_MethodikPhase3_C2">
+        <di:waypoint x="4845" y="240" />
+        <di:waypoint x="4845" y="265" />
+        <di:waypoint x="4690" y="265" />
+        <di:waypoint x="4690" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C4_di" bpmnElement="DataIn_MethodikPhase3_C4">
+        <di:waypoint x="4875" y="240" />
+        <di:waypoint x="4875" y="265" />
+        <di:waypoint x="5070" y="265" />
+        <di:waypoint x="5070" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C1_di" bpmnElement="DataIn_MethodikPhase3_C1">
+        <di:waypoint x="4835" y="215" />
+        <di:waypoint x="4760" y="215" />
+        <di:waypoint x="4760" y="135" />
+        <di:waypoint x="4200" y="135" />
+        <di:waypoint x="4200" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C3_di" bpmnElement="DataIn_MethodikPhase3_C3">
+        <di:waypoint x="4860" y="240" />
+        <di:waypoint x="4860" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase4_di" bpmnElement="StoreRef_MethodikPhase4" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="6805" y="1365" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="6655" y="1376" width="145" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D3_di" bpmnElement="DataIn_MethodikPhase4_D3">
+        <di:waypoint x="6815" y="1365" />
+        <di:waypoint x="6815" y="1350" />
+        <di:waypoint x="6720" y="1350" />
+        <di:waypoint x="6720" y="1335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D4_di" bpmnElement="DataIn_MethodikPhase4_D4">
+        <di:waypoint x="6845" y="1365" />
+        <di:waypoint x="6845" y="1350" />
+        <di:waypoint x="6940" y="1350" />
+        <di:waypoint x="6940" y="1335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D2a_di" bpmnElement="DataIn_MethodikPhase4_D2a">
+        <di:waypoint x="6830" y="1415" />
+        <di:waypoint x="6830" y="1430" />
+        <di:waypoint x="6420" y="1430" />
+        <di:waypoint x="6420" y="520" />
+        <di:waypoint x="6280" y="520" />
+        <di:waypoint x="6280" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D6_di" bpmnElement="DataIn_MethodikPhase4_D6">
+        <di:waypoint x="6855" y="1390" />
+        <di:waypoint x="7840" y="1390" />
+        <di:waypoint x="7840" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase5_di" bpmnElement="StoreRef_MethodikPhase5" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="8150" y="1365" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="8035" y="1376" width="110" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E1_di" bpmnElement="DataIn_MethodikPhase5_E1">
+        <di:waypoint x="8175" y="1365" />
+        <di:waypoint x="8175" y="1335" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E3_di" bpmnElement="DataIn_MethodikPhase5_E3">
+        <di:waypoint x="8200" y="1390" />
+        <di:waypoint x="8580" y="1390" />
+        <di:waypoint x="8580" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase6_di" bpmnElement="StoreRef_MethodikPhase6" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="9535" y="190" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="9490" y="150" width="140" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P1_di" bpmnElement="DataIn_MethodikPhase6_P1">
+        <di:waypoint x="9545" y="240" />
+        <di:waypoint x="9545" y="262" />
+        <di:waypoint x="9390" y="262" />
+        <di:waypoint x="9390" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P4_di" bpmnElement="DataIn_MethodikPhase6_P4">
+        <di:waypoint x="9575" y="240" />
+        <di:waypoint x="9575" y="262" />
+        <di:waypoint x="9740" y="262" />
+        <di:waypoint x="9740" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P5_di" bpmnElement="DataIn_MethodikPhase6_P5">
+        <di:waypoint x="9585" y="215" />
+        <di:waypoint x="9660" y="215" />
+        <di:waypoint x="9660" y="135" />
+        <di:waypoint x="10220" y="135" />
+        <di:waypoint x="10220" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P6_di" bpmnElement="DataIn_MethodikPhase6_P6">
+        <di:waypoint x="9535" y="215" />
+        <di:waypoint x="9470" y="215" />
+        <di:waypoint x="9470" y="520" />
+        <di:waypoint x="10220" y="520" />
+        <di:waypoint x="10220" y="490" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K1_di" bpmnElement="DataIn_MethodikPhase2_K1">
+        <di:waypoint x="1960" y="465" />
+        <di:waypoint x="1460" y="465" />
+        <di:waypoint x="1460" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_B5_di" bpmnElement="DataIn_MethodikPhase2_B5">
+        <di:waypoint x="1960" y="490" />
+        <di:waypoint x="1900" y="490" />
+        <di:waypoint x="1900" y="1100" />
+        <di:waypoint x="3440" y="1100" />
+        <di:waypoint x="3440" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D1_di" bpmnElement="DataIn_MethodikPhase4_D1">
+        <di:waypoint x="6810" y="1415" />
+        <di:waypoint x="6810" y="1421" />
+        <di:waypoint x="5840" y="1421" />
+        <di:waypoint x="5840" y="375" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D5_di" bpmnElement="DataIn_MethodikPhase4_D5">
+        <di:waypoint x="6855" y="1375" />
+        <di:waypoint x="7380" y="1375" />
+        <di:waypoint x="7380" y="1035" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_E4_di" bpmnElement="DataIn_MethodikPhase6_E4">
+        <di:waypoint x="9585" y="195" />
+        <di:waypoint x="9640" y="195" />
+        <di:waypoint x="9640" y="95" />
+        <di:waypoint x="10530" y="95" />
+        <di:waypoint x="10530" y="262" />
+        <di:waypoint x="10490" y="262" />
+        <di:waypoint x="10490" y="285" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_1_TextAnnotation_di" bpmnElement="MapAnnot_1_TextAnnotation">
-        <dc:Bounds x="308" y="378" width="220" height="46" />
+        <dc:Bounds x="256" y="415" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_1_Association_di" bpmnElement="MapAnnot_1_Association">
-        <di:waypoint x="278" y="330" />
-        <di:waypoint x="308" y="401" />
+        <di:waypoint x="226" y="255" />
+        <di:waypoint x="256" y="430" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_2_TextAnnotation_di" bpmnElement="MapAnnot_2_TextAnnotation">
-        <dc:Bounds x="580" y="245" width="220" height="30" />
+        <dc:Bounds x="308" y="500" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_2_Association_di" bpmnElement="MapAnnot_2_Association">
+        <di:waypoint x="278" y="330" />
+        <di:waypoint x="308" y="523" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_3_TextAnnotation_di" bpmnElement="MapAnnot_3_TextAnnotation">
+        <dc:Bounds x="580" y="245" width="220" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_3_Association_di" bpmnElement="MapAnnot_3_Association">
         <di:waypoint x="550" y="330" />
         <di:waypoint x="580" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_3_TextAnnotation_di" bpmnElement="MapAnnot_3_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_4_TextAnnotation_di" bpmnElement="MapAnnot_4_TextAnnotation">
         <dc:Bounds x="800" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_3_Association_di" bpmnElement="MapAnnot_3_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_4_Association_di" bpmnElement="MapAnnot_4_Association">
         <di:waypoint x="770" y="330" />
         <di:waypoint x="800" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_4_TextAnnotation_di" bpmnElement="MapAnnot_4_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_5_TextAnnotation_di" bpmnElement="MapAnnot_5_TextAnnotation">
         <dc:Bounds x="975" y="371" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_4_Association_di" bpmnElement="MapAnnot_4_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_5_Association_di" bpmnElement="MapAnnot_5_Association">
         <di:waypoint x="945" y="330" />
         <di:waypoint x="975" y="394" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_5_TextAnnotation_di" bpmnElement="MapAnnot_5_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_6_TextAnnotation_di" bpmnElement="MapAnnot_6_TextAnnotation">
         <dc:Bounds x="968" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_5_Association_di" bpmnElement="MapAnnot_5_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_6_Association_di" bpmnElement="MapAnnot_6_Association">
         <di:waypoint x="938" y="215" />
         <di:waypoint x="968" y="164" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_6_TextAnnotation_di" bpmnElement="MapAnnot_6_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_7_TextAnnotation_di" bpmnElement="MapAnnot_7_TextAnnotation">
         <dc:Bounds x="1195" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_6_Association_di" bpmnElement="MapAnnot_6_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_7_Association_di" bpmnElement="MapAnnot_7_Association">
         <di:waypoint x="1165" y="330" />
         <di:waypoint x="1195" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_7_TextAnnotation_di" bpmnElement="MapAnnot_7_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_8_TextAnnotation_di" bpmnElement="MapAnnot_8_TextAnnotation">
         <dc:Bounds x="1188" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_7_Association_di" bpmnElement="MapAnnot_7_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_8_Association_di" bpmnElement="MapAnnot_8_Association">
         <di:waypoint x="1158" y="215" />
         <di:waypoint x="1188" y="164" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_8_TextAnnotation_di" bpmnElement="MapAnnot_8_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_9_TextAnnotation_di" bpmnElement="MapAnnot_9_TextAnnotation">
         <dc:Bounds x="1188" y="493" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_8_Association_di" bpmnElement="MapAnnot_8_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_9_Association_di" bpmnElement="MapAnnot_9_Association">
         <di:waypoint x="1158" y="445" />
         <di:waypoint x="1188" y="516" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_9_TextAnnotation_di" bpmnElement="MapAnnot_9_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_10_TextAnnotation_di" bpmnElement="MapAnnot_10_TextAnnotation">
         <dc:Bounds x="1560" y="412" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_9_Association_di" bpmnElement="MapAnnot_9_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_10_Association_di" bpmnElement="MapAnnot_10_Association">
         <di:waypoint x="1530" y="330" />
         <di:waypoint x="1560" y="435" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_10_TextAnnotation_di" bpmnElement="MapAnnot_10_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_11_TextAnnotation_di" bpmnElement="MapAnnot_11_TextAnnotation">
         <dc:Bounds x="1780" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_10_Association_di" bpmnElement="MapAnnot_10_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_11_Association_di" bpmnElement="MapAnnot_11_Association">
         <di:waypoint x="1750" y="330" />
         <di:waypoint x="1780" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_11_TextAnnotation_di" bpmnElement="MapAnnot_11_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_12_TextAnnotation_di" bpmnElement="MapAnnot_12_TextAnnotation">
         <dc:Bounds x="1955" y="371" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_11_Association_di" bpmnElement="MapAnnot_11_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_12_Association_di" bpmnElement="MapAnnot_12_Association">
         <di:waypoint x="1925" y="330" />
         <di:waypoint x="1955" y="394" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_12_TextAnnotation_di" bpmnElement="MapAnnot_12_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_13_TextAnnotation_di" bpmnElement="MapAnnot_13_TextAnnotation">
         <dc:Bounds x="1948" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_12_Association_di" bpmnElement="MapAnnot_12_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_13_Association_di" bpmnElement="MapAnnot_13_Association">
         <di:waypoint x="1918" y="215" />
         <di:waypoint x="1948" y="164" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_13_TextAnnotation_di" bpmnElement="MapAnnot_13_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_14_TextAnnotation_di" bpmnElement="MapAnnot_14_TextAnnotation">
         <dc:Bounds x="2175" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_13_Association_di" bpmnElement="MapAnnot_13_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_14_Association_di" bpmnElement="MapAnnot_14_Association">
         <di:waypoint x="2145" y="330" />
         <di:waypoint x="2175" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_14_TextAnnotation_di" bpmnElement="MapAnnot_14_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_15_TextAnnotation_di" bpmnElement="MapAnnot_15_TextAnnotation">
         <dc:Bounds x="2440" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_14_Association_di" bpmnElement="MapAnnot_14_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_15_Association_di" bpmnElement="MapAnnot_15_Association">
         <di:waypoint x="2410" y="330" />
         <di:waypoint x="2440" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_15_TextAnnotation_di" bpmnElement="MapAnnot_15_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_16_TextAnnotation_di" bpmnElement="MapAnnot_16_TextAnnotation">
         <dc:Bounds x="2440" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_15_Association_di" bpmnElement="MapAnnot_15_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_16_Association_di" bpmnElement="MapAnnot_16_Association">
         <di:waypoint x="2410" y="690" />
         <di:waypoint x="2440" y="620" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_16_TextAnnotation_di" bpmnElement="MapAnnot_16_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_17_TextAnnotation_di" bpmnElement="MapAnnot_17_TextAnnotation">
         <dc:Bounds x="2440" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_16_Association_di" bpmnElement="MapAnnot_16_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_17_Association_di" bpmnElement="MapAnnot_17_Association">
         <di:waypoint x="2410" y="990" />
         <di:waypoint x="2440" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_17_TextAnnotation_di" bpmnElement="MapAnnot_17_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_18_TextAnnotation_di" bpmnElement="MapAnnot_18_TextAnnotation">
         <dc:Bounds x="2615" y="371" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_17_Association_di" bpmnElement="MapAnnot_17_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_18_Association_di" bpmnElement="MapAnnot_18_Association">
         <di:waypoint x="2585" y="330" />
         <di:waypoint x="2615" y="394" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_18_TextAnnotation_di" bpmnElement="MapAnnot_18_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_19_TextAnnotation_di" bpmnElement="MapAnnot_19_TextAnnotation">
         <dc:Bounds x="2835" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_18_Association_di" bpmnElement="MapAnnot_18_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_19_Association_di" bpmnElement="MapAnnot_19_Association">
         <di:waypoint x="2805" y="330" />
         <di:waypoint x="2835" y="272" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_19_TextAnnotation_di" bpmnElement="MapAnnot_19_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_20_TextAnnotation_di" bpmnElement="MapAnnot_20_TextAnnotation">
         <dc:Bounds x="3100" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_19_Association_di" bpmnElement="MapAnnot_19_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_20_Association_di" bpmnElement="MapAnnot_20_Association">
         <di:waypoint x="3070" y="690" />
         <di:waypoint x="3100" y="620" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_20_TextAnnotation_di" bpmnElement="MapAnnot_20_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_21_TextAnnotation_di" bpmnElement="MapAnnot_21_TextAnnotation">
         <dc:Bounds x="3100" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_20_Association_di" bpmnElement="MapAnnot_20_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_21_Association_di" bpmnElement="MapAnnot_21_Association">
         <di:waypoint x="3070" y="990" />
         <di:waypoint x="3100" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_21_TextAnnotation_di" bpmnElement="MapAnnot_21_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_22_TextAnnotation_di" bpmnElement="MapAnnot_22_TextAnnotation">
         <dc:Bounds x="3275" y="670" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_21_Association_di" bpmnElement="MapAnnot_21_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_22_Association_di" bpmnElement="MapAnnot_22_Association">
         <di:waypoint x="3245" y="690" />
         <di:waypoint x="3275" y="693" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_22_TextAnnotation_di" bpmnElement="MapAnnot_22_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_23_TextAnnotation_di" bpmnElement="MapAnnot_23_TextAnnotation">
         <dc:Bounds x="3540" y="412" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_22_Association_di" bpmnElement="MapAnnot_22_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_23_Association_di" bpmnElement="MapAnnot_23_Association">
         <di:waypoint x="3510" y="330" />
         <di:waypoint x="3540" y="435" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_23_TextAnnotation_di" bpmnElement="MapAnnot_23_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_24_TextAnnotation_di" bpmnElement="MapAnnot_24_TextAnnotation">
         <dc:Bounds x="3715" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_23_Association_di" bpmnElement="MapAnnot_23_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_24_Association_di" bpmnElement="MapAnnot_24_Association">
         <di:waypoint x="3685" y="330" />
         <di:waypoint x="3715" y="272" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_24_TextAnnotation_di" bpmnElement="MapAnnot_24_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_25_TextAnnotation_di" bpmnElement="MapAnnot_25_TextAnnotation">
         <dc:Bounds x="3708" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_24_Association_di" bpmnElement="MapAnnot_24_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_25_Association_di" bpmnElement="MapAnnot_25_Association">
         <di:waypoint x="3678" y="215" />
         <di:waypoint x="3708" y="164" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_25_TextAnnotation_di" bpmnElement="MapAnnot_25_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_26_TextAnnotation_di" bpmnElement="MapAnnot_26_TextAnnotation">
         <dc:Bounds x="4035" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_25_Association_di" bpmnElement="MapAnnot_25_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_26_Association_di" bpmnElement="MapAnnot_26_Association">
         <di:waypoint x="4005" y="330" />
         <di:waypoint x="4035" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_26_TextAnnotation_di" bpmnElement="MapAnnot_26_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_27_TextAnnotation_di" bpmnElement="MapAnnot_27_TextAnnotation">
         <dc:Bounds x="4300" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_26_Association_di" bpmnElement="MapAnnot_26_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_27_Association_di" bpmnElement="MapAnnot_27_Association">
         <di:waypoint x="4270" y="330" />
         <di:waypoint x="4300" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_27_TextAnnotation_di" bpmnElement="MapAnnot_27_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_28_TextAnnotation_di" bpmnElement="MapAnnot_28_TextAnnotation">
         <dc:Bounds x="4475" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_27_Association_di" bpmnElement="MapAnnot_27_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_28_Association_di" bpmnElement="MapAnnot_28_Association">
         <di:waypoint x="4445" y="330" />
         <di:waypoint x="4475" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_28_TextAnnotation_di" bpmnElement="MapAnnot_28_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_29_TextAnnotation_di" bpmnElement="MapAnnot_29_TextAnnotation">
         <dc:Bounds x="4740" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_28_Association_di" bpmnElement="MapAnnot_28_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_29_Association_di" bpmnElement="MapAnnot_29_Association">
         <di:waypoint x="4710" y="330" />
         <di:waypoint x="4740" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_29_TextAnnotation_di" bpmnElement="MapAnnot_29_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_30_TextAnnotation_di" bpmnElement="MapAnnot_30_TextAnnotation">
         <dc:Bounds x="4960" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_29_Association_di" bpmnElement="MapAnnot_29_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_30_Association_di" bpmnElement="MapAnnot_30_Association">
         <di:waypoint x="4930" y="330" />
         <di:waypoint x="4960" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_30_TextAnnotation_di" bpmnElement="MapAnnot_30_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_31_TextAnnotation_di" bpmnElement="MapAnnot_31_TextAnnotation">
         <dc:Bounds x="5180" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_30_Association_di" bpmnElement="MapAnnot_30_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_31_Association_di" bpmnElement="MapAnnot_31_Association">
         <di:waypoint x="5150" y="330" />
         <di:waypoint x="5180" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_31_TextAnnotation_di" bpmnElement="MapAnnot_31_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_32_TextAnnotation_di" bpmnElement="MapAnnot_32_TextAnnotation">
         <dc:Bounds x="5355" y="310" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_31_Association_di" bpmnElement="MapAnnot_31_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_32_Association_di" bpmnElement="MapAnnot_32_Association">
         <di:waypoint x="5325" y="330" />
         <di:waypoint x="5355" y="333" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_32_TextAnnotation_di" bpmnElement="MapAnnot_32_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_33_TextAnnotation_di" bpmnElement="MapAnnot_33_TextAnnotation">
         <dc:Bounds x="5675" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_32_Association_di" bpmnElement="MapAnnot_32_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_33_Association_di" bpmnElement="MapAnnot_33_Association">
         <di:waypoint x="5645" y="330" />
         <di:waypoint x="5675" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_33_TextAnnotation_di" bpmnElement="MapAnnot_33_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_34_TextAnnotation_di" bpmnElement="MapAnnot_34_TextAnnotation">
         <dc:Bounds x="5940" y="229" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_33_Association_di" bpmnElement="MapAnnot_33_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_34_Association_di" bpmnElement="MapAnnot_34_Association">
         <di:waypoint x="5910" y="330" />
         <di:waypoint x="5940" y="252" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_34_TextAnnotation_di" bpmnElement="MapAnnot_34_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_35_TextAnnotation_di" bpmnElement="MapAnnot_35_TextAnnotation">
         <dc:Bounds x="6115" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_34_Association_di" bpmnElement="MapAnnot_34_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_35_Association_di" bpmnElement="MapAnnot_35_Association">
         <di:waypoint x="6085" y="330" />
         <di:waypoint x="6115" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_35_TextAnnotation_di" bpmnElement="MapAnnot_35_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_36_TextAnnotation_di" bpmnElement="MapAnnot_36_TextAnnotation">
         <dc:Bounds x="6380" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_35_Association_di" bpmnElement="MapAnnot_35_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_36_Association_di" bpmnElement="MapAnnot_36_Association">
         <di:waypoint x="6350" y="330" />
         <di:waypoint x="6380" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_36_TextAnnotation_di" bpmnElement="MapAnnot_36_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_37_TextAnnotation_di" bpmnElement="MapAnnot_37_TextAnnotation">
         <dc:Bounds x="6380" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_36_Association_di" bpmnElement="MapAnnot_36_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_37_Association_di" bpmnElement="MapAnnot_37_Association">
         <di:waypoint x="6350" y="690" />
         <di:waypoint x="6380" y="620" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_37_TextAnnotation_di" bpmnElement="MapAnnot_37_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_38_TextAnnotation_di" bpmnElement="MapAnnot_38_TextAnnotation">
         <dc:Bounds x="6380" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_37_Association_di" bpmnElement="MapAnnot_37_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_38_Association_di" bpmnElement="MapAnnot_38_Association">
         <di:waypoint x="6350" y="990" />
         <di:waypoint x="6380" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_38_TextAnnotation_di" bpmnElement="MapAnnot_38_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_39_TextAnnotation_di" bpmnElement="MapAnnot_39_TextAnnotation">
         <dc:Bounds x="6380" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_38_Association_di" bpmnElement="MapAnnot_38_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_39_Association_di" bpmnElement="MapAnnot_39_Association">
         <di:waypoint x="6350" y="1290" />
         <di:waypoint x="6380" y="1220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_39_TextAnnotation_di" bpmnElement="MapAnnot_39_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_40_TextAnnotation_di" bpmnElement="MapAnnot_40_TextAnnotation">
         <dc:Bounds x="6555" y="1392" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_39_Association_di" bpmnElement="MapAnnot_39_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_40_Association_di" bpmnElement="MapAnnot_40_Association">
         <di:waypoint x="6525" y="1290" />
         <di:waypoint x="6555" y="1415" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_40_TextAnnotation_di" bpmnElement="MapAnnot_40_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_41_TextAnnotation_di" bpmnElement="MapAnnot_41_TextAnnotation">
         <dc:Bounds x="6820" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_40_Association_di" bpmnElement="MapAnnot_40_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_41_Association_di" bpmnElement="MapAnnot_41_Association">
         <di:waypoint x="6790" y="1290" />
         <di:waypoint x="6820" y="1220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_41_TextAnnotation_di" bpmnElement="MapAnnot_41_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_42_TextAnnotation_di" bpmnElement="MapAnnot_42_TextAnnotation">
         <dc:Bounds x="7040" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_41_Association_di" bpmnElement="MapAnnot_41_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_42_Association_di" bpmnElement="MapAnnot_42_Association">
         <di:waypoint x="7010" y="1290" />
         <di:waypoint x="7040" y="1220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_42_TextAnnotation_di" bpmnElement="MapAnnot_42_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_43_TextAnnotation_di" bpmnElement="MapAnnot_43_TextAnnotation">
         <dc:Bounds x="7215" y="1092" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_42_Association_di" bpmnElement="MapAnnot_42_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_43_Association_di" bpmnElement="MapAnnot_43_Association">
         <di:waypoint x="7185" y="990" />
         <di:waypoint x="7215" y="1115" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_43_TextAnnotation_di" bpmnElement="MapAnnot_43_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_44_TextAnnotation_di" bpmnElement="MapAnnot_44_TextAnnotation">
         <dc:Bounds x="7480" y="889" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_43_Association_di" bpmnElement="MapAnnot_43_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_44_Association_di" bpmnElement="MapAnnot_44_Association">
         <di:waypoint x="7450" y="990" />
         <di:waypoint x="7480" y="912" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_44_TextAnnotation_di" bpmnElement="MapAnnot_44_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_45_TextAnnotation_di" bpmnElement="MapAnnot_45_TextAnnotation">
         <dc:Bounds x="7655" y="970" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_44_Association_di" bpmnElement="MapAnnot_44_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_45_Association_di" bpmnElement="MapAnnot_45_Association">
         <di:waypoint x="7625" y="990" />
         <di:waypoint x="7655" y="993" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_45_TextAnnotation_di" bpmnElement="MapAnnot_45_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_46_TextAnnotation_di" bpmnElement="MapAnnot_46_TextAnnotation">
         <dc:Bounds x="7875" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_45_Association_di" bpmnElement="MapAnnot_45_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_46_Association_di" bpmnElement="MapAnnot_46_Association">
         <di:waypoint x="7845" y="330" />
         <di:waypoint x="7875" y="272" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_46_TextAnnotation_di" bpmnElement="MapAnnot_46_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_47_TextAnnotation_di" bpmnElement="MapAnnot_47_TextAnnotation">
         <dc:Bounds x="7920" y="360" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_46_Association_di" bpmnElement="MapAnnot_46_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_47_Association_di" bpmnElement="MapAnnot_47_Association">
         <di:waypoint x="7890" y="445" />
         <di:waypoint x="7920" y="375" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_47_TextAnnotation_di" bpmnElement="MapAnnot_47_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_48_TextAnnotation_di" bpmnElement="MapAnnot_48_TextAnnotation">
         <dc:Bounds x="8240" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_47_Association_di" bpmnElement="MapAnnot_47_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_48_Association_di" bpmnElement="MapAnnot_48_Association">
         <di:waypoint x="8210" y="1290" />
         <di:waypoint x="8240" y="1220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_48_TextAnnotation_di" bpmnElement="MapAnnot_48_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_49_TextAnnotation_di" bpmnElement="MapAnnot_49_TextAnnotation">
         <dc:Bounds x="8460" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_48_Association_di" bpmnElement="MapAnnot_48_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_49_Association_di" bpmnElement="MapAnnot_49_Association">
         <di:waypoint x="8430" y="990" />
         <di:waypoint x="8460" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_49_TextAnnotation_di" bpmnElement="MapAnnot_49_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_50_TextAnnotation_di" bpmnElement="MapAnnot_50_TextAnnotation">
         <dc:Bounds x="8680" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_49_Association_di" bpmnElement="MapAnnot_49_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_50_Association_di" bpmnElement="MapAnnot_50_Association">
         <di:waypoint x="8650" y="330" />
         <di:waypoint x="8680" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_50_TextAnnotation_di" bpmnElement="MapAnnot_50_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_51_TextAnnotation_di" bpmnElement="MapAnnot_51_TextAnnotation">
         <dc:Bounds x="8855" y="310" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_50_Association_di" bpmnElement="MapAnnot_50_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_51_Association_di" bpmnElement="MapAnnot_51_Association">
         <di:waypoint x="8825" y="330" />
         <di:waypoint x="8855" y="333" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_51_TextAnnotation_di" bpmnElement="MapAnnot_51_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_52_TextAnnotation_di" bpmnElement="MapAnnot_52_TextAnnotation">
         <dc:Bounds x="8900" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_51_Association_di" bpmnElement="MapAnnot_51_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_52_Association_di" bpmnElement="MapAnnot_52_Association">
         <di:waypoint x="8870" y="990" />
         <di:waypoint x="8900" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_52_TextAnnotation_di" bpmnElement="MapAnnot_52_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_53_TextAnnotation_di" bpmnElement="MapAnnot_53_TextAnnotation">
         <dc:Bounds x="9168" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_52_Association_di" bpmnElement="MapAnnot_52_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_53_Association_di" bpmnElement="MapAnnot_53_Association">
         <di:waypoint x="9138" y="215" />
         <di:waypoint x="9168" y="164" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_53_TextAnnotation_di" bpmnElement="MapAnnot_53_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_54_TextAnnotation_di" bpmnElement="MapAnnot_54_TextAnnotation">
         <dc:Bounds x="9175" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_53_Association_di" bpmnElement="MapAnnot_53_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_54_Association_di" bpmnElement="MapAnnot_54_Association">
         <di:waypoint x="9145" y="330" />
         <di:waypoint x="9175" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_54_TextAnnotation_di" bpmnElement="MapAnnot_54_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_55_TextAnnotation_di" bpmnElement="MapAnnot_55_TextAnnotation">
         <dc:Bounds x="9440" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_54_Association_di" bpmnElement="MapAnnot_54_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_55_Association_di" bpmnElement="MapAnnot_55_Association">
         <di:waypoint x="9410" y="330" />
         <di:waypoint x="9440" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_55_TextAnnotation_di" bpmnElement="MapAnnot_55_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_56_TextAnnotation_di" bpmnElement="MapAnnot_56_TextAnnotation">
         <dc:Bounds x="9440" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_55_Association_di" bpmnElement="MapAnnot_55_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_56_Association_di" bpmnElement="MapAnnot_56_Association">
         <di:waypoint x="9410" y="690" />
         <di:waypoint x="9440" y="620" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_56_TextAnnotation_di" bpmnElement="MapAnnot_56_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_57_TextAnnotation_di" bpmnElement="MapAnnot_57_TextAnnotation">
         <dc:Bounds x="9440" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_56_Association_di" bpmnElement="MapAnnot_56_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_57_Association_di" bpmnElement="MapAnnot_57_Association">
         <di:waypoint x="9410" y="990" />
         <di:waypoint x="9440" y="920" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_57_TextAnnotation_di" bpmnElement="MapAnnot_57_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_58_TextAnnotation_di" bpmnElement="MapAnnot_58_TextAnnotation">
         <dc:Bounds x="9440" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_57_Association_di" bpmnElement="MapAnnot_57_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_58_Association_di" bpmnElement="MapAnnot_58_Association">
         <di:waypoint x="9410" y="1290" />
         <di:waypoint x="9440" y="1220" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_58_TextAnnotation_di" bpmnElement="MapAnnot_58_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_59_TextAnnotation_di" bpmnElement="MapAnnot_59_TextAnnotation">
         <dc:Bounds x="9615" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_58_Association_di" bpmnElement="MapAnnot_58_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_59_Association_di" bpmnElement="MapAnnot_59_Association">
         <di:waypoint x="9585" y="330" />
         <di:waypoint x="9615" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_59_TextAnnotation_di" bpmnElement="MapAnnot_59_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_60_TextAnnotation_di" bpmnElement="MapAnnot_60_TextAnnotation">
         <dc:Bounds x="9880" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_59_Association_di" bpmnElement="MapAnnot_59_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_60_Association_di" bpmnElement="MapAnnot_60_Association">
         <di:waypoint x="9850" y="330" />
         <di:waypoint x="9880" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_60_TextAnnotation_di" bpmnElement="MapAnnot_60_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_61_TextAnnotation_di" bpmnElement="MapAnnot_61_TextAnnotation">
         <dc:Bounds x="10055" y="493" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_60_Association_di" bpmnElement="MapAnnot_60_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_61_Association_di" bpmnElement="MapAnnot_61_Association">
         <di:waypoint x="10025" y="330" />
         <di:waypoint x="10055" y="516" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_61_TextAnnotation_di" bpmnElement="MapAnnot_61_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_62_TextAnnotation_di" bpmnElement="MapAnnot_62_TextAnnotation">
         <dc:Bounds x="10320" y="495" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_61_Association_di" bpmnElement="MapAnnot_61_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_62_Association_di" bpmnElement="MapAnnot_62_Association">
         <di:waypoint x="10290" y="445" />
         <di:waypoint x="10320" y="510" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_62_TextAnnotation_di" bpmnElement="MapAnnot_62_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_63_TextAnnotation_di" bpmnElement="MapAnnot_63_TextAnnotation">
         <dc:Bounds x="10488" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_62_Association_di" bpmnElement="MapAnnot_62_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_63_Association_di" bpmnElement="MapAnnot_63_Association">
         <di:waypoint x="10458" y="445" />
         <di:waypoint x="10488" y="455" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_63_TextAnnotation_di" bpmnElement="MapAnnot_63_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_64_TextAnnotation_di" bpmnElement="MapAnnot_64_TextAnnotation">
         <dc:Bounds x="10320" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_63_Association_di" bpmnElement="MapAnnot_63_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_64_Association_di" bpmnElement="MapAnnot_64_Association">
         <di:waypoint x="10290" y="330" />
         <di:waypoint x="10320" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_64_TextAnnotation_di" bpmnElement="MapAnnot_64_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_65_TextAnnotation_di" bpmnElement="MapAnnot_65_TextAnnotation">
         <dc:Bounds x="10540" y="229" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_64_Association_di" bpmnElement="MapAnnot_64_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_65_Association_di" bpmnElement="MapAnnot_65_Association">
         <di:waypoint x="10510" y="330" />
         <di:waypoint x="10540" y="252" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_65_TextAnnotation_di" bpmnElement="MapAnnot_65_TextAnnotation">
+      <bpmndi:BPMNShape id="MapAnnot_66_TextAnnotation_di" bpmnElement="MapAnnot_66_TextAnnotation">
         <dc:Bounds x="10708" y="317" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_65_Association_di" bpmnElement="MapAnnot_65_Association">
+      <bpmndi:BPMNEdge id="MapAnnot_66_Association_di" bpmnElement="MapAnnot_66_Association">
         <di:waypoint x="10678" y="330" />
         <di:waypoint x="10708" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_67_TextAnnotation_di" bpmnElement="MapAnnot_67_TextAnnotation">
+        <dc:Bounds x="10488" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_67_Association_di" bpmnElement="MapAnnot_67_Association">
+        <di:waypoint x="10458" y="215" />
+        <di:waypoint x="10488" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_68_TextAnnotation_di" bpmnElement="MapAnnot_68_TextAnnotation">
+        <dc:Bounds x="645" y="384" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_68_Association_di" bpmnElement="MapAnnot_68_Association">
+        <di:waypoint x="615" y="465" />
+        <di:waypoint x="645" y="407" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_69_TextAnnotation_di" bpmnElement="MapAnnot_69_TextAnnotation">
+        <dc:Bounds x="2040" y="516" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_69_Association_di" bpmnElement="MapAnnot_69_Association">
+        <di:waypoint x="2010" y="475" />
+        <di:waypoint x="2040" y="539" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_70_TextAnnotation_di" bpmnElement="MapAnnot_70_TextAnnotation">
+        <dc:Bounds x="4915" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_70_Association_di" bpmnElement="MapAnnot_70_Association">
+        <di:waypoint x="4885" y="215" />
+        <di:waypoint x="4915" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_71_TextAnnotation_di" bpmnElement="MapAnnot_71_TextAnnotation">
+        <dc:Bounds x="6885" y="1370" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_71_Association_di" bpmnElement="MapAnnot_71_Association">
+        <di:waypoint x="6855" y="1390" />
+        <di:waypoint x="6885" y="1393" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_72_TextAnnotation_di" bpmnElement="MapAnnot_72_TextAnnotation">
+        <dc:Bounds x="8230" y="1309" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_72_Association_di" bpmnElement="MapAnnot_72_Association">
+        <di:waypoint x="8200" y="1390" />
+        <di:waypoint x="8230" y="1332" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_73_TextAnnotation_di" bpmnElement="MapAnnot_73_TextAnnotation">
+        <dc:Bounds x="9615" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_73_Association_di" bpmnElement="MapAnnot_73_Association">
+        <di:waypoint x="9585" y="215" />
+        <di:waypoint x="9615" y="157" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

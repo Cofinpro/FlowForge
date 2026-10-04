@@ -29,3 +29,9 @@ sources: `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md`. Card template:
 
 Write `stories/<storyId>/04_story.md` from the template; `status: invest-ok` or `invest-failed`.
 Run state and counters live in `00_run.md`; the calling skill updates them.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Story formulieren** (wissen): "Story unter Epic in User Story Map einordnen" → `${CLAUDE_SKILL_DIR}/references/C1.md`; "Story im Connextra-Format formulieren" → `${CLAUDE_SKILL_DIR}/references/C2.md`; "Bezug zu Epic, Fachkonzept & Feedback dokumentieren" → `${CLAUDE_SKILL_DIR}/references/C3.md`; "INVEST-Selbstcheck durchführen" → `${CLAUDE_SKILL_DIR}/references/C4.md`

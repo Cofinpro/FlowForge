@@ -43,3 +43,9 @@ the feedback link to add, combined estimate if several overlap (`status: merge-p
 From the findings: one entry per affected or superseded story in `09_aenderungsvorschlaege.md`
 (story, what to change, dependency link, reason). No findings → write "keine".
 `status: proposed`.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Auf Duplikate & Überschneidungen prüfen" → `${CLAUDE_SKILL_DIR}/references/P1.md`; "Plausibilitätsbefund zusammenführen" → `${CLAUDE_SKILL_DIR}/references/P4.md`; "Mit bestehender Story zusammenführen" → `${CLAUDE_SKILL_DIR}/references/P6.md`; "Betroffene Stories zur Anpassung markieren" → `${CLAUDE_SKILL_DIR}/references/P5.md`

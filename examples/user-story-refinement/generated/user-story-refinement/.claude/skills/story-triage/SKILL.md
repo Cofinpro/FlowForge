@@ -33,3 +33,9 @@ terms and synonyms. Append to `01_feedback.md`:
   offene Story" / "Kein Epic-Bezug / kein Nutzen" / "Neue Story unter bestehendem Epic" (name it).
 
 Set `status: triaged`. The calling skill confirms exits with the user; don't decide them here.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Eingang & Triage** (wissen): "Feedback erfassen & als Problem formulieren" → `${CLAUDE_SKILL_DIR}/references/I1.md`; "Verwandte Stories & Epics im Backlog suchen" → `${CLAUDE_SKILL_DIR}/references/I2.md`

@@ -1,9 +1,10 @@
 ---
 name: user-story-refinement
 description: Turns one piece of user or stakeholder feedback into a sprint-ready user story in a running project that already has a product vision, epics, a Fachkonzept and a backlog ("Neue User Story aus Feedback erstellen & verfeinern") — triage, fachliche Klärung, story writing, Three Amigos refinement, Definition of Ready and a plausibility check against the backlog, pausing for the team at every decision. Use when feedback, a support ticket, a review comment or a change request should become (or be ruled out as) a new User Story, for "aus Feedback eine User Story machen", "Story verfeinern", or to resume such a run from its stories/<id>/ folder.
+argument-hint: "[feedback] [backlog] [fachkonzept]"
 bpmn:
   file: user-story-refinement.bpmn
-  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady]
+  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady, StoreRef_MethodikPhase1, StoreRef_MethodikPhase2, StoreRef_MethodikPhase3, StoreRef_MethodikPhase4, StoreRef_MethodikPhase5, StoreRef_MethodikPhase6, DataInput_Feedback, DO_ReadyStory_Ref]
 ---
 
 # Neue User Story aus Feedback erstellen & verfeinern
@@ -11,6 +12,15 @@ bpmn:
 Generated from `user-story-refinement.bpmn` by `bpmn2agent-generate`. This skill is the spine of
 the process: it walks the six phases in diagram order, calls one phase skill per phase and stops
 for the team at every checkpoint. The team decides; you prepare, propose and record.
+
+## Input
+
+Required: `feedback` (the raw user or stakeholder feedback, as text or a path to a file), `backlog` (location of
+the existing project backlog and user story map) and `fachkonzept` (location of the existing epic and Fachkonzept
+documents). Take them from the invocation arguments. If one is missing, ask the user for it via `AskUserQuestion`
+before starting step 0; never start with a guess. When resuming an existing story folder, take `backlog` and
+`fachkonzept` from its `01_feedback.md` and ask only for what is still missing. If the arguments are only free text, treat all of it as `feedback`
+and ask for `backlog` and `fachkonzept` via `AskUserQuestion`.
 
 ## Ground rules
 
@@ -54,9 +64,8 @@ over file statuses: after a loop back, older files still show their earlier `sta
 
 ## Start: "Nutzer- oder Stakeholder-Feedback eingegangen"
 
-0. Take the feedback (text, ticket, file). If a story folder for it exists, resume it. Otherwise ask
-   once where the backlog / user story map and the epic + Fachkonzept live (paths, a tool, or
-   "paste it"), create `00_run.md` (`position: 0`, `status: running`).
+0. Take the `feedback` argument (text, ticket, file). If a story folder for it exists, resume it. Otherwise create
+   `00_run.md` (`position: 0`, `status: running`).
 
 ## Phase 1 — Eingang & Triage
 
@@ -72,23 +81,26 @@ over file statuses: after a loop back, older files still show their earlier `sta
 
 4. **Checkpoint "Anliegen mit Feedbackgeber klären".** Draft the questions for the feedback giver
    (problem behind the wish, expected outcome, urgency); ask the user for the answers or to confirm
-   the problem statement. Pass: the problem is confirmed and outcome and urgency are known.
+   the problem statement. Pass: the problem is confirmed and outcome and urgency are known. Method and pitfalls:
+   `${CLAUDE_SKILL_DIR}/references/K1.md`.
 5. Invoke `story-clarification` for "Gegen Epic-Ziel & Fachkonzept prüfen".
 6. **"Mit dem Fachkonzept vereinbar?"** — "Nein (Fachkonzept ändern)" → confirm; the change request
    from `01_feedback.md` (conflicting term or rule, why, proposal for the domain experts) goes into
-   `99_uebergabe.md`; end **"Fachkonzept-Änderung beantragt"**. "Ja" → next.
+   `99_uebergabe.md`; end **"Fachkonzept-Änderung beantragt"**. "Ja" → next. Criteria: `${CLAUDE_SKILL_DIR}/references/phase-2-fachliche-klaerung.md` (Decision criteria).
 7. Invoke `story-clarification` for the three perspectives "Ist-/Soll-Delta beschreiben",
    "Betroffene Screens & Abläufe identifizieren", "Technische Auswirkungen grob einschätzen" →
    `02_ist-soll-delta.md` (`done`).
 8. **"Relevante Unsicherheit offen?"** — "Nein" → step 11. "Nutzen / Bedienbarkeit unklar" →
    confirm, `story-clarification` "Klickbaren Prototyp mit Nutzern testen". "Technisch unklar" →
-   confirm, `story-clarification` "Time-boxed Spike durchführen".
+   confirm, `story-clarification` "Time-boxed Spike durchführen". Criteria: `${CLAUDE_SKILL_DIR}/references/phase-2-fachliche-klaerung.md`.
 9. **Checkpoint "Erkenntnisse auswerten".** Hold the test or spike result against these criteria,
-   recommend, and ask: continue or discard. Pass: users confirm the problem and want the solution;
+   recommend, and ask: continue, discard, or another test or spike (stay at this checkpoint and ask for
+   the new result). Pass: users confirm the problem and want the solution;
    the spike shows feasibility at acceptable cost (fail: timebox expired without meeting its
    criteria); the expected behaviour change is plausible. Fail: low demand, or effort out of
-   proportion to the value.
-10. **"Tragen die Erkenntnisse die Story?"** — "Nein" → end **"Anliegen verworfen"**. "Ja" → next.
+   proportion to the value. Evidence and decision options:
+   `${CLAUDE_SKILL_DIR}/references/B5.md`.
+10. **"Tragen die Erkenntnisse die Story?"** — "Nein" → end **"Anliegen verworfen"** (a pivot ends here too: note it in `99_uebergabe.md`). "Ja" → next.
 
 ## Phase 3 — Story formulieren
 
@@ -104,6 +116,7 @@ over file statuses: after a loop back, older files still show their earlier `sta
 13. **Checkpoint "Refinement mit Three Amigos ansetzen".** Propose participants (PO/BA, the
     developers and testers who will deliver it, UX if screens change, optionally the feedback
     giver) and an agenda from `04_story.md`; ask the user to confirm or report the meeting outcome.
+    Preparation, agenda and outputs: `${CLAUDE_SKILL_DIR}/references/D1.md`.
 14. Invoke `story-refinement` for the four perspectives "Wert & Fachregeln erläutern (Was)",
     "Wireframes & Interaktionsfluss beilegen", "Umsetzung & Abhängigkeiten klären (Wie)",
     "Randfälle & Negativszenarien identifizieren", then "Akzeptanzkriterien in Given-When-Then
@@ -113,16 +126,18 @@ over file statuses: after a loop back, older files still show their earlier `sta
     team's cards and its maximum story size for one sprint (default 8 points). Write
     `06_schaetzung.md`: cards per round, outliers and their reasons, `storyPoints`,
     `maxStorySize`.
+    Rules for the rounds and for convergence: `${CLAUDE_SKILL_DIR}/references/D5.md`.
 16. **"Schätzungen konvergiert?"** — converged when highest and lowest card are at most one scale
     step apart, or the team accepts the majority value (`status: converged`). "Nein (Ausreißer
     begründen)" → `loops.poker` + 1, ask the outliers' reasons, next round. In round 3: take the
-    majority value, document the outliers (`status: cap-majority`), continue with a risk note.
+    majority value, document the outliers (`status: cap-majority`), continue with a risk note. Criteria: `${CLAUDE_SKILL_DIR}/references/phase-4-refinement.md`.
 17. **"Passt die Story in einen Sprint?"** — "Ja" when `storyPoints` ≤ `maxStorySize` → phase 5.
     "Nein (zu groß)" → if `loops.split` is already 3, escalate (see "Loop caps"). Otherwise
     `story-refinement` "Story vertikal schneiden (Splitting-Muster)" writes the part stories;
     set the parent's `04_story.md` to `split`, its `00_run.md` to `ended`. Then run **every
     part story** one after another from step 11, each with its own `00_run.md`
-    (`parentStory` set, `loops.split` = parent's + 1, other counters 0, `position: 10`).
+    (`parentStory` set, `loops.split` = parent's + 1, other counters 0, `position: 10`). Sprint-size criteria:
+    `${CLAUDE_SKILL_DIR}/references/phase-4-refinement.md`.
 
 ## Phase 5 — Definition of Ready
 
@@ -145,7 +160,7 @@ over file statuses: after a loop back, older files still show their earlier `sta
     and the merge proposal and ask: merge / not a duplicate (continue with "Ja") / back to
     refinement (counts like "Widerspruch"). On merge, set `09_aenderungsvorschlaege.md` to
     `approved`, end **"Story in bestehende Story überführt"**. "Ja" → `story-backlog-check`
-    "Betroffene Stories zur Anpassung markieren".
+    "Betroffene Stories zur Anpassung markieren". Criteria: `${CLAUDE_SKILL_DIR}/references/phase-6-plausibilitaet-freigabe.md`.
 22. **Checkpoint "Story priorisieren & in Ready-Spalte stellen".** Ask for the Cost of Delay parts
     (user/business value, time criticality, risk reduction) and propose a position by WSJF = Cost of
     Delay ÷ story points. Show the change proposals from `09_aenderungsvorschlaege.md` (if the file
@@ -153,6 +168,7 @@ over file statuses: after a loop back, older files still show their earlier `sta
     final story text, link to `05_akzeptanzkriterien.md`, `storyPoints`, WSJF inputs,
     `priority`, risk notes. Set `04_story.md` to `ready`, `09_…` to `approved`, end **"Story
     sprint-ready"**. Moving the card is the team's step.
+    Criteria for the position and for Ready: `${CLAUDE_SKILL_DIR}/references/E4.md`.
 
 ## Loop caps on readiness, consistency and size
 
@@ -168,3 +184,18 @@ Except "Story sprint-ready", write `99_uebergabe.md`: `status` = the end's label
 reason and what the team should do next. On "Story verworfen" and "Anliegen verworfen" set
 `04_story.md` (if it exists) to `discarded`. Set `00_run.md` to `ended` and tell the user what to
 carry over into their tools. After a split, continue with the next part story.
+
+## End result
+
+The result of a run is the "Sprint-reife User Story": `stories/<storyId>/10_ready-story.md` (frontmatter
+`storyId`, `version`, `status`, `epic`, `storyPoints`, `priority`), written only at the end **"Story sprint-ready"**.
+Every other end hands over through `99_uebergabe.md`. After a vertical split, each part story ends with
+its own `10_ready-story.md`.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. The phase files beside them hold the gateway criteria.
+
+- **Product-Methodik: Fachliche Klärung** (wissen): "Anliegen mit Feedbackgeber klären" → `${CLAUDE_SKILL_DIR}/references/K1.md`; "Erkenntnisse auswerten" → `${CLAUDE_SKILL_DIR}/references/B5.md`
+- **Product-Methodik: Refinement** (wissen): "Refinement mit Three Amigos ansetzen" → `${CLAUDE_SKILL_DIR}/references/D1.md`; "Story Points schätzen (Planning Poker)" → `${CLAUDE_SKILL_DIR}/references/D5.md`
+- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Story priorisieren & in Ready-Spalte stellen" → `${CLAUDE_SKILL_DIR}/references/E4.md`

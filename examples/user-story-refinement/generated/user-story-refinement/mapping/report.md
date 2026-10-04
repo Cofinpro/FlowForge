@@ -1,18 +1,18 @@
 ---
 bpmn:
   file: user-story-refinement.bpmn
-  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady]
+  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady, StoreRef_MethodikPhase1, StoreRef_MethodikPhase2, StoreRef_MethodikPhase3, StoreRef_MethodikPhase4, StoreRef_MethodikPhase5, StoreRef_MethodikPhase6, DataInput_Feedback, DO_ReadyStory_Ref]
 ---
 
 # Mapping report — user-story-refinement
 
-Generated 2026-09-26 from `generated/user-story-refinement/workflow-spec.yaml`
-(source `user-story-refinement.bpmn` @ `d97297a43b12…`). This is the
+Generated 2026-09-26, updated 2026-10-04 (context sources) from `generated/user-story-refinement/workflow-spec.yaml`
+(source `user-story-refinement.bpmn` @ `c6c9b4a41a7d…`). This is the
 trace target for `bpmn2agent-verify` — every row below must correspond to what's on disk.
 
 ## Review status
 
-**Nothing red, no open questions.** All 65 elements resolved to a concrete kind.
+**Nothing red, no open questions.** All 73 elements resolved to a concrete kind (65 diagram nodes, 6 data stores, 2 process input/output elements).
 0 elements deliberately not generated (grey).
 Interactive, read-only view of the same mapping: [`index.html`](index.html).
 
@@ -31,6 +31,8 @@ Dein Diagramm wird von einem Menschen begleitet: fünfmal entscheidet oder best�
 
 Everything installable is under `.claude/`: 7 skills (one entry skill spanning all elements, six
 phase skills), no agents, no scripts, no hooks, no `settings.json`.
+Per reading task a knowledge file sits beside the skill that owns it (`references/<taskId>.md`, 24 files); the
+entry skill also carries the three phase files its five checkpoints point to.
 
 ## Legend
 
@@ -41,6 +43,7 @@ phase skills), no agents, no scripts, no hooks, no `settings.json`.
 | Amber | `human-checkpoint` | `userTask`: a person decides here (AskUserQuestion in the entry skill). |
 | **Grey** | `not-generated` | Deliberately not generated. None in this run. |
 | **Red** | `unresolved` | Unmapped or open. None in this run. |
+| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (here: six knowledge stores) or the process-wide input/output; no file of its own. |
 
 (Full legend: `bpmn2agent-design/references/mapping-rubric.md`.)
 
@@ -49,70 +52,78 @@ phase skills), no agents, no scripts, no hooks, no `settings.json`.
 | BPMN element | Type | Lane | Kind | Generated artifact(s) | Notes |
 |---|---|---|---|---|---|
 | "Nutzer- oder Stakeholder-Feedback eingegangen" | startEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Feedback erfassen & als Problem formulieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-triage/SKILL.md` |  |
-| "Verwandte Stories & Epics im Backlog suchen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-triage/SKILL.md` |  |
+| "Feedback erfassen & als Problem formulieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-triage/SKILL.md` | knowledge: references/I1.md |
+| "Verwandte Stories & Epics im Backlog suchen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-triage/SKILL.md` | knowledge: references/I2.md |
 | "Fehlverhalten einer bestehenden Funktion?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward branch continues without asking. |
 | "An Fehlerbearbeitung übergeben" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | "Wie hängt das Anliegen mit dem Backlog zusammen?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward branch continues without asking. |
 | "Als Änderung an offene Story übergeben" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | "Feedback im Opportunity Backlog geparkt" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Anliegen mit Feedbackgeber klären" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human |
-| "Gegen Epic-Ziel & Fachkonzept prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-clarification/SKILL.md` |  |
+| "Anliegen mit Feedbackgeber klären" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human; knowledge: references/K1.md |
+| "Gegen Epic-Ziel & Fachkonzept prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-clarification/SKILL.md` | knowledge: references/K2.md |
 | "Mit dem Fachkonzept vereinbar?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward branch continues without asking. |
 | "Fachkonzept-Änderung beantragt" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | Par_KlaerungSplit | parallelGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Ist-/Soll-Delta beschreiben" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-clarification/SKILL.md` |  |
+| "Ist-/Soll-Delta beschreiben" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-clarification/SKILL.md` | knowledge: references/K3.md |
 | "Betroffene Screens & Abläufe identifizieren" | serviceTask | UX & Design | skill | `.claude/skills/story-clarification/SKILL.md` |  |
-| "Technische Auswirkungen grob einschätzen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-clarification/SKILL.md` |  |
+| "Technische Auswirkungen grob einschätzen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-clarification/SKILL.md` | knowledge: references/K4.md |
 | Par_KlaerungJoin | parallelGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | "Relevante Unsicherheit offen?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward branch continues without asking. |
 | "Klickbaren Prototyp mit Nutzern testen" | serviceTask | UX & Design | skill | `.claude/skills/story-clarification/SKILL.md` |  |
 | "Time-boxed Spike durchführen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-clarification/SKILL.md` |  |
 | Merge_Validierung | exclusiveGateway | UX & Design | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Erkenntnisse auswerten" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human |
+| "Erkenntnisse auswerten" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human; knowledge: references/B5.md |
 | "Tragen die Erkenntnisse die Story?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | Exit and loop-back branches are proposed with reasons and confirmed by the user (AskUserQuestion); the forward branch continues without asking. |
 | "Anliegen verworfen" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | Merge_Einordnung | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Story unter Epic in User Story Map einordnen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` |  |
+| "Story unter Epic in User Story Map einordnen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` | knowledge: references/C1.md |
 | Merge_Formulierung | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Story im Connextra-Format formulieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` |  |
-| "Bezug zu Epic, Fachkonzept & Feedback dokumentieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` |  |
-| "INVEST-Selbstcheck durchführen" | businessRuleTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` | gate critic, maxLoops 3 |
+| "Story im Connextra-Format formulieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` | knowledge: references/C2.md |
+| "Bezug zu Epic, Fachkonzept & Feedback dokumentieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` | knowledge: references/C3.md |
+| "INVEST-Selbstcheck durchführen" | businessRuleTask | Product Owner / BA | skill | `.claude/skills/story-writing/SKILL.md` | gate critic, maxLoops 3; knowledge: references/C4.md |
 | "INVEST erfüllt?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | Merge_Refinement | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Refinement mit Three Amigos ansetzen" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human |
+| "Refinement mit Three Amigos ansetzen" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human; knowledge: references/D1.md |
 | Par_AmigosSplit | parallelGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Wert & Fachregeln erläutern (Was)" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-refinement/SKILL.md` |  |
+| "Wert & Fachregeln erläutern (Was)" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-refinement/SKILL.md` | knowledge: references/D2a.md |
 | "Wireframes & Interaktionsfluss beilegen" | serviceTask | UX & Design | skill | `.claude/skills/story-refinement/SKILL.md` |  |
 | "Umsetzung & Abhängigkeiten klären (Wie)" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-refinement/SKILL.md` |  |
 | "Randfälle & Negativszenarien identifizieren" | serviceTask | QA / Test | skill | `.claude/skills/story-refinement/SKILL.md` |  |
 | Par_AmigosJoin | parallelGateway | QA / Test | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Akzeptanzkriterien in Given-When-Then formulieren" | serviceTask | QA / Test | skill | `.claude/skills/story-refinement/SKILL.md` |  |
-| "Beispieltabellen ergänzen (Specification by Example)" | serviceTask | QA / Test | skill | `.claude/skills/story-refinement/SKILL.md` |  |
+| "Akzeptanzkriterien in Given-When-Then formulieren" | serviceTask | QA / Test | skill | `.claude/skills/story-refinement/SKILL.md` | knowledge: references/D3.md |
+| "Beispieltabellen ergänzen (Specification by Example)" | serviceTask | QA / Test | skill | `.claude/skills/story-refinement/SKILL.md` | knowledge: references/D4.md |
 | Merge_Schaetzung | exclusiveGateway | Entwicklung / Tech Lead | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Story Points schätzen (Planning Poker)" | userTask | Entwicklung / Tech Lead | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human, maxLoops 3 |
+| "Story Points schätzen (Planning Poker)" | userTask | Entwicklung / Tech Lead | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human, maxLoops 3; knowledge: references/D5.md |
 | "Schätzungen konvergiert?" | exclusiveGateway | Entwicklung / Tech Lead | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | "Passt die Story in einen Sprint?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | gate critic, maxLoops 3 |
-| "Story vertikal schneiden (Splitting-Muster)" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-refinement/SKILL.md` | Every part story runs through "Story im Connextra-Format formulieren" and the rest of the flow one after another (stories/{storyId}-1, -2, ...), each with its own run state; parts inherit loops.split from the parent, so splitting is capped at 3 levels in total. |
-| "Definition of Ready prüfen" | businessRuleTask | QA / Test | skill | `.claude/skills/story-readiness/SKILL.md` |  |
+| "Story vertikal schneiden (Splitting-Muster)" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-refinement/SKILL.md` | Every part story runs through "Story im Connextra-Format formulieren" and the rest of the flow one after another (stories/{storyId}-1, -2, ...), each with its own run state; parts inherit loops.split from the parent, so splitting is capped at 3 levels in total.; knowledge: references/D6.md |
+| "Definition of Ready prüfen" | businessRuleTask | QA / Test | skill | `.claude/skills/story-readiness/SKILL.md` | knowledge: references/E1.md |
 | "Begriffe mit Domänenmodell abgleichen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-readiness/SKILL.md` |  |
-| "Auf Fake- & Waisen-Story prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-readiness/SKILL.md` |  |
+| "Auf Fake- & Waisen-Story prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-readiness/SKILL.md` | knowledge: references/E3.md |
 | "Definition of Ready erfüllt?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | gate critic, maxLoops 3 |
 | "Nachgelagerten Spike durchführen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-readiness/SKILL.md` |  |
 | "Story verworfen" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
 | Par_PlausiSplit | parallelGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Auf Duplikate & Überschneidungen prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
+| "Auf Duplikate & Überschneidungen prüfen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` | knowledge: references/P1.md |
 | "Konsistenz mit bestehenden Abläufen prüfen" | serviceTask | UX & Design | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
 | "Abhängigkeiten & Reihenfolge prüfen" | serviceTask | Entwicklung / Tech Lead | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
 | "Akzeptanzkriterien gegen bestehende Stories abgleichen" | serviceTask | QA / Test | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
 | Par_PlausiJoin | parallelGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Plausibilitätsbefund zusammenführen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
+| "Plausibilitätsbefund zusammenführen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` | knowledge: references/P4.md |
 | "Konsistent mit dem übrigen Backlog?" | exclusiveGateway | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` | gate critic, maxLoops 3 |
-| "Mit bestehender Story zusammenführen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
+| "Mit bestehender Story zusammenführen" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` | knowledge: references/P6.md |
 | "Story in bestehende Story überführt" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
-| "Betroffene Stories zur Anpassung markieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` |  |
-| "Story priorisieren & in Ready-Spalte stellen" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human |
+| "Betroffene Stories zur Anpassung markieren" | serviceTask | Product Owner / BA | skill | `.claude/skills/story-backlog-check/SKILL.md` | knowledge: references/P5.md |
+| "Story priorisieren & in Ready-Spalte stellen" | userTask | Product Owner / BA | human-checkpoint | `.claude/skills/user-story-refinement/SKILL.md` | gate human; knowledge: references/E4.md |
 | "Story sprint-ready" | endEvent | Product Owner / BA | orchestrator | `.claude/skills/user-story-refinement/SKILL.md` |  |
+| "Product-Methodik: Eingang & Triage" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Product-Methodik: Fachliche Klärung" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Product-Methodik: Story formulieren" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Product-Methodik: Refinement" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Product-Methodik: Definition of Ready" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Product-Methodik: Plausibilität & Freigabe" | dataStoreReference | — | context-source | — | wissen · notebook:The Product - Business Design (details under "Context sources") |
+| "Feedback" | dataInput | — | workflow-input | — | artifact feedback |
+| "Sprint-reife User Story" | dataObjectReference | Product Owner / BA | workflow-output | — | artifact sprint-reife-user-story |
 
 ## Grey — deliberately not generated
 
@@ -121,6 +132,59 @@ None.
 ## Red — open / unresolved
 
 None — every element resolved to a concrete kind.
+
+## Context sources
+
+### Product-Methodik: Eingang & Triage
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Feedback erfassen & als Problem formulieren", "Verwandte Stories & Epics im Backlog suchen" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/I1.md, knowledge/I2.md (installed as `references/<taskId>.md`)
+
+### Product-Methodik: Fachliche Klärung
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Anliegen mit Feedbackgeber klären", "Gegen Epic-Ziel & Fachkonzept prüfen", "Ist-/Soll-Delta beschreiben", "Technische Auswirkungen grob einschätzen", "Erkenntnisse auswerten" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/K1.md, knowledge/K2.md, knowledge/K3.md, knowledge/K4.md, knowledge/B5.md (installed as `references/<taskId>.md`)
+
+### Product-Methodik: Story formulieren
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Story unter Epic in User Story Map einordnen", "Story im Connextra-Format formulieren", "Bezug zu Epic, Fachkonzept & Feedback dokumentieren", "INVEST-Selbstcheck durchführen" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/C1.md, knowledge/C2.md, knowledge/C3.md, knowledge/C4.md (installed as `references/<taskId>.md`)
+
+### Product-Methodik: Refinement
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Refinement mit Three Amigos ansetzen", "Wert & Fachregeln erläutern (Was)", "Akzeptanzkriterien in Given-When-Then formulieren", "Beispieltabellen ergänzen (Specification by Example)", "Story Points schätzen (Planning Poker)", "Story vertikal schneiden (Splitting-Muster)" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/D1.md, knowledge/D2a.md, knowledge/D3.md, knowledge/D4.md, knowledge/D5.md, knowledge/D6.md (installed as `references/<taskId>.md`)
+
+### Product-Methodik: Definition of Ready
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Definition of Ready prüfen", "Auf Fake- & Waisen-Story prüfen" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/E1.md, knowledge/E3.md (installed as `references/<taskId>.md`)
+
+### Product-Methodik: Plausibilität & Freigabe
+
+- **Art / Ort:** wissen / notebook:The Product - Business Design
+- **Readers:** "Auf Duplikate & Überschneidungen prüfen", "Plausibilitätsbefund zusammenführen", "Mit bestehender Story zusammenführen", "Betroffene Stories zur Anpassung markieren", "Story priorisieren & in Ready-Spalte stellen" · **Writers:** none
+- **Placement:** no tools (wissen): distilled at generation time, no access at run time.
+- **Knowledge (wissen):** knowledge/P1.md, knowledge/P4.md, knowledge/P6.md, knowledge/P5.md, knowledge/E4.md (installed as `references/<taskId>.md`)
+
+Process input: feedback, required: feedback, backlog, fachkonzept — becomes the argument-hint and Input section of `.claude/skills/user-story-refinement/SKILL.md`.
+Process output: sprint-reife-user-story — contract for the end result, written only at the end "Story sprint-ready".
+
+11 agent tasks (UX & Design, Entwicklung / Tech Lead, QA / Test) have no store arrow and keep the phase-level knowledge (lane mapping; decided by the business user).
+
+### Context hooks
+
+None. There is no live store with write tools and no memory store, so no write guard and no memory cap were generated.
 
 ## Roles
 
@@ -137,6 +201,7 @@ Lanes are perspectives inside the phase skills; the skill-chain pattern generate
 
 | Artifact | Path pattern | Producer | Consumers | Frontmatter |
 |---|---|---|---|---|
+| feedback | `{feedback} (feedback text or file the user hands over at the start, read-only)` | — | I1 | feedback, backlog, fachkonzept (workflow input) |
 | feedback-eintrag | `stories/{storyId}/01_feedback.md` | I1 | — | storyId, version, status, backlog, fachkonzept |
 | product-backlog | `{backlog} (existing project backlog and user story map, read-only)` | — | I2, P1 | — |
 | epic-fachkonzept | `{fachkonzept} (existing epic and Fachkonzept documents, read-only)` | — | K2 | — |
@@ -163,3 +228,4 @@ None. Answered during this run:
 - **Story priorisieren & in Ready-Spalte stellen** — Should "Story priorisieren & in Ready-Spalte stellen" suggest a prioritisation method? → Yes: suggest a position via Weighted Shortest Job First (Cost of Delay ÷ story points); the PO decides.
 - **Mit bestehender Story zusammenführen** — The merge path (Gw_Plausibel -> "Mit bestehender Story zusammenführen" -> end) passes no human approval. Add a userTask to the BPMN or confirm inside the flow? → Confirm inside the flow before the end event; the workflow only writes a merge proposal. No BPMN change.
 - **Story vertikal schneiden (Splitting-Muster)** — A vertical split yields several part stories. Continue with the first and keep the rest as drafts, or process all of them one after another? → Process all part stories one after another in the same run (stories/{storyId}-1, -2, ...), each through the rest of the flow.
+- **Gw_Erkenntnis ‘Tragen die Erkenntnisse die Story?’** — The notebook names more outcomes after a spike or prototype test than the diagram has (persevere, pivot, kill, another experiment); the gateway has two exits. → Keep two exits: a pivot goes through "Nein" with a note, a further experiment is started by the human at "Erkenntnisse auswerten". No diagram change.

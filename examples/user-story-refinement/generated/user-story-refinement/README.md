@@ -1,7 +1,7 @@
 ---
 bpmn:
   file: user-story-refinement.bpmn
-  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady]
+  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady, StoreRef_MethodikPhase1, StoreRef_MethodikPhase2, StoreRef_MethodikPhase3, StoreRef_MethodikPhase4, StoreRef_MethodikPhase5, StoreRef_MethodikPhase6, DataInput_Feedback, DO_ReadyStory_Ref]
 ---
 
 # user-story-refinement — Neue User Story aus Feedback erstellen & verfeinern
@@ -10,7 +10,7 @@ Aus dem Diagramm `user-story-refinement.bpmn` erzeugt: ein geführter Ablauf, de
 Nutzer- oder Stakeholder-Feedback eine sprint-reife User Story macht, oder begründet, warum nicht.
 Installiert ist noch nichts. `.claude/` in diesem Ordner ist fertig zum Kopieren in ein Projekt.
 
-Erzeugt 2026-09-26 · Muster: **Skill-Kette** · Quelle: `user-story-refinement.bpmn` (`d97297a43b12…`)
+Erzeugt 2026-09-26, aktualisiert 2026-10-04 (Kontextquellen) · Muster: **Skill-Kette** · Quelle: `user-story-refinement.bpmn` (`c6c9b4a41a7d…`)
 
 Dein Diagramm wird von einem Menschen begleitet: fünfmal entscheidet oder bestätigt jemand aus dem
 Team. Einige Verzweigungen verlangen ein Urteil (Bug oder Story? passt es zum Fachkonzept? tragen
@@ -28,13 +28,22 @@ Mehr ist nicht zu tun: kein Installationsskript, kein `npm install`, keine `sett
 Hat dein Projekt schon Skills mit denselben Namen, vorher nachsehen:
 `ls <dein-projekt>/.claude/skills`.
 
-Starten: `/user-story-refinement` in Claude Code, mit dem Feedback als Text, Ticket oder Datei.
-Beim ersten Schritt fragt der Ablauf, wo Backlog, Story Map, Epic und Fachkonzept liegen.
+Starten: `/user-story-refinement <feedback> <backlog> <fachkonzept>` in Claude Code: das Feedback als Text,
+Ticket oder Datei, dazu wo das Backlog mit der Story Map liegt und wo Epics und Fachkonzept liegen. Was fehlt,
+fragt der Ablauf vor dem ersten Schritt ab. Beim Fortsetzen einer Story kommen Backlog und Fachkonzept aus
+`stories/<id>/01_feedback.md`.
 
 **Empfehlung:** Der Ablauf schreibt nur nach `stories/<id>/` und ändert Backlog, andere Stories
 oder das Fachkonzept nie, sondern legt Änderungsvorschläge ab. Wer das technisch absichern will,
 sperrt Schreibzugriffe auf diese Pfade oder Werkzeuge in der eigenen `.claude/settings.json`
 (`permissions.deny`), denn die Pfade kennt nur dein Projekt.
+
+## Voraussetzungen
+
+Keine. Die sechs Wissensquellen („Product-Methodik: …“, Notebook „The Product – Business Design“) wurden beim
+Erzeugen gelesen; das Wissen steckt in den Skills (`references/`), zur Laufzeit ist weder das Notebook noch ein
+MCP-Server oder eine CLI nötig. Es gibt keine Live-Quellen und kein Gedächtnis, also auch keine Freigabe vor einem
+Schreibzugriff, keine Hooks und keine `settings.json`.
 
 ## Was in `.claude/` steckt
 
@@ -50,6 +59,11 @@ sperrt Schreibzugriffe auf diese Pfade oder Werkzeuge in der eigenen `.claude/se
   - `story-readiness`: Definition of Ready, Domänenmodell-Abgleich, Fake- und Waisen-Stories.
   - `story-backlog-check`: Duplikate, Abläufe, Abhängigkeiten, Akzeptanzkriterien gegen das
     Backlog; Änderungsvorschläge statt Änderungen.
+- **Wissensdateien:** zu 24 Aufgaben gibt es eine eigene Datei `references/<Aufgaben-Id>.md` im Skill, der den Schritt
+  ausführt (z. B. `story-triage/references/I1.md`), jeweils mit Belegstellen aus dem Notebook. Die fünf Prüfpunkte im
+  Einstiegs-Skill haben ihre Dateien dort (`K1`, `B5`, `D1`, `D5`, `E4`), dazu die Phasen-Dateien, auf die sie
+  verweisen. Elf Aufgaben (UX & Design, Entwicklung / Tech Lead, QA / Test) behalten das Phasen-Wissen in
+  `references/domain-knowledge.md`.
 - **Agenten, Hooks, Skripte:** keine.
 
 Andere Umgebungen (z. B. `.codex/`): die Skills sind neutral geschrieben und lassen sich dorthin
@@ -72,8 +86,8 @@ geschnitten, und alle Teil-Stories laufen nacheinander bis zur Freigabe durch.
 - `mapping/report.md`: jedes BPMN-Element und was daraus wurde; hier wird freigegeben.
 - `mapping/index.html`: dasselbe als anklickbares Diagramm.
 - `workflow-spec.yaml`: alle Entscheidungen.
-- `knowledge/`: das Fachwissen je Phase aus dem Notebook „The Product – Business Design“, mit
-  Belegstellen in `knowledge/faq/`.
+- `knowledge/`: das Fachwissen aus dem Notebook „The Product – Business Design“, je Aufgabe (`<Aufgaben-Id>.md`) und
+  je Phase, mit Belegstellen in `knowledge/faq/`.
 
 ## Offene Fragen
 
@@ -87,6 +101,9 @@ Keine. Während des Laufs entschieden:
 - Priorisierung: WSJF als Vorschlag, der PO entscheidet.
 - Zusammenführen mit einer bestehenden Story: nur nach deiner Bestätigung, ohne BPMN-Änderung.
 - Geschnittene Stories: alle Teil-Stories nacheinander.
+- „Tragen die Erkenntnisse die Story?“: bleibt bei Ja / Nein. Ein Pivot läuft über „Nein“ mit Notiz, ein weiteres
+  Experiment setzt der Mensch bei „Erkenntnisse auswerten“ an. Keine Diagrammänderung.
+- Elf Aufgaben ohne Quellen-Pfeil behalten das Wissen ihrer Phase.
 
 ## Neu erzeugen
 
