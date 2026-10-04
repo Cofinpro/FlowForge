@@ -38,8 +38,8 @@ wirklich etwas unklar ist.
   Klärung`, `… Story formulieren`, `… Refinement`, `… Definition of Ready`, `… Plausibilität &
   Freigabe`). Alle tragen `Art: wissen` und `Ort: notebook:The Product - Business Design`, also
   dasselbe Notebook, nur fachlich nach Phase geschnitten. Die Pfeile gehen vom Store zur Aufgabe
-  (lesen): Triage → I1, I2 · Klärung → K2, K3, K4 · Story formulieren → C1, C2, C3, C4 ·
-  Refinement → D2a, D3, D4, D6 · DoR → E1, E3 · Plausibilität → P1, P4, P5, P6.
+  (lesen): Triage → I1, I2 · Klärung → K1, K2, K3, K4, B5 · Story formulieren → C1, C2, C3, C4 ·
+  Refinement → D1, D2a, D3, D4, D5, D6 · DoR → E1, E3 · Plausibilität → E4, P1, P4, P5, P6.
   Aufgaben ohne Pfeil von einem Store (alle übrigen) fallen auf die Lane-Zuordnung von
   `bpmn2agent-knowledge` zurück.
 

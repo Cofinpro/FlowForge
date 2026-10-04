@@ -146,6 +146,8 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Kandidatenliste. Output: kurze Rückfrage beim Nutzer oder Stakeholder bestätigt - Problem hinter dem Wunsch, gewünschtes Ergebnis, Dringlichkeit, Ansprechpartner für das Refinement.</bpmn:documentation>
       <bpmn:incoming>F08</bpmn:incoming>
       <bpmn:outgoing>F09</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K1"><bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase2_K1</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:serviceTask id="K2" name="Gegen Epic-Ziel &amp; Fachkonzept prüfen">
       <bpmn:documentation>Input: bestätigtes Anliegen, Epic mit Ziel-KPI, Fachkonzept (Fachregeln, Domänenmodell, Ubiquitous Language). Output: Befund - unterstützt das Anliegen das Epic-Ziel, welche Fachregeln und Begriffe sind betroffen, widerspricht es dem Fachkonzept?</bpmn:documentation>
@@ -225,6 +227,8 @@
       <bpmn:documentation>Input: Spike-Report oder Testergebnisse, Ist-/Soll-Delta. Output: Entscheidung weitermachen oder verwerfen mit Begründung; ggf. angepasstes Delta.</bpmn:documentation>
       <bpmn:incoming>F25</bpmn:incoming>
       <bpmn:outgoing>F26</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_B5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_B5"><bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase2_B5</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gw_Erkenntnis" name="Tragen die Erkenntnisse die Story?" default="F27">
       <bpmn:incoming>F26</bpmn:incoming>
@@ -290,6 +294,8 @@
       <bpmn:documentation>Input: Story-Karte, INVEST-Befund. Output: Refinement-Termin mit PO/BA, Entwicklung und QA (Power of Three), UX bei Bedarf; Feedbackgeber optional eingeladen.</bpmn:documentation>
       <bpmn:incoming>F37</bpmn:incoming>
       <bpmn:outgoing>F38</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D1"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D1</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:userTask>
     <bpmn:parallelGateway id="Par_AmigosSplit">
       <bpmn:incoming>F38</bpmn:incoming>
@@ -351,6 +357,8 @@
       <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, technischer Ansatz. Output: relative Schätzung in Story Points, vom Team gemeinsam verantwortet.</bpmn:documentation>
       <bpmn:incoming>F78</bpmn:incoming>
       <bpmn:outgoing>F79</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D5"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D5</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Schaetzung_Ref"><bpmn:targetRef>DO_Schaetzung_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gw_Schaetzung" name="Schätzungen konvergiert?" default="F48">
@@ -477,6 +485,8 @@
       <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story. Output: priorisierte, sprint-reife User Story in der Ready-Spalte des Boards.</bpmn:documentation>
       <bpmn:incoming>F80</bpmn:incoming>
       <bpmn:outgoing>F81</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_E4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_E4"><bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase6_E4</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_ReadyStory_Ref"><bpmn:targetRef>DO_ReadyStory_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:userTask>
     <bpmn:endEvent id="End_StorySprintReady" name="Story sprint-ready">
@@ -854,6 +864,11 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P4_di" bpmnElement="DataIn_MethodikPhase6_P4"><di:waypoint x="9575" y="240" /><di:waypoint x="9575" y="262" /><di:waypoint x="9740" y="262" /><di:waypoint x="9740" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P5_di" bpmnElement="DataIn_MethodikPhase6_P5"><di:waypoint x="9585" y="215" /><di:waypoint x="9660" y="215" /><di:waypoint x="9660" y="135" /><di:waypoint x="10220" y="135" /><di:waypoint x="10220" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P6_di" bpmnElement="DataIn_MethodikPhase6_P6"><di:waypoint x="9535" y="215" /><di:waypoint x="9470" y="215" /><di:waypoint x="9470" y="520" /><di:waypoint x="10220" y="520" /><di:waypoint x="10220" y="490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K1_di" bpmnElement="DataIn_MethodikPhase2_K1"><di:waypoint x="1960" y="465" /><di:waypoint x="1460" y="465" /><di:waypoint x="1460" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_B5_di" bpmnElement="DataIn_MethodikPhase2_B5"><di:waypoint x="1960" y="490" /><di:waypoint x="1900" y="490" /><di:waypoint x="1900" y="1100" /><di:waypoint x="3440" y="1100" /><di:waypoint x="3440" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D1_di" bpmnElement="DataIn_MethodikPhase4_D1"><di:waypoint x="6810" y="1415" /><di:waypoint x="6810" y="1421" /><di:waypoint x="5840" y="1421" /><di:waypoint x="5840" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D5_di" bpmnElement="DataIn_MethodikPhase4_D5"><di:waypoint x="6855" y="1375" /><di:waypoint x="7380" y="1375" /><di:waypoint x="7380" y="1035" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_E4_di" bpmnElement="DataIn_MethodikPhase6_E4"><di:waypoint x="9585" y="195" /><di:waypoint x="9640" y="195" /><di:waypoint x="9640" y="95" /><di:waypoint x="10530" y="95" /><di:waypoint x="10530" y="262" /><di:waypoint x="10490" y="262" /><di:waypoint x="10490" y="285" /></bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
