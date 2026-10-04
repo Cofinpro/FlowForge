@@ -1,10 +1,10 @@
 ---
 name: user-story-refinement
-description: Turns one piece of user or stakeholder feedback into a sprint-ready user story in a running project that already has a product vision, epics, a Fachkonzept and a backlog ("Neue User Story aus Feedback erstellen & verfeinern") — triage, fachliche Klärung, story writing, Three Amigos refinement, Definition of Ready and a plausibility check against the backlog, pausing for the team at every decision. Use when feedback, a support ticket, a review comment or a change request should become (or be ruled out as) a new User Story, for "aus Feedback eine User Story machen", "Story verfeinern", or to resume such a run from its stories/<id>/ folder.
+description: Turns one piece of user or stakeholder feedback into a sprint-ready user story in a running project that already has a product vision, epics, a Fachkonzept and a backlog ("Neue User Story aus Feedback erstellen & verfeinern") — triage, fachliche Klärung, story writing, Three Amigos refinement, Definition of Ready and a plausibility check against the GitHub backlog, pausing for the team at every decision and writing into the backlog only after its approval. Use when feedback, a support ticket, a review comment or a change request should become (or be ruled out as) a new User Story, for "aus Feedback eine User Story machen", "Story verfeinern", or to resume such a run from its stories/<id>/ folder.
 argument-hint: "[feedback] [backlog] [fachkonzept]"
 bpmn:
   file: user-story-refinement.bpmn
-  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P6, End_StoryZusammengefuehrt, P5, E4, End_StorySprintReady, StoreRef_MethodikPhase1, StoreRef_MethodikPhase2, StoreRef_MethodikPhase3, StoreRef_MethodikPhase4, StoreRef_MethodikPhase5, StoreRef_MethodikPhase6, DataInput_Feedback, DO_ReadyStory_Ref]
+  elements: [Start_FeedbackEingegangen, I1, I2, Gw_Bug, End_BugUebergeben, Gw_Bezug, End_AnStoryUebergeben, End_FeedbackGeparkt, I3, I4, I5, I6, K1, K2, Gw_Fachkonzept, End_FachkonzeptAenderung, Par_KlaerungSplit, K3, K5, K4, Par_KlaerungJoin, Gw_Unsicherheit, K6, B4, Merge_Validierung, B5, Gw_Erkenntnis, End_AnliegenVerworfen, Merge_Einordnung, C1, Merge_Formulierung, C2, C3, C4, Gw_Invest, Merge_Refinement, D1, Par_AmigosSplit, D2a, D2d, D2b, D2c, Par_AmigosJoin, D3, D4, Merge_Schaetzung, D5, Gw_Schaetzung, Gw_Sprintgroesse, D6, E1, E2, E3, Gw_Ready, E5, End_StoryVerworfen, Par_PlausiSplit, P1, P7, P3, P2, Par_PlausiJoin, P4, Gw_Plausibel, P9, P6, End_StoryZusammengefuehrt, P5, E4, P8, P10, End_StorySprintReady, StoreRef_MethodikPhase1, StoreRef_MethodikPhase2, StoreRef_MethodikPhase3, StoreRef_MethodikPhase4, StoreRef_MethodikPhase5, StoreRef_MethodikPhase6, StoreRef_BacklogTriage, StoreRef_BacklogPlausi, StoreRef_BacklogFreigabe, DataInput_Feedback, DO_ReadyStory_Ref]
 ---
 
 # Neue User Story aus Feedback erstellen & verfeinern
@@ -15,18 +15,40 @@ for the team at every checkpoint. The team decides; you prepare, propose and rec
 
 ## Input
 
-Required: `feedback` (the raw user or stakeholder feedback, as text or a path to a file), `backlog` (location of
-the existing project backlog and user story map) and `fachkonzept` (location of the existing epic and Fachkonzept
+Required: `feedback` (the raw user or stakeholder feedback, as text or a path to a file), `backlog` (GitHub
+repository and project of the product backlog and user story map, e.g. "owner/repo, project 3"; epics are labels
+`epic:<name>`, Status "Ready" and the field "Priority" live in the project) and `fachkonzept` (location of the existing epic and Fachkonzept
 documents). Take them from the invocation arguments. If one is missing, ask the user for it via `AskUserQuestion`
 before starting step 0; never start with a guess. When resuming an existing story folder, take `backlog` and
 `fachkonzept` from its `01_feedback.md` and ask only for what is still missing. If the arguments are only free text, treat all of it as `feedback`
 and ask for `backlog` and `fachkonzept` via `AskUserQuestion`.
 
+Before step 1, check access to the backlog: `gh auth status` (its token scopes must include
+`project`; otherwise suggest `gh auth refresh -s project`), `gh issue list -R <owner/repo> --limit 1 --json number`
+and `gh project view <number> --owner <owner> --format json`. On an error show it raw and ask via
+`AskUserQuestion`: fix access and retry (recommended) / stop. Never start the triage on a backlog you
+cannot read.
+
 ## Ground rules
 
-- **Never write outside `stories/<storyId>/`.** Backlog, user story map, epics and Fachkonzept are
-  read-only. Anything that would change them (a bug hand-over, a change to an open story, a merge,
-  marks on affected stories, the Ready column) is written as a proposal the team applies.
+- **Local files only under `stories/<storyId>/`.** Fachkonzept and epics documents stay read-only.
+- **The backlog changes only after an approval.** Five steps write into GitHub, all through
+  `story-backlog-publish`, each right after its approval checkpoint ("Änderungshinweis an offene Story
+  freigeben", "Parken im Opportunity Backlog freigeben", "Zusammenführung freigeben", "Story
+  priorisieren & Übernahme ins Backlog freigeben"). Claude Code asks again at every write (write-guard
+  hook). The bug hand-over stays local.
+- **Approval checkpoints** (I3, I5, P9, E4) show the exact change (repo, issue, text, labels, field
+  values) and offer approve (recommended when the checks passed) / edit / reject.
+  - The approved text has one home: `99_uebergabe.md` (I3, I5) or its entry in
+    `09_aenderungsvorschlaege.md` (P9, E4), with `status: approved`, plus the exact text to send in
+    `stories/<storyId>/publish/<step id>.md` (I4, I6, P6, P8, P10-<n>), ending with the marker
+    `<!-- user-story-refinement: <storyId> <step id> -->`. Any edit after the approval sets it back
+    to `proposed` and asks again.
+  - Record `checkpoints.<id>` in `00_run.md` (`I3`, `I5`, `P9`, `E4`): `decision`, `approvedAt`, and for
+    E4 also `priority` and `approvedVersions` (the `version` of `04_story.md`,
+    `05_akzeptanzkriterien.md`, `06_schaetzung.md`).
+  - Reject → write nothing, set `00_run.md` to `status: paused` with the reason; a later invocation
+    resumes at this checkpoint.
 - **Every question goes through `AskUserQuestion`**, with concrete options and a recommendation.
 - **Judgement gateways:** propose the branch with a one-line reason. Branches that leave the process
   or loop back are confirmed by the user; the forward branch continues without asking. Record each
@@ -40,18 +62,18 @@ One folder per story, `stories/<storyId>/`, `storyId` = `US-<yyyymmdd>-<short-sl
 
 | File | Written by | `status` values |
 |---|---|---|
-| `00_run.md` | this skill | `running`, `ended` |
-| `01_feedback.md` | story-triage, story-clarification | `captured`, `triaged`, `clarified` |
+| `00_run.md` | this skill | `running`, `paused`, `ended` |
+| `01_feedback.md` | story-triage (incl. the related issues), story-clarification | `captured`, `triaged`, `clarified` |
 | `02_ist-soll-delta.md` | story-clarification | `draft`, `done` |
 | `03_prototyp-test.md` / `03_spike-report.md` | story-clarification, story-readiness | `done` |
-| `04_story.md` | story-writing, story-refinement, this skill | `invest-failed`, `invest-ok`, `split`, `merge-proposed`, `ready`, `discarded` |
+| `04_story.md` | story-writing, story-refinement, this skill | `invest-failed`, `invest-ok`, `split`, `merged`, `ready`, `discarded` |
 | `05_akzeptanzkriterien.md` | story-refinement | `draft`, `refined` |
 | `06_schaetzung.md` | this skill | `converged`, `cap-majority` |
 | `07_dor-befund.md` | story-readiness | `ready-ok`, `ready-failed` |
 | `08_plausibilitaet.md` | story-backlog-check | `draft`, `done` |
-| `09_aenderungsvorschlaege.md` | story-backlog-check | `proposed`, `merge-proposed`, `approved` |
-| `10_ready-story.md` | this skill | `sprint-ready` |
-| `99_uebergabe.md` | this skill | the label of the end reached |
+| `09_aenderungsvorschlaege.md` | story-backlog-check, this skill, story-backlog-publish (`appliedUrl`) | `proposed`, `merge-proposed`, `approved`, `applied` |
+| `10_ready-story.md` | story-backlog-publish | `draft`, `sprint-ready` |
+| `99_uebergabe.md` | this skill, story-backlog-publish (`backlogItem`) | `proposed`, `approved`, or the label of the end reached |
 
 `00_run.md` (created at the start) holds the run state in its frontmatter: `storyId`,
 `parentStory`, `position` (number of the last step completed below), `checkpoints` (outcome +
@@ -59,7 +81,10 @@ date of every checkpoint and confirmed gateway), `loops` and `status`. Counters:
 `poker` restart at 0 each time their phase is entered from outside the loop; `refinement` (returns
 into step 13) and `split` never reset. Update `position` after every step.
 
-**Resume:** if `stories/<storyId>/00_run.md` exists, continue after `position`. Trust `position`
+**Resume:** if `stories/<storyId>/00_run.md` exists, continue after `position`; a `paused` run
+re-asks the checkpoint it paused at. If `checkpoints.<id>.decision` is `approved` but the write after
+it isn't recorded yet (no `backlogItem` / `appliedUrl`), don't ask again: invoke `story-backlog-publish`
+for that write directly; it skips what it already recorded. Trust `position`
 over file statuses: after a loop back, older files still show their earlier `status`.
 
 ## Start: "Nutzer- oder Stakeholder-Feedback eingegangen"
@@ -73,9 +98,22 @@ over file statuses: after a loop back, older files still show their earlier `sta
    stories and a triage proposal.
 2. **"Fehlverhalten einer bestehenden Funktion?"** — "Ja (Bug)" → confirm, end **"An
    Fehlerbearbeitung übergeben"**. "Nein" → next.
-3. **"Wie hängt das Anliegen mit dem Backlog zusammen?"** — "Ändert eine offene Story" → confirm,
-   end **"Als Änderung an offene Story übergeben"**; "Kein Epic-Bezug / kein Nutzen" → confirm, end
-   **"Feedback im Opportunity Backlog geparkt"**; "Neue Story unter bestehendem Epic" → phase 2.
+3. **"Wie hängt das Anliegen mit dem Backlog zusammen?"** — "Neue Story unter bestehendem Epic" →
+   phase 2. The two exits are confirmed together with their approval, in one question:
+   - "Ändert eine offene Story" → **Checkpoint "Änderungshinweis an offene Story freigeben".** Draft
+     the comment for the open story (problem statement, link to the feedback) and take the target
+     issue URL named in the triage proposal of `01_feedback.md`; read its `updatedAt`
+     (`gh issue view <url> -R <repo> --json updatedAt`). Write the comment, `target` and
+     `baseUpdatedAt` to `99_uebergabe.md` (`status: proposed`) and the exact comment with its marker to
+     `publish/I4.md`. Ask: approve / edit / other branch / reject. Approved → `status: approved`,
+     `checkpoints.I3`, invoke `story-backlog-publish` for "Änderungshinweis an offener Story ergänzen",
+     end **"Als Änderung an offene Story übergeben"**.
+   - "Kein Epic-Bezug / kein Nutzen" → **Checkpoint "Parken im Opportunity Backlog freigeben".** Draft
+     the entry (`title`, problem statement, source, reason, label `opportunity`) in `99_uebergabe.md`
+     (`status: proposed`) and the exact body with its marker in `publish/I6.md`. Ask: approve / edit /
+     other branch / reject. Approved → `status: approved`, `checkpoints.I5`, invoke
+     `story-backlog-publish` for "Feedback im Opportunity Backlog anlegen", end **"Feedback im
+     Opportunity Backlog geparkt"**.
 
 ## Phase 2 — Fachliche Klärung
 
@@ -156,39 +194,63 @@ over file statuses: after a loop back, older files still show their earlier `sta
     `08_plausibilitaet.md` with a proposal.
 21. **"Konsistent mit dem übrigen Backlog?"** — "Widerspruch zu anderen Stories" → confirm,
     `loops.refinement` + 1, back to step 13 (check the cap first). "Duplikat einer bestehenden
-    Story" → `story-backlog-check` "Mit bestehender Story zusammenführen", then show the duplicate
-    and the merge proposal and ask: merge / not a duplicate (continue with "Ja") / back to
-    refinement (counts like "Widerspruch"). On merge, set `09_aenderungsvorschlaege.md` to
-    `approved`, end **"Story in bestehende Story überführt"**. "Ja" → `story-backlog-check`
-    "Betroffene Stories zur Anpassung markieren". Criteria: `${CLAUDE_SKILL_DIR}/references/phase-6-plausibilitaet-freigabe.md`.
-22. **Checkpoint "Story priorisieren & in Ready-Spalte stellen".** Ask for the Cost of Delay parts
-    (user/business value, time criticality, risk reduction) and propose a position by WSJF = Cost of
-    Delay ÷ story points. Show the change proposals from `09_aenderungsvorschlaege.md` (if the file
-    is missing, say that phase 6 was skipped at a cap). The PO decides. Write `10_ready-story.md`:
-    final story text, link to `05_akzeptanzkriterien.md`, `storyPoints`, WSJF inputs,
-    `priority`, risk notes. Set `04_story.md` to `ready`, `09_…` to `approved`, end **"Story
-    sprint-ready"**. Moving the card is the team's step.
-    Criteria for the position and for Ready: `${CLAUDE_SKILL_DIR}/references/E4.md`.
+    Story" → **Checkpoint "Zusammenführung freigeben"**, asked together with the duplicate verdict:
+    read the duplicate (`gh issue view <url> -R <repo> --json body,updatedAt`), draft the section to
+    add (new acceptance criteria, feedback link, combined estimate if several overlap; merge criteria:
+    `${CLAUDE_SKILL_DIR}/../story-backlog-publish/references/P6.md`) and write it as the merge entry in
+    `09_aenderungsvorschlaege.md` (`status: merge-proposed`, target, the section, `baseUpdatedAt`) and
+    with its marker to `publish/P6.md`. Show it as a diff against the current body and ask one
+    `AskUserQuestion` call with two questions — verdict: duplicate / not a duplicate (continue with
+    "Ja") / back to refinement (counts like "Widerspruch"); approval: approve / edit / reject.
+    Duplicate + approved → entry `decision: approved`, `status: approved`, `checkpoints.P9`, invoke
+    `story-backlog-publish` for "Mit bestehender Story zusammenführen", set `04_story.md` to `merged`
+    and `09_…` to `applied`, end **"Story in bestehende Story überführt"**. "Ja" →
+    `story-backlog-check` "Anpassungen an betroffenen Stories vorschlagen".
+    Criteria: `${CLAUDE_SKILL_DIR}/references/phase-6-plausibilitaet-freigabe.md`.
+22. **Checkpoint "Story priorisieren & Übernahme ins Backlog freigeben".** First read the project's
+    fields (`gh project field-list <number> --owner <owner> --format json`): "Status" must have the
+    option "Ready", and "Priority" decides the value's form (a number, or one of its single-select
+    options). A missing field or option → say so and ask how to proceed before anything else. Ask for
+    the Cost of Delay parts (user/business value, time criticality, risk reduction), rank by WSJF =
+    Cost of Delay ÷ story points and propose a "Priority" value in the field's form. Write the exact
+    issue title (first line `# <title>`) and body with its marker to `publish/P8.md`, and each
+    approved proposal's note to `publish/P10-<n>.md`. Show exactly what will be written: repo and project, issue title and body (story text, Given-When-Then
+    scenarios, estimate, links to epic, feedback and affected stories), label `epic:<name>`, Status
+    "Ready", Priority, and each proposal from `09_aenderungsvorschlaege.md` (if the file is missing,
+    say that phase 6 was skipped at a cap). Say how many Claude Code write prompts follow. Ask:
+    approve (recommended when nothing is open) / edit / reject; approve or reject each proposal on
+    its own. Record `checkpoints.E4` (`decision`, `priority`, `approvedVersions`, `approvedAt`) and the
+    per-proposal `decision`.
+    Reject → pause (ground rules). Criteria for the position and for Ready:
+    `${CLAUDE_SKILL_DIR}/references/E4.md`.
+23. Invoke `story-backlog-publish` for "Story im Backlog anlegen & in Ready-Spalte stellen" →
+    `10_ready-story.md` with `backlogItem`, `status: sprint-ready`.
+24. Invoke `story-backlog-publish` for "Betroffene Stories im Backlog markieren". Continue only when
+    every approved proposal is applied or the user chose to leave it undone. Set `04_story.md` to
+    `ready`, `09_…` to `applied`, end **"Story sprint-ready"**.
 
 ## Loop caps on readiness, consistency and size
 
 When `loops.refinement` would pass 3, or a split is needed with `loops.split` at 3, don't loop
 again and don't pass silently. Ask the PO, with a recommendation based on what failed: discard (end
 "Story verworfen") / park (end "Feedback im Opportunity Backlog geparkt") / continue with the open
-problem shown as a risk — from step 19 to step 20, from steps 17 and 21 to step 22.
+problem shown as a risk — from step 19 to step 20, from steps 17 and 21 to step 22. Parking at a cap
+also goes through "Parken im Opportunity Backlog freigeben".
 
 ## At every end
 
-Except "Story sprint-ready", write `99_uebergabe.md`: `status` = the end's label, `target`
+Except "Story sprint-ready", write `99_uebergabe.md`, or update it when an approval step already wrote
+it (keep `target`, the approved text and `backlogItem`): `status` = the end's label, `target`
 (Fehlerbearbeitung, the open story, Opportunity Backlog, Fachkonzept, the existing story, none), the
-reason and what the team should do next. On "Story verworfen" and "Anliegen verworfen" set
+reason and what the team should do next (with `backlogItem` when the end wrote into GitHub). On "Story verworfen" and "Anliegen verworfen" set
 `04_story.md` (if it exists) to `discarded`. Set `00_run.md` to `ended` and tell the user what to
 carry over into their tools. After a split, continue with the next part story.
 
 ## End result
 
 The result of a run is the "Sprint-reife User Story": `stories/<storyId>/10_ready-story.md` (frontmatter
-`storyId`, `version`, `status`, `epic`, `storyPoints`, `priority`), written only at the end **"Story sprint-ready"**.
+`storyId`, `version`, `status`, `epic`, `storyPoints`, `priority`, `backlogItem` = URL of the GitHub issue),
+written by "Story im Backlog anlegen & in Ready-Spalte stellen" and complete at the end **"Story sprint-ready"**.
 Every other end hands over through `99_uebergabe.md`. After a vertical split, each part story ends with
 its own `10_ready-story.md`.
 
@@ -198,4 +260,4 @@ Knowledge stores, distilled at generation time into one file per task; no tool c
 
 - **Product-Methodik: Fachliche Klärung** (wissen): "Anliegen mit Feedbackgeber klären" → `${CLAUDE_SKILL_DIR}/references/K1.md`; "Erkenntnisse auswerten" → `${CLAUDE_SKILL_DIR}/references/B5.md`
 - **Product-Methodik: Refinement** (wissen): "Refinement mit Three Amigos ansetzen" → `${CLAUDE_SKILL_DIR}/references/D1.md`; "Story Points schätzen (Planning Poker)" → `${CLAUDE_SKILL_DIR}/references/D5.md`
-- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Story priorisieren & in Ready-Spalte stellen" → `${CLAUDE_SKILL_DIR}/references/E4.md`
+- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Story priorisieren & Übernahme ins Backlog freigeben" → `${CLAUDE_SKILL_DIR}/references/E4.md`

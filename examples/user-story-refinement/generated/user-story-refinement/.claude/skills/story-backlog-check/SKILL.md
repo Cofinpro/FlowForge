@@ -1,16 +1,25 @@
 ---
 name: story-backlog-check
-description: Checks a ready user story for plausibility against the rest of the backlog — duplicates and overlaps, consistency with existing flows, dependencies and order, acceptance criteria against other stories and the living documentation — merges the findings, and writes merge and adjustment proposals for affected stories without touching the backlog. Use for the "Plausibilität gegen Backlog & Freigabe" phase of the user-story-refinement flow.
+description: Checks a ready user story for plausibility against the rest of the GitHub backlog — duplicates and overlaps, consistency with existing flows, dependencies and order, acceptance criteria against other stories and the living documentation — merges the findings and proposes changes to affected stories, reading the backlog only. Use for the "Plausibilität gegen Backlog & Freigabe" phase of the user-story-refinement flow; the approved changes are written later by story-backlog-publish.
 bpmn:
   file: user-story-refinement.bpmn
-  elements: [P1, P7, P3, P2, P4, P5, P6]
+  elements: [P1, P7, P3, P2, P4, P5]
 ---
 
 # Plausibilität gegen Backlog
 
 Phase 6 of `user-story-refinement`. Criteria and sources:
-`${CLAUDE_SKILL_DIR}/references/domain-knowledge.md`. The backlog and other stories are read-only:
-everything that would change them goes into `09_aenderungsvorschlaege.md` for the team.
+`${CLAUDE_SKILL_DIR}/references/domain-knowledge.md`. This skill only reads the backlog: every change
+it finds goes into `09_aenderungsvorschlaege.md` as a proposal; `story-backlog-publish` writes it after
+the approval.
+
+**Reading the backlog.** Repo and project come from `backlog` in `01_feedback.md`. Always pass
+`-R <owner/repo>` (or `--repo` for `gh search issues`), ask for `--json` with only the fields you need
+and a `--limit`, and open single issues on demand with `gh issue view`. A failed read (not logged in,
+missing scope, wrong repo or project) is an error, not an empty result: show the raw error and ask
+via `AskUserQuestion` whether to fix access and retry (recommended) or continue with the risk
+"Backlog nicht gelesen" written into `08_plausibilitaet.md`. Record per perspective the query, the
+outcome and the number of hits.
 
 ## Four perspectives → `stories/<storyId>/08_plausibilitaet.md`
 
@@ -32,20 +41,19 @@ From the file only: duplicates, contradictions, dependencies, affected stories; 
 for "Konsistent mit dem übrigen Backlog?": Ja / Widerspruch zu anderen Stories / Duplikat einer
 bestehenden Story, with the reason. `status: done`.
 
-## "Mit bestehender Story zusammenführen" (only for "Duplikat")
+## "Anpassungen an betroffenen Stories vorschlagen" (only for "Ja")
 
-Write the merge proposal to `09_aenderungsvorschlaege.md`: target story, the acceptance criteria and
-the feedback link to add, combined estimate if several overlap (`status: merge-proposed`). Set
-`04_story.md` to `status: merge-proposed`. The calling skill asks before the merge counts as done.
-
-## "Betroffene Stories zur Anpassung markieren" (only for "Ja")
-
-From the findings: one entry per affected or superseded story in `09_aenderungsvorschlaege.md`
-(story, what to change, dependency link, reason). No findings → write "keine".
-`status: proposed`.
+From the findings: one entry per affected or superseded story under `proposals` in
+`09_aenderungsvorschlaege.md` — target issue URL, the exact note to post (what to change, dependency
+link, reason), `baseUpdatedAt` from `gh issue view <url> -R <repo> --json updatedAt`, `decision` empty.
+No findings → write "keine". `status: proposed`. Nothing is written into the backlog here.
 
 ## Kontextquellen
 
 Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
 
-- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Auf Duplikate & Überschneidungen prüfen" → `${CLAUDE_SKILL_DIR}/references/P1.md`; "Plausibilitätsbefund zusammenführen" → `${CLAUDE_SKILL_DIR}/references/P4.md`; "Mit bestehender Story zusammenführen" → `${CLAUDE_SKILL_DIR}/references/P6.md`; "Betroffene Stories zur Anpassung markieren" → `${CLAUDE_SKILL_DIR}/references/P5.md`
+- **Product-Methodik: Plausibilität & Freigabe** (wissen): "Auf Duplikate & Überschneidungen prüfen" → `${CLAUDE_SKILL_DIR}/references/P1.md`; "Plausibilitätsbefund zusammenführen" → `${CLAUDE_SKILL_DIR}/references/P4.md`; "Anpassungen an betroffenen Stories vorschlagen" → `${CLAUDE_SKILL_DIR}/references/P5.md`
+
+Live and memory stores, used at run time:
+
+- **Product Backlog: übrige Stories** (live, read): "Auf Duplikate & Überschneidungen prüfen" searches open and done stories with the same goal or concept with `Bash(gh search issues:*)` and `Bash(gh issue list:*)`; "Abhängigkeiten & Reihenfolge prüfen" lists the project's items and their order with `Bash(gh project item-list:*)`; "Akzeptanzkriterien gegen bestehende Stories abgleichen" reads the scenarios of candidate stories with `Bash(gh issue view:*)`.

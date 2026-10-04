@@ -309,9 +309,11 @@ Das ist ein Schnappschuss; das daraus entstandene Dark-Factory-Plugin wird im Re
 
 **[`examples/user-story-refinement/`](examples/user-story-refinement/)**: eine neue User Story aus
 Feedback erstellen und verfeinern. Ein Diagramm mit vier Lanes und sechs Phasen, als erstes Beispiel
-im neuen Aufbau durch die Pipeline gelaufen: 7 Skills unter
+im neuen Aufbau durch die Pipeline gelaufen: 8 Skills, ein Write-Guard-Hook und eine `settings.json` unter
 [`generated/user-story-refinement/.claude/`](examples/user-story-refinement/generated/user-story-refinement/.claude/),
-installierbar mit einer Kopie, ohne Agenten, Skripte und Hooks.
+installierbar mit einer Kopie, ohne Agenten und Skripte. Es zeigt zwei der drei Kontextquellen-Arten im
+Einsatz: Notebook-Wissen je Phase und das Product Backlog live in GitHub (`cli:gh`), das
+nur nach einer Freigabe direkt davor geschrieben wird.
 
 ![User-Story-Refinement als BPMN](examples/user-story-refinement/user-story-refinement.png)
 

@@ -24,6 +24,7 @@
   <bpmn:dataStore id="DataStore_MethodikPhase4" />
   <bpmn:dataStore id="DataStore_MethodikPhase5" />
   <bpmn:dataStore id="DataStore_MethodikPhase6" />
+  <bpmn:dataStore id="DataStore_Backlog" />
   <bpmn:process id="Process_UserStoryErstellenVerfeinern" name="Neue User Story aus Feedback erstellen &#38; verfeinern" isExecutable="false">
     <bpmn:documentation>Weg einer neuen User Story in einem laufenden IT-Projekt: Produktvision, Epics, Fachkonzept und Backlog existieren bereits. Auslöser ist Feedback von Nutzern oder Stakeholdern. Triage (Bug, Änderung an offener Story, neue Story unter einem Epic, parken), leichtgewichtige fachliche Klärung gegen Epic-Ziel und Fachkonzept, Spike oder Prototyp nur bei echter Unsicherheit, Story formulieren und gegen INVEST prüfen, Three-Amigos-Refinement, Definition of Ready und abschließend eine Plausibilitätsprüfung gegen die übrigen Stories im Backlog (Duplikate, widersprüchliche Akzeptanzkriterien, Abhängigkeiten, Ablaufkonsistenz). Wissensbasis: NotebookLM-Notebook "The Product - Business Design".</bpmn:documentation>
     <bpmn:ioSpecification id="IoSpec_UserStory">
@@ -43,6 +44,10 @@
         <bpmn:flowNodeRef>Gw_Bezug</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_AnStoryUebergeben</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_FeedbackGeparkt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I3</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I5</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>I6</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>K1</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>K2</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gw_Fachkonzept</bpmn:flowNodeRef>
@@ -79,6 +84,9 @@
         <bpmn:flowNodeRef>End_StoryZusammengefuehrt</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>P5</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>E4</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P8</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P9</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>P10</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>End_StorySprintReady</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="Lane_UxResearchDesign" name="UX &#38; Design">
@@ -134,11 +142,11 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Product Backlog, User Story Map, Epics. Output: Kandidatenliste verwandter Stories (offen, in Arbeit, erledigt) und der passende Epic bzw. Impact-Zweig, jeweils mit Begründung.</bpmn:documentation>
       <bpmn:incoming>F02</bpmn:incoming>
       <bpmn:outgoing>F03</bpmn:outgoing>
-      <bpmn:property id="Property_DO_Backlog_Ref" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_Backlog_I2" name="__targetRef_placeholder" />
       <bpmn:property id="Property_MethodikPhase1_I2" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref">
-        <bpmn:sourceRef>DO_Backlog_Ref</bpmn:sourceRef>
-        <bpmn:targetRef>Property_DO_Backlog_Ref</bpmn:targetRef>
+      <bpmn:dataInputAssociation id="DataIn_Backlog_I2">
+        <bpmn:sourceRef>StoreRef_BacklogTriage</bpmn:sourceRef>
+        <bpmn:targetRef>Property_Backlog_I2</bpmn:targetRef>
       </bpmn:dataInputAssociation>
       <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I2">
         <bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef>
@@ -162,11 +170,11 @@
     </bpmn:exclusiveGateway>
     <bpmn:endEvent id="End_AnStoryUebergeben" name="Als Änderung an offene Story übergeben">
       <bpmn:documentation>Betrifft das Feedback eine Story, die noch im Refinement oder in Arbeit ist, werden deren Akzeptanzkriterien angepasst statt eine neue Story anzulegen.</bpmn:documentation>
-      <bpmn:incoming>F06</bpmn:incoming>
+      <bpmn:incoming>F84</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:endEvent id="End_FeedbackGeparkt" name="Feedback im Opportunity Backlog geparkt">
       <bpmn:documentation>Kein Bezug zu einem bestehenden Epic oder Ziel, kein erkennbarer Nutzen, abgelaufene Frist oder reiner Technik-Wunsch ohne Nutzerproblem.</bpmn:documentation>
-      <bpmn:incoming>F07</bpmn:incoming>
+      <bpmn:incoming>F86</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:userTask id="K1" name="Anliegen mit Feedbackgeber klären">
       <bpmn:documentation>Input: Feedback-Eintrag, Kandidatenliste. Output: kurze Rückfrage beim Nutzer oder Stakeholder bestätigt - Problem hinter dem Wunsch, gewünschtes Ergebnis, Dringlichkeit, Ansprechpartner für das Refinement.</bpmn:documentation>
@@ -515,11 +523,11 @@
       <bpmn:documentation>Input: Story-Karte, Product Backlog (offene und erledigte Stories). Output: Stories mit gleichem oder überlappendem Ziel, gleiche Konzepte unter anderem Namen ('Splitter').</bpmn:documentation>
       <bpmn:incoming>F62</bpmn:incoming>
       <bpmn:outgoing>F66</bpmn:outgoing>
-      <bpmn:property id="Property_DO_Backlog_Ref2" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_Backlog_P1" name="__targetRef_placeholder" />
       <bpmn:property id="Property_MethodikPhase6_P1" name="__targetRef_placeholder" />
-      <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref2">
-        <bpmn:sourceRef>DO_Backlog_Ref2</bpmn:sourceRef>
-        <bpmn:targetRef>Property_DO_Backlog_Ref2</bpmn:targetRef>
+      <bpmn:dataInputAssociation id="DataIn_Backlog_P1">
+        <bpmn:sourceRef>StoreRef_BacklogPlausi</bpmn:sourceRef>
+        <bpmn:targetRef>Property_Backlog_P1</bpmn:targetRef>
       </bpmn:dataInputAssociation>
       <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P1">
         <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
@@ -535,11 +543,21 @@
       <bpmn:documentation>Input: technischer Ansatz, Backlog, nichtfunktionale Ziele des Release. Output: Vorgänger-/Nachfolger-Stories, geteilte Komponenten, Konflikte mit Sicherheits-, Performance- oder Kapazitätszielen.</bpmn:documentation>
       <bpmn:incoming>F64</bpmn:incoming>
       <bpmn:outgoing>F68</bpmn:outgoing>
+      <bpmn:property id="Property_Backlog_P3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Backlog_P3">
+        <bpmn:sourceRef>StoreRef_BacklogPlausi</bpmn:sourceRef>
+        <bpmn:targetRef>Property_Backlog_P3</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="P2" name="Akzeptanzkriterien gegen bestehende Stories abgleichen">
       <bpmn:documentation>Input: Given-When-Then-Szenarien, Akzeptanzkriterien anderer Stories, Living Documentation. Output: widersprüchliche Szenarien und Fachregeln mit Fundstelle.</bpmn:documentation>
       <bpmn:incoming>F65</bpmn:incoming>
       <bpmn:outgoing>F69</bpmn:outgoing>
+      <bpmn:property id="Property_Backlog_P2" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Backlog_P2">
+        <bpmn:sourceRef>StoreRef_BacklogPlausi</bpmn:sourceRef>
+        <bpmn:targetRef>Property_Backlog_P2</bpmn:targetRef>
+      </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:parallelGateway id="Par_PlausiJoin">
       <bpmn:incoming>F66</bpmn:incoming>
@@ -569,19 +587,22 @@
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="P6" name="Mit bestehender Story zusammenführen">
       <bpmn:documentation>Input: neue Story, gefundenes Duplikat. Output: bestehende Story um die neuen Akzeptanzkriterien und den Feedback-Link ergänzt; die neue Story entfällt.</bpmn:documentation>
-      <bpmn:incoming>F74</bpmn:incoming>
+      <bpmn:incoming>F87</bpmn:incoming>
       <bpmn:outgoing>F75</bpmn:outgoing>
       <bpmn:property id="Property_MethodikPhase6_P6" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P6">
         <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
         <bpmn:targetRef>Property_MethodikPhase6_P6</bpmn:targetRef>
       </bpmn:dataInputAssociation>
+      <bpmn:dataOutputAssociation id="DataOut_Backlog_P6">
+        <bpmn:targetRef>StoreRef_BacklogFreigabe</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_StoryZusammengefuehrt" name="Story in bestehende Story überführt">
       <bpmn:incoming>F75</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:serviceTask id="P5" name="Betroffene Stories zur Anpassung markieren">
-      <bpmn:documentation>Input: Plausibilitätsbefund. Output: Abhängigkeitslinks und Anpassungshinweise an betroffenen oder überholten Stories. Ohne Befund entfällt dieser Schritt.</bpmn:documentation>
+    <bpmn:serviceTask id="P5" name="Anpassungen an betroffenen Stories vorschlagen">
+      <bpmn:documentation>Input: Plausibilitätsbefund. Output: Anpassungsvorschläge für betroffene oder überholte Stories (Abhängigkeitslinks, Anpassungshinweise), zur Freigabe durch den Product Owner. Ohne Befund entfällt dieser Schritt.</bpmn:documentation>
       <bpmn:incoming>F72</bpmn:incoming>
       <bpmn:outgoing>F80</bpmn:outgoing>
       <bpmn:property id="Property_MethodikPhase6_P5" name="__targetRef_placeholder" />
@@ -590,8 +611,8 @@
         <bpmn:targetRef>Property_MethodikPhase6_P5</bpmn:targetRef>
       </bpmn:dataInputAssociation>
     </bpmn:serviceTask>
-    <bpmn:userTask id="E4" name="Story priorisieren &#38; in Ready-Spalte stellen">
-      <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story. Output: priorisierte, sprint-reife User Story in der Ready-Spalte des Boards.</bpmn:documentation>
+    <bpmn:userTask id="E4" name="Story priorisieren &#38; Übernahme ins Backlog freigeben">
+      <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story, Plausibilitätsbefund, Anpassungsvorschläge. Output: Priorität und Freigabe, die Story ins Product Backlog zu übernehmen, in die Ready-Spalte zu stellen und die betroffenen Stories anzupassen. Ohne Freigabe wird nichts ins Backlog geschrieben.</bpmn:documentation>
       <bpmn:incoming>F80</bpmn:incoming>
       <bpmn:outgoing>F81</bpmn:outgoing>
       <bpmn:property id="Property_MethodikPhase6_E4" name="__targetRef_placeholder" />
@@ -599,13 +620,60 @@
         <bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef>
         <bpmn:targetRef>Property_MethodikPhase6_E4</bpmn:targetRef>
       </bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P8" name="Story im Backlog anlegen &#38; in Ready-Spalte stellen">
+      <bpmn:documentation>Input: freigegebene, priorisierte Story (Story-Karte, Given-When-Then-Szenarien, Schätzung, Priorität). Output: Story als Eintrag im Product Backlog, in die Ready-Spalte des Boards gestellt, mit Links zu Epic, auslösendem Feedback und betroffenen Stories.</bpmn:documentation>
+      <bpmn:incoming>F81</bpmn:incoming>
+      <bpmn:outgoing>F82</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_DO_ReadyStory_Ref">
         <bpmn:targetRef>DO_ReadyStory_Ref</bpmn:targetRef>
       </bpmn:dataOutputAssociation>
-    </bpmn:userTask>
+      <bpmn:dataOutputAssociation id="DataOut_Backlog_P8">
+        <bpmn:targetRef>StoreRef_BacklogFreigabe</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
     <bpmn:endEvent id="End_StorySprintReady" name="Story sprint-ready">
-      <bpmn:incoming>F81</bpmn:incoming>
+      <bpmn:incoming>F88</bpmn:incoming>
     </bpmn:endEvent>
+    <bpmn:userTask id="I3" name="Änderungshinweis an offene Story freigeben">
+      <bpmn:documentation>Input: Feedback-Eintrag, betroffene offene Story, Entwurf des Änderungshinweises. Output: Freigabe des Hinweistexts für die offene Story. Ohne Freigabe wird nichts ins Backlog geschrieben.</bpmn:documentation>
+      <bpmn:incoming>F06</bpmn:incoming>
+      <bpmn:outgoing>F83</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="I4" name="Änderungshinweis an offener Story ergänzen">
+      <bpmn:documentation>Input: freigegebener Änderungshinweis, offene Story. Output: Kommentar an der offenen Story im Product Backlog mit Problemformulierung und Link zum Feedback.</bpmn:documentation>
+      <bpmn:incoming>F83</bpmn:incoming>
+      <bpmn:outgoing>F84</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Backlog_I4">
+        <bpmn:targetRef>StoreRef_BacklogTriage</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="I5" name="Parken im Opportunity Backlog freigeben">
+      <bpmn:documentation>Input: Feedback-Eintrag, Begründung (kein Epic-Bezug oder kein Nutzen). Output: Freigabe, das Feedback als Eintrag im Opportunity Backlog anzulegen. Ohne Freigabe wird nichts ins Backlog geschrieben.</bpmn:documentation>
+      <bpmn:incoming>F07</bpmn:incoming>
+      <bpmn:outgoing>F85</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="I6" name="Feedback im Opportunity Backlog anlegen">
+      <bpmn:documentation>Input: freigegebener Feedback-Eintrag mit Begründung. Output: Eintrag im Opportunity Backlog mit Problemformulierung, Quelle, Begründung und Link zum Feedback.</bpmn:documentation>
+      <bpmn:incoming>F85</bpmn:incoming>
+      <bpmn:outgoing>F86</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Backlog_I6">
+        <bpmn:targetRef>StoreRef_BacklogTriage</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="P9" name="Zusammenführung freigeben">
+      <bpmn:documentation>Input: neue Story, gefundenes Duplikat, Plausibilitätsbefund. Output: Freigabe, die bestehende Story um die neuen Akzeptanzkriterien und den Feedback-Link zu ergänzen. Ohne Freigabe wird nichts ins Backlog geschrieben.</bpmn:documentation>
+      <bpmn:incoming>F74</bpmn:incoming>
+      <bpmn:outgoing>F87</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="P10" name="Betroffene Stories im Backlog markieren">
+      <bpmn:documentation>Input: freigegebene Anpassungsvorschläge, Backlog-Eintrag der neuen Story. Output: Abhängigkeitslinks und Anpassungshinweise an den betroffenen Stories im Product Backlog. Ohne freigegebene Anpassungen entfällt dieser Schritt.</bpmn:documentation>
+      <bpmn:incoming>F82</bpmn:incoming>
+      <bpmn:outgoing>F88</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Backlog_P10">
+        <bpmn:targetRef>StoreRef_BacklogFreigabe</bpmn:targetRef>
+      </bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
     <bpmn:sequenceFlow id="F01" sourceRef="Start_FeedbackEingegangen" targetRef="I1" />
     <bpmn:sequenceFlow id="F02" sourceRef="I1" targetRef="I2" />
     <bpmn:sequenceFlow id="F03" sourceRef="I2" targetRef="Gw_Bug" />
@@ -613,10 +681,10 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ja (Bug)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="F05" name="Nein" sourceRef="Gw_Bug" targetRef="Gw_Bezug" />
-    <bpmn:sequenceFlow id="F06" name="Ändert eine offene Story" sourceRef="Gw_Bezug" targetRef="End_AnStoryUebergeben">
+    <bpmn:sequenceFlow id="F06" name="Ändert eine offene Story" sourceRef="Gw_Bezug" targetRef="I3">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ändert eine offene Story</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="F07" name="Kein Epic-Bezug / kein Nutzen" sourceRef="Gw_Bezug" targetRef="End_FeedbackGeparkt">
+    <bpmn:sequenceFlow id="F07" name="Kein Epic-Bezug / kein Nutzen" sourceRef="Gw_Bezug" targetRef="I5">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Kein Epic-Bezug / kein Nutzen</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="F08" name="Neue Story unter bestehendem Epic" sourceRef="Gw_Bezug" targetRef="K1" />
@@ -710,16 +778,21 @@
     <bpmn:sequenceFlow id="F73" name="Widerspruch zu anderen Stories" sourceRef="Gw_Plausibel" targetRef="Merge_Refinement">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Widerspruch zu anderen Stories</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="F74" name="Duplikat einer bestehenden Story" sourceRef="Gw_Plausibel" targetRef="P6">
+    <bpmn:sequenceFlow id="F74" name="Duplikat einer bestehenden Story" sourceRef="Gw_Plausibel" targetRef="P9">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Duplikat einer bestehenden Story</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="F75" sourceRef="P6" targetRef="End_StoryZusammengefuehrt" />
     <bpmn:sequenceFlow id="F80" sourceRef="P5" targetRef="E4" />
-    <bpmn:sequenceFlow id="F81" sourceRef="E4" targetRef="End_StorySprintReady" />
+    <bpmn:sequenceFlow id="F81" sourceRef="E4" targetRef="P8" />
+    <bpmn:sequenceFlow id="F82" sourceRef="P8" targetRef="P10" />
+    <bpmn:sequenceFlow id="F88" sourceRef="P10" targetRef="End_StorySprintReady" />
+    <bpmn:sequenceFlow id="F83" sourceRef="I3" targetRef="I4" />
+    <bpmn:sequenceFlow id="F84" sourceRef="I4" targetRef="End_AnStoryUebergeben" />
+    <bpmn:sequenceFlow id="F85" sourceRef="I5" targetRef="I6" />
+    <bpmn:sequenceFlow id="F86" sourceRef="I6" targetRef="End_FeedbackGeparkt" />
+    <bpmn:sequenceFlow id="F87" sourceRef="P9" targetRef="P6" />
     <bpmn:dataObject id="DO_Feedback" />
     <bpmn:dataObjectReference id="DO_Feedback_Ref" name="Feedback-Eintrag" dataObjectRef="DO_Feedback" />
-    <bpmn:dataObject id="DO_Backlog" />
-    <bpmn:dataObjectReference id="DO_Backlog_Ref" name="Product Backlog &#38; User Story Map" dataObjectRef="DO_Backlog" />
     <bpmn:dataObject id="DO_Fachkonzept" />
     <bpmn:dataObjectReference id="DO_Fachkonzept_Ref" name="Epic &#38; Fachkonzept" dataObjectRef="DO_Fachkonzept" />
     <bpmn:dataObject id="DO_ScopeDelta" />
@@ -734,7 +807,6 @@
     <bpmn:dataObjectReference id="DO_Akzeptanz_Ref" name="Given-When-Then-Szenarien" dataObjectRef="DO_Akzeptanz" />
     <bpmn:dataObject id="DO_Schaetzung" />
     <bpmn:dataObjectReference id="DO_Schaetzung_Ref" name="Story-Point-Schätzung" dataObjectRef="DO_Schaetzung" />
-    <bpmn:dataObjectReference id="DO_Backlog_Ref2" name="Product Backlog" dataObjectRef="DO_Backlog" />
     <bpmn:dataObject id="DO_Plausi" />
     <bpmn:dataObjectReference id="DO_Plausi_Ref" name="Plausibilitätsbefund" dataObjectRef="DO_Plausi" />
     <bpmn:dataObject id="DO_ReadyStory" />
@@ -762,6 +834,18 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
     <bpmn:dataStoreReference id="StoreRef_MethodikPhase6" name="Product-Methodik: Plausibilität &#38; Freigabe" dataStoreRef="DataStore_MethodikPhase6">
       <bpmn:documentation>Art: wissen
 Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_BacklogTriage" name="Product Backlog &#38; User Story Map" dataStoreRef="DataStore_Backlog">
+      <bpmn:documentation>Art: live
+Ort: cli:gh</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_BacklogPlausi" name="Product Backlog: übrige Stories" dataStoreRef="DataStore_Backlog">
+      <bpmn:documentation>Art: live
+Ort: cli:gh</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_BacklogFreigabe" name="Product Backlog: freigegebene Änderungen" dataStoreRef="DataStore_Backlog">
+      <bpmn:documentation>Art: live
+Ort: cli:gh</bpmn:documentation>
     </bpmn:dataStoreReference>
     <bpmn:group id="Group_Phase1" categoryValueRef="CategoryValue_Group_Phase1" />
     <bpmn:group id="Group_Phase2" categoryValueRef="CategoryValue_Group_Phase2" />
@@ -1014,7 +1098,7 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
     </bpmn:textAnnotation>
     <bpmn:association id="MapAnnot_61_Association" sourceRef="Gw_Plausibel" targetRef="MapAnnot_61_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_62_TextAnnotation">
-      <bpmn:text>Skill: story-backlog-check</bpmn:text>
+      <bpmn:text>Skill: story-backlog-publish</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="MapAnnot_62_Association" sourceRef="P6" targetRef="MapAnnot_62_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_63_TextAnnotation">
@@ -1030,86 +1114,126 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
     </bpmn:textAnnotation>
     <bpmn:association id="MapAnnot_65_Association" sourceRef="E4" targetRef="MapAnnot_65_TextAnnotation" />
     <bpmn:textAnnotation id="MapAnnot_66_TextAnnotation">
+      <bpmn:text>Skill: story-backlog-publish</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_66_Association" sourceRef="P8" targetRef="MapAnnot_66_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_67_TextAnnotation">
       <bpmn:text>Orchestrierung: user-story-refinement</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_66_Association" sourceRef="End_StorySprintReady" targetRef="MapAnnot_66_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_67_TextAnnotation">
+    <bpmn:association id="MapAnnot_67_Association" sourceRef="End_StorySprintReady" targetRef="MapAnnot_67_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_68_TextAnnotation">
+      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_68_Association" sourceRef="I3" targetRef="MapAnnot_68_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_69_TextAnnotation">
+      <bpmn:text>Skill: story-backlog-publish</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_69_Association" sourceRef="I4" targetRef="MapAnnot_69_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_70_TextAnnotation">
+      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_70_Association" sourceRef="I5" targetRef="MapAnnot_70_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_71_TextAnnotation">
+      <bpmn:text>Skill: story-backlog-publish</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_71_Association" sourceRef="I6" targetRef="MapAnnot_71_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_72_TextAnnotation">
+      <bpmn:text>Menschliche Prüfung: user-story-refinement</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_72_Association" sourceRef="P9" targetRef="MapAnnot_72_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_73_TextAnnotation">
+      <bpmn:text>Skill: story-backlog-publish</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_73_Association" sourceRef="P10" targetRef="MapAnnot_73_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_74_TextAnnotation">
       <bpmn:text>Prozess-Ausgabe: sprint-reife-user-story</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_67_Association" sourceRef="DO_ReadyStory_Ref" targetRef="MapAnnot_67_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_68_TextAnnotation">
+    <bpmn:association id="MapAnnot_74_Association" sourceRef="DO_ReadyStory_Ref" targetRef="MapAnnot_74_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_75_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_68_Association" sourceRef="StoreRef_MethodikPhase1" targetRef="MapAnnot_68_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_69_TextAnnotation">
+    <bpmn:association id="MapAnnot_75_Association" sourceRef="StoreRef_MethodikPhase1" targetRef="MapAnnot_75_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_76_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_69_Association" sourceRef="StoreRef_MethodikPhase2" targetRef="MapAnnot_69_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_70_TextAnnotation">
+    <bpmn:association id="MapAnnot_76_Association" sourceRef="StoreRef_MethodikPhase2" targetRef="MapAnnot_76_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_77_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_70_Association" sourceRef="StoreRef_MethodikPhase3" targetRef="MapAnnot_70_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_71_TextAnnotation">
+    <bpmn:association id="MapAnnot_77_Association" sourceRef="StoreRef_MethodikPhase3" targetRef="MapAnnot_77_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_78_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_71_Association" sourceRef="StoreRef_MethodikPhase4" targetRef="MapAnnot_71_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_72_TextAnnotation">
+    <bpmn:association id="MapAnnot_78_Association" sourceRef="StoreRef_MethodikPhase4" targetRef="MapAnnot_78_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_79_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_72_Association" sourceRef="StoreRef_MethodikPhase5" targetRef="MapAnnot_72_TextAnnotation" />
-    <bpmn:textAnnotation id="MapAnnot_73_TextAnnotation">
+    <bpmn:association id="MapAnnot_79_Association" sourceRef="StoreRef_MethodikPhase5" targetRef="MapAnnot_79_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_80_TextAnnotation">
       <bpmn:text>Kontextquelle: Wissen · notebook:The Product - Business Design</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="MapAnnot_73_Association" sourceRef="StoreRef_MethodikPhase6" targetRef="MapAnnot_73_TextAnnotation" />
+    <bpmn:association id="MapAnnot_80_Association" sourceRef="StoreRef_MethodikPhase6" targetRef="MapAnnot_80_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_81_TextAnnotation">
+      <bpmn:text>Kontextquelle: Live-System · cli:gh</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_81_Association" sourceRef="StoreRef_BacklogTriage" targetRef="MapAnnot_81_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_82_TextAnnotation">
+      <bpmn:text>Kontextquelle: Live-System · cli:gh</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_82_Association" sourceRef="StoreRef_BacklogPlausi" targetRef="MapAnnot_82_TextAnnotation" />
+    <bpmn:textAnnotation id="MapAnnot_83_TextAnnotation">
+      <bpmn:text>Kontextquelle: Live-System · cli:gh</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="MapAnnot_83_Association" sourceRef="StoreRef_BacklogFreigabe" targetRef="MapAnnot_83_TextAnnotation" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_UserStory">
     <bpmndi:BPMNPlane id="BPMNPlane_UserStory" bpmnElement="Process_UserStoryErstellenVerfeinern">
       <bpmndi:BPMNShape id="Lane_ProductOwner_di" bpmnElement="Lane_ProductOwner" isHorizontal="true">
-        <dc:Bounds x="100" y="80" width="10720" height="460" />
+        <dc:Bounds x="100" y="80" width="11720" height="460" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_UxResearchDesign_di" bpmnElement="Lane_UxResearchDesign" isHorizontal="true">
-        <dc:Bounds x="100" y="540" width="10720" height="300" />
+        <dc:Bounds x="100" y="540" width="11720" height="300" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Entwicklung_di" bpmnElement="Lane_Entwicklung" isHorizontal="true">
-        <dc:Bounds x="100" y="840" width="10720" height="300" />
+        <dc:Bounds x="100" y="840" width="11720" height="300" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_QaTest_di" bpmnElement="Lane_QaTest" isHorizontal="true">
-        <dc:Bounds x="100" y="1140" width="10720" height="300" />
+        <dc:Bounds x="100" y="1140" width="11720" height="300" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase1_di" bpmnElement="Group_Phase1">
-        <dc:Bounds x="120" y="30" width="1160" height="1430" />
+        <dc:Bounds x="120" y="30" width="1720" height="1430" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="130" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase2_di" bpmnElement="Group_Phase2">
-        <dc:Bounds x="1320" y="30" width="2480" height="1430" />
+        <dc:Bounds x="1880" y="30" width="2480" height="1430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1330" y="38" width="300" height="20" />
+          <dc:Bounds x="1890" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase3_di" bpmnElement="Group_Phase3">
-        <dc:Bounds x="3840" y="30" width="1600" height="1430" />
+        <dc:Bounds x="4400" y="30" width="1600" height="1430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3850" y="38" width="300" height="20" />
+          <dc:Bounds x="4410" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase4_di" bpmnElement="Group_Phase4">
-        <dc:Bounds x="5480" y="30" width="2480" height="1430" />
+        <dc:Bounds x="6040" y="30" width="2480" height="1430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5490" y="38" width="300" height="20" />
+          <dc:Bounds x="6050" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase5_di" bpmnElement="Group_Phase5">
-        <dc:Bounds x="8000" y="30" width="940" height="1430" />
+        <dc:Bounds x="8560" y="30" width="940" height="1430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8010" y="38" width="300" height="20" />
+          <dc:Bounds x="8570" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Group_Phase6_di" bpmnElement="Group_Phase6">
-        <dc:Bounds x="8980" y="30" width="1820" height="1430" />
+        <dc:Bounds x="9540" y="30" width="2260" height="1430" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8990" y="38" width="300" height="20" />
+          <dc:Bounds x="9550" y="38" width="300" height="20" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Start_FeedbackEingegangen_di" bpmnElement="Start_FeedbackEingegangen" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
@@ -1143,225 +1267,228 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_AnStoryUebergeben_di" bpmnElement="End_AnStoryUebergeben" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="1122" y="197" width="36" height="36" />
+        <dc:Bounds x="1672" y="132" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1080" y="153" width="120" height="40" />
+          <dc:Bounds x="1712" y="136" width="120" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_FeedbackGeparkt_di" bpmnElement="End_FeedbackGeparkt" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="1122" y="427" width="36" height="36" />
+        <dc:Bounds x="1672" y="452" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1080" y="469" width="120" height="42" />
+          <dc:Bounds x="1712" y="456" width="120" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K1_di" bpmnElement="K1" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
-        <dc:Bounds x="1390" y="285" width="140" height="90" />
+        <dc:Bounds x="1950" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K2_di" bpmnElement="K2" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="1610" y="285" width="140" height="90" />
+        <dc:Bounds x="2170" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Fachkonzept_di" bpmnElement="Gw_Fachkonzept" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="1875" y="305" width="50" height="50" />
+        <dc:Bounds x="2435" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1730" y="258" width="140" height="42" />
+          <dc:Bounds x="2290" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_FachkonzeptAenderung_di" bpmnElement="End_FachkonzeptAenderung" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="1882" y="197" width="36" height="36" />
+        <dc:Bounds x="2442" y="197" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1840" y="153" width="120" height="40" />
+          <dc:Bounds x="2400" y="153" width="120" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_KlaerungSplit_di" bpmnElement="Par_KlaerungSplit" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="2095" y="305" width="50" height="50" />
+        <dc:Bounds x="2655" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K3_di" bpmnElement="K3" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="2270" y="285" width="140" height="90" />
+        <dc:Bounds x="2830" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K5_di" bpmnElement="K5" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="2270" y="645" width="140" height="90" />
+        <dc:Bounds x="2830" y="645" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K4_di" bpmnElement="K4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="2270" y="945" width="140" height="90" />
+        <dc:Bounds x="2830" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_KlaerungJoin_di" bpmnElement="Par_KlaerungJoin" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="2535" y="305" width="50" height="50" />
+        <dc:Bounds x="3095" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Unsicherheit_di" bpmnElement="Gw_Unsicherheit" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="2755" y="305" width="50" height="50" />
+        <dc:Bounds x="3315" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2610" y="258" width="140" height="42" />
+          <dc:Bounds x="3170" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="K6_di" bpmnElement="K6" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="2930" y="645" width="140" height="90" />
+        <dc:Bounds x="3490" y="645" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="B4_di" bpmnElement="B4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="2930" y="945" width="140" height="90" />
+        <dc:Bounds x="3490" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Merge_Validierung_di" bpmnElement="Merge_Validierung" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="3195" y="665" width="50" height="50" />
+        <dc:Bounds x="3755" y="665" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="B5_di" bpmnElement="B5" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
-        <dc:Bounds x="3370" y="285" width="140" height="90" />
+        <dc:Bounds x="3930" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Erkenntnis_di" bpmnElement="Gw_Erkenntnis" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="3635" y="305" width="50" height="50" />
+        <dc:Bounds x="4195" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3490" y="258" width="140" height="42" />
+          <dc:Bounds x="4050" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_AnliegenVerworfen_di" bpmnElement="End_AnliegenVerworfen" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="3642" y="197" width="36" height="36" />
+        <dc:Bounds x="4202" y="197" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3600" y="153" width="120" height="40" />
+          <dc:Bounds x="4160" y="153" width="120" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Merge_Einordnung_di" bpmnElement="Merge_Einordnung" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="3955" y="305" width="50" height="50" />
+        <dc:Bounds x="4515" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="C1_di" bpmnElement="C1" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="4130" y="285" width="140" height="90" />
+        <dc:Bounds x="4690" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Merge_Formulierung_di" bpmnElement="Merge_Formulierung" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="4395" y="305" width="50" height="50" />
+        <dc:Bounds x="4955" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="C2_di" bpmnElement="C2" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="4570" y="285" width="140" height="90" />
+        <dc:Bounds x="5130" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="C3_di" bpmnElement="C3" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="4790" y="285" width="140" height="90" />
+        <dc:Bounds x="5350" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="C4_di" bpmnElement="C4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="5010" y="285" width="140" height="90" />
+        <dc:Bounds x="5570" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Invest_di" bpmnElement="Gw_Invest" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="5275" y="305" width="50" height="50" />
+        <dc:Bounds x="5835" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5130" y="258" width="140" height="42" />
+          <dc:Bounds x="5690" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Merge_Refinement_di" bpmnElement="Merge_Refinement" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="5595" y="305" width="50" height="50" />
+        <dc:Bounds x="6155" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D1_di" bpmnElement="D1" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
-        <dc:Bounds x="5770" y="285" width="140" height="90" />
+        <dc:Bounds x="6330" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_AmigosSplit_di" bpmnElement="Par_AmigosSplit" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="6035" y="305" width="50" height="50" />
+        <dc:Bounds x="6595" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D2a_di" bpmnElement="D2a" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6210" y="285" width="140" height="90" />
+        <dc:Bounds x="6770" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D2d_di" bpmnElement="D2d" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6210" y="645" width="140" height="90" />
+        <dc:Bounds x="6770" y="645" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D2b_di" bpmnElement="D2b" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6210" y="945" width="140" height="90" />
+        <dc:Bounds x="6770" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D2c_di" bpmnElement="D2c" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6210" y="1245" width="140" height="90" />
+        <dc:Bounds x="6770" y="1245" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_AmigosJoin_di" bpmnElement="Par_AmigosJoin" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="6475" y="1265" width="50" height="50" />
+        <dc:Bounds x="7035" y="1265" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D3_di" bpmnElement="D3" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6650" y="1245" width="140" height="90" />
+        <dc:Bounds x="7210" y="1245" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D4_di" bpmnElement="D4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="6870" y="1245" width="140" height="90" />
+        <dc:Bounds x="7430" y="1245" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Merge_Schaetzung_di" bpmnElement="Merge_Schaetzung" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="7135" y="965" width="50" height="50" />
+        <dc:Bounds x="7695" y="965" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D5_di" bpmnElement="D5" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
-        <dc:Bounds x="7310" y="945" width="140" height="90" />
+        <dc:Bounds x="7870" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Schaetzung_di" bpmnElement="Gw_Schaetzung" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="7575" y="965" width="50" height="50" />
+        <dc:Bounds x="8135" y="965" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7430" y="918" width="140" height="42" />
+          <dc:Bounds x="7990" y="918" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Sprintgroesse_di" bpmnElement="Gw_Sprintgroesse" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="7795" y="305" width="50" height="50" />
+        <dc:Bounds x="8355" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7650" y="258" width="140" height="42" />
+          <dc:Bounds x="8210" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="D6_di" bpmnElement="D6" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="7750" y="400" width="140" height="90" />
+        <dc:Bounds x="8310" y="400" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="E1_di" bpmnElement="E1" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="8070" y="1245" width="140" height="90" />
+        <dc:Bounds x="8630" y="1245" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="E2_di" bpmnElement="E2" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="8290" y="945" width="140" height="90" />
+        <dc:Bounds x="8850" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="E3_di" bpmnElement="E3" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="8510" y="285" width="140" height="90" />
+        <dc:Bounds x="9070" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Ready_di" bpmnElement="Gw_Ready" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="8775" y="305" width="50" height="50" />
+        <dc:Bounds x="9335" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8630" y="258" width="140" height="42" />
+          <dc:Bounds x="9190" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="E5_di" bpmnElement="E5" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="8730" y="945" width="140" height="90" />
+        <dc:Bounds x="9290" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_StoryVerworfen_di" bpmnElement="End_StoryVerworfen" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="9102" y="197" width="36" height="36" />
+        <dc:Bounds x="9662" y="197" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9060" y="153" width="120" height="40" />
+          <dc:Bounds x="9620" y="153" width="120" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_PlausiSplit_di" bpmnElement="Par_PlausiSplit" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="9095" y="305" width="50" height="50" />
+        <dc:Bounds x="9655" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P1_di" bpmnElement="P1" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="9270" y="285" width="140" height="90" />
+        <dc:Bounds x="9830" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P7_di" bpmnElement="P7" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="9270" y="645" width="140" height="90" />
+        <dc:Bounds x="9830" y="645" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P3_di" bpmnElement="P3" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="9270" y="945" width="140" height="90" />
+        <dc:Bounds x="9830" y="945" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P2_di" bpmnElement="P2" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="9270" y="1245" width="140" height="90" />
+        <dc:Bounds x="9830" y="1245" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Par_PlausiJoin_di" bpmnElement="Par_PlausiJoin" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="9535" y="305" width="50" height="50" />
+        <dc:Bounds x="10095" y="305" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P4_di" bpmnElement="P4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="9710" y="285" width="140" height="90" />
+        <dc:Bounds x="10270" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gw_Plausibel_di" bpmnElement="Gw_Plausibel" isMarkerVisible="true" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="9975" y="305" width="50" height="50" />
+        <dc:Bounds x="10535" y="305" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9830" y="258" width="140" height="42" />
+          <dc:Bounds x="10390" y="258" width="140" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P6_di" bpmnElement="P6" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="10150" y="400" width="140" height="90" />
+        <dc:Bounds x="10930" y="400" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_StoryZusammengefuehrt_di" bpmnElement="End_StoryZusammengefuehrt" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="10422" y="427" width="36" height="36" />
+        <dc:Bounds x="11152" y="427" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10380" y="469" width="120" height="42" />
+          <dc:Bounds x="11110" y="469" width="120" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="P5_di" bpmnElement="P5" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
-        <dc:Bounds x="10150" y="285" width="140" height="90" />
+        <dc:Bounds x="10710" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="E4_di" bpmnElement="E4" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
-        <dc:Bounds x="10370" y="285" width="140" height="90" />
+        <dc:Bounds x="10930" y="285" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P8_di" bpmnElement="P8" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
+        <dc:Bounds x="11150" y="285" width="140" height="90" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_StorySprintReady_di" bpmnElement="End_StorySprintReady" bioc:stroke="#006064" bioc:fill="#E0F7FA" color:background-color="#E0F7FA" color:border-color="#006064">
-        <dc:Bounds x="10642" y="312" width="36" height="36" />
+        <dc:Bounds x="11642" y="312" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10682" y="316" width="120" height="42" />
+          <dc:Bounds x="11600" y="354" width="110" height="42" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="DO_Feedback_Ref_di" bpmnElement="DO_Feedback_Ref">
@@ -1385,115 +1512,130 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
         <di:waypoint x="480" y="285" />
         <di:waypoint x="480" y="240" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="DO_Backlog_Ref_di" bpmnElement="DO_Backlog_Ref">
-        <dc:Bounds x="682" y="190" width="36" height="50" />
+      <bpmndi:BPMNShape id="StoreRef_BacklogTriage_di" bpmnElement="StoreRef_BacklogTriage" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="1495" y="230" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="630" y="150" width="140" height="36" />
+          <dc:Bounds x="1550" y="236" width="140" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="DataIn_DO_Backlog_Ref_di" bpmnElement="DataIn_DO_Backlog_Ref">
-        <di:waypoint x="700" y="240" />
-        <di:waypoint x="700" y="285" />
+      <bpmndi:BPMNEdge id="DataIn_Backlog_I2_di" bpmnElement="DataIn_Backlog_I2">
+        <di:waypoint x="1495" y="250" />
+        <di:waypoint x="740" y="250" />
+        <di:waypoint x="740" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Fachkonzept_Ref_di" bpmnElement="DO_Fachkonzept_Ref">
-        <dc:Bounds x="1662" y="190" width="36" height="50" />
+        <dc:Bounds x="2222" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1610" y="150" width="140" height="36" />
+          <dc:Bounds x="2170" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_DO_Fachkonzept_Ref_di" bpmnElement="DataIn_DO_Fachkonzept_Ref">
-        <di:waypoint x="1680" y="240" />
-        <di:waypoint x="1680" y="285" />
+        <di:waypoint x="2240" y="240" />
+        <di:waypoint x="2240" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_ScopeDelta_Ref_di" bpmnElement="DO_ScopeDelta_Ref">
-        <dc:Bounds x="2322" y="190" width="36" height="50" />
+        <dc:Bounds x="2882" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2270" y="150" width="140" height="36" />
+          <dc:Bounds x="2830" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_ScopeDelta_Ref_di" bpmnElement="DataOut_DO_ScopeDelta_Ref">
-        <di:waypoint x="2340" y="285" />
-        <di:waypoint x="2340" y="240" />
+        <di:waypoint x="2900" y="285" />
+        <di:waypoint x="2900" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Testing_Ref_di" bpmnElement="DO_Testing_Ref">
-        <dc:Bounds x="2982" y="565" width="36" height="50" />
+        <dc:Bounds x="3542" y="565" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3024" y="573" width="140" height="36" />
+          <dc:Bounds x="3584" y="573" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_Testing_Ref_di" bpmnElement="DataOut_DO_Testing_Ref">
-        <di:waypoint x="3000" y="645" />
-        <di:waypoint x="3000" y="615" />
+        <di:waypoint x="3560" y="645" />
+        <di:waypoint x="3560" y="615" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Spike_Ref_di" bpmnElement="DO_Spike_Ref">
-        <dc:Bounds x="2982" y="865" width="36" height="50" />
+        <dc:Bounds x="3542" y="865" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3024" y="873" width="140" height="36" />
+          <dc:Bounds x="3584" y="873" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_Spike_Ref_di" bpmnElement="DataOut_DO_Spike_Ref">
-        <di:waypoint x="3000" y="945" />
-        <di:waypoint x="3000" y="915" />
+        <di:waypoint x="3560" y="945" />
+        <di:waypoint x="3560" y="915" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_StoryKarte_Ref_di" bpmnElement="DO_StoryKarte_Ref">
-        <dc:Bounds x="4622" y="190" width="36" height="50" />
+        <dc:Bounds x="5182" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4570" y="150" width="140" height="36" />
+          <dc:Bounds x="5130" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_StoryKarte_Ref_di" bpmnElement="DataOut_DO_StoryKarte_Ref">
-        <di:waypoint x="4640" y="285" />
-        <di:waypoint x="4640" y="240" />
+        <di:waypoint x="5200" y="285" />
+        <di:waypoint x="5200" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Akzeptanz_Ref_di" bpmnElement="DO_Akzeptanz_Ref">
-        <dc:Bounds x="6702" y="1165" width="36" height="50" />
+        <dc:Bounds x="7262" y="1165" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="6744" y="1173" width="140" height="36" />
+          <dc:Bounds x="7304" y="1173" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_Akzeptanz_Ref_di" bpmnElement="DataOut_DO_Akzeptanz_Ref">
-        <di:waypoint x="6720" y="1245" />
-        <di:waypoint x="6720" y="1215" />
+        <di:waypoint x="7280" y="1245" />
+        <di:waypoint x="7280" y="1215" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Schaetzung_Ref_di" bpmnElement="DO_Schaetzung_Ref">
-        <dc:Bounds x="7362" y="865" width="36" height="50" />
+        <dc:Bounds x="7922" y="865" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7404" y="873" width="140" height="36" />
+          <dc:Bounds x="7964" y="873" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_Schaetzung_Ref_di" bpmnElement="DataOut_DO_Schaetzung_Ref">
-        <di:waypoint x="7380" y="945" />
-        <di:waypoint x="7380" y="915" />
+        <di:waypoint x="7940" y="945" />
+        <di:waypoint x="7940" y="915" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="DO_Backlog_Ref2_di" bpmnElement="DO_Backlog_Ref2">
-        <dc:Bounds x="9322" y="190" width="36" height="50" />
+      <bpmndi:BPMNShape id="StoreRef_BacklogPlausi_di" bpmnElement="StoreRef_BacklogPlausi" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="9875" y="190" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9270" y="150" width="140" height="36" />
+          <dc:Bounds x="9830" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="DataIn_DO_Backlog_Ref2_di" bpmnElement="DataIn_DO_Backlog_Ref2">
-        <di:waypoint x="9340" y="240" />
-        <di:waypoint x="9340" y="285" />
+      <bpmndi:BPMNEdge id="DataIn_Backlog_P1_di" bpmnElement="DataIn_Backlog_P1">
+        <di:waypoint x="9900" y="240" />
+        <di:waypoint x="9900" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Backlog_P3_di" bpmnElement="DataIn_Backlog_P3">
+        <di:waypoint x="9875" y="210" />
+        <di:waypoint x="9795" y="210" />
+        <di:waypoint x="9795" y="920" />
+        <di:waypoint x="9860" y="920" />
+        <di:waypoint x="9860" y="945" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Backlog_P2_di" bpmnElement="DataIn_Backlog_P2">
+        <di:waypoint x="9875" y="225" />
+        <di:waypoint x="9780" y="225" />
+        <di:waypoint x="9780" y="1220" />
+        <di:waypoint x="9860" y="1220" />
+        <di:waypoint x="9860" y="1245" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_Plausi_Ref_di" bpmnElement="DO_Plausi_Ref">
-        <dc:Bounds x="9762" y="190" width="36" height="50" />
+        <dc:Bounds x="10322" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9710" y="150" width="140" height="36" />
+          <dc:Bounds x="10270" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_Plausi_Ref_di" bpmnElement="DataOut_DO_Plausi_Ref">
-        <di:waypoint x="9780" y="285" />
-        <di:waypoint x="9780" y="240" />
+        <di:waypoint x="10340" y="285" />
+        <di:waypoint x="10340" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="DO_ReadyStory_Ref_di" bpmnElement="DO_ReadyStory_Ref" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="10422" y="190" width="36" height="50" />
+        <dc:Bounds x="11202" y="190" width="36" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10370" y="150" width="140" height="36" />
+          <dc:Bounds x="11150" y="150" width="140" height="36" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataOut_DO_ReadyStory_Ref_di" bpmnElement="DataOut_DO_ReadyStory_Ref">
-        <di:waypoint x="10440" y="285" />
-        <di:waypoint x="10440" y="240" />
+        <di:waypoint x="11220" y="285" />
+        <di:waypoint x="11220" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F01_di" bpmnElement="F01">
         <di:waypoint x="278" y="330" />
@@ -1523,419 +1665,436 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F06_di" bpmnElement="F06">
         <di:waypoint x="1140" y="305" />
-        <di:waypoint x="1140" y="233" />
+        <di:waypoint x="1140" y="150" />
+        <di:waypoint x="1230" y="150" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1146" y="257" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F07_di" bpmnElement="F07">
         <di:waypoint x="1140" y="355" />
-        <di:waypoint x="1140" y="427" />
+        <di:waypoint x="1140" y="470" />
+        <di:waypoint x="1230" y="470" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1146" y="363" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F08_di" bpmnElement="F08">
         <di:waypoint x="1165" y="330" />
-        <di:waypoint x="1390" y="330" />
+        <di:waypoint x="1950" y="330" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1171" y="298" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F09_di" bpmnElement="F09">
-        <di:waypoint x="1530" y="330" />
-        <di:waypoint x="1610" y="330" />
+        <di:waypoint x="2090" y="330" />
+        <di:waypoint x="2170" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F10_di" bpmnElement="F10">
-        <di:waypoint x="1750" y="330" />
-        <di:waypoint x="1875" y="330" />
+        <di:waypoint x="2310" y="330" />
+        <di:waypoint x="2435" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F11_di" bpmnElement="F11">
-        <di:waypoint x="1900" y="305" />
-        <di:waypoint x="1900" y="233" />
+        <di:waypoint x="2460" y="305" />
+        <di:waypoint x="2460" y="233" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1906" y="257" width="130" height="28" />
+          <dc:Bounds x="2466" y="257" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F12_di" bpmnElement="F12">
-        <di:waypoint x="1925" y="330" />
-        <di:waypoint x="2095" y="330" />
+        <di:waypoint x="2485" y="330" />
+        <di:waypoint x="2655" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1931" y="312" width="80" height="14" />
+          <dc:Bounds x="2491" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F13_di" bpmnElement="F13">
-        <di:waypoint x="2145" y="330" />
-        <di:waypoint x="2270" y="330" />
+        <di:waypoint x="2705" y="330" />
+        <di:waypoint x="2830" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F14_di" bpmnElement="F14">
-        <di:waypoint x="2120" y="355" />
-        <di:waypoint x="2120" y="690" />
-        <di:waypoint x="2270" y="690" />
+        <di:waypoint x="2680" y="355" />
+        <di:waypoint x="2680" y="690" />
+        <di:waypoint x="2830" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F15_di" bpmnElement="F15">
-        <di:waypoint x="2120" y="355" />
-        <di:waypoint x="2120" y="990" />
-        <di:waypoint x="2270" y="990" />
+        <di:waypoint x="2680" y="355" />
+        <di:waypoint x="2680" y="990" />
+        <di:waypoint x="2830" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F16_di" bpmnElement="F16">
-        <di:waypoint x="2410" y="330" />
-        <di:waypoint x="2535" y="330" />
+        <di:waypoint x="2970" y="330" />
+        <di:waypoint x="3095" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F17_di" bpmnElement="F17">
-        <di:waypoint x="2410" y="690" />
-        <di:waypoint x="2560" y="690" />
-        <di:waypoint x="2560" y="355" />
+        <di:waypoint x="2970" y="690" />
+        <di:waypoint x="3120" y="690" />
+        <di:waypoint x="3120" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F18_di" bpmnElement="F18">
-        <di:waypoint x="2410" y="990" />
-        <di:waypoint x="2560" y="990" />
-        <di:waypoint x="2560" y="355" />
+        <di:waypoint x="2970" y="990" />
+        <di:waypoint x="3120" y="990" />
+        <di:waypoint x="3120" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F19_di" bpmnElement="F19">
-        <di:waypoint x="2585" y="330" />
-        <di:waypoint x="2755" y="330" />
+        <di:waypoint x="3145" y="330" />
+        <di:waypoint x="3315" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F20_di" bpmnElement="F20">
-        <di:waypoint x="2780" y="305" />
-        <di:waypoint x="2780" y="140" />
-        <di:waypoint x="3980" y="140" />
-        <di:waypoint x="3980" y="305" />
+        <di:waypoint x="3340" y="305" />
+        <di:waypoint x="3340" y="140" />
+        <di:waypoint x="4540" y="140" />
+        <di:waypoint x="4540" y="305" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2786" y="264" width="80" height="14" />
+          <dc:Bounds x="3346" y="264" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F21_di" bpmnElement="F21">
-        <di:waypoint x="2780" y="355" />
-        <di:waypoint x="2780" y="690" />
-        <di:waypoint x="2930" y="690" />
+        <di:waypoint x="3340" y="355" />
+        <di:waypoint x="3340" y="690" />
+        <di:waypoint x="3490" y="690" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2788" y="658" width="130" height="28" />
+          <dc:Bounds x="3348" y="658" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F22_di" bpmnElement="F22">
-        <di:waypoint x="2780" y="355" />
-        <di:waypoint x="2780" y="990" />
-        <di:waypoint x="2930" y="990" />
+        <di:waypoint x="3340" y="355" />
+        <di:waypoint x="3340" y="990" />
+        <di:waypoint x="3490" y="990" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2788" y="958" width="130" height="28" />
+          <dc:Bounds x="3348" y="958" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F23_di" bpmnElement="F23">
-        <di:waypoint x="3070" y="690" />
-        <di:waypoint x="3195" y="690" />
+        <di:waypoint x="3630" y="690" />
+        <di:waypoint x="3755" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F24_di" bpmnElement="F24">
-        <di:waypoint x="3070" y="990" />
-        <di:waypoint x="3220" y="990" />
-        <di:waypoint x="3220" y="715" />
+        <di:waypoint x="3630" y="990" />
+        <di:waypoint x="3780" y="990" />
+        <di:waypoint x="3780" y="715" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F25_di" bpmnElement="F25">
-        <di:waypoint x="3220" y="665" />
-        <di:waypoint x="3220" y="330" />
-        <di:waypoint x="3370" y="330" />
+        <di:waypoint x="3780" y="665" />
+        <di:waypoint x="3780" y="330" />
+        <di:waypoint x="3930" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F26_di" bpmnElement="F26">
-        <di:waypoint x="3510" y="330" />
-        <di:waypoint x="3635" y="330" />
+        <di:waypoint x="4070" y="330" />
+        <di:waypoint x="4195" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F27_di" bpmnElement="F27">
-        <di:waypoint x="3685" y="330" />
-        <di:waypoint x="3955" y="330" />
+        <di:waypoint x="4245" y="330" />
+        <di:waypoint x="4515" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3691" y="312" width="80" height="14" />
+          <dc:Bounds x="4251" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F28_di" bpmnElement="F28">
-        <di:waypoint x="3660" y="305" />
-        <di:waypoint x="3660" y="233" />
+        <di:waypoint x="4220" y="305" />
+        <di:waypoint x="4220" y="233" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="3666" y="264" width="80" height="14" />
+          <dc:Bounds x="4226" y="264" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F29_di" bpmnElement="F29">
-        <di:waypoint x="4005" y="330" />
-        <di:waypoint x="4130" y="330" />
+        <di:waypoint x="4565" y="330" />
+        <di:waypoint x="4690" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F30_di" bpmnElement="F30">
-        <di:waypoint x="4270" y="330" />
-        <di:waypoint x="4395" y="330" />
+        <di:waypoint x="4830" y="330" />
+        <di:waypoint x="4955" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F31_di" bpmnElement="F31">
-        <di:waypoint x="4445" y="330" />
-        <di:waypoint x="4570" y="330" />
+        <di:waypoint x="5005" y="330" />
+        <di:waypoint x="5130" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F32_di" bpmnElement="F32">
-        <di:waypoint x="4710" y="330" />
-        <di:waypoint x="4790" y="330" />
+        <di:waypoint x="5270" y="330" />
+        <di:waypoint x="5350" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F33_di" bpmnElement="F33">
-        <di:waypoint x="4930" y="330" />
-        <di:waypoint x="5010" y="330" />
+        <di:waypoint x="5490" y="330" />
+        <di:waypoint x="5570" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F34_di" bpmnElement="F34">
-        <di:waypoint x="5150" y="330" />
-        <di:waypoint x="5275" y="330" />
+        <di:waypoint x="5710" y="330" />
+        <di:waypoint x="5835" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F35_di" bpmnElement="F35">
-        <di:waypoint x="5325" y="330" />
-        <di:waypoint x="5595" y="330" />
+        <di:waypoint x="5885" y="330" />
+        <di:waypoint x="6155" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5331" y="312" width="80" height="14" />
+          <dc:Bounds x="5891" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F36_di" bpmnElement="F36">
-        <di:waypoint x="5300" y="355" />
-        <di:waypoint x="5300" y="395" />
-        <di:waypoint x="4420" y="395" />
-        <di:waypoint x="4420" y="355" />
+        <di:waypoint x="5860" y="355" />
+        <di:waypoint x="5860" y="395" />
+        <di:waypoint x="4980" y="395" />
+        <di:waypoint x="4980" y="355" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="5306" y="363" width="130" height="28" />
+          <dc:Bounds x="5866" y="363" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F37_di" bpmnElement="F37">
-        <di:waypoint x="5645" y="330" />
-        <di:waypoint x="5770" y="330" />
+        <di:waypoint x="6205" y="330" />
+        <di:waypoint x="6330" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F38_di" bpmnElement="F38">
-        <di:waypoint x="5910" y="330" />
-        <di:waypoint x="6035" y="330" />
+        <di:waypoint x="6470" y="330" />
+        <di:waypoint x="6595" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F39_di" bpmnElement="F39">
-        <di:waypoint x="6085" y="330" />
-        <di:waypoint x="6210" y="330" />
+        <di:waypoint x="6645" y="330" />
+        <di:waypoint x="6770" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F40_di" bpmnElement="F40">
-        <di:waypoint x="6060" y="355" />
-        <di:waypoint x="6060" y="690" />
-        <di:waypoint x="6210" y="690" />
+        <di:waypoint x="6620" y="355" />
+        <di:waypoint x="6620" y="690" />
+        <di:waypoint x="6770" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F41_di" bpmnElement="F41">
-        <di:waypoint x="6060" y="355" />
-        <di:waypoint x="6060" y="990" />
-        <di:waypoint x="6210" y="990" />
+        <di:waypoint x="6620" y="355" />
+        <di:waypoint x="6620" y="990" />
+        <di:waypoint x="6770" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F42_di" bpmnElement="F42">
-        <di:waypoint x="6060" y="355" />
-        <di:waypoint x="6060" y="1290" />
-        <di:waypoint x="6210" y="1290" />
+        <di:waypoint x="6620" y="355" />
+        <di:waypoint x="6620" y="1290" />
+        <di:waypoint x="6770" y="1290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F43_di" bpmnElement="F43">
-        <di:waypoint x="6350" y="330" />
-        <di:waypoint x="6500" y="330" />
-        <di:waypoint x="6500" y="1265" />
+        <di:waypoint x="6910" y="330" />
+        <di:waypoint x="7060" y="330" />
+        <di:waypoint x="7060" y="1265" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F44_di" bpmnElement="F44">
-        <di:waypoint x="6350" y="690" />
-        <di:waypoint x="6500" y="690" />
-        <di:waypoint x="6500" y="1265" />
+        <di:waypoint x="6910" y="690" />
+        <di:waypoint x="7060" y="690" />
+        <di:waypoint x="7060" y="1265" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F45_di" bpmnElement="F45">
-        <di:waypoint x="6350" y="990" />
-        <di:waypoint x="6500" y="990" />
-        <di:waypoint x="6500" y="1265" />
+        <di:waypoint x="6910" y="990" />
+        <di:waypoint x="7060" y="990" />
+        <di:waypoint x="7060" y="1265" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F46_di" bpmnElement="F46">
-        <di:waypoint x="6350" y="1290" />
-        <di:waypoint x="6475" y="1290" />
+        <di:waypoint x="6910" y="1290" />
+        <di:waypoint x="7035" y="1290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F47_di" bpmnElement="F47">
-        <di:waypoint x="6525" y="1290" />
-        <di:waypoint x="6650" y="1290" />
+        <di:waypoint x="7085" y="1290" />
+        <di:waypoint x="7210" y="1290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F76_di" bpmnElement="F76">
-        <di:waypoint x="6790" y="1290" />
-        <di:waypoint x="6870" y="1290" />
+        <di:waypoint x="7350" y="1290" />
+        <di:waypoint x="7430" y="1290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F77_di" bpmnElement="F77">
-        <di:waypoint x="7010" y="1290" />
-        <di:waypoint x="7095" y="1290" />
-        <di:waypoint x="7095" y="990" />
-        <di:waypoint x="7135" y="990" />
+        <di:waypoint x="7570" y="1290" />
+        <di:waypoint x="7655" y="1290" />
+        <di:waypoint x="7655" y="990" />
+        <di:waypoint x="7695" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F78_di" bpmnElement="F78">
-        <di:waypoint x="7185" y="990" />
-        <di:waypoint x="7310" y="990" />
+        <di:waypoint x="7745" y="990" />
+        <di:waypoint x="7870" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F79_di" bpmnElement="F79">
-        <di:waypoint x="7450" y="990" />
-        <di:waypoint x="7575" y="990" />
+        <di:waypoint x="8010" y="990" />
+        <di:waypoint x="8135" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F48_di" bpmnElement="F48">
-        <di:waypoint x="7625" y="990" />
-        <di:waypoint x="7755" y="990" />
-        <di:waypoint x="7755" y="330" />
-        <di:waypoint x="7795" y="330" />
+        <di:waypoint x="8185" y="990" />
+        <di:waypoint x="8315" y="990" />
+        <di:waypoint x="8315" y="330" />
+        <di:waypoint x="8355" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7631" y="972" width="80" height="14" />
+          <dc:Bounds x="8191" y="972" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F49_di" bpmnElement="F49">
-        <di:waypoint x="7600" y="1015" />
-        <di:waypoint x="7600" y="1090" />
-        <di:waypoint x="7160" y="1090" />
-        <di:waypoint x="7160" y="1015" />
+        <di:waypoint x="8160" y="1015" />
+        <di:waypoint x="8160" y="1090" />
+        <di:waypoint x="7720" y="1090" />
+        <di:waypoint x="7720" y="1015" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7606" y="1023" width="130" height="28" />
+          <dc:Bounds x="8166" y="1023" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F50_di" bpmnElement="F50">
-        <di:waypoint x="7845" y="330" />
-        <di:waypoint x="8030" y="330" />
-        <di:waypoint x="8030" y="1290" />
-        <di:waypoint x="8070" y="1290" />
+        <di:waypoint x="8405" y="330" />
+        <di:waypoint x="8590" y="330" />
+        <di:waypoint x="8590" y="1290" />
+        <di:waypoint x="8630" y="1290" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7851" y="312" width="80" height="14" />
+          <dc:Bounds x="8411" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F51_di" bpmnElement="F51">
-        <di:waypoint x="7820" y="355" />
-        <di:waypoint x="7820" y="400" />
+        <di:waypoint x="8380" y="355" />
+        <di:waypoint x="8380" y="400" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="7826" y="363" width="80" height="14" />
+          <dc:Bounds x="8386" y="363" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F52_di" bpmnElement="F52">
-        <di:waypoint x="7750" y="445" />
-        <di:waypoint x="4420" y="445" />
-        <di:waypoint x="4420" y="355" />
+        <di:waypoint x="8310" y="445" />
+        <di:waypoint x="4980" y="445" />
+        <di:waypoint x="4980" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F53_di" bpmnElement="F53">
-        <di:waypoint x="8210" y="1290" />
-        <di:waypoint x="8250" y="1290" />
-        <di:waypoint x="8250" y="990" />
-        <di:waypoint x="8290" y="990" />
+        <di:waypoint x="8770" y="1290" />
+        <di:waypoint x="8810" y="1290" />
+        <di:waypoint x="8810" y="990" />
+        <di:waypoint x="8850" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F54_di" bpmnElement="F54">
-        <di:waypoint x="8430" y="990" />
-        <di:waypoint x="8470" y="990" />
-        <di:waypoint x="8470" y="330" />
-        <di:waypoint x="8510" y="330" />
+        <di:waypoint x="8990" y="990" />
+        <di:waypoint x="9030" y="990" />
+        <di:waypoint x="9030" y="330" />
+        <di:waypoint x="9070" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F55_di" bpmnElement="F55">
-        <di:waypoint x="8650" y="330" />
-        <di:waypoint x="8775" y="330" />
+        <di:waypoint x="9210" y="330" />
+        <di:waypoint x="9335" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F57_di" bpmnElement="F57">
-        <di:waypoint x="8825" y="330" />
-        <di:waypoint x="9095" y="330" />
+        <di:waypoint x="9385" y="330" />
+        <di:waypoint x="9655" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8831" y="312" width="80" height="14" />
+          <dc:Bounds x="9391" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F58_di" bpmnElement="F58">
-        <di:waypoint x="8800" y="305" />
-        <di:waypoint x="8800" y="125" />
-        <di:waypoint x="5620" y="125" />
-        <di:waypoint x="5620" y="305" />
+        <di:waypoint x="9360" y="305" />
+        <di:waypoint x="9360" y="125" />
+        <di:waypoint x="6180" y="125" />
+        <di:waypoint x="6180" y="305" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8806" y="257" width="130" height="28" />
+          <dc:Bounds x="9366" y="257" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F59_di" bpmnElement="F59">
-        <di:waypoint x="8800" y="355" />
-        <di:waypoint x="8800" y="945" />
+        <di:waypoint x="9360" y="355" />
+        <di:waypoint x="9360" y="945" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8806" y="363" width="130" height="28" />
+          <dc:Bounds x="9366" y="363" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F60_di" bpmnElement="F60">
-        <di:waypoint x="8825" y="330" />
-        <di:waypoint x="9062" y="330" />
-        <di:waypoint x="9062" y="215" />
-        <di:waypoint x="9102" y="215" />
+        <di:waypoint x="9385" y="330" />
+        <di:waypoint x="9622" y="330" />
+        <di:waypoint x="9622" y="215" />
+        <di:waypoint x="9662" y="215" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9068" y="239" width="130" height="28" />
+          <dc:Bounds x="9628" y="239" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F61_di" bpmnElement="F61">
-        <di:waypoint x="8730" y="990" />
-        <di:waypoint x="8690" y="990" />
-        <di:waypoint x="8690" y="140" />
-        <di:waypoint x="5620" y="140" />
-        <di:waypoint x="5620" y="305" />
+        <di:waypoint x="9290" y="990" />
+        <di:waypoint x="9250" y="990" />
+        <di:waypoint x="9250" y="140" />
+        <di:waypoint x="6180" y="140" />
+        <di:waypoint x="6180" y="305" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F62_di" bpmnElement="F62">
-        <di:waypoint x="9145" y="330" />
-        <di:waypoint x="9270" y="330" />
+        <di:waypoint x="9705" y="330" />
+        <di:waypoint x="9830" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F63_di" bpmnElement="F63">
-        <di:waypoint x="9120" y="355" />
-        <di:waypoint x="9120" y="690" />
-        <di:waypoint x="9270" y="690" />
+        <di:waypoint x="9680" y="355" />
+        <di:waypoint x="9680" y="690" />
+        <di:waypoint x="9830" y="690" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F64_di" bpmnElement="F64">
-        <di:waypoint x="9120" y="355" />
-        <di:waypoint x="9120" y="990" />
-        <di:waypoint x="9270" y="990" />
+        <di:waypoint x="9680" y="355" />
+        <di:waypoint x="9680" y="990" />
+        <di:waypoint x="9830" y="990" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F65_di" bpmnElement="F65">
-        <di:waypoint x="9120" y="355" />
-        <di:waypoint x="9120" y="1290" />
-        <di:waypoint x="9270" y="1290" />
+        <di:waypoint x="9680" y="355" />
+        <di:waypoint x="9680" y="1290" />
+        <di:waypoint x="9830" y="1290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F66_di" bpmnElement="F66">
-        <di:waypoint x="9410" y="330" />
-        <di:waypoint x="9535" y="330" />
+        <di:waypoint x="9970" y="330" />
+        <di:waypoint x="10095" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F67_di" bpmnElement="F67">
-        <di:waypoint x="9410" y="690" />
-        <di:waypoint x="9560" y="690" />
-        <di:waypoint x="9560" y="355" />
+        <di:waypoint x="9970" y="690" />
+        <di:waypoint x="10120" y="690" />
+        <di:waypoint x="10120" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F68_di" bpmnElement="F68">
-        <di:waypoint x="9410" y="990" />
-        <di:waypoint x="9560" y="990" />
-        <di:waypoint x="9560" y="355" />
+        <di:waypoint x="9970" y="990" />
+        <di:waypoint x="10120" y="990" />
+        <di:waypoint x="10120" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F69_di" bpmnElement="F69">
-        <di:waypoint x="9410" y="1290" />
-        <di:waypoint x="9560" y="1290" />
-        <di:waypoint x="9560" y="355" />
+        <di:waypoint x="9970" y="1290" />
+        <di:waypoint x="10120" y="1290" />
+        <di:waypoint x="10120" y="355" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F70_di" bpmnElement="F70">
-        <di:waypoint x="9585" y="330" />
-        <di:waypoint x="9710" y="330" />
+        <di:waypoint x="10145" y="330" />
+        <di:waypoint x="10270" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F71_di" bpmnElement="F71">
-        <di:waypoint x="9850" y="330" />
-        <di:waypoint x="9975" y="330" />
+        <di:waypoint x="10410" y="330" />
+        <di:waypoint x="10535" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F72_di" bpmnElement="F72">
-        <di:waypoint x="10025" y="330" />
-        <di:waypoint x="10150" y="330" />
+        <di:waypoint x="10585" y="330" />
+        <di:waypoint x="10710" y="330" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10031" y="312" width="80" height="14" />
+          <dc:Bounds x="10591" y="312" width="80" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F73_di" bpmnElement="F73">
-        <di:waypoint x="10000" y="305" />
-        <di:waypoint x="10000" y="110" />
-        <di:waypoint x="5620" y="110" />
-        <di:waypoint x="5620" y="305" />
+        <di:waypoint x="10560" y="305" />
+        <di:waypoint x="10560" y="110" />
+        <di:waypoint x="6180" y="110" />
+        <di:waypoint x="6180" y="305" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10006" y="257" width="130" height="28" />
+          <dc:Bounds x="10566" y="257" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F74_di" bpmnElement="F74">
-        <di:waypoint x="10000" y="355" />
-        <di:waypoint x="10000" y="445" />
-        <di:waypoint x="10150" y="445" />
+        <di:waypoint x="10560" y="355" />
+        <di:waypoint x="10560" y="445" />
+        <di:waypoint x="10710" y="445" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="10008" y="413" width="130" height="28" />
+          <dc:Bounds x="10568" y="413" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F75_di" bpmnElement="F75">
-        <di:waypoint x="10290" y="445" />
-        <di:waypoint x="10422" y="445" />
+        <di:waypoint x="11070" y="445" />
+        <di:waypoint x="11152" y="445" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F80_di" bpmnElement="F80">
-        <di:waypoint x="10290" y="330" />
-        <di:waypoint x="10370" y="330" />
+        <di:waypoint x="10850" y="330" />
+        <di:waypoint x="10930" y="330" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F81_di" bpmnElement="F81">
-        <di:waypoint x="10510" y="330" />
-        <di:waypoint x="10642" y="330" />
+        <di:waypoint x="11070" y="330" />
+        <di:waypoint x="11150" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F82_di" bpmnElement="F82">
+        <di:waypoint x="11290" y="330" />
+        <di:waypoint x="11370" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_BacklogFreigabe_di" bpmnElement="StoreRef_BacklogFreigabe" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
+        <dc:Bounds x="11415" y="190" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="11370" y="150" width="140" height="28" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataOut_Backlog_P8_di" bpmnElement="DataOut_Backlog_P8">
+        <di:waypoint x="11260" y="285" />
+        <di:waypoint x="11260" y="215" />
+        <di:waypoint x="11415" y="215" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase1_di" bpmnElement="StoreRef_MethodikPhase1" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
         <dc:Bounds x="565" y="440" width="50" height="50" />
@@ -1956,168 +2115,229 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
         <di:waypoint x="700" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase2_di" bpmnElement="StoreRef_MethodikPhase2" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="1960" y="450" width="50" height="50" />
+        <dc:Bounds x="2520" y="450" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1920" y="502" width="130" height="28" />
+          <dc:Bounds x="2480" y="502" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K2_di" bpmnElement="DataIn_MethodikPhase2_K2">
-        <di:waypoint x="1970" y="450" />
-        <di:waypoint x="1970" y="420" />
-        <di:waypoint x="1680" y="420" />
-        <di:waypoint x="1680" y="375" />
+        <di:waypoint x="2530" y="450" />
+        <di:waypoint x="2530" y="420" />
+        <di:waypoint x="2240" y="420" />
+        <di:waypoint x="2240" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K3_di" bpmnElement="DataIn_MethodikPhase2_K3">
-        <di:waypoint x="2000" y="450" />
-        <di:waypoint x="2000" y="420" />
-        <di:waypoint x="2340" y="420" />
-        <di:waypoint x="2340" y="375" />
+        <di:waypoint x="2560" y="450" />
+        <di:waypoint x="2560" y="420" />
+        <di:waypoint x="2900" y="420" />
+        <di:waypoint x="2900" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K4_di" bpmnElement="DataIn_MethodikPhase2_K4">
-        <di:waypoint x="2010" y="475" />
-        <di:waypoint x="2060" y="475" />
-        <di:waypoint x="2060" y="915" />
-        <di:waypoint x="2300" y="915" />
-        <di:waypoint x="2300" y="945" />
+        <di:waypoint x="2570" y="475" />
+        <di:waypoint x="2620" y="475" />
+        <di:waypoint x="2620" y="915" />
+        <di:waypoint x="2860" y="915" />
+        <di:waypoint x="2860" y="945" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase3_di" bpmnElement="StoreRef_MethodikPhase3" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="4835" y="190" width="50" height="50" />
+        <dc:Bounds x="5395" y="190" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="4795" y="150" width="130" height="28" />
+          <dc:Bounds x="5355" y="150" width="130" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C2_di" bpmnElement="DataIn_MethodikPhase3_C2">
-        <di:waypoint x="4845" y="240" />
-        <di:waypoint x="4845" y="265" />
-        <di:waypoint x="4690" y="265" />
-        <di:waypoint x="4690" y="285" />
+        <di:waypoint x="5405" y="240" />
+        <di:waypoint x="5405" y="265" />
+        <di:waypoint x="5250" y="265" />
+        <di:waypoint x="5250" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C4_di" bpmnElement="DataIn_MethodikPhase3_C4">
-        <di:waypoint x="4875" y="240" />
-        <di:waypoint x="4875" y="265" />
-        <di:waypoint x="5070" y="265" />
-        <di:waypoint x="5070" y="285" />
+        <di:waypoint x="5435" y="240" />
+        <di:waypoint x="5435" y="265" />
+        <di:waypoint x="5630" y="265" />
+        <di:waypoint x="5630" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C1_di" bpmnElement="DataIn_MethodikPhase3_C1">
-        <di:waypoint x="4835" y="215" />
-        <di:waypoint x="4760" y="215" />
+        <di:waypoint x="5395" y="215" />
+        <di:waypoint x="5320" y="215" />
+        <di:waypoint x="5320" y="135" />
         <di:waypoint x="4760" y="135" />
-        <di:waypoint x="4200" y="135" />
-        <di:waypoint x="4200" y="285" />
+        <di:waypoint x="4760" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C3_di" bpmnElement="DataIn_MethodikPhase3_C3">
-        <di:waypoint x="4860" y="240" />
-        <di:waypoint x="4860" y="285" />
+        <di:waypoint x="5420" y="240" />
+        <di:waypoint x="5420" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase4_di" bpmnElement="StoreRef_MethodikPhase4" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="6805" y="1365" width="50" height="50" />
+        <dc:Bounds x="7365" y="1365" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="6655" y="1376" width="145" height="28" />
+          <dc:Bounds x="7215" y="1376" width="145" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D3_di" bpmnElement="DataIn_MethodikPhase4_D3">
-        <di:waypoint x="6815" y="1365" />
-        <di:waypoint x="6815" y="1350" />
-        <di:waypoint x="6720" y="1350" />
-        <di:waypoint x="6720" y="1335" />
+        <di:waypoint x="7375" y="1365" />
+        <di:waypoint x="7375" y="1350" />
+        <di:waypoint x="7280" y="1350" />
+        <di:waypoint x="7280" y="1335" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D4_di" bpmnElement="DataIn_MethodikPhase4_D4">
-        <di:waypoint x="6845" y="1365" />
-        <di:waypoint x="6845" y="1350" />
-        <di:waypoint x="6940" y="1350" />
-        <di:waypoint x="6940" y="1335" />
+        <di:waypoint x="7405" y="1365" />
+        <di:waypoint x="7405" y="1350" />
+        <di:waypoint x="7500" y="1350" />
+        <di:waypoint x="7500" y="1335" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D2a_di" bpmnElement="DataIn_MethodikPhase4_D2a">
-        <di:waypoint x="6830" y="1415" />
-        <di:waypoint x="6830" y="1430" />
-        <di:waypoint x="6420" y="1430" />
-        <di:waypoint x="6420" y="520" />
-        <di:waypoint x="6280" y="520" />
-        <di:waypoint x="6280" y="375" />
+        <di:waypoint x="7390" y="1415" />
+        <di:waypoint x="7390" y="1430" />
+        <di:waypoint x="6980" y="1430" />
+        <di:waypoint x="6980" y="520" />
+        <di:waypoint x="6840" y="520" />
+        <di:waypoint x="6840" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D6_di" bpmnElement="DataIn_MethodikPhase4_D6">
-        <di:waypoint x="6855" y="1390" />
-        <di:waypoint x="7840" y="1390" />
-        <di:waypoint x="7840" y="490" />
+        <di:waypoint x="7415" y="1390" />
+        <di:waypoint x="8400" y="1390" />
+        <di:waypoint x="8400" y="490" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase5_di" bpmnElement="StoreRef_MethodikPhase5" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="8150" y="1365" width="50" height="50" />
+        <dc:Bounds x="8710" y="1365" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="8035" y="1376" width="110" height="28" />
+          <dc:Bounds x="8595" y="1376" width="110" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E1_di" bpmnElement="DataIn_MethodikPhase5_E1">
-        <di:waypoint x="8175" y="1365" />
-        <di:waypoint x="8175" y="1335" />
+        <di:waypoint x="8735" y="1365" />
+        <di:waypoint x="8735" y="1335" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E3_di" bpmnElement="DataIn_MethodikPhase5_E3">
-        <di:waypoint x="8200" y="1390" />
-        <di:waypoint x="8580" y="1390" />
-        <di:waypoint x="8580" y="375" />
+        <di:waypoint x="8760" y="1390" />
+        <di:waypoint x="9140" y="1390" />
+        <di:waypoint x="9140" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase6_di" bpmnElement="StoreRef_MethodikPhase6" bioc:stroke="#880E4F" bioc:fill="#F8BBD0" color:background-color="#F8BBD0" color:border-color="#880E4F">
-        <dc:Bounds x="9535" y="190" width="50" height="50" />
+        <dc:Bounds x="10095" y="190" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="9490" y="150" width="140" height="28" />
+          <dc:Bounds x="10050" y="150" width="140" height="28" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P1_di" bpmnElement="DataIn_MethodikPhase6_P1">
-        <di:waypoint x="9545" y="240" />
-        <di:waypoint x="9545" y="262" />
-        <di:waypoint x="9390" y="262" />
-        <di:waypoint x="9390" y="285" />
+        <di:waypoint x="10105" y="240" />
+        <di:waypoint x="10105" y="262" />
+        <di:waypoint x="9950" y="262" />
+        <di:waypoint x="9950" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P4_di" bpmnElement="DataIn_MethodikPhase6_P4">
-        <di:waypoint x="9575" y="240" />
-        <di:waypoint x="9575" y="262" />
-        <di:waypoint x="9740" y="262" />
-        <di:waypoint x="9740" y="285" />
+        <di:waypoint x="10135" y="240" />
+        <di:waypoint x="10135" y="262" />
+        <di:waypoint x="10300" y="262" />
+        <di:waypoint x="10300" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P5_di" bpmnElement="DataIn_MethodikPhase6_P5">
-        <di:waypoint x="9585" y="215" />
-        <di:waypoint x="9660" y="215" />
-        <di:waypoint x="9660" y="135" />
+        <di:waypoint x="10145" y="215" />
+        <di:waypoint x="10220" y="215" />
         <di:waypoint x="10220" y="135" />
-        <di:waypoint x="10220" y="285" />
+        <di:waypoint x="10780" y="135" />
+        <di:waypoint x="10780" y="285" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P6_di" bpmnElement="DataIn_MethodikPhase6_P6">
-        <di:waypoint x="9535" y="215" />
-        <di:waypoint x="9470" y="215" />
-        <di:waypoint x="9470" y="520" />
-        <di:waypoint x="10220" y="520" />
-        <di:waypoint x="10220" y="490" />
+        <di:waypoint x="10095" y="215" />
+        <di:waypoint x="10030" y="215" />
+        <di:waypoint x="10030" y="520" />
+        <di:waypoint x="11000" y="520" />
+        <di:waypoint x="11000" y="490" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K1_di" bpmnElement="DataIn_MethodikPhase2_K1">
-        <di:waypoint x="1960" y="465" />
-        <di:waypoint x="1460" y="465" />
-        <di:waypoint x="1460" y="375" />
+        <di:waypoint x="2520" y="465" />
+        <di:waypoint x="2020" y="465" />
+        <di:waypoint x="2020" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_B5_di" bpmnElement="DataIn_MethodikPhase2_B5">
-        <di:waypoint x="1960" y="490" />
-        <di:waypoint x="1900" y="490" />
-        <di:waypoint x="1900" y="1100" />
-        <di:waypoint x="3440" y="1100" />
-        <di:waypoint x="3440" y="375" />
+        <di:waypoint x="2520" y="490" />
+        <di:waypoint x="2460" y="490" />
+        <di:waypoint x="2460" y="1100" />
+        <di:waypoint x="4000" y="1100" />
+        <di:waypoint x="4000" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D1_di" bpmnElement="DataIn_MethodikPhase4_D1">
-        <di:waypoint x="6810" y="1415" />
-        <di:waypoint x="6810" y="1421" />
-        <di:waypoint x="5840" y="1421" />
-        <di:waypoint x="5840" y="375" />
+        <di:waypoint x="7370" y="1415" />
+        <di:waypoint x="7370" y="1421" />
+        <di:waypoint x="6400" y="1421" />
+        <di:waypoint x="6400" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D5_di" bpmnElement="DataIn_MethodikPhase4_D5">
-        <di:waypoint x="6855" y="1375" />
-        <di:waypoint x="7380" y="1375" />
-        <di:waypoint x="7380" y="1035" />
+        <di:waypoint x="7415" y="1375" />
+        <di:waypoint x="7940" y="1375" />
+        <di:waypoint x="7940" y="1035" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_E4_di" bpmnElement="DataIn_MethodikPhase6_E4">
-        <di:waypoint x="9585" y="195" />
-        <di:waypoint x="9640" y="195" />
-        <di:waypoint x="9640" y="95" />
-        <di:waypoint x="10530" y="95" />
-        <di:waypoint x="10530" y="262" />
-        <di:waypoint x="10490" y="262" />
-        <di:waypoint x="10490" y="285" />
+        <di:waypoint x="10145" y="195" />
+        <di:waypoint x="10200" y="195" />
+        <di:waypoint x="10200" y="95" />
+        <di:waypoint x="11090" y="95" />
+        <di:waypoint x="11090" y="262" />
+        <di:waypoint x="11050" y="262" />
+        <di:waypoint x="11050" y="285" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="I3_di" bpmnElement="I3" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
+        <dc:Bounds x="1230" y="105" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="I4_di" bpmnElement="I4" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
+        <dc:Bounds x="1450" y="105" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="I5_di" bpmnElement="I5" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
+        <dc:Bounds x="1230" y="425" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="I6_di" bpmnElement="I6" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
+        <dc:Bounds x="1450" y="425" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F83_di" bpmnElement="F83">
+        <di:waypoint x="1370" y="150" />
+        <di:waypoint x="1450" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F84_di" bpmnElement="F84">
+        <di:waypoint x="1590" y="150" />
+        <di:waypoint x="1672" y="150" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F85_di" bpmnElement="F85">
+        <di:waypoint x="1370" y="470" />
+        <di:waypoint x="1450" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F86_di" bpmnElement="F86">
+        <di:waypoint x="1590" y="470" />
+        <di:waypoint x="1672" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Backlog_I4_di" bpmnElement="DataOut_Backlog_I4">
+        <di:waypoint x="1520" y="195" />
+        <di:waypoint x="1520" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Backlog_I6_di" bpmnElement="DataOut_Backlog_I6">
+        <di:waypoint x="1520" y="425" />
+        <di:waypoint x="1520" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="P9_di" bpmnElement="P9" bioc:stroke="#7A5C00" bioc:fill="#FFFDE7" color:background-color="#FFFDE7" color:border-color="#7A5C00">
+        <dc:Bounds x="10710" y="400" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="P10_di" bpmnElement="P10" bioc:stroke="#1B5E20" bioc:fill="#E8F5E9" color:background-color="#E8F5E9" color:border-color="#1B5E20">
+        <dc:Bounds x="11370" y="285" width="140" height="90" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="F87_di" bpmnElement="F87">
+        <di:waypoint x="10850" y="445" />
+        <di:waypoint x="10930" y="445" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="F88_di" bpmnElement="F88">
+        <di:waypoint x="11510" y="330" />
+        <di:waypoint x="11642" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Backlog_P6_di" bpmnElement="DataOut_Backlog_P6">
+        <di:waypoint x="11040" y="490" />
+        <di:waypoint x="11040" y="525" />
+        <di:waypoint x="11740" y="525" />
+        <di:waypoint x="11740" y="215" />
+        <di:waypoint x="11465" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Backlog_P10_di" bpmnElement="DataOut_Backlog_P10">
+        <di:waypoint x="11440" y="285" />
+        <di:waypoint x="11440" y="240" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_1_TextAnnotation_di" bpmnElement="MapAnnot_1_TextAnnotation">
         <dc:Bounds x="256" y="415" width="220" height="30" />
@@ -2162,473 +2382,543 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
         <di:waypoint x="968" y="164" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_7_TextAnnotation_di" bpmnElement="MapAnnot_7_TextAnnotation">
-        <dc:Bounds x="1195" y="432" width="220" height="46" />
+        <dc:Bounds x="1195" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_7_Association_di" bpmnElement="MapAnnot_7_Association">
         <di:waypoint x="1165" y="330" />
-        <di:waypoint x="1195" y="455" />
+        <di:waypoint x="1195" y="272" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_8_TextAnnotation_di" bpmnElement="MapAnnot_8_TextAnnotation">
-        <dc:Bounds x="1188" y="141" width="220" height="46" />
+        <dc:Bounds x="1738" y="76" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_8_Association_di" bpmnElement="MapAnnot_8_Association">
-        <di:waypoint x="1158" y="215" />
-        <di:waypoint x="1188" y="164" />
+        <di:waypoint x="1708" y="150" />
+        <di:waypoint x="1738" y="99" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_9_TextAnnotation_di" bpmnElement="MapAnnot_9_TextAnnotation">
-        <dc:Bounds x="1188" y="493" width="220" height="46" />
+        <dc:Bounds x="1738" y="396" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_9_Association_di" bpmnElement="MapAnnot_9_Association">
-        <di:waypoint x="1158" y="445" />
-        <di:waypoint x="1188" y="516" />
+        <di:waypoint x="1708" y="470" />
+        <di:waypoint x="1738" y="419" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_10_TextAnnotation_di" bpmnElement="MapAnnot_10_TextAnnotation">
-        <dc:Bounds x="1560" y="412" width="220" height="46" />
+        <dc:Bounds x="2120" y="412" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_10_Association_di" bpmnElement="MapAnnot_10_Association">
-        <di:waypoint x="1530" y="330" />
-        <di:waypoint x="1560" y="435" />
+        <di:waypoint x="2090" y="330" />
+        <di:waypoint x="2120" y="435" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_11_TextAnnotation_di" bpmnElement="MapAnnot_11_TextAnnotation">
-        <dc:Bounds x="1780" y="245" width="220" height="30" />
+        <dc:Bounds x="2340" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_11_Association_di" bpmnElement="MapAnnot_11_Association">
-        <di:waypoint x="1750" y="330" />
-        <di:waypoint x="1780" y="260" />
+        <di:waypoint x="2310" y="330" />
+        <di:waypoint x="2340" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_12_TextAnnotation_di" bpmnElement="MapAnnot_12_TextAnnotation">
-        <dc:Bounds x="1955" y="371" width="220" height="46" />
+        <dc:Bounds x="2515" y="371" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_12_Association_di" bpmnElement="MapAnnot_12_Association">
-        <di:waypoint x="1925" y="330" />
-        <di:waypoint x="1955" y="394" />
+        <di:waypoint x="2485" y="330" />
+        <di:waypoint x="2515" y="394" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_13_TextAnnotation_di" bpmnElement="MapAnnot_13_TextAnnotation">
-        <dc:Bounds x="1948" y="141" width="220" height="46" />
+        <dc:Bounds x="2508" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_13_Association_di" bpmnElement="MapAnnot_13_Association">
-        <di:waypoint x="1918" y="215" />
-        <di:waypoint x="1948" y="164" />
+        <di:waypoint x="2478" y="215" />
+        <di:waypoint x="2508" y="164" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_14_TextAnnotation_di" bpmnElement="MapAnnot_14_TextAnnotation">
-        <dc:Bounds x="2175" y="432" width="220" height="46" />
+        <dc:Bounds x="2735" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_14_Association_di" bpmnElement="MapAnnot_14_Association">
-        <di:waypoint x="2145" y="330" />
-        <di:waypoint x="2175" y="455" />
+        <di:waypoint x="2705" y="330" />
+        <di:waypoint x="2735" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_15_TextAnnotation_di" bpmnElement="MapAnnot_15_TextAnnotation">
-        <dc:Bounds x="2440" y="245" width="220" height="30" />
+        <dc:Bounds x="3000" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_15_Association_di" bpmnElement="MapAnnot_15_Association">
-        <di:waypoint x="2410" y="330" />
-        <di:waypoint x="2440" y="260" />
+        <di:waypoint x="2970" y="330" />
+        <di:waypoint x="3000" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_16_TextAnnotation_di" bpmnElement="MapAnnot_16_TextAnnotation">
-        <dc:Bounds x="2440" y="605" width="220" height="30" />
+        <dc:Bounds x="3000" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_16_Association_di" bpmnElement="MapAnnot_16_Association">
-        <di:waypoint x="2410" y="690" />
-        <di:waypoint x="2440" y="620" />
+        <di:waypoint x="2970" y="690" />
+        <di:waypoint x="3000" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_17_TextAnnotation_di" bpmnElement="MapAnnot_17_TextAnnotation">
-        <dc:Bounds x="2440" y="905" width="220" height="30" />
+        <dc:Bounds x="3000" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_17_Association_di" bpmnElement="MapAnnot_17_Association">
-        <di:waypoint x="2410" y="990" />
-        <di:waypoint x="2440" y="920" />
+        <di:waypoint x="2970" y="990" />
+        <di:waypoint x="3000" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_18_TextAnnotation_di" bpmnElement="MapAnnot_18_TextAnnotation">
-        <dc:Bounds x="2615" y="371" width="220" height="46" />
+        <dc:Bounds x="3175" y="371" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_18_Association_di" bpmnElement="MapAnnot_18_Association">
-        <di:waypoint x="2585" y="330" />
-        <di:waypoint x="2615" y="394" />
+        <di:waypoint x="3145" y="330" />
+        <di:waypoint x="3175" y="394" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_19_TextAnnotation_di" bpmnElement="MapAnnot_19_TextAnnotation">
-        <dc:Bounds x="2835" y="249" width="220" height="46" />
+        <dc:Bounds x="3395" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_19_Association_di" bpmnElement="MapAnnot_19_Association">
-        <di:waypoint x="2805" y="330" />
-        <di:waypoint x="2835" y="272" />
+        <di:waypoint x="3365" y="330" />
+        <di:waypoint x="3395" y="272" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_20_TextAnnotation_di" bpmnElement="MapAnnot_20_TextAnnotation">
-        <dc:Bounds x="3100" y="605" width="220" height="30" />
+        <dc:Bounds x="3660" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_20_Association_di" bpmnElement="MapAnnot_20_Association">
-        <di:waypoint x="3070" y="690" />
-        <di:waypoint x="3100" y="620" />
+        <di:waypoint x="3630" y="690" />
+        <di:waypoint x="3660" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_21_TextAnnotation_di" bpmnElement="MapAnnot_21_TextAnnotation">
-        <dc:Bounds x="3100" y="905" width="220" height="30" />
+        <dc:Bounds x="3660" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_21_Association_di" bpmnElement="MapAnnot_21_Association">
-        <di:waypoint x="3070" y="990" />
-        <di:waypoint x="3100" y="920" />
+        <di:waypoint x="3630" y="990" />
+        <di:waypoint x="3660" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_22_TextAnnotation_di" bpmnElement="MapAnnot_22_TextAnnotation">
-        <dc:Bounds x="3275" y="670" width="220" height="46" />
+        <dc:Bounds x="3835" y="670" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_22_Association_di" bpmnElement="MapAnnot_22_Association">
-        <di:waypoint x="3245" y="690" />
-        <di:waypoint x="3275" y="693" />
+        <di:waypoint x="3805" y="690" />
+        <di:waypoint x="3835" y="693" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_23_TextAnnotation_di" bpmnElement="MapAnnot_23_TextAnnotation">
-        <dc:Bounds x="3540" y="412" width="220" height="46" />
+        <dc:Bounds x="4100" y="412" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_23_Association_di" bpmnElement="MapAnnot_23_Association">
-        <di:waypoint x="3510" y="330" />
-        <di:waypoint x="3540" y="435" />
+        <di:waypoint x="4070" y="330" />
+        <di:waypoint x="4100" y="435" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_24_TextAnnotation_di" bpmnElement="MapAnnot_24_TextAnnotation">
-        <dc:Bounds x="3715" y="249" width="220" height="46" />
+        <dc:Bounds x="4275" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_24_Association_di" bpmnElement="MapAnnot_24_Association">
-        <di:waypoint x="3685" y="330" />
-        <di:waypoint x="3715" y="272" />
+        <di:waypoint x="4245" y="330" />
+        <di:waypoint x="4275" y="272" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_25_TextAnnotation_di" bpmnElement="MapAnnot_25_TextAnnotation">
-        <dc:Bounds x="3708" y="141" width="220" height="46" />
+        <dc:Bounds x="4268" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_25_Association_di" bpmnElement="MapAnnot_25_Association">
-        <di:waypoint x="3678" y="215" />
-        <di:waypoint x="3708" y="164" />
+        <di:waypoint x="4238" y="215" />
+        <di:waypoint x="4268" y="164" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_26_TextAnnotation_di" bpmnElement="MapAnnot_26_TextAnnotation">
-        <dc:Bounds x="4035" y="432" width="220" height="46" />
+        <dc:Bounds x="4595" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_26_Association_di" bpmnElement="MapAnnot_26_Association">
-        <di:waypoint x="4005" y="330" />
-        <di:waypoint x="4035" y="455" />
+        <di:waypoint x="4565" y="330" />
+        <di:waypoint x="4595" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_27_TextAnnotation_di" bpmnElement="MapAnnot_27_TextAnnotation">
-        <dc:Bounds x="4300" y="245" width="220" height="30" />
+        <dc:Bounds x="4860" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_27_Association_di" bpmnElement="MapAnnot_27_Association">
-        <di:waypoint x="4270" y="330" />
-        <di:waypoint x="4300" y="260" />
+        <di:waypoint x="4830" y="330" />
+        <di:waypoint x="4860" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_28_TextAnnotation_di" bpmnElement="MapAnnot_28_TextAnnotation">
-        <dc:Bounds x="4475" y="432" width="220" height="46" />
+        <dc:Bounds x="5035" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_28_Association_di" bpmnElement="MapAnnot_28_Association">
-        <di:waypoint x="4445" y="330" />
-        <di:waypoint x="4475" y="455" />
+        <di:waypoint x="5005" y="330" />
+        <di:waypoint x="5035" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_29_TextAnnotation_di" bpmnElement="MapAnnot_29_TextAnnotation">
-        <dc:Bounds x="4740" y="245" width="220" height="30" />
+        <dc:Bounds x="5300" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_29_Association_di" bpmnElement="MapAnnot_29_Association">
-        <di:waypoint x="4710" y="330" />
-        <di:waypoint x="4740" y="260" />
+        <di:waypoint x="5270" y="330" />
+        <di:waypoint x="5300" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_30_TextAnnotation_di" bpmnElement="MapAnnot_30_TextAnnotation">
-        <dc:Bounds x="4960" y="245" width="220" height="30" />
+        <dc:Bounds x="5520" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_30_Association_di" bpmnElement="MapAnnot_30_Association">
-        <di:waypoint x="4930" y="330" />
-        <di:waypoint x="4960" y="260" />
+        <di:waypoint x="5490" y="330" />
+        <di:waypoint x="5520" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_31_TextAnnotation_di" bpmnElement="MapAnnot_31_TextAnnotation">
-        <dc:Bounds x="5180" y="245" width="220" height="30" />
+        <dc:Bounds x="5740" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_31_Association_di" bpmnElement="MapAnnot_31_Association">
-        <di:waypoint x="5150" y="330" />
-        <di:waypoint x="5180" y="260" />
+        <di:waypoint x="5710" y="330" />
+        <di:waypoint x="5740" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_32_TextAnnotation_di" bpmnElement="MapAnnot_32_TextAnnotation">
-        <dc:Bounds x="5355" y="310" width="220" height="46" />
+        <dc:Bounds x="5915" y="310" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_32_Association_di" bpmnElement="MapAnnot_32_Association">
-        <di:waypoint x="5325" y="330" />
-        <di:waypoint x="5355" y="333" />
+        <di:waypoint x="5885" y="330" />
+        <di:waypoint x="5915" y="333" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_33_TextAnnotation_di" bpmnElement="MapAnnot_33_TextAnnotation">
-        <dc:Bounds x="5675" y="432" width="220" height="46" />
+        <dc:Bounds x="6235" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_33_Association_di" bpmnElement="MapAnnot_33_Association">
-        <di:waypoint x="5645" y="330" />
-        <di:waypoint x="5675" y="455" />
+        <di:waypoint x="6205" y="330" />
+        <di:waypoint x="6235" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_34_TextAnnotation_di" bpmnElement="MapAnnot_34_TextAnnotation">
-        <dc:Bounds x="5940" y="229" width="220" height="46" />
+        <dc:Bounds x="6500" y="229" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_34_Association_di" bpmnElement="MapAnnot_34_Association">
-        <di:waypoint x="5910" y="330" />
-        <di:waypoint x="5940" y="252" />
+        <di:waypoint x="6470" y="330" />
+        <di:waypoint x="6500" y="252" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_35_TextAnnotation_di" bpmnElement="MapAnnot_35_TextAnnotation">
-        <dc:Bounds x="6115" y="432" width="220" height="46" />
+        <dc:Bounds x="6675" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_35_Association_di" bpmnElement="MapAnnot_35_Association">
-        <di:waypoint x="6085" y="330" />
-        <di:waypoint x="6115" y="455" />
+        <di:waypoint x="6645" y="330" />
+        <di:waypoint x="6675" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_36_TextAnnotation_di" bpmnElement="MapAnnot_36_TextAnnotation">
-        <dc:Bounds x="6380" y="245" width="220" height="30" />
+        <dc:Bounds x="6940" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_36_Association_di" bpmnElement="MapAnnot_36_Association">
-        <di:waypoint x="6350" y="330" />
-        <di:waypoint x="6380" y="260" />
+        <di:waypoint x="6910" y="330" />
+        <di:waypoint x="6940" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_37_TextAnnotation_di" bpmnElement="MapAnnot_37_TextAnnotation">
-        <dc:Bounds x="6380" y="605" width="220" height="30" />
+        <dc:Bounds x="6940" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_37_Association_di" bpmnElement="MapAnnot_37_Association">
-        <di:waypoint x="6350" y="690" />
-        <di:waypoint x="6380" y="620" />
+        <di:waypoint x="6910" y="690" />
+        <di:waypoint x="6940" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_38_TextAnnotation_di" bpmnElement="MapAnnot_38_TextAnnotation">
-        <dc:Bounds x="6380" y="905" width="220" height="30" />
+        <dc:Bounds x="6940" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_38_Association_di" bpmnElement="MapAnnot_38_Association">
-        <di:waypoint x="6350" y="990" />
-        <di:waypoint x="6380" y="920" />
+        <di:waypoint x="6910" y="990" />
+        <di:waypoint x="6940" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_39_TextAnnotation_di" bpmnElement="MapAnnot_39_TextAnnotation">
-        <dc:Bounds x="6380" y="1205" width="220" height="30" />
+        <dc:Bounds x="6940" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_39_Association_di" bpmnElement="MapAnnot_39_Association">
-        <di:waypoint x="6350" y="1290" />
-        <di:waypoint x="6380" y="1220" />
+        <di:waypoint x="6910" y="1290" />
+        <di:waypoint x="6940" y="1220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_40_TextAnnotation_di" bpmnElement="MapAnnot_40_TextAnnotation">
-        <dc:Bounds x="6555" y="1392" width="220" height="46" />
+        <dc:Bounds x="7115" y="1392" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_40_Association_di" bpmnElement="MapAnnot_40_Association">
-        <di:waypoint x="6525" y="1290" />
-        <di:waypoint x="6555" y="1415" />
+        <di:waypoint x="7085" y="1290" />
+        <di:waypoint x="7115" y="1415" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_41_TextAnnotation_di" bpmnElement="MapAnnot_41_TextAnnotation">
-        <dc:Bounds x="6820" y="1205" width="220" height="30" />
+        <dc:Bounds x="7380" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_41_Association_di" bpmnElement="MapAnnot_41_Association">
-        <di:waypoint x="6790" y="1290" />
-        <di:waypoint x="6820" y="1220" />
+        <di:waypoint x="7350" y="1290" />
+        <di:waypoint x="7380" y="1220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_42_TextAnnotation_di" bpmnElement="MapAnnot_42_TextAnnotation">
-        <dc:Bounds x="7040" y="1205" width="220" height="30" />
+        <dc:Bounds x="7600" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_42_Association_di" bpmnElement="MapAnnot_42_Association">
-        <di:waypoint x="7010" y="1290" />
-        <di:waypoint x="7040" y="1220" />
+        <di:waypoint x="7570" y="1290" />
+        <di:waypoint x="7600" y="1220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_43_TextAnnotation_di" bpmnElement="MapAnnot_43_TextAnnotation">
-        <dc:Bounds x="7215" y="1092" width="220" height="46" />
+        <dc:Bounds x="7775" y="1092" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_43_Association_di" bpmnElement="MapAnnot_43_Association">
-        <di:waypoint x="7185" y="990" />
-        <di:waypoint x="7215" y="1115" />
+        <di:waypoint x="7745" y="990" />
+        <di:waypoint x="7775" y="1115" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_44_TextAnnotation_di" bpmnElement="MapAnnot_44_TextAnnotation">
-        <dc:Bounds x="7480" y="889" width="220" height="46" />
+        <dc:Bounds x="8040" y="889" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_44_Association_di" bpmnElement="MapAnnot_44_Association">
-        <di:waypoint x="7450" y="990" />
-        <di:waypoint x="7480" y="912" />
+        <di:waypoint x="8010" y="990" />
+        <di:waypoint x="8040" y="912" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_45_TextAnnotation_di" bpmnElement="MapAnnot_45_TextAnnotation">
-        <dc:Bounds x="7655" y="970" width="220" height="46" />
+        <dc:Bounds x="8215" y="970" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_45_Association_di" bpmnElement="MapAnnot_45_Association">
-        <di:waypoint x="7625" y="990" />
-        <di:waypoint x="7655" y="993" />
+        <di:waypoint x="8185" y="990" />
+        <di:waypoint x="8215" y="993" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_46_TextAnnotation_di" bpmnElement="MapAnnot_46_TextAnnotation">
-        <dc:Bounds x="7875" y="249" width="220" height="46" />
+        <dc:Bounds x="8435" y="249" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_46_Association_di" bpmnElement="MapAnnot_46_Association">
-        <di:waypoint x="7845" y="330" />
-        <di:waypoint x="7875" y="272" />
+        <di:waypoint x="8405" y="330" />
+        <di:waypoint x="8435" y="272" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_47_TextAnnotation_di" bpmnElement="MapAnnot_47_TextAnnotation">
-        <dc:Bounds x="7920" y="360" width="220" height="30" />
+        <dc:Bounds x="8480" y="360" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_47_Association_di" bpmnElement="MapAnnot_47_Association">
-        <di:waypoint x="7890" y="445" />
-        <di:waypoint x="7920" y="375" />
+        <di:waypoint x="8450" y="445" />
+        <di:waypoint x="8480" y="375" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_48_TextAnnotation_di" bpmnElement="MapAnnot_48_TextAnnotation">
-        <dc:Bounds x="8240" y="1205" width="220" height="30" />
+        <dc:Bounds x="8800" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_48_Association_di" bpmnElement="MapAnnot_48_Association">
-        <di:waypoint x="8210" y="1290" />
-        <di:waypoint x="8240" y="1220" />
+        <di:waypoint x="8770" y="1290" />
+        <di:waypoint x="8800" y="1220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_49_TextAnnotation_di" bpmnElement="MapAnnot_49_TextAnnotation">
-        <dc:Bounds x="8460" y="905" width="220" height="30" />
+        <dc:Bounds x="9020" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_49_Association_di" bpmnElement="MapAnnot_49_Association">
-        <di:waypoint x="8430" y="990" />
-        <di:waypoint x="8460" y="920" />
+        <di:waypoint x="8990" y="990" />
+        <di:waypoint x="9020" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_50_TextAnnotation_di" bpmnElement="MapAnnot_50_TextAnnotation">
-        <dc:Bounds x="8680" y="245" width="220" height="30" />
+        <dc:Bounds x="9240" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_50_Association_di" bpmnElement="MapAnnot_50_Association">
-        <di:waypoint x="8650" y="330" />
-        <di:waypoint x="8680" y="260" />
+        <di:waypoint x="9210" y="330" />
+        <di:waypoint x="9240" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_51_TextAnnotation_di" bpmnElement="MapAnnot_51_TextAnnotation">
-        <dc:Bounds x="8855" y="310" width="220" height="46" />
+        <dc:Bounds x="9415" y="310" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_51_Association_di" bpmnElement="MapAnnot_51_Association">
-        <di:waypoint x="8825" y="330" />
-        <di:waypoint x="8855" y="333" />
+        <di:waypoint x="9385" y="330" />
+        <di:waypoint x="9415" y="333" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_52_TextAnnotation_di" bpmnElement="MapAnnot_52_TextAnnotation">
-        <dc:Bounds x="8900" y="905" width="220" height="30" />
+        <dc:Bounds x="9460" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_52_Association_di" bpmnElement="MapAnnot_52_Association">
-        <di:waypoint x="8870" y="990" />
-        <di:waypoint x="8900" y="920" />
+        <di:waypoint x="9430" y="990" />
+        <di:waypoint x="9460" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_53_TextAnnotation_di" bpmnElement="MapAnnot_53_TextAnnotation">
-        <dc:Bounds x="9168" y="141" width="220" height="46" />
+        <dc:Bounds x="9728" y="141" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_53_Association_di" bpmnElement="MapAnnot_53_Association">
-        <di:waypoint x="9138" y="215" />
-        <di:waypoint x="9168" y="164" />
+        <di:waypoint x="9698" y="215" />
+        <di:waypoint x="9728" y="164" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_54_TextAnnotation_di" bpmnElement="MapAnnot_54_TextAnnotation">
-        <dc:Bounds x="9175" y="432" width="220" height="46" />
+        <dc:Bounds x="9735" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_54_Association_di" bpmnElement="MapAnnot_54_Association">
-        <di:waypoint x="9145" y="330" />
-        <di:waypoint x="9175" y="455" />
+        <di:waypoint x="9705" y="330" />
+        <di:waypoint x="9735" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_55_TextAnnotation_di" bpmnElement="MapAnnot_55_TextAnnotation">
-        <dc:Bounds x="9440" y="245" width="220" height="30" />
+        <dc:Bounds x="10000" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_55_Association_di" bpmnElement="MapAnnot_55_Association">
-        <di:waypoint x="9410" y="330" />
-        <di:waypoint x="9440" y="260" />
+        <di:waypoint x="9970" y="330" />
+        <di:waypoint x="10000" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_56_TextAnnotation_di" bpmnElement="MapAnnot_56_TextAnnotation">
-        <dc:Bounds x="9440" y="605" width="220" height="30" />
+        <dc:Bounds x="10000" y="605" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_56_Association_di" bpmnElement="MapAnnot_56_Association">
-        <di:waypoint x="9410" y="690" />
-        <di:waypoint x="9440" y="620" />
+        <di:waypoint x="9970" y="690" />
+        <di:waypoint x="10000" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_57_TextAnnotation_di" bpmnElement="MapAnnot_57_TextAnnotation">
-        <dc:Bounds x="9440" y="905" width="220" height="30" />
+        <dc:Bounds x="10000" y="905" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_57_Association_di" bpmnElement="MapAnnot_57_Association">
-        <di:waypoint x="9410" y="990" />
-        <di:waypoint x="9440" y="920" />
+        <di:waypoint x="9970" y="990" />
+        <di:waypoint x="10000" y="920" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_58_TextAnnotation_di" bpmnElement="MapAnnot_58_TextAnnotation">
-        <dc:Bounds x="9440" y="1205" width="220" height="30" />
+        <dc:Bounds x="10000" y="1205" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_58_Association_di" bpmnElement="MapAnnot_58_Association">
-        <di:waypoint x="9410" y="1290" />
-        <di:waypoint x="9440" y="1220" />
+        <di:waypoint x="9970" y="1290" />
+        <di:waypoint x="10000" y="1220" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_59_TextAnnotation_di" bpmnElement="MapAnnot_59_TextAnnotation">
-        <dc:Bounds x="9615" y="432" width="220" height="46" />
+        <dc:Bounds x="10175" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_59_Association_di" bpmnElement="MapAnnot_59_Association">
-        <di:waypoint x="9585" y="330" />
-        <di:waypoint x="9615" y="455" />
+        <di:waypoint x="10145" y="330" />
+        <di:waypoint x="10175" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_60_TextAnnotation_di" bpmnElement="MapAnnot_60_TextAnnotation">
-        <dc:Bounds x="9880" y="245" width="220" height="30" />
+        <dc:Bounds x="10440" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_60_Association_di" bpmnElement="MapAnnot_60_Association">
-        <di:waypoint x="9850" y="330" />
-        <di:waypoint x="9880" y="260" />
+        <di:waypoint x="10410" y="330" />
+        <di:waypoint x="10440" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_61_TextAnnotation_di" bpmnElement="MapAnnot_61_TextAnnotation">
-        <dc:Bounds x="10055" y="493" width="220" height="46" />
+        <dc:Bounds x="10615" y="493" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_61_Association_di" bpmnElement="MapAnnot_61_Association">
-        <di:waypoint x="10025" y="330" />
-        <di:waypoint x="10055" y="516" />
+        <di:waypoint x="10585" y="330" />
+        <di:waypoint x="10615" y="516" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_62_TextAnnotation_di" bpmnElement="MapAnnot_62_TextAnnotation">
-        <dc:Bounds x="10320" y="495" width="220" height="30" />
+        <dc:Bounds x="11100" y="495" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_62_Association_di" bpmnElement="MapAnnot_62_Association">
-        <di:waypoint x="10290" y="445" />
-        <di:waypoint x="10320" y="510" />
+        <di:waypoint x="11070" y="445" />
+        <di:waypoint x="11100" y="510" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_63_TextAnnotation_di" bpmnElement="MapAnnot_63_TextAnnotation">
-        <dc:Bounds x="10488" y="432" width="220" height="46" />
+        <dc:Bounds x="11218" y="432" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_63_Association_di" bpmnElement="MapAnnot_63_Association">
-        <di:waypoint x="10458" y="445" />
-        <di:waypoint x="10488" y="455" />
+        <di:waypoint x="11188" y="445" />
+        <di:waypoint x="11218" y="455" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_64_TextAnnotation_di" bpmnElement="MapAnnot_64_TextAnnotation">
-        <dc:Bounds x="10320" y="245" width="220" height="30" />
+        <dc:Bounds x="10880" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_64_Association_di" bpmnElement="MapAnnot_64_Association">
-        <di:waypoint x="10290" y="330" />
-        <di:waypoint x="10320" y="260" />
+        <di:waypoint x="10850" y="330" />
+        <di:waypoint x="10880" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_65_TextAnnotation_di" bpmnElement="MapAnnot_65_TextAnnotation">
-        <dc:Bounds x="10540" y="229" width="220" height="46" />
+        <dc:Bounds x="11100" y="534" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_65_Association_di" bpmnElement="MapAnnot_65_Association">
-        <di:waypoint x="10510" y="330" />
-        <di:waypoint x="10540" y="252" />
+        <di:waypoint x="11070" y="330" />
+        <di:waypoint x="11100" y="557" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_66_TextAnnotation_di" bpmnElement="MapAnnot_66_TextAnnotation">
-        <dc:Bounds x="10708" y="317" width="220" height="46" />
+        <dc:Bounds x="11320" y="245" width="220" height="30" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_66_Association_di" bpmnElement="MapAnnot_66_Association">
-        <di:waypoint x="10678" y="330" />
-        <di:waypoint x="10708" y="340" />
+        <di:waypoint x="11290" y="330" />
+        <di:waypoint x="11320" y="260" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_67_TextAnnotation_di" bpmnElement="MapAnnot_67_TextAnnotation">
-        <dc:Bounds x="10488" y="134" width="220" height="46" />
+        <dc:Bounds x="11708" y="256" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_67_Association_di" bpmnElement="MapAnnot_67_Association">
-        <di:waypoint x="10458" y="215" />
-        <di:waypoint x="10488" y="157" />
+        <di:waypoint x="11678" y="330" />
+        <di:waypoint x="11708" y="279" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="MapAnnot_68_TextAnnotation_di" bpmnElement="MapAnnot_68_TextAnnotation">
-        <dc:Bounds x="645" y="384" width="220" height="46" />
+        <dc:Bounds x="1400" y="49" width="220" height="46" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="MapAnnot_68_Association_di" bpmnElement="MapAnnot_68_Association">
+        <di:waypoint x="1370" y="150" />
+        <di:waypoint x="1400" y="72" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_69_TextAnnotation_di" bpmnElement="MapAnnot_69_TextAnnotation">
+        <dc:Bounds x="1620" y="200" width="220" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_69_Association_di" bpmnElement="MapAnnot_69_Association">
+        <di:waypoint x="1590" y="150" />
+        <di:waypoint x="1620" y="215" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_70_TextAnnotation_di" bpmnElement="MapAnnot_70_TextAnnotation">
+        <dc:Bounds x="1400" y="369" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_70_Association_di" bpmnElement="MapAnnot_70_Association">
+        <di:waypoint x="1370" y="470" />
+        <di:waypoint x="1400" y="392" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_71_TextAnnotation_di" bpmnElement="MapAnnot_71_TextAnnotation">
+        <dc:Bounds x="1620" y="520" width="220" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_71_Association_di" bpmnElement="MapAnnot_71_Association">
+        <di:waypoint x="1590" y="470" />
+        <di:waypoint x="1620" y="535" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_72_TextAnnotation_di" bpmnElement="MapAnnot_72_TextAnnotation">
+        <dc:Bounds x="10880" y="527" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_72_Association_di" bpmnElement="MapAnnot_72_Association">
+        <di:waypoint x="10850" y="445" />
+        <di:waypoint x="10880" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_73_TextAnnotation_di" bpmnElement="MapAnnot_73_TextAnnotation">
+        <dc:Bounds x="11540" y="380" width="220" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_73_Association_di" bpmnElement="MapAnnot_73_Association">
+        <di:waypoint x="11510" y="330" />
+        <di:waypoint x="11540" y="395" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_74_TextAnnotation_di" bpmnElement="MapAnnot_74_TextAnnotation">
+        <dc:Bounds x="11268" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_74_Association_di" bpmnElement="MapAnnot_74_Association">
+        <di:waypoint x="11238" y="215" />
+        <di:waypoint x="11268" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_75_TextAnnotation_di" bpmnElement="MapAnnot_75_TextAnnotation">
+        <dc:Bounds x="645" y="384" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_75_Association_di" bpmnElement="MapAnnot_75_Association">
         <di:waypoint x="615" y="465" />
         <di:waypoint x="645" y="407" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_69_TextAnnotation_di" bpmnElement="MapAnnot_69_TextAnnotation">
-        <dc:Bounds x="2040" y="516" width="220" height="46" />
+      <bpmndi:BPMNShape id="MapAnnot_76_TextAnnotation_di" bpmnElement="MapAnnot_76_TextAnnotation">
+        <dc:Bounds x="2600" y="516" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_69_Association_di" bpmnElement="MapAnnot_69_Association">
-        <di:waypoint x="2010" y="475" />
-        <di:waypoint x="2040" y="539" />
+      <bpmndi:BPMNEdge id="MapAnnot_76_Association_di" bpmnElement="MapAnnot_76_Association">
+        <di:waypoint x="2570" y="475" />
+        <di:waypoint x="2600" y="539" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_70_TextAnnotation_di" bpmnElement="MapAnnot_70_TextAnnotation">
-        <dc:Bounds x="4915" y="134" width="220" height="46" />
+      <bpmndi:BPMNShape id="MapAnnot_77_TextAnnotation_di" bpmnElement="MapAnnot_77_TextAnnotation">
+        <dc:Bounds x="5475" y="134" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_70_Association_di" bpmnElement="MapAnnot_70_Association">
-        <di:waypoint x="4885" y="215" />
-        <di:waypoint x="4915" y="157" />
+      <bpmndi:BPMNEdge id="MapAnnot_77_Association_di" bpmnElement="MapAnnot_77_Association">
+        <di:waypoint x="5445" y="215" />
+        <di:waypoint x="5475" y="157" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_71_TextAnnotation_di" bpmnElement="MapAnnot_71_TextAnnotation">
-        <dc:Bounds x="6885" y="1370" width="220" height="46" />
+      <bpmndi:BPMNShape id="MapAnnot_78_TextAnnotation_di" bpmnElement="MapAnnot_78_TextAnnotation">
+        <dc:Bounds x="7445" y="1370" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_71_Association_di" bpmnElement="MapAnnot_71_Association">
-        <di:waypoint x="6855" y="1390" />
-        <di:waypoint x="6885" y="1393" />
+      <bpmndi:BPMNEdge id="MapAnnot_78_Association_di" bpmnElement="MapAnnot_78_Association">
+        <di:waypoint x="7415" y="1390" />
+        <di:waypoint x="7445" y="1393" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_72_TextAnnotation_di" bpmnElement="MapAnnot_72_TextAnnotation">
-        <dc:Bounds x="8230" y="1309" width="220" height="46" />
+      <bpmndi:BPMNShape id="MapAnnot_79_TextAnnotation_di" bpmnElement="MapAnnot_79_TextAnnotation">
+        <dc:Bounds x="8790" y="1309" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_72_Association_di" bpmnElement="MapAnnot_72_Association">
-        <di:waypoint x="8200" y="1390" />
-        <di:waypoint x="8230" y="1332" />
+      <bpmndi:BPMNEdge id="MapAnnot_79_Association_di" bpmnElement="MapAnnot_79_Association">
+        <di:waypoint x="8760" y="1390" />
+        <di:waypoint x="8790" y="1332" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="MapAnnot_73_TextAnnotation_di" bpmnElement="MapAnnot_73_TextAnnotation">
-        <dc:Bounds x="9615" y="134" width="220" height="46" />
+      <bpmndi:BPMNShape id="MapAnnot_80_TextAnnotation_di" bpmnElement="MapAnnot_80_TextAnnotation">
+        <dc:Bounds x="10175" y="134" width="220" height="46" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="MapAnnot_73_Association_di" bpmnElement="MapAnnot_73_Association">
-        <di:waypoint x="9585" y="215" />
-        <di:waypoint x="9615" y="157" />
+      <bpmndi:BPMNEdge id="MapAnnot_80_Association_di" bpmnElement="MapAnnot_80_Association">
+        <di:waypoint x="10145" y="215" />
+        <di:waypoint x="10175" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_81_TextAnnotation_di" bpmnElement="MapAnnot_81_TextAnnotation">
+        <dc:Bounds x="1575" y="235" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_81_Association_di" bpmnElement="MapAnnot_81_Association">
+        <di:waypoint x="1545" y="255" />
+        <di:waypoint x="1575" y="258" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_82_TextAnnotation_di" bpmnElement="MapAnnot_82_TextAnnotation">
+        <dc:Bounds x="9955" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_82_Association_di" bpmnElement="MapAnnot_82_Association">
+        <di:waypoint x="9925" y="215" />
+        <di:waypoint x="9955" y="157" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="MapAnnot_83_TextAnnotation_di" bpmnElement="MapAnnot_83_TextAnnotation">
+        <dc:Bounds x="11495" y="134" width="220" height="46" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="MapAnnot_83_Association_di" bpmnElement="MapAnnot_83_Association">
+        <di:waypoint x="11465" y="215" />
+        <di:waypoint x="11495" y="157" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

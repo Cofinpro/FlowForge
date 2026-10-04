@@ -286,7 +286,8 @@ die Struktur des Diagramms).
 
 - `examples/dark-factory/` – vollständiger Lauf „Von der Produktvision zu User Stories“ als
   Schnappschuss. `generated/` wird nur über `tools/dark-factory-gen/regenerate.sh` erneuert.
-- `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau;
+- `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau,
+  mit Wissens-Stores und dem Product Backlog als Live-Store (`cli:gh`) samt Freigaben und Write-Guard;
   die Notebook-Frage dahinter liegt in `notebook-faq/`.
 
 ## Wo ändere ich was?

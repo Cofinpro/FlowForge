@@ -20,28 +20,33 @@ wirklich etwas unklar ist.
 
 | Phase | Inhalt | Entscheidung / Schleife |
 |---|---|---|
-| 1 Eingang & Triage | Feedback als Problem formulieren (nicht als Lösungswunsch), verwandte Stories und Epics im Backlog suchen | *Fehlverhalten einer bestehenden Funktion?* (→ Fehlerbearbeitung) · *Wie hängt das Anliegen mit dem Backlog zusammen?* (Änderung an offener Story → dorthin übergeben, kein Epic-Bezug → im Opportunity Backlog parken, sonst neue Story unter bestehendem Epic) |
+| 1 Eingang & Triage | Feedback als Problem formulieren (nicht als Lösungswunsch), verwandte Stories und Epics im Backlog suchen | *Fehlverhalten einer bestehenden Funktion?* (→ Fehlerbearbeitung) · *Wie hängt das Anliegen mit dem Backlog zusammen?* (Änderung an offener Story → Hinweis freigeben, dann als Kommentar an die Story; kein Epic-Bezug → Parken freigeben, dann im Opportunity Backlog anlegen; sonst neue Story unter bestehendem Epic) |
 | 2 Fachliche Klärung | Rückfrage beim Feedbackgeber, Prüfung gegen Epic-Ziel und Fachkonzept, danach parallel: Ist-/Soll-Delta (PO), betroffene Screens (UX), technische Grobeinschätzung (Entwicklung) | *Mit dem Fachkonzept vereinbar?* (sonst Fachkonzept-Änderung beantragen) · *Relevante Unsicherheit offen?* (technisch → Spike, Nutzen/Bedienbarkeit → Prototyp-Test, sonst direkt weiter) · *Tragen die Erkenntnisse die Story?* |
 | 3 Story formulieren | Einordnung unter den Epic in der User Story Map, Connextra-Format, Bezug zu Epic, Fachkonzept und auslösendem Feedback, INVEST-Selbstcheck | *INVEST erfüllt?* (umformulieren) |
 | 4 Refinement (Three Amigos) | parallel Was (PO), Wie (Entwicklung), Rand- und Negativfälle (QA), Wireframes (UX); danach Given-When-Then, Beispieltabellen, Planning Poker | *Schätzungen konvergiert?* · *Passt die Story in einen Sprint?* (vertikal schneiden, Teil-Stories neu formulieren) |
 | 5 Definition of Ready | DoR-Checkliste, Abgleich mit dem Domänenmodell, Prüfung auf Fake- oder Waisen-Story | *Definition of Ready erfüllt?* (Kriterien unklar → Refinement, technisches Risiko → Spike → Refinement, nicht mehr relevant → verwerfen) |
-| 6 Plausibilität gegen Backlog & Freigabe | parallel: Duplikate/Überschneidungen (PO), Konsistenz mit bestehenden Abläufen (UX), Abhängigkeiten und Reihenfolge (Entwicklung), Akzeptanzkriterien gegen andere Stories und Living Documentation (QA); Befund zusammenführen, betroffene Stories markieren, priorisieren | *Konsistent mit dem übrigen Backlog?* (Widerspruch → zurück ins Refinement, Duplikat → mit bestehender Story zusammenführen) |
+| 6 Plausibilität gegen Backlog & Freigabe | parallel: Duplikate/Überschneidungen (PO), Konsistenz mit bestehenden Abläufen (UX), Abhängigkeiten und Reihenfolge (Entwicklung), Akzeptanzkriterien gegen andere Stories und Living Documentation (QA); Befund zusammenführen, Anpassungen an betroffenen Stories vorschlagen, priorisieren und die Übernahme freigeben, dann Story im Backlog anlegen und betroffene Stories markieren | *Konsistent mit dem übrigen Backlog?* (Widerspruch → zurück ins Refinement, Duplikat → Zusammenführung freigeben, dann mit bestehender Story zusammenführen) |
 
 - **Aufgabentypen** nach der Lesart von `bpmn2agent-analyze`: `serviceTask` = Agentenarbeit,
   `userTask` = menschlicher Kontrollpunkt (Rückfrage beim Feedbackgeber, Auswertung von Spike oder
-  Prototyp-Test, Refinement-Termin, Planning Poker, Priorisierung), `businessRuleTask` = Prüfung gegen
+  Prototyp-Test, Refinement-Termin, Planning Poker, Priorisierung und Freigabe, dazu je eine Freigabe
+  vor dem Änderungshinweis, dem Parken und der Zusammenführung), `businessRuleTask` = Prüfung gegen
   eine Checkliste (INVEST, DoR).
-- Jede Aufgabe trägt in `<bpmn:documentation>` ein `Input: … Output: …`. Zwölf Datenobjekte zeigen
-  die wichtigsten Artefakte, darunter drei Eingaben aus dem Projektrahmen: Product Backlog (zweimal:
-  bei der Triage und bei der Duplikatprüfung) sowie Epic & Fachkonzept.
+- Jede Aufgabe trägt in `<bpmn:documentation>` ein `Input: … Output: …`. Zehn Datenobjekte zeigen
+  die wichtigsten Artefakte, darunter die Eingabe Epic & Fachkonzept aus dem Projektrahmen.
 - **Sechs Wissens-Stores**, je einer pro Phase (`Product-Methodik: Eingang & Triage`, `… Fachliche
   Klärung`, `… Story formulieren`, `… Refinement`, `… Definition of Ready`, `… Plausibilität &
   Freigabe`). Alle tragen `Art: wissen` und `Ort: notebook:The Product - Business Design`, also
   dasselbe Notebook, nur fachlich nach Phase geschnitten. Die Pfeile gehen vom Store zur Aufgabe
   (lesen): Triage → I1, I2 · Klärung → K1, K2, K3, K4, B5 · Story formulieren → C1, C2, C3, C4 ·
   Refinement → D1, D2a, D3, D4, D5, D6 · DoR → E1, E3 · Plausibilität → E4, P1, P4, P5, P6.
-  Aufgaben ohne Pfeil von einem Store (alle übrigen) fallen auf die Lane-Zuordnung von
+  Aufgaben ohne Pfeil von einem Wissens-Store fallen auf die Lane-Zuordnung von
   `bpmn2agent-knowledge` zurück.
+- **Drei Live-Stores für das Product Backlog** in GitHub (`Art: live`, `Ort: cli:gh`), nach Phase
+  geschnitten: `Product Backlog & User Story Map` (gelesen von I2, geschrieben von I4 und I6),
+  `Product Backlog: übrige Stories` (gelesen von P1, P2, P3) und `Product Backlog: freigegebene
+  Änderungen` (geschrieben von P6, P8, P10). Vor jedem Schreiben steht ein User Task als Freigabe:
+  I3 vor I4, I5 vor I6, P9 vor P6, E4 vor P8 und P10.
 
 ## Wissensgrundlage
 
@@ -69,10 +74,13 @@ Stand: XSD gültig, 0 bpmn-moddle-Warnungen, 0 bpmnlint-Befunde.
 
 ## Ergebnis der Pipeline
 
-Am 2026-09-26 mit `bpmn-to-agentic-workflow` durchgelaufen, als erstes Beispiel im neuen Aufbau:
-[`generated/user-story-refinement/`](generated/user-story-refinement/). Muster Skill-Kette, 7 Skills
-(ein Einstieg, sechs Phasen-Skills mit dem Notebook-Wissen als `references/`), keine Agenten, keine
-Skripte, keine Hooks. Installiert wird mit einer Kopie:
+Am 2026-09-26 mit `bpmn-to-agentic-workflow` durchgelaufen, als erstes Beispiel im neuen Aufbau, und
+am 2026-10-04 mit dem GitHub-Backlog erneut:
+[`generated/user-story-refinement/`](generated/user-story-refinement/). Muster Skill-Kette + Hook,
+8 Skills (ein Einstieg, sechs Phasen-Skills mit dem Notebook-Wissen als `references/`, ein
+Schreib-Skill `story-backlog-publish`), ein Write-Guard-Hook und eine `settings.json` mit den
+`gh`-Lesebefehlen; keine Agenten, keine Skripte. Installiert wird mit einer Kopie (eine vorhandene
+`settings.json` von Hand zusammenführen):
 
 ```bash
 cp -R generated/user-story-refinement/.claude/. <projekt>/.claude/

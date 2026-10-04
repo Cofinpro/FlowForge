@@ -3,12 +3,12 @@ meta:
   workflowName: user-story-refinement
   sourceBpmn:
     path: user-story-refinement.bpmn
-    sha256: c6c9b4a41a7d8cbab5483a19e65322346c311ff8b512069488d5069c2ba11a6e
+    sha256: a3be89b16aad09f29fa35fd34bbe6f3dc3332f00979d6040e222dd3decb26ec0
   language: de
   generatorVersion: 0.1.0
   outputLayout: claude-dir
   created: '2026-09-26T09:53:22.108Z'
-  updated: '2026-10-04T09:01:44.728Z'
+  updated: '2026-10-04T11:52:40.000Z'
 roles:
   product-owner:
     bpmnLaneId: Lane_ProductOwner
@@ -55,9 +55,8 @@ elements:
     label: Verwandte Stories & Epics im Backlog suchen
     lane: product-owner
     kind: skill
-    inputs:
-      - artifact: product-backlog
-        required: true
+    outputs:
+      - artifact: feedback-eintrag
     generatedPaths:
       - generated/user-story-refinement/.claude/skills/story-triage/SKILL.md
     knowledge:
@@ -105,6 +104,78 @@ elements:
     kind: orchestrator
     generatedPaths:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+  I3:
+    bpmnType: userTask
+    label: Änderungshinweis an offene Story freigeben
+    lane: product-owner
+    kind: human-checkpoint
+    inputs:
+      - artifact: feedback-eintrag
+        required: true
+      - artifact: run-state
+        required: true
+    outputs:
+      - artifact: uebergabe
+      - artifact: run-state
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge: []
+    gate:
+      kind: human
+      criteria:
+        - Shows the exact comment for the open story (issue, text with problem statement and feedback link) before approval; the PO approves, edits or rejects
+        - Asked together with the confirmation of the Gw_Bezug branch (one question, both decisions recorded separately)
+        - Records the approved text and the target issue URL (from I2's candidate list in feedback-eintrag) in uebergabe and run-state checkpoints.I3
+        - Not approved → nothing is written; the run pauses here with the reason in run-state and resumes from the story folder
+  I4:
+    bpmnType: serviceTask
+    label: Änderungshinweis an offener Story ergänzen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: uebergabe
+        required: true
+      - artifact: run-state
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-publish/SKILL.md
+    knowledge: []
+  I5:
+    bpmnType: userTask
+    label: Parken im Opportunity Backlog freigeben
+    lane: product-owner
+    kind: human-checkpoint
+    inputs:
+      - artifact: feedback-eintrag
+        required: true
+      - artifact: run-state
+        required: true
+    outputs:
+      - artifact: uebergabe
+      - artifact: run-state
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge: []
+    gate:
+      kind: human
+      criteria:
+        - Shows the exact Opportunity Backlog entry (repo, title, body with problem statement, source and reason, label opportunity) before approval; the PO approves, edits or rejects
+        - Asked together with the confirmation of the Gw_Bezug branch (one question, both decisions recorded separately)
+        - Records the approved entry in uebergabe and run-state checkpoints.I5
+        - Not approved → nothing is written; the run pauses here with the reason in run-state and resumes from the story folder
+  I6:
+    bpmnType: serviceTask
+    label: Feedback im Opportunity Backlog anlegen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: uebergabe
+        required: true
+      - artifact: run-state
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-publish/SKILL.md
+    knowledge: []
   K1:
     bpmnType: userTask
     label: Anliegen mit Feedbackgeber klären
@@ -582,9 +653,6 @@ elements:
     label: Auf Duplikate & Überschneidungen prüfen
     lane: product-owner
     kind: skill
-    inputs:
-      - artifact: product-backlog
-        required: true
     generatedPaths:
       - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
     knowledge:
@@ -650,7 +718,6 @@ elements:
       criteria:
         - No contradiction with other stories or the living documentation
         - No unmerged duplicate
-        - Duplicate verdict and merge proposal are confirmed by the user before "Story in bestehende Story überführt"
         - Counts against the same refinement budget as Gw_Ready; at the cap escalate to the PO
       maxLoops: 3
   P6:
@@ -658,8 +725,13 @@ elements:
     label: Mit bestehender Story zusammenführen
     lane: product-owner
     kind: skill
+    inputs:
+      - artifact: aenderungsvorschlaege
+        required: true
+      - artifact: run-state
+        required: true
     generatedPaths:
-      - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
+      - generated/user-story-refinement/.claude/skills/story-backlog-publish/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
       - generated/user-story-refinement/knowledge/P6.md
@@ -672,7 +744,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
   P5:
     bpmnType: serviceTask
-    label: Betroffene Stories zur Anpassung markieren
+    label: Anpassungen an betroffenen Stories vorschlagen
     lane: product-owner
     kind: skill
     generatedPaths:
@@ -682,11 +754,25 @@ elements:
       - generated/user-story-refinement/knowledge/P5.md
   E4:
     bpmnType: userTask
-    label: Story priorisieren & in Ready-Spalte stellen
+    label: Story priorisieren & Übernahme ins Backlog freigeben
     lane: product-owner
     kind: human-checkpoint
+    inputs:
+      - artifact: story-karte
+        required: true
+      - artifact: given-when-then-szenarien
+        required: true
+      - artifact: story-point-schaetzung
+        required: true
+      - artifact: plausibilitaetsbefund
+        required: true
+      - artifact: aenderungsvorschlaege
+        required: false
+      - artifact: run-state
+        required: true
     outputs:
-      - artifact: sprint-reife-user-story
+      - artifact: run-state
+      - artifact: aenderungsvorschlaege
     generatedPaths:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
@@ -697,7 +783,70 @@ elements:
       kind: human
       criteria:
         - 'Position in the backlog confirmed by the PO (WSJF suggestion: Cost of Delay asked here / story points)'
-        - Change proposals for affected stories approved; nothing is written into the backlog tool by the workflow
+        - Priority is stored as the GitHub project field "Priority"; Status becomes "Ready"
+        - Change proposals for affected stories approved or rejected one by one
+        - Shows the exact backlog changes before approval (repo and project, issue title and body, label epic:<name>, Status, Priority, the notes for affected stories) and how many Claude Code write prompts follow; the PO approves, edits or rejects
+        - Records the decision in run-state checkpoints.E4 (decision, priority, approvedVersions of the shown artifacts, approvedAt) and the per-proposal decision in aenderungsvorschlaege; the write steps refuse to write when an artifact version differs from approvedVersions
+        - Not approved → nothing is written; the run pauses here with the reason in run-state and resumes from the story folder
+  P8:
+    bpmnType: serviceTask
+    label: Story im Backlog anlegen & in Ready-Spalte stellen
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: story-karte
+        required: true
+      - artifact: given-when-then-szenarien
+        required: true
+      - artifact: story-point-schaetzung
+        required: true
+      - artifact: feedback-eintrag
+        required: true
+      - artifact: run-state
+        required: true
+    outputs:
+      - artifact: sprint-reife-user-story
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-publish/SKILL.md
+    knowledge: []
+  P9:
+    bpmnType: userTask
+    label: Zusammenführung freigeben
+    lane: product-owner
+    kind: human-checkpoint
+    inputs:
+      - artifact: plausibilitaetsbefund
+        required: true
+      - artifact: run-state
+        required: true
+    outputs:
+      - artifact: aenderungsvorschlaege
+      - artifact: run-state
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
+    knowledge: []
+    gate:
+      kind: human
+      criteria:
+        - Shows the duplicate and the exact change to it (added acceptance criteria, feedback link) as a diff against its body read at approval; the PO approves, edits or rejects
+        - Asked together with the confirmation of the Gw_Plausibel duplicate verdict (one question, both decisions recorded separately)
+        - Records the approved diff and the duplicate's updatedAt in aenderungsvorschlaege and run-state checkpoints.P9
+        - Not approved → nothing is written; the run pauses here with the reason in run-state and resumes from the story folder
+  P10:
+    bpmnType: serviceTask
+    label: Betroffene Stories im Backlog markieren
+    lane: product-owner
+    kind: skill
+    inputs:
+      - artifact: aenderungsvorschlaege
+        required: true
+      - artifact: sprint-reife-user-story
+        required: true
+      - artifact: run-state
+        required: true
+    generatedPaths:
+      - generated/user-story-refinement/.claude/skills/story-backlog-publish/SKILL.md
+    knowledge: []
   End_StorySprintReady:
     bpmnType: endEvent
     label: Story sprint-ready
@@ -729,6 +878,18 @@ elements:
     bpmnType: dataStoreReference
     label: "Product-Methodik: Plausibilität & Freigabe"
     kind: context-source
+  StoreRef_BacklogTriage:
+    bpmnType: dataStoreReference
+    label: Product Backlog & User Story Map
+    kind: context-source
+  StoreRef_BacklogPlausi:
+    bpmnType: dataStoreReference
+    label: "Product Backlog: übrige Stories"
+    kind: context-source
+  StoreRef_BacklogFreigabe:
+    bpmnType: dataStoreReference
+    label: "Product Backlog: freigegebene Änderungen"
+    kind: context-source
   DataInput_Feedback:
     bpmnType: dataInput
     label: Feedback
@@ -740,7 +901,9 @@ elements:
 artifacts:
   feedback-eintrag:
     pathPattern: stories/{storyId}/01_feedback.md
-    producer: I1
+    producer:
+      - I1
+      - I2
     frontmatter:
       - field: storyId
         required: true
@@ -752,11 +915,6 @@ artifacts:
         required: true
       - field: fachkonzept
         required: true
-  product-backlog:
-    pathPattern: '{backlog} (existing project backlog and user story map, read-only)'
-    consumers:
-      - I2
-      - P1
   epic-fachkonzept:
     pathPattern: '{fachkonzept} (existing epic and Fachkonzept documents, read-only)'
     consumers:
@@ -843,7 +1001,7 @@ artifacts:
         required: true
   sprint-reife-user-story:
     pathPattern: stories/{storyId}/10_ready-story.md
-    producer: E4
+    producer: P8
     frontmatter:
       - field: storyId
         required: true
@@ -857,6 +1015,9 @@ artifacts:
         required: true
       - field: priority
         required: true
+      - field: backlogItem
+        required: true
+        description: URL of the GitHub issue that holds the story in the product backlog. Written right after the issue is created, before it is added to the project, so a resumed run reuses it instead of creating a second issue.
   dor-befund:
     pathPattern: stories/{storyId}/07_dor-befund.md
     frontmatter:
@@ -879,11 +1040,22 @@ artifacts:
         required: true
       - field: status
         required: true
+      - field: proposals
+        required: true
+        description: >-
+          One entry per proposed change: target issue URL, the exact change (a comment, or a diff against the body read
+          at approval), baseUpdatedAt of the target issue, decision (approved / rejected), appliedUrl. The write step
+          re-reads the issue first and stops to ask again when updatedAt changed; it adds (comments, appended sections)
+          instead of rewriting a body, writes appliedUrl right after each gh call and skips entries that already have
+          one. The run reaches its end event only when every approved entry is applied or explicitly skipped.
     producer:
       - P5
-      - P6
+      - P9
+      - E4
     consumers:
       - E4
+      - P6
+      - P10
   uebergabe:
     pathPattern: stories/{storyId}/99_uebergabe.md
     frontmatter:
@@ -893,7 +1065,12 @@ artifacts:
         required: true
       - field: target
         required: true
+      - field: backlogItem
+        required: false
+        description: URL of the GitHub comment or issue written after approval ("Änderungshinweis an offener Story ergänzen", "Feedback im Opportunity Backlog anlegen"). Written right after the gh call; before writing, the step checks this field and searches the target for the storyId marker, so a resumed run never writes twice.
     producer:
+      - I3
+      - I5
       - End_BugUebergeben
       - End_AnStoryUebergeben
       - End_FeedbackGeparkt
@@ -901,6 +1078,9 @@ artifacts:
       - End_AnliegenVerworfen
       - End_StoryVerworfen
       - End_StoryZusammengefuehrt
+    consumers:
+      - I4
+      - I6
   run-state:
     pathPattern: stories/{storyId}/00_run.md
     frontmatter:
@@ -919,7 +1099,16 @@ artifacts:
     producer:
       - Start_FeedbackEingegangen
       - D6
+      - I3
+      - I5
+      - P9
+      - E4
     consumers:
+      - I4
+      - I6
+      - P6
+      - P8
+      - P10
       - K1
       - B5
       - D1
@@ -938,7 +1127,7 @@ artifacts:
         description: The raw user or stakeholder feedback, as text or a path to a file.
       - field: backlog
         required: true
-        description: Location of the existing project backlog and user story map.
+        description: GitHub repository and project of the product backlog and user story map, e.g. "owner/repo, project 3". Epics are labels epic:<name>; Status "Ready" and the field "Priority" live in the project. Read and written with gh.
       - field: fachkonzept
         required: true
         description: Location of the existing epic and Fachkonzept documents.
@@ -1017,6 +1206,70 @@ contextSources:
       - P6
       - P5
       - E4
+  product-backlog-user-story-map:
+    name: Product Backlog & User Story Map
+    bpmnElement: StoreRef_BacklogTriage
+    art: live
+    ort:
+      type: cli
+      ref: gh
+    readers:
+      - I2
+    writers:
+      - I4
+      - I6
+    tools:
+      read:
+        - Bash(gh auth status:*)
+        - Bash(gh issue list:*)
+        - Bash(gh issue view:*)
+        - Bash(gh search issues:*)
+        - Bash(gh project view:*)
+        - Bash(gh project item-list:*)
+      write:
+        - Bash(gh issue comment:*)
+        - Bash(gh issue create:*)
+  product-backlog-uebrige-stories:
+    name: "Product Backlog: übrige Stories"
+    bpmnElement: StoreRef_BacklogPlausi
+    art: live
+    ort:
+      type: cli
+      ref: gh
+    readers:
+      - P1
+      - P3
+      - P2
+    tools:
+      read:
+        - Bash(gh issue list:*)
+        - Bash(gh issue view:*)
+        - Bash(gh search issues:*)
+        - Bash(gh project item-list:*)
+  product-backlog-freigegebene-aenderungen:
+    name: "Product Backlog: freigegebene Änderungen"
+    bpmnElement: StoreRef_BacklogFreigabe
+    art: live
+    ort:
+      type: cli
+      ref: gh
+    writers:
+      - P6
+      - P8
+      - P10
+    tools:
+      read:
+        - Bash(gh issue list:*)
+        - Bash(gh issue view:*)
+        - Bash(gh project view:*)
+        - Bash(gh project field-list:*)
+        - Bash(gh project item-list:*)
+      write:
+        - Bash(gh issue create:*)
+        - Bash(gh issue edit:*)
+        - Bash(gh issue comment:*)
+        - Bash(gh project item-add:*)
+        - Bash(gh project item-edit:*)
 workflowIO:
   input:
     artifact: feedback
@@ -1062,7 +1315,10 @@ openQuestions:
       The merge path (Gw_Plausibel -> "Mit bestehender Story zusammenführen" -> end) passes no human approval. Add a
       userTask to the BPMN or confirm inside the flow?
     source: 'agentic-workflow-architect review [human-in-the-loop-1: 8, 9, 10, 28]'
-    answer: Confirm inside the flow before the end event; the workflow only writes a merge proposal. No BPMN change.
+    answer: >-
+      Superseded on 2026-10-04: the diagram now has the userTask "Zusammenführung freigeben" before the merge, and
+      "Mit bestehender Story zusammenführen" writes into GitHub (see the P5 entry of 2026-10-04). Originally: confirm
+      inside the flow before the end event, merge proposal only.
     answeredAt: '2026-09-26T10:26:14.274Z'
   - elementId: D6
     question: >-
@@ -1158,6 +1414,87 @@ openQuestions:
       Keep two exits (Ja / Nein). A pivot goes through "Nein" with a note, and a further experiment is started by the
       human at "Erkenntnisse auswerten". No diagram change. Decided by the business user.
     answeredAt: '2026-10-04T09:01:44.728Z'
+  - elementId: P8
+    question: >-
+      No knowledge store is drawn for "Story im Backlog anlegen & in Ready-Spalte stellen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Intentional: the step writes the approved story into the live backlog (gh) and needs the story artifacts, no
+      methodology. No knowledge file. Decided by the business user.
+    answeredAt: '2026-10-04T11:35:01.000Z'
+  - elementId: I4
+    question: >-
+      No knowledge store is drawn for "Änderungshinweis an offener Story ergänzen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Intentional: like "Story im Backlog anlegen & in Ready-Spalte stellen", the step only writes an approved change
+      into the live backlog (gh). No knowledge file. Same rule as P8; confirmed with the mapping plan.
+    answeredAt: '2026-10-04T11:46:44.000Z'
+  - elementId: I6
+    question: >-
+      No knowledge store is drawn for "Feedback im Opportunity Backlog anlegen". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Intentional: like "Story im Backlog anlegen & in Ready-Spalte stellen", the step only writes an approved change
+      into the live backlog (gh). No knowledge file. Same rule as P8; confirmed with the mapping plan.
+    answeredAt: '2026-10-04T11:46:44.000Z'
+  - elementId: P10
+    question: >-
+      No knowledge store is drawn for "Betroffene Stories im Backlog markieren". Intentional, or a missing source?
+    source: 'bpmn2agent-knowledge'
+    answer: >-
+      Intentional: like "Story im Backlog anlegen & in Ready-Spalte stellen", the step only writes an approved change
+      into the live backlog (gh). No knowledge file. Same rule as P8; confirmed with the mapping plan.
+    answeredAt: '2026-10-04T11:46:44.000Z'
+  - elementId: P5
+    question: >-
+      With the backlog live in GitHub: should the workflow itself write the changes to affected stories, the merge into a duplicate, the Opportunity Backlog entry and the note on an open story, or stay with proposals the PO applies by hand?
+    source: 'bpmn2agent-design'
+    answer: >-
+      The workflow writes them, each after its own approval step drawn in the diagram (I3/I4, I5/I6, P9/P6, E4/P8/P10). P5 now only proposes. "An Fehlerbearbeitung übergeben" stays a local handoff. Decided by the business user; diagram changed.
+    answeredAt: '2026-10-04T11:48:16.000Z'
+  - elementId: E4
+    question: >-
+      What happens when the PO does not approve at an approval step (E4, and likewise I3, I5, P9)?
+    source: 'bpmn2agent-design'
+    answer: >-
+      Nothing is written; the run pauses at that step with the reason in run-state and can be resumed from the story folder. No diagram change. Decided by the business user.
+    answeredAt: '2026-10-04T11:48:16.000Z'
+  - elementId: P8
+    question: >-
+      How is the priority stored in GitHub: a project field, or the rank within the Ready column?
+    source: 'bpmn2agent-design'
+    answer: >-
+      A project field "Priority", set with gh project item-edit; no gh api graphql. Decided by the business user.
+    answeredAt: '2026-10-04T11:48:16.000Z'
+  - elementId: I2
+    question: >-
+      How are epics and the user story map represented in the GitHub backlog?
+    source: 'bpmn2agent-design'
+    answer: >-
+      One label epic:<name> per story; the user story map is a project view grouped by that label. Decided by the business user.
+    answeredAt: '2026-10-04T11:48:16.000Z'
+  - elementId: StoreRef_BacklogFreigabe
+    question: >-
+      "Product Backlog: freigegebene Änderungen" has writers but no readers. Intended?
+    source: 'bpmn2agent-design'
+    answer: >-
+      Yes. All three backlog stores are the same GitHub backlog (one DataStore_Backlog); the plausibility checks read it through "Product Backlog: übrige Stories", and the writers look up existing items with the read tools listed on this store. Decided in design.
+    answeredAt: '2026-10-04T11:48:16.000Z'
+  - elementId: StoreRef_BacklogFreigabe
+    question: >-
+      How does the write-guard hook recognise a gh write, and does it pin the repo?
+    source: 'bpmn2agent-design'
+    answer: >-
+      The hook splits the Bash command on shell operators (;, &&, ||, |, newline, $( ), backticks), finds gh in every segment (also after env assignments, env, command, a path ending in /gh, or inside bash -c / sh -c) and answers "ask" unless every segment matches a listed read pattern; unparseable counts as write. It does not pin repo or project: the skill text pins -R/--repo and the approvals show the target repo. Accepted risk: a write to another repo is caught only by the ask prompt.
+    answeredAt: '2026-10-04T11:51:34.000Z'
+  - elementId: P9
+    question: >-
+      Should the approvals "Parken im Opportunity Backlog freigeben" and "Zusammenführung freigeben" read the phase knowledge stores?
+    source: 'bpmn2agent-design'
+    answer: >-
+      No extra knowledge: the park/merge judgement is made at Gw_Bezug / Gw_Plausibel with the phase knowledge, and the approval only confirms the exact change. Same for "Änderungshinweis an offene Story freigeben". Confirmed with the mapping plan.
+    answeredAt: '2026-10-04T11:51:34.000Z'
 knowledge:
   notebooks:
     - id: 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
@@ -1261,14 +1598,20 @@ knowledge:
 pattern:
   chosen: skill-chain-hooks
   rationale: >-
-    Dein Diagramm wird von einem Menschen begleitet: fünfmal entscheidet oder bestätigt jemand aus dem Team. Einige
+    Dein Diagramm wird von einem Menschen begleitet: achtmal entscheidet oder bestätigt jemand aus dem Team. Einige
     Verzweigungen verlangen ein Urteil (Bug oder Story? passt es zum Fachkonzept? tragen die Erkenntnisse?). Diese
     Urteile schlage ich mit Begründung vor, und du bestätigst jeden Ausgang und jeden Rücksprung – so bleibt die
     Entscheidung bei euch. Ich baue es deshalb als geführten Ablauf: ein Einstiegs-Skill geht die sechs Phasen der Reihe
     nach durch, ruft je Phase einen Skill mit den Checklisten aus dem Notebook auf und hält an euren Prüfpunkten an.
     Parallele Blöcke arbeitet er als getrennte Perspektiven nacheinander ab, jede schreibt zuerst ihren eigenen
     Abschnitt. Schleifen haben feste Obergrenzen; bei Definition of Ready, Backlog-Konsistenz und Sprintgröße fragt er
-    dich an der Grenze, statt einfach weiterzumachen.
+    dich an der Grenze, statt einfach weiterzumachen. Ins GitHub-Backlog schreibt der Ablauf nur an fünf Stellen, und
+    jedes Mal erst nach deiner Freigabe direkt davor: Änderungshinweis an eine offene Story, Eintrag im Opportunity
+    Backlog, Zusammenführung mit einem Duplikat, die neue Story in der Ready-Spalte und die Hinweise an betroffenen
+    Stories. Alle Schreibschritte liegen in einem eigenen Skill, der ohne Freigabe nicht schreibt; Claude Code fragt
+    beim Schreiben zusätzlich nach. Gelesen wird das Backlog von vier Schritten; der Lesezugriff ist nicht pro Rolle
+    getrennt. Ein koordinierender Agent könnte jeder Rolle nur ihren Zugriff geben (UX & Design keinen, Entwicklung und
+    QA nur lesen); das lohnt sich, wenn euch diese Trennung wichtig ist.
   alternativesConsidered:
     - pattern: orchestrator-agent
       whyNot: >-
@@ -1276,8 +1619,11 @@ pattern:
         points to the orchestrator row. Every exit and loop-back of these is confirmed by the user instead, so a person
         makes the call, as with a gateway right after a checkpoint. A coordinator agent plus one agent per lane and its
         own run-state file would add independence for the parallel checks, but the business user chose the lighter
-        guided flow.
+        guided flow. With the GitHub backlog the roles need different access (UX & Design none, Entwicklung and QA read
+        only, only Product Owner / BA writes); only a coordinator with one agent per lane could separate that. Not
+        chosen: every write sits behind its own approval, in one write skill, and behind the write-guard hook.
     - pattern: workflow-script
       whyNot: >-
-        The flow pauses five times for people (clarification, evaluation, refinement meeting, planning poker,
-        prioritisation); a Workflow script cannot stop for them mid-run.
+        The flow pauses eight times for people (clarification, evaluation, refinement meeting, planning poker, three
+        approvals before backlog writes, prioritisation) and writes into a live store; a Workflow script cannot stop for
+        them mid-run.
