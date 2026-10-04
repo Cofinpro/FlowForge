@@ -10,7 +10,7 @@ Aus dem Diagramm `user-story-refinement.bpmn` erzeugt: ein geführter Ablauf, de
 Nutzer- oder Stakeholder-Feedback eine sprint-reife User Story macht, oder begründet, warum nicht.
 Installiert ist noch nichts. `.claude/` in diesem Ordner ist fertig zum Kopieren in ein Projekt.
 
-Erzeugt 2026-09-26, aktualisiert 2026-10-04 (Kontextquellen, GitHub-Backlog) · Muster: **Skill-Kette + Hook** · Quelle: `user-story-refinement.bpmn` (`a3be89b16aad…`)
+Erzeugt 2026-09-26, aktualisiert 2026-10-04 (Kontextquellen, GitHub-Backlog) · Muster: **Skill-Kette + Hook** · Quelle: `user-story-refinement.bpmn` (`31eafa88ad49…`)
 
 Dein Diagramm wird von einem Menschen begleitet: achtmal entscheidet oder bestätigt jemand aus dem
 Team. Einige Verzweigungen verlangen ein Urteil (Bug oder Story? passt es zum Fachkonzept? tragen

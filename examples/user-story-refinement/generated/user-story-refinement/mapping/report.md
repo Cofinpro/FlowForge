@@ -7,7 +7,7 @@ bpmn:
 # Mapping report — user-story-refinement
 
 Generated 2026-09-26, updated 2026-10-04 (context sources, GitHub backlog) from `generated/user-story-refinement/workflow-spec.yaml`
-(source `user-story-refinement.bpmn` @ `a3be89b16aad…`). This is the
+(source `user-story-refinement.bpmn` @ `31eafa88ad49…`). This is the
 trace target for `bpmn2agent-verify` — every row below must correspond to what's on disk.
 
 ## Review status

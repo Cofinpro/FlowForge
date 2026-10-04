@@ -3,7 +3,7 @@ meta:
   workflowName: user-story-refinement
   sourceBpmn:
     path: user-story-refinement.bpmn
-    sha256: a3be89b16aad09f29fa35fd34bbe6f3dc3332f00979d6040e222dd3decb26ec0
+    sha256: 31eafa88ad49c578d4edb40d3a0f0bf20e2c21572eae0dbb1845698644e83716
   language: de
   generatorVersion: 0.1.0
   outputLayout: claude-dir
