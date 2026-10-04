@@ -1,6 +1,6 @@
 {
   "name": "lanecraft",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "private": true,
   "description": "Dev tooling for the lanecraft Claude Code plugin (release, commit linting). The plugin itself needs no build.",
   "scripts": {
