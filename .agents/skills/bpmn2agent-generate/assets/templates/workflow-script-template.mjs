@@ -43,7 +43,7 @@ const {{resultVar}} = await agent(
   `{{prompt built from the element's label, inputs, and — if grounded — a pointer to the copied
     knowledge references under this Workflow's owning skill(s); embed the actual procedure inline
     only when no skill was generated for this step}}`,
-  { schema: {{SCHEMA_CONST_OR_OMIT}} },
+  { label: '{{elementId}} {{elementLabel}}', phase: '{{phaseTitle}}', schema: {{SCHEMA_CONST_OR_OMIT}} },
 )
 
 {{For a loop back-edge (elements.<id>.gate.maxLoops on the closing gateway) -> a while loop with a
@@ -70,6 +70,11 @@ branch):
   must be the very first line, before `export const meta = {...}` (a Workflow script must still
   begin its CODE with that export — a leading comment is fine, per the workflow-authoring
   contract).
+- Every `agent()` call carries `label: '<elementId> <label>'`: the BPMN element id first, then the
+  label verbatim. bpmn2agent-cost attributes each run's cost to elements by that prefix, and
+  bpmn2agent-verify fails a literal label that does not start with an element id of the spec. A
+  label built in a loop may start with `${...}` instead; verify can't check it, so make it expand
+  to the element id.
 - `meta` stays a pure literal (no variables/spreads/template interpolation) — fill in the actual
   strings before writing the file, don't leave {{...}} in the emitted output.
 - Plain JS only (no TypeScript syntax), no Date.now()/Math.random()/new Date() (see

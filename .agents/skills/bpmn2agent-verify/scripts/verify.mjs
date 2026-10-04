@@ -292,6 +292,41 @@ function isWorkflowScriptShaped(content) {
   return !!(lines[idx] && lines[idx].trim().startsWith('export const meta'));
 }
 
+// Index just past the ")" that closes the "(" at openIdx, skipping string/template/comment contents.
+function findMatchingParen(s, openIdx) {
+  let depth = 0;
+  for (let i = openIdx; i < s.length; i++) {
+    const c = s[i];
+    if (c === "'" || c === '"' || c === '`') {
+      for (i++; i < s.length && s[i] !== c; i++) if (s[i] === '\\') i++;
+    } else if (c === '/' && s[i + 1] === '/') {
+      while (i < s.length && s[i] !== '\n') i++;
+    } else if (c === '(') depth++;
+    else if (c === ')' && --depth === 0) return i + 1;
+  }
+  return -1;
+}
+
+// bpmn2agent-cost attributes cost by the element id a dispatched step's label starts with. Problems
+// found in a Workflow script: an agent() call without label, or a literal label whose first word is
+// not an element id of the spec. A label that starts with ${...} (built per item) is not checkable.
+function checkAgentLabels(content, elementIds) {
+  const problems = [];
+  for (const m of content.matchAll(/(?<![\w.$])agent\s*\(/g)) {
+    const open = m.index + m[0].length - 1;
+    const end = findMatchingParen(content, open);
+    if (end < 0) continue;
+    const call = content.slice(open, end);
+    const line = content.slice(0, m.index).split('\n').length;
+    const label = call.match(/\blabel\s*:\s*(['"`])([\s\S]*?)\1/);
+    if (!/\blabel\s*:/.test(call)) problems.push(`line ${line}: agent() call has no label (cost cannot be attributed to a BPMN element)`);
+    else if (label && !label[2].startsWith('${') && !elementIds.has(label[2].split(/\s+/)[0])) {
+      problems.push(`line ${line}: agent() label "${label[2].slice(0, 40)}" does not start with a BPMN element id of the spec`);
+    }
+  }
+  return problems;
+}
+
 function checkMetaLiteral(content) {
   const { text } = extractMetaBlock(content);
   let metaObj;
@@ -1016,6 +1051,9 @@ for (const { relPath, abs, content } of mjsFilesToLint) {
     } catch (e) {
       lintCat.fail(`"${relPath}": ${e.message}`);
       continue;
+    }
+    for (const problem of checkAgentLabels(content, new Set(Object.keys(spec?.elements || {})))) {
+      lintCat.fail(`"${relPath}": ${problem}`, 'generate');
     }
     try {
       wrapCheckWorkflowScript(content, tmpDir);

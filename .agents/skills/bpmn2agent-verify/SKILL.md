@@ -37,7 +37,8 @@ Categories, in run order:
    orchestration file for `pattern.chosen`, or a context hook
    (`.claude/hooks/<workflow>-write-guard.mjs` / `-memory-cap.mjs`) that a store in `contextSources`
    needs: a live store with write tools, a memory store.
-5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal and its body parses;
+5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal, its body parses and every `agent()` label starts with an
+   element id of the spec (route: generate);
    `.claude/settings.json` registers exactly the `.claude/hooks/` scripts; installables sit inside
    `.claude/`, with no npm imports or `package.json` there (legacy layout: each hook
    `*.settings.json` parses and pairs with its script).

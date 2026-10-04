@@ -224,7 +224,9 @@ Exactly one, by `pattern.chosen` (for `mixed`, one per phase):
   from `args` and returns `blocked` when one is missing. One `phase()` per contiguous run of
   elements; `agent()` per `serviceTask`; `pipeline()` for the fan-out of a
   `parallelGateway`/`inclusiveGateway`/multi-instance marker unless the next stage needs all results
-  together (then `parallel()`); plain `if`/`while` for deterministic conditions and loop caps.
+  together (then `parallel()`); plain `if`/`while` for deterministic conditions and loop caps. Every
+  `agent()` gets `label: '<elementId> <label>'`; the orchestrator's `Agent` calls start their
+  `description` the same way (`bpmn2agent-cost` attributes cost by that prefix).
   **The Workflow script never runs automatically**, not by this pipeline, only when the user invokes
   it; say so in the README.
 - **`orchestrator-agent`**: `assets/templates/orchestrator-agent-template.md` →
