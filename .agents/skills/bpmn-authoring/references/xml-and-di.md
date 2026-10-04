@@ -27,12 +27,12 @@
 </bpmn:definitions>
 ```
 
-Note: the spec *version* is 2.0.2 but XML namespaces still carry the 2.0 date (`20100524`); XSDs live
-under `20100501/`. There is no separate 2.0.2 namespace.
+Spec version 2.0.2 has no namespace of its own: namespaces carry the 2.0 date (`20100524`); XSDs live
+under `20100501/`.
 
-**Element order inside `process`**: `ioSpecification` (if any) → `laneSet` → flow elements (events, tasks, gateways, sequence
-flows, data objects/associations) → artifacts (group, textAnnotation, association) last. xmllint
-enforces this via the XSD's element sequence.
+**Element order inside `process`** (xmllint enforces it): `ioSpecification` (if any) → `laneSet` →
+flow elements (events, tasks, gateways, sequence flows, data objects/associations) → artifacts
+(group, textAnnotation, association) last.
 
 ## Element catalogue
 
@@ -64,7 +64,7 @@ enforces this via the XSD's element sequence.
 ## Data stores and process input/output
 
 Context sources (where a step reads or writes data that outlives the run) are data stores; what
-goes into and out of the whole process is its `ioSpecification`. Both feed the bpmn2agent pipeline.
+goes into and out of the whole process is its `ioSpecification`.
 
 **Data store**: a root element plus a visible reference, like `dataObject`/`dataObjectReference`.
 `dataStore` sits directly under `definitions` (before the `process`); `dataStoreReference` sits in
@@ -76,8 +76,8 @@ Art: wissen | live | gedächtnis
 Ort: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | websearch
 ```
 
-Task documentation uses `Quelle:` for provenance, so the store location is `Ort:`. There is no
-access line: the arrow direction alone says read or write.
+The location line is `Ort:`, never `Quelle:` (that is task provenance). Add no access line: the
+arrow direction alone says read or write.
 
 ```xml
 <bpmn:dataStore id="DataStore_Jira" />
@@ -128,11 +128,11 @@ without refs is valid.
 
 A task consumes a `dataInput` through a `dataInputAssociation` whose `sourceRef` is the `dataInput` id
 (plus a `property` target, as above); a `dataOutput` is fed by a `dataOutputAssociation` whose
-`targetRef` is the `dataOutput` id. bpmn.io's palette has no entry for these, so they exist only
-through XML. bpmn-js draws them as 36×50 data-object shapes (input arrow icon) **only if a
-`BPMNShape` with `bpmnElement` = the `dataInput`/`dataOutput` id exists**; bpmnlint does not require
-that shape, so a missing one is silent: add it. The pipeline also accepts a convention instead: a
-data object nobody produces that a task reads (input), or one nobody reads (output).
+`targetRef` is the `dataOutput` id. They exist only in XML (bpmn.io's palette lacks them). bpmn-js
+draws them as 36×50 data-object shapes (input arrow icon) **only if a `BPMNShape` with
+`bpmnElement` = the `dataInput`/`dataOutput` id exists**; bpmnlint does not require it, so always
+add it. The pipeline also accepts a convention instead: a data object nobody produces that a task
+reads (input), or one nobody reads (output).
 
 ## Sub-processes and drill-down
 
@@ -160,8 +160,7 @@ data object nobody produces that a task reads (input), or one nobody reads (outp
 **ID convention for inner elements**: `<ParentTaskId>_Start`, `<ParentTaskId>_S<n>` (steps, in the
 step's own order — reuse the parent's numbering, e.g. `Task_1_1_S1`..`Task_1_1_S4`), `<ParentTaskId>_
 Gw<letter>` (internal gateway), `<ParentTaskId>_End`/`_EndAlt` (multiple named ends allowed),
-`<ParentTaskId>_F<n>` (flows) / `<ParentTaskId>_FLoop` (loop-back flow). Keeps every ID globally
-unique and greppable back to its parent task.
+`<ParentTaskId>_F<n>` (flows) / `<ParentTaskId>_FLoop` (loop-back flow).
 
 **DI for a collapsed sub-process**: the parent-level shape gets `isExpanded="false"`; its inner flow
 gets a **second, separate** `BPMNDiagram`/`BPMNPlane` pair whose `bpmnElement` is the subProcess's
@@ -175,18 +174,18 @@ own ID:
 </bpmndi:BPMNDiagram>
 ```
 
-One `<bpmndi:BPMNDiagram>` per collapsed sub-process, all as siblings of the top-level one, all
-direct children of `bpmn:definitions` (after the top-level `BPMNDiagram`). Coordinates inside a
-child plane are independent of the parent — start fresh at a convenient origin (see `layout.md`).
+One `<bpmndi:BPMNDiagram>` per collapsed sub-process, all direct children of `bpmn:definitions`
+after the top-level `BPMNDiagram`. Child-plane coordinates are independent of the parent (origin:
+`layout.md`).
 
 ## Lanes (`laneSet`)
 
 No pool/participant is needed for lanes to render in bpmn-js, at process or sub-process level.
 
-**`laneSet` inside a plain process**: `laneSet` is the *first* child of
-`bpmn:process`, before any flow element (same element-order rule as above). Each `bpmn:lane` lists
-every flow node assigned to it via `flowNodeRef` (events, tasks, gateways — not data objects,
-which aren't flow nodes and carry no lane).
+**`laneSet` inside a plain process**: `laneSet` is the first child of `bpmn:process` after any
+`ioSpecification`, before any flow element (element order above). Each `bpmn:lane` lists every flow
+node assigned to it via `flowNodeRef` (events, tasks, gateways — not data objects, which aren't
+flow nodes and carry no lane).
 
 ```xml
 <bpmn:process id="Process_1" isExecutable="false">
@@ -253,9 +252,10 @@ Without DI, bpmn-js can't render the model, and bpmnlint's `no-bpmndi` fires for
 
 ## Standard sizes
 
-bpmn-js defaults (bpmnlint's `standard-size` rule, not in `recommended`), except two deliberate
-deviations: bpmn-js doesn't grow a task to fit its label, it clips (German step names run long), and a
-too-small gateway label box lets a wrapped question overflow into whatever sits below it.
+bpmn-js defaults (bpmnlint's `standard-size` rule, not in `recommended`), with two deliberate
+deviations: tasks are 140×100 because bpmn-js clips rather than grows a task for long (German)
+names, and forking-gateway labels are 42 high so a wrapped question doesn't overflow into what sits
+below.
 
 | Element | Width × Height |
 |---|---|

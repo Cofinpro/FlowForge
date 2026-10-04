@@ -6,9 +6,9 @@ description: Designs a new process from what the user wants to build plus domain
 # Design an agent-ready BPMN process
 
 Output: a validated `<workflow>.bpmn` (default: cwd) that `bpmn2agent-analyze` reads with no
-findings, plus every notebook answer logged in `generated/<workflow>/knowledge/faq/`. Speak the
-user's language in business terms; BPMN labels use it too. Every question goes through
-`AskUserQuestion` with options and a recommendation.
+findings, plus every notebook answer logged in `generated/<workflow>/knowledge/faq/`. Use the
+user's language and business terms, in BPMN labels too. Ask every question via `AskUserQuestion`
+with options and a recommendation.
 
 ## 1. Understand the goal
 
@@ -22,9 +22,9 @@ Propose a kebab-case workflow name and confirm it.
 ToolSearch: select:mcp__gemini-notebook-mcp__notebook_list,mcp__gemini-notebook-mcp__notebook_describe,mcp__gemini-notebook-mcp__notebook_get,mcp__gemini-notebook-mcp__notebook_query
 ```
 
-Let the user pick from `notebook_list` by title (several allowed, or none); sanity-check each pick
-with `notebook_describe`. Auth error → tell the user to run `nlm login`, ask whether to retry or go
-on without. No notebook → offer WebSearch (cite title and URL; recommended unless the domain is
+The user picks from `notebook_list` by title (several or none); sanity-check each pick with
+`notebook_describe`. Auth error → tell the user to run `nlm login`; ask whether to retry or go on
+without. No notebook → offer WebSearch (cite title and URL; recommended unless the domain is
 generic) or model knowledge.
 
 ## 3. Research the process
@@ -39,7 +39,7 @@ One question per `notebook_query` call, `new_conversation: true`, scoped to the 
 
 Follow up per phase while an answer stays vague. Log every answer per "FAQ log" in
 `${CLAUDE_SKILL_DIR}/../bpmn2agent-knowledge/references/notebook-extraction.md`, with
-`--faq generated/<workflow>/knowledge/faq`. Read oversized answers' `.answer` in `jq` chunks.
+`--faq generated/<workflow>/knowledge/faq`. Read an oversized answer's `.answer` in `jq` chunks.
 Agentic-design questions (lane cut, checkpoints, loop caps) go to
 `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` first (`references/process-to-agents.md`,
 `references/human-in-the-loop.md`).
@@ -69,8 +69,8 @@ model-only steps `⚠ unverified`.
 - No untyped `task`. Unsure → `serviceTask`; `scriptTask` only when nothing needs judgement.
 - A `userTask` before every irreversible or outward-facing action (commit, send, publish, delete)
   and wherever the goal needs sign-off; none on routine steps.
-- Names become verbatim skill text: tasks verb + object, forking gateways a question with
-  answer-labelled flows and one `default`, end events the resulting state.
+- Names become verbatim skill text: tasks verb + object; forking gateways a question with
+  answer-labelled flows and one `default`; end events the resulting state.
 - Every loop re-enters through a merge gateway, carries its cap on the loop-back label
   (`Nein (max. 3×)`, default 3), and has a way out (escalation `userTask` or end).
 - Results cross lanes as data objects. Every task gets
@@ -83,9 +83,9 @@ model-only steps `⚠ unverified`.
   the server is connected); `live` with `mcp:`, `cli:`, `notebook:`, URL or `datei:`; `gedächtnis`
   with `datei:` only (default `.claude/memory/<workflow>/<store>.md`). Anything else: pick another
   Art or Ort.
-- Read or write follows only the arrow: store → task reads, task → store writes. No `Zugriff:` line.
+- The arrow alone sets access: store → task reads, task → store writes. No `Zugriff:` line.
 - A `userTask` precedes every write to a `live` store, on every path.
-- A `gedächtnis` store needs a `serviceTask` that writes it and a reader; writing needs no approval.
+- A `gedächtnis` store needs a writing `serviceTask` and a reader; writing needs no approval.
 - A phase over ~8 steps becomes a collapsed `subProcess` with its own lanes.
 - One pool; no message flows, timer or message events, event sub-processes or compensation
   (rewrites: `${CLAUDE_SKILL_DIR}/../bpmn2agent-analyze/references/unsupported.md`). Error
@@ -93,21 +93,21 @@ model-only steps `⚠ unverified`.
 
 ## 5. Confirm the outline
 
-For each step ask: "What must this step know, and where does it live?" Every answer is a store
-(Art, Ort), a data object from an earlier step, or the process input; nothing means the step
-needs no context. Does it write anywhere? Then name the store and the `userTask` before it.
+For each step ask: "What must this step know, and where does it live?" Each answer is a store
+(Art, Ort), a data object from an earlier step, or the process input; no answer means the step
+needs no context. If the step writes anywhere, name the store and the `userTask` before it.
 
-Before drawing, show: lanes with what each becomes, then per phase the steps with type
-(AI / human / script / rule) and source, gateways with answers, loops with caps, data objects. Add
-a store table (name, Art, Ort, readers, writers) and the process input with its required fields
-and the result the run delivers. Ask: draw as is / change what / ask the notebook more. Repeat until
+Before drawing, show: lanes with what each becomes; per phase the steps with type
+(AI / human / script / rule) and source; gateways with answers; loops with caps; data objects; a
+store table (name, Art, Ort, readers, writers); the process input with its required fields and the
+result the run delivers. Ask: draw as is / change what / ask the notebook more. Repeat until
 confirmed; never draw an unconfirmed design.
 
 ## 6. Draw
 
 Follow `${CLAUDE_SKILL_DIR}/../bpmn-authoring/SKILL.md` steps 2–7, starting from its
 `assets/skeleton.bpmn`. Use readable ids (`Task_FeedbackFormulieren`, `Gw_InvestErfuellt`). Draw
-stores and the process input/output with its data store and `ioSpecification` conventions
+stores and the process input/output per its data store and `ioSpecification` conventions
 (`${CLAUDE_SKILL_DIR}/../bpmn-authoring/references/xml-and-di.md` and `layout.md`); a
 convention-based input is a data object no task produces.
 

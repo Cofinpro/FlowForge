@@ -13,11 +13,10 @@ bpmn:
 # BPMN → Agent Design
 
 Input: the spec `bpmn2agent-analyze` drafted and `bpmn2agent-knowledge` enriched; every element is
-`kind: unresolved` except constructs analysis flagged as unsupported. Output: a concrete generation
-decision per element, an orchestration pattern, and the user's confirmation — written to the spec.
-Never edit the `.bpmn` and never patch around a limit of the diagram; that goes back to
-`bpmn2agent-analyze`. Ask every question via `AskUserQuestion` with options and a recommendation,
-in the user's language (`meta.language`).
+`kind: unresolved` except constructs analysis flagged as unsupported. Output, written to the spec: a
+generation decision per element, an orchestration pattern, and the user's confirmation. Never edit
+the `.bpmn` or patch around a diagram limit; that goes back to `bpmn2agent-analyze`. Ask every
+question via `AskUserQuestion` with options and a recommendation, in `meta.language`.
 
 ## 1. Read the inputs
 
@@ -55,10 +54,10 @@ Sort the spec's `elements` into:
   (not `unresolved`) with the same reason text, and set that element's `openQuestions` entry to
   `answer: "known gap — not generated"`, `answeredAt: <now>`; it needs no further rubric work.
 - **Unguarded live write** — a task in `contextSources.<id>.writers` of an `art: live` store that
-  can be reached from a start event without passing a `userTask`. Check on the inventory's
+  is reachable from a start event without passing a `userTask`. Check on the inventory's
   `flowNodes`/`sequenceFlows`: drop every `userTask`; if the writer is still reachable (loops
-  included), it is unguarded. This is a diagram defect (`mapping-rubric.md` → "Writing into a live
-  store"): tell the user in business words which write lacks a confirmation step, **stop the whole
+  included), it is unguarded — a diagram defect (`mapping-rubric.md` → "Writing into a live
+  store"). Tell the user in business words which write lacks a confirmation step, **stop the whole
   design pass** and point them at `bpmn-authoring`, then `bpmn2agent-analyze`. Never invent a
   checkpoint in the spec.
 - **Already decided** — concrete `kind` from a previous design pass. Leave as-is unless the element
@@ -89,27 +88,24 @@ element:
   introduces (e.g. a sub-workflow's intermediate artifacts).
 
 Data stores and process-wide input/output get `kind: context-source` / `workflow-input` /
-`workflow-output` (the rubric's table; a convention input/output data object takes the `workflow-*`
-kind, not `artifact-contract`). Their content is step 3a.
+`workflow-output` per the rubric's table (a convention input/output data object takes the
+`workflow-*` kind, not `artifact-contract`); their content is step 3a.
 
-Don't ask about individual rubric applications. Save every genuinely uncertain call for the step-7
-confirmation.
+Don't ask about individual rubric applications; save every genuinely uncertain call for step 7.
 
 ## 3a. Resolve context sources
 
 For every `contextSources.<id>` (valid Art × Ort pairs: `mapping-rubric.md` → "Data stores → context
 sources"; analyze settled invalid ones, ask again only if one slipped through):
 
-- **`art: live` → `tools: {read, write}`**, per `Ort` type (rule and heuristic in the rubric's "Live
-  stores: tools and placement"; don't restate them in the spec):
+- **`art: live` → `tools: {read, write}`**, per `Ort` type, classified read/write by the rubric's
+  "Live stores: tools and placement" heuristic (don't restate it in the spec):
   - `mcp:<server>` — ToolSearch with query `mcp__<server>__` (raise `max_results` to cover the
-    server). Nothing found or server not connected → `tools: unresolved`. Classify by name
-    (`get/list/search/read/fetch/view` read; `create/update/delete/add/post/edit/transition/push`
-    write; unclear = write); a `readOnlyHint` in the tool metadata wins. Keep only tools the
+    server). Nothing found or server not connected → `tools: unresolved`. Keep only tools the
     store's readers/writers plausibly need (from their label and documentation); `write` stays
     empty when the store has no writers.
-  - `cli:<cmd>` — `command -v <cmd>` and its `--help` for the subcommands (nothing runs beyond
-    that); patterns `Bash(<cmd> <subcmd>:*)`, same heuristic. Not installed → `unresolved`.
+  - `cli:<cmd>` — `command -v <cmd>` and its `--help` for the subcommands (run nothing else);
+    patterns `Bash(<cmd> <subcmd>:*)`. Not installed → `unresolved`.
   - `notebook:` — treat as `mcp:gemini-notebook-mcp`: `read: [mcp__gemini-notebook-mcp__notebook_query]`;
     write tools only when the store has writers.
   - URL → `read: [WebFetch]`; `datei:` → `read: [Read]` (plus `Edit`/`Write` under `write` if the
@@ -128,10 +124,9 @@ Load `references/pattern-rubric.md` and walk its decision table with step 1's to
 checkpoint's answer toward `judgementBranchCount` (recompute before consulting the table). Repeat per
 `scopes[].signals` for every sub-workflow; each gets its own pattern under the same `elements` map.
 
-Add the two context-store signals the inventory doesn't carry: `liveWriteCount` per phase (writers of
-`art: live` stores) and `roleToolSpread` (from step 3a's tools per lane). A phase with a live write is
-never `workflow-script`; differing role privileges are a signal for `orchestrator-agent` (both in
-the rubric). The step-2 guard check already ran, so no write here lacks its `userTask`.
+Add the two context-store signals the inventory doesn't carry, `liveWriteCount` per phase (writers of
+`art: live` stores) and `roleToolSpread` (from step 3a's tools per lane), and apply the rubric's
+context-store rules. Step 2 already ensured every live write has its `userTask`.
 
 Write `pattern.rationale` in the business phrasing of the rubric's "Explaining the choice" section.
 Add an `alternativesConsidered` entry when the signals were close to another row.
@@ -158,15 +153,14 @@ and placement"):
   artifacts and memory file). Nothing for stores it doesn't touch. `unresolved` stores add nothing.
 - **Any other pattern**: the union of all read tools goes into `.claude/settings.json` →
   `permissions.allow`; write tools never do (the user is asked at the call, backed by the
-  PreToolUse hook generate emits). Say in the plan: "Lesezugriff nicht pro Rolle getrennt". If
-  `roleToolSpread` holds, also recommend `orchestrator-agent` there.
+  PreToolUse hook generate emits). Say in the plan: "Lesezugriff nicht pro Rolle getrennt".
 
 No spec field holds the `permissions.allow` list; generate derives it from
 `contextSources.*.tools.read`.
 
 Apply agent-authoring's "Should this be an agent at all?" and split rule to every lane. A lane that
-should become two agents or a skill is a question for step 7 (the lane belongs to the diagram), not
-a split you make; when the user agrees, record the reason in the spec.
+should become two agents or a skill is a step-7 question (the lane belongs to the diagram), not a
+split you make; when the user agrees, record the reason in the spec.
 
 ## 6. Define artifact contracts
 
@@ -180,7 +174,7 @@ frontmatter field (`required: true`) for every name in `workflowIO.input.require
 
 1. Write the draft decisions of steps 2–6 to `generated/<workflow>/workflow-spec.draft.yaml` (same
    schema; the confirmed spec stays untouched until step 8; delete the draft whenever design stops
-   before step 8, since verify flags it as untraced) and draft the step-7 plan text.
+   before step 8, as verify flags it untraced) and draft the step-7 plan text.
 2. Delegate the review to the `agentic-workflow-architect` agent with absolute paths: the draft
    spec, the `.bpmn`, `${CLAUDE_SKILL_DIR}/references/pattern-rubric.md` and
    `${CLAUDE_SKILL_DIR}/references/mapping-rubric.md`, plus the draft plan text. If the agent fails
@@ -193,10 +187,10 @@ frontmatter field (`required: true`) for every name in `workflowIO.input.require
      diagram's structure in the spec.
    - `question` → add to `openQuestions` (`answer: null`) and raise in step 7.
 4. Agentic-design questions the rubrics leave open (including the `source: agentic-design` entries
-   `bpmn2agent-knowledge` queued in `openQuestions`): answer from `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` (FAQ, then
-   references); only if it has no answer, ask the `agentic-kb-librarian` agent. Quote the citation
-   tag when a recommendation rests on it. Write each answer into the entry's `answer`/`answeredAt`;
-   one neither answers goes to step 7 as a question.
+   `bpmn2agent-knowledge` queued in `openQuestions`): answer from
+   `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` (FAQ, then references); only if it has no answer,
+   ask the `agentic-kb-librarian` agent. Quote the citation tag when a recommendation rests on it.
+   Write each answer into the entry's `answer`/`answeredAt`; one neither answers goes to step 7.
 
 ## 7. Write the mapping plan and confirm
 
@@ -222,14 +216,14 @@ language, e.g.:
 > Schreiben zusätzlich nach). Lesezugriff nicht pro Rolle getrennt.
 > *Technisch — lesen: `mcp__atlassian__getJiraIssue`; schreiben: `mcp__atlassian__addCommentToJiraIssue`.*
 
-Gedächtnis: file path and the 150-line cap; `unresolved` tools: say that the server wasn't reachable
-and that the step stays without tool access until it is. Tool names appear only in the italic
-technical line. Also name the process input with its required fields, and the output. Where
-`roleToolSpread` holds and the pattern isn't `orchestrator-agent`, recommend it here.
+Gedächtnis: file path and the 150-line cap. `unresolved` tools: say the server wasn't reachable and
+the step stays without tool access until it is. Tool names appear only in the italic technical
+line. Also name the process input with its required fields, and the output. Where `roleToolSpread`
+holds and the pattern isn't `orchestrator-agent`, recommend it here.
 
-Include the pattern and rationale ("how it runs"), any model/tools proposals from step 5, open
-questions from 6a, and every `not-generated`/`unresolved` element with its reason. Fold every
-pending pattern or model/tools question into this one confirmation. Offer at least:
+Include the pattern and rationale ("how it runs"), step 5's model/tools proposals, 6a's open
+questions, and every `not-generated`/`unresolved` element with its reason. Fold every pending
+question into this one confirmation. Offer at least:
 
 - **Accept as proposed** — recommend when nothing is `unresolved` and no step-3 call was uncertain.
 - **Adjust specific elements** — collect which and how, redo steps 3–6 (and the draft) for those,
@@ -264,12 +258,12 @@ before writing.
 
 ## Reference files
 
-- `references/mapping-rubric.md` — element → `kind` table, sub-decisions, data stores → context
-  sources (Art × Ort, tools and placement, write guard), v1 supported constructs, mapping-view colours.
-- `references/pattern-rubric.md` — signals (incl. live writes, role tool spread), pattern table,
-  per-pattern generation/checkpoint/loop cap/resume detail, business phrasing.
+- `references/mapping-rubric.md` — element → `kind`, sub-decisions, context sources, v1 constructs,
+  mapping-view colours (steps 3, 3a, 5).
+- `references/pattern-rubric.md` — signals, pattern table, per-pattern detail, business phrasing
+  (steps 3, 4).
 - `assets/workflow-spec.schema.yaml` — the schema for step 8.
 - `${CLAUDE_SKILL_DIR}/../agent-authoring/SKILL.md` — naming and split rule (step 5).
 - `${CLAUDE_SKILL_DIR}/../orchestration-design/SKILL.md` — inline fallback review (step 6a).
-- `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` — cited answers to design questions.
+- `${CLAUDE_SKILL_DIR}/../agentic-workflow-kb/` — cited answers to design questions (step 6a).
 - Agents `agentic-workflow-architect`, `agentic-kb-librarian` — step 6a.

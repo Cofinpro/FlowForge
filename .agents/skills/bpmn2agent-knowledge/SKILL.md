@@ -11,12 +11,12 @@ bpmn:
 
 Input: the spec `bpmn2agent-analyze` wrote. Output: the same spec with `knowledge:` and
 `openQuestions:` filled, plus `generated/<workflow>/knowledge/*.md`: one file per reading task, or per
-element/lane under the fallback (§3). Later stages read these; they don't query notebooks themselves.
+element/lane under the fallback (§3). Later stages read these and don't query notebooks.
 
-The diagram is the source of truth: a `wissen` data store drawn with an arrow into a task **is** the
+The diagram is the source of truth: a `wissen` data store with an arrow into a task **is** the
 mapping. Ask the user only where the diagram says nothing.
 
-Every question goes through `AskUserQuestion` with concrete options plus a recommendation, in the
+Ask every question through `AskUserQuestion` with concrete options plus a recommendation, in the
 user's business language.
 
 ## 1. Read the spec
@@ -27,9 +27,8 @@ mapping targets. From `contextSources` take every store with `art: wissen`: its 
 (`{type, ref}`), `readers` and `bpmnElement`. Each reader is a **reading task**, the unit extraction
 writes one file for.
 
-Only `wissen` stores are handled here. `live` stores are read at run time and `gedaechtnis` stores are
-curated at run time; `bpmn2agent-design` resolves both, so skip them, extract nothing from them, and
-don't ask about them.
+Skip `live` and `gedaechtnis` stores entirely (no extraction, no questions); `bpmn2agent-design`
+resolves them.
 
 ## 2. Resolve each store's Ort
 
@@ -39,24 +38,24 @@ Load the notebook tools once, when a `notebook:` store exists or step 3 needs th
 ToolSearch: select:mcp__gemini-notebook-mcp__notebook_list,mcp__gemini-notebook-mcp__notebook_describe,mcp__gemini-notebook-mcp__notebook_query,mcp__gemini-notebook-mcp__notebook_get
 ```
 
-Resolve by `ort.type`; nothing is asked when the store resolves cleanly:
+Resolve by `ort.type`; ask nothing when the store resolves cleanly:
 
 - **`notebook`**: call `notebook_list`, match `ort.ref` against the titles (exact, then
   case-insensitive). One match: take its id and sanity-check it with `notebook_describe`. No match: ask
-  the user which notebook is meant, offering the actual titles (plus "none of these" and a
-  recommendation), and tell them to fix the `Ort:` line in the diagram. Auth/connection error: tell
-  the user to run `nlm login` in a terminal, then retry or treat the store as unresolved.
+  which notebook is meant, offering the actual titles (plus "none of these" and a recommendation),
+  and tell the user to fix the `Ort:` line in the diagram. Auth/connection error: tell the user to run
+  `nlm login` in a terminal, then retry or treat the store as unresolved.
 - **`url`**: `WebFetch` the page. `evidence: cited`, URL as the citation.
-- **`datei`**: a local repo doc, cited through `references/notebook-extraction.md` §Citing local repo
+- **`datei`**: a local repo doc, cited per `references/notebook-extraction.md` §Citing local repo
   docs. File missing: unresolved.
 - **`websearch`**: targeted `WebSearch` queries per reading task. `evidence: cited`.
 - **`mcp`**: only if the server's tools are connected (check with `ToolSearch` on
-  `mcp__<server>__`). Then read through its read tools once and keep the result as a
-  generation-time snapshot, cited as server, tool and date. Not connected: unresolved.
+  `mcp__<server>__`). Read through its read tools once and keep the result as a generation-time
+  snapshot, cited as server, tool and date. Not connected: unresolved.
 
-An **unresolved** store gets an `openQuestions` entry (`elementId` = the store reference id, never
-silently dropped or downgraded to model knowledge); offer the user: fix and re-run, or knowingly use a
-fallback from step 3 for its readers.
+An **unresolved** store gets an `openQuestions` entry (`elementId` = the store reference id); never
+drop it silently or downgrade it to model knowledge. Offer the user: fix and re-run, or knowingly use
+a fallback from step 3 for its readers.
 
 Record the notebooks, with `mappedTo` taken from the store readers (task ids), not from a question:
 
@@ -91,9 +90,9 @@ lane (not per task) and offer:
 - **(d) Cite existing repo docs** — ask which reviewed file(s) apply per lane/element;
   `evidence: cited`. Format: `references/notebook-extraction.md` §Citing local repo docs.
 
-Recommend (d) if reviewed reference docs for this domain exist in the repo, else (b) for generic
-domains, else (a). This is the old lane-level flow, unchanged, and it stays the only flow for diagrams
-without stores. Mixed diagrams use the stores where drawn and this flow for the rest.
+Otherwise recommend (d) if reviewed reference docs for this domain exist in the repo, else (b) for
+generic domains, else (a). Diagrams without stores use only this flow; mixed diagrams use the stores
+where drawn and this flow for the rest.
 
 `knowledge.mode`: `notebook` if every in-scope task has notebook coverage; otherwise the fallback in
 use (`websearch | local-docs | unverified`; `url`/`websearch` stores count as `websearch`, `datei` as
@@ -106,9 +105,9 @@ For each reading task (fallback: each lane/phase), run the **challenge queries**
 WebSearch). Under (b), answer them from model reasoning and mark every finding `unverified`; don't skip
 the step.
 
-Only domain questions belong here. Queue agentic-design questions (patterns, agents, skills,
+Ask only domain questions here. Queue agentic-design questions (patterns, agents, skills,
 checkpoints, hooks) as `openQuestions` entries with `source: agentic-design` and `answer: null` for
-`bpmn2agent-design` step 6a instead of querying about them.
+`bpmn2agent-design` step 6a; don't query about them.
 
 Turn every real finding into a question for the user; **never** change the design based on a source
 without asking. Record in the spec:
@@ -132,12 +131,12 @@ re-ask only what it doesn't answer or what the changed diagram makes stale.
 ## 5. Extract reference material per reading task
 
 For each reading task write `generated/<workflow>/knowledge/<taskId>.md` (the task's BPMN element id,
-e.g. `Task_AntwortEntwerfen.md`): **one section per `wissen` store it reads**, named with the store's
-label verbatim, each with its own citations. Run the **extraction queries** from
+e.g. `Task_AntwortEntwerfen.md`) with **one section per `wissen` store it reads**, named with the
+store's label verbatim, each with its own citations. Run the **extraction queries** from
 `references/notebook-extraction.md` §Extraction queries against that store's source only; the store's
-Ort picks the route (`references/notebook-extraction.md` §Store-driven extraction). A task reading two
-stores gets two sections in one file. Under the fallback (§3), write `<element-or-lane>.md` as before;
-under (b), still one file per in-scope element, `evidence: unverified` with inline callouts.
+Ort picks the route (§Store-driven extraction there). Under the fallback (§3), write
+`<element-or-lane>.md`; under (b), still one file per in-scope element, `evidence: unverified` with
+inline callouts.
 
 With many tasks × notebooks, extraction may run as parallel `Agent` calls, one per task; each writes its
 `knowledge/<taskId>.md` and saves its raw query results for the FAQ log. No Workflow script.
@@ -146,7 +145,7 @@ Frontmatter (incl. the required `bpmn:` key), section layout, citation format, e
 of large `notebook_query` output, target length and persistence of `knowledge/*.md`: see
 `references/notebook-extraction.md`.
 
-Record the refs, still keyed by element id (a lane under the fallback):
+Record the refs, keyed by element id (a lane under the fallback):
 
 ```yaml
 knowledge:
@@ -156,13 +155,19 @@ knowledge:
 
 ## 6. Hand off
 
-Before finishing, confirm: every reading task of a resolved `wissen` store has a `knowledge.refs` entry
-and a cited section per store; every other in-scope element has a `knowledge.refs` entry, an answered
-"intentional" open question, or an explicit "no coverage, mode: <fallback>" note; every
-`knowledge.notebooks[].mappedTo` lists the reading tasks; every challenge finding has an `openQuestions`
-entry with an answer (not null) or is flagged for the user to resolve before design;
-`source: agentic-design` entries stay null, design answers them. `bpmn2agent-generate` copies
-`knowledge/*.md` into skills' `references/` and agents' "Domain knowledge"; this skill does neither.
+Before finishing, confirm:
+
+- every reading task of a resolved `wissen` store has a `knowledge.refs` entry and a cited section per
+  store;
+- every other in-scope element has a `knowledge.refs` entry, an answered "intentional" open question,
+  or an explicit "no coverage, mode: <fallback>" note;
+- every `knowledge.notebooks[].mappedTo` lists the reading tasks;
+- every challenge finding has an `openQuestions` entry with an answer (not null) or is flagged for the
+  user to resolve before design;
+- `source: agentic-design` entries stay null; design answers them.
+
+`bpmn2agent-generate`, not this skill, copies `knowledge/*.md` into skills' `references/` and agents'
+"Domain knowledge".
 
 ## Scripts
 

@@ -1,10 +1,10 @@
 # Pattern rubric: choosing the orchestration pattern
 
-How `bpmn2agent-design` picks `pattern.chosen` in `workflow-spec.yaml` from the shape of the analyzed
-diagram, and how it explains that choice to the business user who drew it. The choice is made once
-per workflow (and, recursively, once per `callActivity`/`subProcess` that `mapping-rubric.md` decided
-is a sub-workflow rather than a plain skill) — always propose it, never silently apply it; confirm via
-`AskUserQuestion` with the rationale and the alternatives considered, both recorded in the spec.
+How `bpmn2agent-design` picks `pattern.chosen` in `workflow-spec.yaml` from the diagram's shape and
+explains it to the business user who drew it. Choose once per workflow and once per
+`callActivity`/`subProcess` that `mapping-rubric.md` made a sub-workflow. Always propose, never
+silently apply: confirm via `AskUserQuestion` with the rationale and the alternatives considered,
+both recorded in the spec.
 
 Every pattern caps its loops at `elements.<id>.gate.maxLoops`. **Default: 3**, unless the BPMN or
 interview gives another number; never leave it unset. At the cap the gate stops sending work back
@@ -49,12 +49,12 @@ If two rows plausibly apply, prefer the earliest that fits. Choose `mixed` only 
 
 Two context-store rules apply on top of the table:
 
-- **`liveWriteCount > 0` rules out `workflow-script` for that phase.** The pattern has no human
-  checkpoints, and a write into a live store needs a `userTask` before it on every path (the
-  write-guard rule in `mapping-rubric.md`). Take the next fitting row, or `mixed` with the writing
-  phase as `skill-chain-hooks`/`orchestrator-agent`. A phase with a live write and no `userTask`
-  before it is a diagram defect, not a pattern question: route to `bpmn2agent-analyze` (change the
-  `.bpmn`), never invent a checkpoint in the spec.
+- **`liveWriteCount > 0` rules out `workflow-script` for that phase.** That pattern has no human
+  checkpoints, and a live write needs a `userTask` before it on every path (`mapping-rubric.md`'s
+  write-guard rule). Take the next fitting row, or `mixed` with the writing phase as
+  `skill-chain-hooks`/`orchestrator-agent`. A live write with no `userTask` before it is a diagram
+  defect, not a pattern question: route to `bpmn2agent-analyze` (change the `.bpmn`), never invent a
+  checkpoint in the spec.
 - **`roleToolSpread` is a signal for `orchestrator-agent`.** It is the only pattern where each role
   is its own agent with its own `tools:`. If the table picks another row, keep that row, say in the
   mapping plan that read access is not separated per role ("Lesezugriff nicht pro Rolle getrennt";
@@ -90,9 +90,9 @@ Two context-store rules apply on top of the table:
   subagents can't ask the user, so any attended step disqualifies that phase.
 - **Generated**: one Workflow script, `.claude/workflows/<workflow>.workflow.mjs`: `agent()` for LLM
   steps, `parallel()`/`pipeline()` for the fan-out of gateways/multi-instance markers, plain JS for
-  deterministic gateway conditions. **The script never runs automatically — neither the generator
-  nor anything else invokes it; the generated `README.md` says the operator starts it deliberately,
-  on demand.**
+  deterministic gateway conditions. **The script never runs automatically — nothing, the generator
+  included, invokes it; the generated `README.md` says the operator starts it deliberately, on
+  demand.**
 - **Human checkpoints**: none inside the script; if the diagram has any, choose `mixed`.
 - **Loop caps**: a plain counter checked each iteration (`while (loopCount < maxLoops)`), matching
   `elements.<id>.gate.maxLoops`.

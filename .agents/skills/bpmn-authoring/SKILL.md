@@ -5,9 +5,8 @@ description: Creates, extends or refines BPMN 2.0 .bpmn diagrams (process models
 
 # Author BPMN
 
-Diagrams here are descriptive process models (`isExecutable="false"`), documenting how a process
-works. The `references/` are distilled from an external German BPMN reference (not in this repo);
-load each at the step that needs it.
+Diagrams are descriptive process models (`isExecutable="false"`). Load each `references/` file at
+the step that needs it.
 
 ## Workflow
 
@@ -15,8 +14,8 @@ load each at the step that needs it.
 
 Read the target file (or start from `assets/skeleton.bpmn`). List its element IDs, sequence flows
 and `BPMNDiagram`/`BPMNPlane` pairs before changing anything. **Never renumber or rename an existing
-ID** — every `sourceRef`/`targetRef`, `dataObjectRef`, `bpmnElement`, `categoryValueRef` would need
-updating, and a missed one is a dangling reference only bpmn-moddle (not xmllint) catches.
+ID**: a missed `sourceRef`/`targetRef`, `dataObjectRef`, `bpmnElement` or `categoryValueRef` becomes
+a dangling reference that only bpmn-moddle (not xmllint) catches.
 
 ### 2. Model the semantics first, layout second
 
@@ -34,10 +33,9 @@ Most-missed:
 
 ### 3. Refining a task into a collapsed drill-down sub-process
 
-1. Change the tag from `bpmn:task` to `bpmn:subProcess`; **keep its `id`**, so everything pointing
-   at it keeps working.
-2. Move its `dataInputAssociation`/`dataOutputAssociation` onto the subProcess element itself (they
-   stay at the collapsed level, not on an inner step).
+1. Change the tag from `bpmn:task` to `bpmn:subProcess`; **keep its `id`**.
+2. Move its `dataInputAssociation`/`dataOutputAssociation` onto the subProcess element itself, not
+   onto an inner step.
 3. Add the inner flow as children: one blank start event, the step tasks, an internal gateway/loop if
    the phase has one, one or more named end events, and their sequence flows. IDs per
    `references/xml-and-di.md`.
@@ -57,10 +55,10 @@ exclusive gateway.
 ${CLAUDE_SKILL_DIR}/scripts/validate.sh <file>.bpmn
 ```
 
-Runs XSD (xmllint) → bpmn-moddle parse warnings → `bpmnlint:recommended --max-warnings=0` and stops
-at the first failing stage. Fix every finding before moving on; `references/validation.md` has what
-each stage catches and a table of typical errors. Tooling is fetched on demand into
-`${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`; never add it to this repo's `package.json`.
+Runs XSD (xmllint) → bpmn-moddle parse warnings → `bpmnlint:recommended --max-warnings=0`, stopping
+at the first failing stage. Fix every finding before moving on; see `references/validation.md`.
+Tooling is fetched on demand into `${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`; never
+add it to this repo's `package.json`.
 
 ### 6. Render and eyeball
 
@@ -80,10 +78,10 @@ each one, not in a batch.
 
 ## Files
 
-- `references/xml-and-di.md` — skeleton, element catalogue, drill-down and lane XML/DI, standard sizes.
-- `references/modelling-rules.md` — hard rules, best practices, loops, lanes, naming.
-- `references/layout.md` — the coordinate grid, top-level and per child plane.
+- `references/xml-and-di.md` — skeleton, element catalogue, data stores, drill-down and lane XML/DI,
+  standard sizes.
+- `references/modelling-rules.md` — hard rules, best practices, lanes, loops, German labels.
+- `references/layout.md` — coordinate grid, top-level and per child plane.
 - `references/validation.md` — what each validation stage catches, typical errors and fixes.
-- `assets/skeleton.bpmn` — minimal valid file to start from; `assets/.bpmnlintrc` — the lint config.
-- `scripts/validate.sh` (step 5), `scripts/check-moddle.mjs` (called by it), `scripts/render.mjs`
-  (step 6).
+- `assets/skeleton.bpmn` (starting file), `assets/.bpmnlintrc` (lint config).
+- `scripts/validate.sh` (step 5, calls `scripts/check-moddle.mjs`), `scripts/render.mjs` (step 6).

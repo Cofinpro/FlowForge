@@ -22,26 +22,26 @@ bpmn:
 
 # BPMN → Agentic Workflow
 
-Runs the five `bpmn2agent-*` stage skills in order via the `Skill` tool, carries the gates and loops
-between them, and reports the result. It does no analysis, mapping or generation itself.
+Run the five `bpmn2agent-*` stage skills in order via the `Skill` tool, carry the gates and loops
+between them, and report the result. Do no analysis, mapping or generation yourself.
 
 Ask every question via `AskUserQuestion` with options and a recommendation, in the user's language.
 
 ## 1. Intake
 
-Gather, asking only where context doesn't already answer it:
+Gather only what context doesn't already answer:
 
-- **Source `.bpmn`** — glob for `*.bpmn` if not named; confirm when several candidates exist. No
-  diagram yet → run `bpmn-process-design` first and use the file it writes.
-- **Workflow name** — kebab-case; default to the `.bpmn` basename and confirm. Output goes to
-  `generated/<workflow>/`; tell the user.
+- **Source `.bpmn`** — glob for `*.bpmn` if not named; confirm when several match. No diagram yet →
+  run `bpmn-process-design` first and use the file it writes.
+- **Workflow name** — kebab-case; default to the `.bpmn` basename and confirm. Tell the user output
+  goes to `generated/<workflow>/`.
 - **Language** — for questions and generated `README.md`s (generated skills/agents/scripts stay
   English). Default: the language the user writes in.
 - **Knowledge sources** — whether Gemini notebooks (NotebookLM) cover this process; knowledge does
   the lookup.
 
-If `generated/<workflow>/` already exists, this is a re-run: confirm the same name rather than
-asking afresh; every stage diffs against its previous output itself. Write nothing in this step.
+If `generated/<workflow>/` exists, this is a re-run: confirm the same name instead of asking
+afresh; every stage diffs against its previous output itself. Write nothing in this step.
 
 ## 2. Analyze
 
@@ -49,7 +49,7 @@ Run `bpmn2agent-analyze` with the intake context; it writes the draft `workflow-
 
 ## 3. Knowledge
 
-Run `bpmn2agent-knowledge`. Run it even when the user said no notebook exists — it owns the fallback
+Run `bpmn2agent-knowledge`, even when the user said no notebook exists — it owns the fallback
 choice (WebSearch / unverified model knowledge / pause to build a notebook); don't pre-decide it.
 
 ## 4. Design → confirm mapping plan (loop A)
@@ -57,7 +57,7 @@ choice (WebSearch / unverified model knowledge / pause to build a notebook); don
 Run `bpmn2agent-design`. It ends with the user's answer to the mapping plan:
 
 - **Accepted** → step 5. The confirmed spec is the safe point to resume from in a new session.
-- **Adjust specific elements** → design redoes those and re-confirms, within this step, at most 3
+- **Adjust specific elements** → design redoes those and re-confirms within this step, at most 3
   times (design handles the cap).
 - **The diagram must change** → **loop A**: stop the run. The user edits the `.bpmn` with
   `bpmn-authoring` (`${CLAUDE_SKILL_DIR}/../bpmn-authoring/SKILL.md`), then re-runs this skill from
@@ -71,14 +71,15 @@ they show red in the mapping view.
 ## 6. Verify (loop B)
 
 Run `bpmn2agent-verify`. Pass → step 7. Fail → **loop B**, routing each finding as verify reports:
-  - mapping/pattern problem → step 4, scoped to the flagged elements;
-  - generation defect → step 5, only the affected files;
-  - changed (sha256 mismatch) or invalid `.bpmn` → step 2, then steps 3–6 again.
 
-  Re-run step 6 after every fix. Cap: 3 verify rounds per run. At the cap, or when the same finding
-  (category + file) returns unchanged twice, stop and ask: send the remaining findings to design,
-  change the diagram (loop A), or accept a handoff marked **unverified** with the findings listed.
-  Never report success at the cap.
+- mapping/pattern problem → step 4, scoped to the flagged elements;
+- generation defect → step 5, only the affected files;
+- changed (sha256 mismatch) or invalid `.bpmn` → step 2, then steps 3–6 again.
+
+Re-run step 6 after every fix. Cap: 3 verify rounds per run. At the cap, or when the same finding
+(category + file) returns unchanged twice, stop and ask: send the remaining findings to design,
+change the diagram (loop A), or accept a handoff marked **unverified** with the findings listed.
+Never report success at the cap.
 
 ## 7. Handoff
 

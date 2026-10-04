@@ -1,9 +1,8 @@
 # Mapping rubric: BPMN element → generated artifact
 
-How `bpmn2agent-design` turns each element of the analyzed BPMN inventory into a `kind` in
-`workflow-spec.yaml` (see `../assets/workflow-spec.schema.yaml`). Apply this per element, record the
-result under `elements.<id>`, and list every `not-generated`/`unresolved` decision in the step-7
-mapping plan.
+How `bpmn2agent-design` turns each analyzed BPMN element into a `kind` in `workflow-spec.yaml`
+(schema: `../assets/workflow-spec.schema.yaml`). Record the result under `elements.<id>`; list every
+`not-generated`/`unresolved` decision in the step-7 mapping plan.
 
 - [The rubric](#the-rubric)
 - [serviceTask → skill vs. agent-checklist item](#servicetask--skill-vs-agent-checklist-item)
@@ -21,9 +20,9 @@ mapping plan.
 | Lane | Role (`roles.<id>`) | A subagent file only under `orchestrator-agent` (or a mixed phase using it); otherwise the lane's steps live in the chain skill and lane skill. `agentName` per agent-authoring's naming rule (`{domain}-{role}`, kebab-case, no "-expert"). The lane's elements become checklist items and/or skills. |
 | `userTask` / `manualTask` | Human checkpoint (`kind: human-checkpoint`) | An `AskUserQuestion` call — options + a recommendation, never a bare prompt — as a step in the owning skill/agent. No file of its own. |
 | `serviceTask` | Skill, or an agent checklist item — see decision below | |
-| `scriptTask` | Script inside a skill, `kind: script` | Deterministic, no LLM call. Lives under the skill **of its lane** — `generated/<workflow>/.claude/skills/<agentName>/scripts/<name>.mjs`, `<agentName>` = that lane's `roles.<id>.agentName` (generate's "lane skill", step 3) — unless shared across lanes (then its own skill, like a reusable `serviceTask`). `.claude/skills/<workflow>/` (the workflow name) is **reserved** for the skill-chain top-level skill; never use it for a lane's scripts, even if the lane has the same name. |
+| `scriptTask` | Script inside a skill, `kind: script` | Deterministic, no LLM call. Lives under the skill **of its lane** — `generated/<workflow>/.claude/skills/<agentName>/scripts/<name>.mjs`, `<agentName>` = that lane's `roles.<id>.agentName` (generate's "lane skill", step 3) — unless shared across lanes (then its own skill, like a reusable `serviceTask`). `.claude/skills/<workflow>/` is **reserved** for the skill-chain top-level skill; never put a lane's scripts there, even if the lane has the workflow's name. |
 | `businessRuleTask` / gateway condition | Hook or script — see decision below | |
-| Gateway (any type), loop back-edge, multi-instance marker | Orchestrator logic (`kind: orchestrator`) | No file of its own; control flow inside the pattern `pattern-rubric.md` selects (branch in a Workflow script, delegation logic in an orchestrator agent, or a hook's block/allow decision). Still record it in `elements.<id>`. |
+| Gateway (any type), loop back-edge, multi-instance marker | Orchestrator logic (`kind: orchestrator`) | No file of its own; control flow inside the pattern `pattern-rubric.md` selects (Workflow-script branch, orchestrator-agent delegation, or a hook's block/allow decision). Still record it in `elements.<id>`. |
 | `startEvent` / `endEvent` | `kind: orchestrator` if it does real routing work (e.g. a start event with a form, an end event a loop can short-circuit to); otherwise `kind: not-generated` with `reason: "Start/end event — structural marker only, no generated artifact."` | Never a file of its own. Don't leave these unmapped by omission. |
 | Intermediate throw/catch event (link, none/signal used as a plain marker) | `kind: orchestrator`, same as a gateway | Timer/message intermediate events are **unsupported in v1** (see below). |
 | `callActivity` / collapsed `subProcess` | Reusable skill, or a sub-workflow — see decision below | A skill-backed one folds its inner flow nodes into the same skill. |
@@ -51,8 +50,8 @@ reference material. When unsure, default to agent-checklist item.
 ### `businessRuleTask` / gateway condition → hook vs. script
 
 Generate a **Claude Code hook** only when the check must physically gate a *tool call* the agent is
-about to make or has just made — enforcement inside Claude Code's tool-execution loop, not a step the
-agent chooses to run:
+about to make or has just made (enforcement in the tool-execution loop, not a step the agent chooses
+to run):
 
 | Event | Fires | Fits when the BPMN rule... |
 |---|---|---|
@@ -126,17 +125,17 @@ Anything else (e.g. `live` + `websearch`, `gedächtnis` + `mcp:`) is invalid.
 ### Live stores: tools and placement
 
 - **Resolve the tools.** For `mcp:`, fetch the server's tool list with ToolSearch (`mcp__<server>__`)
-  and sort by name: `get/list/search/read/fetch/view` read; `create/update/delete/add/post/edit/transition/push`
-  write. A server's `readOnlyHint` wins over the name. **Unclear counts as write.** `cli:` becomes
-  `Bash(<cmd> <subcmd>:*)` patterns, same heuristic on the subcommands. The user confirms the list in
-  the mapping plan. Server not connected → `tools: unresolved` (verify warns, generate emits no tools,
-  never a wildcard).
+  and sort by name: `get/list/search/read/fetch/view` read;
+  `create/update/delete/add/post/edit/transition/push` write. A server's `readOnlyHint` wins over the
+  name. **Unclear counts as write.** `cli:` becomes `Bash(<cmd> <subcmd>:*)` patterns, same heuristic
+  on the subcommands. The user confirms the list in the mapping plan. Server not connected →
+  `tools: unresolved` (verify warns, generate emits no tools, never a wildcard).
 - **Place them.** Where lanes are agents (`orchestrator-agent`), the needed read tools go into that
   lane agent's `tools:`, least privilege per role (a lane that writes also gets that store's write
-tools; they stay behind the `userTask` and the hook). Otherwise they go into `.claude/settings.json` →
-  `permissions.allow` (union of all read tools; write tools never go there) and the plan says openly "Lesezugriff nicht pro Rolle
-  getrennt". **If the roles need different privileges, that is a signal for `orchestrator-agent`**
-  (see `pattern-rubric.md`).
+  tools; they stay behind the `userTask` and the hook). Otherwise the union of all read tools goes
+  into `.claude/settings.json` → `permissions.allow` (write tools never) and the plan says openly
+  "Lesezugriff nicht pro Rolle getrennt". **If the roles need different privileges, that is a signal
+  for `orchestrator-agent`** (see `pattern-rubric.md`).
 
 ### Writing into a live store
 
@@ -175,9 +174,9 @@ a role, not an external system").
 ## Legend: mapping view colours
 
 Used in `mapping/workflow-mapped.bpmn` (bpmn.io colour extension), `mapping/index.html`'s legend and
-`mapping/report.md`. One colour per `kind`; lanes are not tinted. Every annotation also starts with
-the kind or status name, so colour is never the only signal (exact values: the header comment of
-`bpmn2agent-generate/scripts/render-mapping.mjs`).
+`mapping/report.md`. One colour per `kind`; lanes are not tinted. Every annotation starts with the
+kind or status name, so colour is never the only signal. Exact values: the header comment of
+`bpmn2agent-generate/scripts/render-mapping.mjs`.
 
 | Colour | Kind | Meaning |
 |---|---|---|
@@ -188,7 +187,7 @@ the kind or status name, so colour is never the only signal (exact values: the h
 | Teal | `orchestrator` | Gateways, loop back-edges, multi-instance markers — no file of its own. |
 | Amber | `human-checkpoint` | `userTask`/`manualTask`: a person decides here. |
 | Brown | `artifact-contract` | A data object with a path/frontmatter contract. |
-| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. A greener shade than the `orchestrator` teal, so the two stay apart; the annotation names the Art (exact values: `render-mapping.mjs`, set in generate). |
+| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. A greener shade than the `orchestrator` teal, so the two stay apart; the annotation names the Art. |
 | **Grey** | `not-generated` | Deliberately not generated; the element's `reason` is shown in its annotation and on click. Not an error. |
 | **Red** | `unresolved` | Unmapped or still an open question; blocks `bpmn2agent-verify`'s "no red in the map" check. |
 

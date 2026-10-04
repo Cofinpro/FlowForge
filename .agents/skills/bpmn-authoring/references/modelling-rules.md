@@ -19,8 +19,8 @@
   synchronize parallel paths with AND — matching the split type.
 - **Split and merge are separate gateways** (never one gateway with n-in and n-out).
 - **One blank start and at least one end event** per process and per embedded sub-process; no implicit
-  start/end (nodes with no incoming/outgoing). One end event per distinct outcome is fine; name end
-  events after the resulting state.
+  start/end (nodes with no incoming/outgoing). One end event per distinct outcome is allowed; name
+  each after the resulting state.
 - A sub-process without an internal check is a plain `Start → S1..Sn → End` chain; don't add a
   gateway it doesn't need.
 - **Naming**: tasks = verb + object ("Entwurf prüfen"); events = object + past participle / state
@@ -29,8 +29,7 @@
   `label-required` expects names on tasks, events, forking XOR/OR gateways, conditional flows, pools
   and lanes; `superfluous-label` flags names on unconditional flows that don't leave an XOR/OR split
   and aren't default flows.
-- **Groups** only for visual grouping ("Review phase"); they never change behavior and must not stand
-  in for sub-processes.
+- **Groups** only for visual grouping ("Review phase"); never as a stand-in for sub-processes.
 - Avoid inclusive/complex gateways and `terminateEndEvent` unless the semantics are genuinely needed.
 - Flow left to right, happy path on a straight line, no overlapping shapes.
 
@@ -56,8 +55,7 @@ flows (initial entry, loop-back), one outgoing flow into that task. The gateway 
 loop is a separate, later XOR **split** gateway after the body, with a question name and named
 outgoing flows (one of them `default`). If the loop returns to the very first step of a sub-process,
 the merge gateway sits between the start event and that step. Same pattern at the top level and
-inside child planes; see `examples/dark-factory/product-vision-to-user-stories.bpmn` in this repo
-for worked examples.
+in child planes; worked examples: `examples/dark-factory/product-vision-to-user-stories.bpmn`.
 
 ## German labels
 

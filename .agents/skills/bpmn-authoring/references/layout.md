@@ -1,8 +1,7 @@
 # Layout conventions (grid & coordinates)
 
-DI is hand-laid on the grid below (`bpmn-auto-layout` can't produce drill-down planes).
-
-Sizes and why: `xml-and-di.md`, "Standard sizes".
+Lay out DI by hand on the grid below (`bpmn-auto-layout` can't produce drill-down planes). Sizes:
+`xml-and-di.md`, "Standard sizes".
 
 ## Top-level plane grid
 
@@ -53,13 +52,13 @@ Each child plane is an independent coordinate space; don't reuse the parent's co
 
 ## General
 
-- Never let two shapes' bounding boxes overlap (`no-overlapping-elements` is a warning; treat it as
-  an error). When in doubt, add horizontal space rather than stacking vertically.
+- Never let two shapes' bounding boxes overlap (treat the `no-overlapping-elements` warning as an
+  error). When in doubt, add horizontal space rather than stacking vertically.
 - Several loop-backs in one plane (e.g. a three-outcome gateway with two targets): sort them by
-  horizontal span; the shortest runs closest to the row, longer ones further below — same at the top
-  level and in child planes.
-- Escape every name/label/condition for XML (`&` → `&amp;`, `"`, `<`, `>`) — German labels often
-  contain `&`, and an unescaped one fails xmllint with `xmlParseEntityRef: no name`. When generating
-  XML from a script, escape once, centrally.
-- Most planes that validate but look wrong have a coordinate slip: an off gap after inserting a
-  shape mid-row (shift every shape after it), or a waypoint that doesn't touch its shape's border.
+  horizontal span; the shortest runs closest to the row, longer ones further below — top level and
+  child planes alike.
+- Escape every name/label/condition for XML (`&` → `&amp;`, `"`, `<`, `>`); an unescaped `&` (common
+  in German labels) fails xmllint with `xmlParseEntityRef: no name`. When generating XML from a
+  script, escape once, centrally.
+- A plane that validates but looks wrong usually has a coordinate slip: an off gap after inserting a
+  shape mid-row (shift every shape after it), or a waypoint not touching its shape's border.

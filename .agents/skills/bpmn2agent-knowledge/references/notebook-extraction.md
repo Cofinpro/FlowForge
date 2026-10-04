@@ -22,12 +22,13 @@ and the diagram's actual flow:
 - "What commonly goes wrong at **`<this activity>`** according to the sources — and does this
   diagram have a check or gate that would catch it?"
 
-Scope each query to one activity/lane; whole-process queries get vague, uncited answers. Only the
-resulting question goes into `openQuestions`, not the answer.
+Scope each query to one activity/lane; whole-process queries get vague, uncited answers. Put only the
+resulting question into `openQuestions`, not the answer.
 
 ## Extraction queries
 
-Per element likely to become a skill, agent or gate/critic; skip elements likely to be dropped.
+Per element likely to become a skill, agent or gate/critic; skip elements likely to be dropped. Run
+only the relevant ones (a `scriptTask` rarely needs domain knowledge, a lane rarely needs a checklist).
 
 - **Skill procedure** (serviceTask/callActivity → reusable skill): "Describe the step-by-step
   procedure for `<activity>` as the sources document it — inputs, the ordered steps, and outputs."
@@ -41,13 +42,10 @@ Per element likely to become a skill, agent or gate/critic; skip elements likely
 - **Terminology**: "What domain terms does `<activity>` use that a generic reader wouldn't already
   know, and how do the sources define them?"
 
-Run only the ones relevant to the element (a `scriptTask` rarely needs domain knowledge, a lane
-rarely needs a checklist).
-
 ## Store-driven extraction
 
-Per reading task of a `wissen` store (SKILL.md §1), run the extraction queries relevant to that task
-against **each store it reads, separately**; the store's `ort.type` picks the route:
+Per reading task of a `wissen` store (SKILL.md §1), run the relevant extraction queries against
+**each store it reads, separately**; the store's `ort.type` picks the route:
 
 | `ort.type` | Route | Cited as |
 |---|---|---|
@@ -58,7 +56,7 @@ against **each store it reads, separately**; the store's `ort.type` picks the ro
 | `mcp` | read through the server's read tools once; snapshot only | `<server>`, tool name, date |
 
 All five yield `evidence: cited`. An unresolved store (title not found, server not connected, file
-missing) has no section; it is an open question instead, never filled from model knowledge.
+missing) gets no section; it is an open question instead, never filled from model knowledge.
 
 One file per reading task, `knowledge/<taskId>.md`, one section per store, named with the store label
 verbatim:
@@ -86,15 +84,14 @@ Procedure, checklist, terminology for this task, each claim cited [^1].
   section headings and `sources:`).
 - `sources:` lists every store's source (notebook title, URL, repo path, server), in section order.
   `evidence:` is the dominant tier over all sections.
-- Footnotes are one list at the file bottom, numbered across sections. The citation format below
+- Footnotes form one list at the file bottom, numbered across sections. The citation format below
   applies per section; a section without a footnote is not `cited`.
-- Each section follows the length target at the end of this file; scale it down when a task reads
-  several stores.
+- Each section follows the length target (§Keep it short); scale it down when a task reads several
+  stores.
 
 ## Citing local repo docs (mode (d))
 
-Used for fallback (d) and for `datei:` stores. No query to run; point at the reviewed file(s)
-instead. Per element:
+For fallback (d) and `datei:` stores. Run no query; point at the reviewed file(s). Per element:
 
 - **Cite directly**: if the file already answers the extraction query briefly and on point (e.g.
   `bpmn2agent-design/references/mapping-rubric.md` for a mapping-decision element), set
@@ -108,7 +105,7 @@ Both count as `evidence: cited`.
 
 ## Citation format
 
-Every extracted claim keeps its source inline, not just in a bibliography:
+Cite every extracted claim inline, not just in a bibliography:
 
 ```markdown
 Approvals above €10,000 require a second signer [^1].
@@ -121,8 +118,8 @@ Approvals above €10,000 require a second signer [^1].
   sentences). Carry through the source names/snippets `notebook_query` returns.
 - One footnote list per file; numbering restarts per file.
 - WebSearch claims: page title and URL instead of the notebook source name.
-- If two sources agree, cite both: `[^1][^2]`. If sources conflict, say so in the text ("sources
-  disagree: A says X, B says Y") rather than picking one silently.
+- Two sources agree: cite both, `[^1][^2]`. Sources conflict: say so in the text ("sources
+  disagree: A says X, B says Y"); never pick one silently.
 
 ## Evidence marking and frontmatter
 
@@ -133,8 +130,8 @@ Approvals above €10,000 require a second signer [^1].
 | Unverified | `unverified` | Model knowledge only — no notebook, no search, mode (b) from SKILL.md §3. |
 
 Every `knowledge/*.md` file gets a frontmatter `evidence:` field naming its **dominant** tier
-(strongest wins if mixed: `cited` > `inferred` > `unverified`), and every `unverified` claim inside
-an otherwise-cited file gets an inline callout so it can't be mistaken for sourced material:
+(strongest wins if mixed: `cited` > `inferred` > `unverified`). Every `unverified` claim inside an
+otherwise-cited file gets this inline callout:
 
 ```markdown
 > ⚠ unverified — model knowledge, no source. Confirm before relying on this in production.
@@ -164,7 +161,7 @@ turned out unneeded, and then also drop its `knowledge.refs` entry.
 
 ## Chunking / large-output handling
 
-A `notebook_query` answer over the inline output limit is saved to a file. Don't read it whole:
+A `notebook_query` answer over the inline output limit is saved to a file. Read it in chunks, not whole:
 
 ```bash
 jq -r '.answer' <saved-file>.json | head -c 4000      # first chunk
