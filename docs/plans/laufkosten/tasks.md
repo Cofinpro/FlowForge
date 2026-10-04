@@ -90,9 +90,15 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 - **Dateien:**
   - `.agents/skills/bpmn2agent-cost/scripts/cost-report.mjs`
   - `.agents/skills/bpmn2agent-cost/SKILL.md`
-- **Zuordnung:** Reihenfolge laut plan.md §Zuordnung; Skill → Element über
-  `elements.*.generatedPaths`; Phase aus `pattern.phases` bzw. den `phase()`-Titeln.
-- **Ausgabe:** `generated/<workflow>/runs/<runId>/cost.json` + `cost.md`:
+- **Zuordnung:** Reihenfolge laut plan.md §Zuordnung, nachgeschlagen in
+  `.claude/hooks/<workflow>-cost-map.json`. Im Erzeuger-Repo ersatzweise aus `workflow-spec.yaml`
+  (Skill → Element über `elements.*.generatedPaths`, Phase aus `pattern.phases` bzw. den
+  `phase()`-Titeln), über dieselbe Funktion, die T4 für die Kostenkarte nutzt.
+- **Aufruf im Projekt der Nutzerin:** `/bpmn2agent-cost` ohne Argumente nimmt den neuesten Lauf aus
+  `.claude/runs/<workflow>/ledger.jsonl`. Mehrere Workflows im Projekt → Auswahl per
+  `AskUserQuestion`.
+- **Ausgabe:** `.claude/runs/<workflow>/<runId>/cost.json` + `cost.md` neben dem Ledger, oder per
+  `--out` an einem anderen Ort:
   - Summen je Element, Lane, Phase und Modell
   - Tokens nach Art, Cache-Anteil sichtbar
   - Eimer *Orchestrierung* und *nicht zugeordnet*
@@ -105,13 +111,15 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 - **Abnahme:** Auf den T0-Fixtures: Abgleich grün; dark-factory-Pilot ordnet ≥ 95 % der Kosten
   einem Element oder der Orchestrierung zu.
 
-## T4: Ledger-Hook generieren
+## T4: Ledger-Hook und Kostenkarte generieren
 
-`feat(generate): emit a cost ledger hook per workflow`
+`feat(generate): emit a cost ledger hook and cost map per workflow`
 
-- **Abhängig von:** T0 (Hook-Felder), T1 (gleiche Dedupe-Regel)
+- **Abhängig von:** T0 (Hook-Felder), T1 (gleiche Dedupe-Regel), T2 (Label-Präfixe)
 - **Dateien:**
   - `.agents/skills/bpmn2agent-generate/assets/templates/hook-cost-ledger-template.mjs`
+  - `.agents/skills/bpmn2agent-generate/scripts/build-cost-map.mjs` (Spec →
+    `cost-map.json`, deterministisch, kein Modell)
   - `.agents/skills/bpmn2agent-generate/SKILL.md` (neuer Schritt 6b, Self-Check, README-Abschnitt)
   - `.agents/skills/bpmn2agent-generate/assets/templates/README-template.md`
   - `.agents/skills/bpmn2agent-generate/assets/templates/mapping-report-template.md`
@@ -122,11 +130,20 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
   - scheitert nie den Lauf: Fehler → stderr, Exit 0
 - **Header:** `bpmn.elements` = Prozess-ID (wie die Kontext-Hooks keine `generatedPaths`
   beanspruchen). Ob verify dafür eine Ausnahme braucht, klärt die Aufgabe.
-- **README:** wo der Ledger liegt, `.gitignore`-Empfehlung, wie man `cost-report` aufruft.
+- **Kostenkarte:** `.claude/hooks/<workflow>-cost-map.json` aus `build-cost-map.mjs`, Felder laut
+  plan.md §Bausteine 1a. Wird bei jedem generate-Lauf neu geschrieben.
+- **verify:** prüft die Kostenkarte in beide Richtungen gegen die Spec. Jedes Element mit
+  `serviceTask`/Skill steht drin, jeder Eintrag zeigt auf ein existierendes Element, jeder
+  Skill-Name existiert unter `.claude/skills/`.
+- **README:**
+  - wo Ledger und Kostenkarte liegen
+  - `.gitignore`-Empfehlung für `.claude/runs/`
+  - „Kosten auswerten: lanecraft-Plugin installieren, dann `/bpmn2agent-cost`“
 - **Abnahme:**
   - Smoke-Test mit gepipeten Payloads auf die T0-Fixtures schreibt die erwarteten Zeilen.
   - Ein zweiter Aufruf für denselben Agent dupliziert nichts.
-  - verify grün auf den Fixtures.
+  - verify grün auf den Fixtures; eine Kostenkarte mit gelöschtem Eintrag oder fremder
+    Element-ID → Fehler, geroutet an generate.
 
 ## T5: Kosten in der Mapping-Ansicht
 
@@ -169,7 +186,8 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 - **Abhängig von:** T3–T6
 - **Dateien:**
   - `ARCHITECTURE.md`: Abschnitt Laufkosten (Zuordnung, Ledger, Abgleich, Grenzen)
-  - `README.md`: Kurzanleitung „Was hat der Lauf gekostet?“
+  - `README.md`: Kurzanleitung „Was hat der Lauf gekostet?“ mit der Verteilung aus plan.md
+    (Payload trägt Daten, Plugin die Logik)
   - `.agents/skills/bpmn-to-agentic-workflow/SKILL.md`: Verweis auf `bpmn2agent-cost` nach einem
     Lauf
   - OTel als Gegenprobe: Env-Variablen und welche Attribute wofür taugen
@@ -184,8 +202,10 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
   - Pipeline auf einer verify-Fixture mit workflow-script-Muster
   - generierten Payload in ein Scratch-Projekt kopieren und einmal laufen lassen
   - `cost-report` aus dem Ledger und zum Vergleich direkt aus dem Transkript
+  - einmal im Scratch-Projekt nur mit Payload + lanecraft-Plugin, **ohne** `generated/`, also
+    ausschließlich über `cost-map.json`
 - **Abnahme:**
-  - Beide Wege liefern dieselben Zahlen; Abgleich grün.
+  - Alle Wege (Ledger, Transkript, nur Kostenkarte) liefern dieselben Zahlen; Abgleich grün.
   - Mapping-Ansicht mit `--cost` ohne Rot.
   - OTel-Summe `claude_code.cost.usage` weicht höchstens 1 % ab.
   - `regenerate.sh` endet weiterhin mit `RESULT: PASS`, `no reference problems`, den drei

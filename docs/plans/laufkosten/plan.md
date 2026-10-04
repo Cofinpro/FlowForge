@@ -62,8 +62,16 @@ Element-ID, gefolgt vom Label wörtlich.
    `{sessionId, agentId, agentType, description, attributionSkill, requestId, model, usage}`.
    Keine Preise, keine Gruppierung, kein Netz. Die Zeilen überleben das Aufräumen der Transkripte
    (`cleanupPeriodDays`).
+1a. **Kostenkarte** (generiert): `.claude/hooks/<workflow>-cost-map.json` neben dem Hook, nicht
+   unter `.claude/runs/` (das ist per `.gitignore` ausgeschlossen). Rückverfolgung als
+   `bpmn: {file, elements}`-Schlüssel im JSON selbst. Je Eintrag `{elementId, label, lane, phase}` plus die Schlüssel, unter denen
+   das Element im Transkript auftaucht: Label-Präfix (Element-ID) und Skill-Namen aus
+   `generatedPaths`. Dazu `workflow`, `pattern`, `generatorVersion` und die Namen des
+   Top-Level-Skills bzw. Orchestrators (→ Eimer *Orchestrierung*). Eine gekürzte Laufzeitfassung
+   der Rückverfolgung, ohne Logik.
 2. **`cost-report`** (lanecraft, neuer Helper-Skill `bpmn2agent-cost`): liest Ledger **oder**
-   direkt eine Session-ID bzw. einen Transkriptpfad, dazu `workflow-spec.yaml`. Wendet die
+   direkt eine Session-ID bzw. einen Transkriptpfad, dazu `cost-map.json` (im Projekt der
+   Nutzerin) oder ersatzweise `workflow-spec.yaml` (im Erzeuger-Repo). Wendet die
    Preistabelle an, ordnet nach der Tabelle oben zu und schreibt `cost.json` + `cost.md`:
    gruppiert nach Element, Lane, Phase und Modell, Tokens getrennt nach Art, Cache-Anteil sichtbar.
 3. **Abgleich** (Teil von `cost-report`): die Summe der Teile gegen den Gesamtwert.
@@ -78,6 +86,30 @@ Element-ID, gefolgt vom Label wörtlich.
 6. **Wiederholte Läufe:** `cost-bench` startet denselben Input N-mal headless (`claude -p`) in
    frischen Arbeitskopien, sammelt die Session-IDs und berichtet je Element Median, Min/Max und
    Interquartilsabstand.
+
+## Verteilung: was mit dem Workflow kommt, was in lanecraft bleibt
+
+Die Spec ist Review-Material und wird nie ins Projekt der Nutzerin kopiert. Damit Kosten dort
+auswertbar sind, wo der Workflow läuft, gilt: **Der Payload trägt Daten, das Plugin die Logik.**
+
+| Teil | liegt in | kommt zur Nutzerin über |
+|---|---|---|
+| Ledger-Hook | Payload `.claude/hooks/` | `cp -R generated/<workflow>/.claude/.` |
+| `cost-map.json` | Payload `.claude/hooks/` | dieselbe Kopie |
+| `cost-report`, Abgleich, `prices.json` | lanecraft-Plugin, Skill `bpmn2agent-cost` | Plugin-Installation |
+| `cost-bench`, Mapping-Overlay | lanecraft-Plugin | nur im Erzeuger-Repo sinnvoll (braucht `generated/`) |
+
+- **Ablauf für Nutzerinnen:** Workflow installieren, lanecraft-Plugin installieren, Workflow
+  laufen lassen, danach `/bpmn2agent-cost` im selben Projekt.
+- **Warum nicht alles in den Payload:** Jede Workflow-Kopie hätte eine eigene, veraltende
+  Preistabelle, und ein Report-Skript ohne BPMN-Element verstieße gegen die Regel aus generate
+  Schritt 4. Der Hook ist wie die Kontext-Hooks eine benannte Ausnahme; `cost-map.json` ist
+  Daten, kein Skript.
+- **Ohne lanecraft-Plugin** sammelt der Hook trotzdem. Der Ledger lässt sich später auswerten,
+  auch in einem anderen Projekt.
+- **Später:** Werden generierte Workflows als Plugins veröffentlicht (wie dark-factory), wandert
+  der Hook in das `hooks.json` des Plugins und `cost-map.json` reist mit. Die Aufteilung bleibt
+  gleich.
 
 ## Grenzen
 
