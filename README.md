@@ -22,6 +22,22 @@ BPMN-Element, aus dem sie entstanden ist, und das wird in beide Richtungen gepr�
 Wer Agenten und Skills lieber von Hand schreibt, braucht dieses Repo nicht. Wie die Teile
 zusammenspielen, steht in [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
+## Neu hier?
+
+Sechs Skizzen erklären die Idee in etwa 15 Minuten, in dieser Reihenfolge
+([Übersicht und Quelldateien](docs/erklaerung/README.md)):
+
+| Skizze | Frage |
+|---|---|
+| [Problem](docs/erklaerung/00-problem.png) | Welches Problem lösen wir? |
+| [Idee](docs/erklaerung/01-idee.png) | Was macht lanecraft? |
+| [Bausteine](docs/erklaerung/03-bausteine.png) | Was sind Skill, Agent, Hook, Workflow und Kontext? |
+| [Mapping](docs/erklaerung/05-mapping.png) | Was wird aus welchem BPMN-Element? |
+| [Pipeline](docs/erklaerung/02-pipeline.png) | Wie läuft die Übersetzung ab, und wo entscheidest du? |
+| [Kontext](docs/erklaerung/04-kontext.png) | Was sieht ein Schritt? |
+
+[![Idee](docs/erklaerung/01-idee.png)](docs/erklaerung/01-idee.png)
+
 ## Schnellstart
 
 Das Repo ist Claude-Code-Plugin und Marketplace zugleich:
