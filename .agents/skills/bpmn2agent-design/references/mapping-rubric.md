@@ -188,7 +188,7 @@ the kind or status name, so colour is never the only signal (exact values: the h
 | Teal | `orchestrator` | Gateways, loop back-edges, multi-instance markers — no file of its own. |
 | Amber | `human-checkpoint` | `userTask`/`manualTask`: a person decides here. |
 | Brown | `artifact-contract` | A data object with a path/frontmatter contract. |
-| Turquoise | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. A greener shade than the `orchestrator` teal, so the two stay apart; the annotation names the Art (exact values: `render-mapping.mjs`, set in generate). |
+| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. A greener shade than the `orchestrator` teal, so the two stay apart; the annotation names the Art (exact values: `render-mapping.mjs`, set in generate). |
 | **Grey** | `not-generated` | Deliberately not generated; the element's `reason` is shown in its annotation and on click. Not an error. |
 | **Red** | `unresolved` | Unmapped or still an open question; blocks `bpmn2agent-verify`'s "no red in the map" check. |
 

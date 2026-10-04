@@ -53,7 +53,7 @@ Generated {{date}} from `generated/{{workflow}}/workflow-spec.yaml`
 | Teal | `orchestrator` | Gateways, loop back-edges, multi-instance markers — no file of its own. |
 | Amber | `human-checkpoint` | `userTask`/`manualTask`: a person decides here. |
 | Brown | `artifact-contract` | A data object with a path/frontmatter contract. |
-| Turquoise | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. {{Delete this row when the spec has neither.}} |
+| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. {{Delete this row when the spec has neither.}} |
 | **Grey** | `not-generated` | Deliberately not generated; reason shown in the table below. Not an error. |
 | **Red** | `unresolved` | Unmapped or still an open question; blocks `bpmn2agent-verify`'s "no red in the map" check. |
 

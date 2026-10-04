@@ -174,7 +174,7 @@ schon für die Herkunft belegt.)
 - **Nicht aufgelöste Tools werden nie zu Wildcards.** Ist der Server nicht verbunden, bleibt der
   Store `tools: unresolved`, verify warnt und generate lässt die Tools weg.
 - **Rückverfolgung:** Stores tragen `kind: context-source`, Prozess-Ein-/Ausgabe `workflow-input` /
-  `workflow-output`; die Mapping-Ansicht färbt Stores türkis, ein Store ohne Eintrag ist rot. Die
+  `workflow-output`; die Mapping-Ansicht färbt Stores rosé, ein Store ohne Eintrag ist rot. Die
   Memory-Dateien entstehen erst im Projekt des Anwenders, nicht im Output.
 
 **Bewusst nicht in v1:** Datenzustände (`[freigegeben]`) und daraus abgeleitete Status-Hooks,

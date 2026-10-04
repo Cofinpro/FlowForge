@@ -102,7 +102,7 @@ Ort: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | web
 ### Rückverfolgung und Mapping-Ansicht
 
 - **Stores:** Jeder Store bekommt `elements.<storeRefId>` mit `kind: context-source` und eine
-  eigene Farbe (Türkis). verify verlangt den Eintrag wie bei Flow Nodes; fehlt er, ist der Store
+  eigene Farbe (Rosé). verify verlangt den Eintrag wie bei Flow Nodes; fehlt er, ist der Store
   rot.
 - **Prozess-I/O:** Bekommt `kind: workflow-input` / `workflow-output` und wird aus
   `ioSpecification` indiziert.

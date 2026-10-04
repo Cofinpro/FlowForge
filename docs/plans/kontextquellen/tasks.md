@@ -39,7 +39,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
   - die Art×Ort-Matrix
   - die Regel „Schreiben in Live-Store braucht `userTask`, nicht workflow-script“
   - Platzierung der Tools (Agent-`tools:` vs. `permissions.allow`)
-  - Farbe Türkis in der Farbtabelle
+  - Farbe Rosé in der Farbtabelle
   - Musterhinweis „unterschiedliche Rechte je Rolle → orchestrator-agent“
 - **Abnahme:**
   - Das Schema validiert ein Beispiel-Snippet mit allen drei Arten.
@@ -191,7 +191,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 - **Orchestrator:** `argument-hint` aus `workflowIO.input`; fragt nach, wenn ein Pflichtfeld
   fehlt.
 - **README:** Voraussetzungen (MCP-Server, CLIs), Gedächtnisablage.
-- **Mapping-Ansicht:** `context-source` in Türkis, Prozess-I/O aus `ioSpecification`
+- **Mapping-Ansicht:** `context-source` in Rosé, Prozess-I/O aus `ioSpecification`
   indizieren, Stores ohne Eintrag rot.
 - **Abnahme:** Generate auf der Fixture, danach verify grün und `check-mapping-view` ohne Rot.
 

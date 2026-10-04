@@ -30,11 +30,12 @@
 //   orchestrator      teal    #E0F7FA / #006064  — gateway / loop-back / multi-instance control flow
 //   human-checkpoint  amber   #FFFDE7 / #7A5C00  — userTask/manualTask -> AskUserQuestion step
 //   artifact-contract brown   #EFEBE9 / #4E342E  — data object with a path/frontmatter contract
-//   context-source    turquoise #C8F0E6 / #0B6B55  — data store (Art wissen|live|gedaechtnis) and, under
+//   context-source    rose      #F8BBD0 / #880E4F  — data store (Art wissen|live|gedaechtnis) and, under
 //                                                  the same colour, the process-wide input/output
-//                                                  (kind workflow-input / workflow-output). A more
-//                                                  saturated mint than skill green and clearly greener
-//                                                  than the orchestrator teal; the annotation names
+//                                                  (kind workflow-input / workflow-output). A hue no
+//                                                  other kind uses (it sat too close to the
+//                                                  orchestrator teal before) and a stronger fill than
+//                                                  the pale pink of unresolved; the annotation names
 //                                                  the Art / the artifact. The legend entry (and its
 //                                                  strings) only appears when a diagram has one.
 //   not-generated     grey    #F5F5F5 / #616161  — deliberately not generated (reason on click/hover)
@@ -100,7 +101,7 @@ const PALETTE = {
   orchestrator: { fill: '#E0F7FA', stroke: '#006064' },
   'human-checkpoint': { fill: '#FFFDE7', stroke: '#7A5C00' },
   'artifact-contract': { fill: '#EFEBE9', stroke: '#4E342E' },
-  'context-source': { fill: '#C8F0E6', stroke: '#0B6B55' },
+  'context-source': { fill: '#F8BBD0', stroke: '#880E4F' },
   'not-generated': { fill: '#F5F5F5', stroke: '#616161' },
   unresolved: { fill: '#FFEBEE', stroke: '#C62828' },
 };

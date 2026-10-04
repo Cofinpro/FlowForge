@@ -276,7 +276,7 @@ node ${CLAUDE_SKILL_DIR}/scripts/check-mapping-view.mjs \
 ```
 
 It must print `mapping view ok` (offline it checks only the fallback; say so) and a `red elements:`
-line. Data stores and process input/output are turquoise (`context-source`); a store with no
+line. Data stores and process input/output are rose (`context-source`); a store with no
 `elements` entry shows red like any unmapped node. Add `--no-red` to fail on red.
 
 ## 11. Self-check before handoff
