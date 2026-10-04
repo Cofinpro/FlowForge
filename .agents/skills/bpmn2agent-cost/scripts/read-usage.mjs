@@ -62,10 +62,11 @@ function readThread(file, meta, requests, stats) {
     if (entry.type !== 'assistant') continue
     const where = `${file}:${line}`
     const msg = entry.message
+    // client-generated lines (API error text, "No response requested") carry no requestId and no cost
+    if (msg?.model === '<synthetic>') { stats.synthetic++; continue }
     if (!entry.requestId || !msg?.usage || !msg.model) {
       throw new Error(`${where}: assistant entry without requestId/usage/model (transcript format changed?)`)
     }
-    if (msg.model === '<synthetic>') { stats.synthetic++; continue }
     const usage = toUsage(msg.usage, where)
     const cur = requests.get(entry.requestId)
     if (!cur || usage.output >= cur.usage.output) {

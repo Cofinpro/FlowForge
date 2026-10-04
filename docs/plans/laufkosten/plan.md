@@ -74,10 +74,13 @@ Element-ID, gefolgt vom Label wörtlich.
    Nutzerin) oder ersatzweise `workflow-spec.yaml` (im Erzeuger-Repo). Wendet die
    Preistabelle an, ordnet nach der Tabelle oben zu und schreibt `cost.json` + `cost.md`:
    gruppiert nach Element, Lane, Phase und Modell, Tokens getrennt nach Art, Cache-Anteil sichtbar.
-3. **Abgleich** (Teil von `cost-report`): die Summe der Teile gegen den Gesamtwert.
-   - Tokens je Modell gegen `cost-state.modelUsage`: muss exakt passen.
-   - Kosten gegen `totalCostUSD` bzw. `total_cost_usd` aus `claude -p --output-format json`:
-     Abweichung über 1 % → Fehler mit Angabe, welcher Teil fehlt.
+3. **Abgleich** (Teil von `cost-report`): die Summe der Teile gegen den Gesamtwert (Korrektur nach
+   dem Pilot, siehe `spike.md`).
+   - Tokens je Modell gegen `cost-state.modelUsage`; passen sie exakt, muss der Preis `costUSD`
+     reproduzieren (sonst Fehler: `prices.json` veraltet).
+   - Steht `cost-state` hinter dem Transkript (fortgesetzte Session), ist das eine Warnung, kein
+     Fehler; die Transkriptsumme gilt.
+   - Kosten gegen `total_cost_usd` aus `claude -p --output-format json`: Abweichung über 1 % → Fehler.
 4. **Preistabelle** `prices.json`: je Modell Input, Output, Cache-Write 5m/1h, Cache-Read, dazu
    WebSearch je Anfrage. Mit `version`, `retrieved` und Quell-URL. Unbekanntes Modell → Fehler,
    kein Schätzwert.

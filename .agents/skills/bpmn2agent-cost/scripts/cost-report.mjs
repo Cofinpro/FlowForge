@@ -97,63 +97,74 @@ export function buildReport({ requests, costState, map, prices, claudeTotal, ses
   })).sort((a, b) => b.costUsd - a.costUsd)
 
   // ---- reconciliation ---------------------------------------------------------------------
+  // cost-state is Claude Code's own running total of the PROCESS. It is the hard reference only when
+  // it matches the transcripts token for token (a single uninterrupted run, e.g. `claude -p`). For a
+  // resumed or cleared session it can hold less (earlier process) or lag behind (snapshot), which says
+  // nothing about our attribution, so that is a warning and never a failure. Failures are what this
+  // code can be blamed for: an unpriced model, a price table that does not reproduce costUSD on an
+  // exact match, a claude -p total that does not match.
   const checks = []
   let aux = null
   if (!costState) {
     checks.push({ level: 'warn', text: 'Kein cost-state im Transkript: Summe der Teile kann nicht gegen die Session-Summe geprüft werden.' })
   } else {
     aux = { costUsd: 0, models: [] }
+    // cost-state names carry context variants (claude-opus-5-5[1m]); sum them per priced model
+    const csBy = new Map()
     for (const [model, v] of Object.entries(costState.modelUsage)) {
-      const key = priceKey(model, prices)
+      const key = priceKey(model, prices) ?? model
+      const cur = csBy.get(key) ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, webSearch: 0, costUSD: 0, names: [] }
+      cur.input += v.inputTokens; cur.output += v.outputTokens; cur.cacheRead += v.cacheReadInputTokens
+      cur.cacheWrite += v.cacheCreationInputTokens; cur.webSearch += v.webSearchRequests ?? 0; cur.costUSD += v.costUSD
+      cur.names.push(model)
+      csBy.set(key, cur)
+    }
+    for (const [key, cs] of csBy) {
       const mine = models.find((x) => x.model === key)
       const have = mine?.usage ?? sumUsage([])
-      const cacheWriteHave = have.cacheWrite5m + have.cacheWrite1h
       const diff = {
-        input: v.inputTokens - have.input, output: v.outputTokens - have.output,
-        cacheRead: v.cacheReadInputTokens - have.cacheRead, cacheWrite: v.cacheCreationInputTokens - cacheWriteHave,
-        webSearch: (v.webSearchRequests ?? 0) - have.webSearch,
+        input: cs.input - have.input, output: cs.output - have.output, cacheRead: cs.cacheRead - have.cacheRead,
+        cacheWrite: cs.cacheWrite - (have.cacheWrite5m + have.cacheWrite1h),
       }
-      const negative = Object.entries(diff).filter(([k, d]) => d < 0 && k !== 'webSearch')
-      if (negative.length) {
-        checks.push({ level: 'fail', text: `${model}: Das Transkript enthält mehr Tokens als cost-state (${negative.map(([k, d]) => `${k} ${d}`).join(', ')}). Doppelt gezählte Anfragen oder Transkript einer anderen Session.` })
+      const lagging = Object.entries(diff).filter(([, d]) => d < 0).map(([k]) => k)
+      const tokenExact = Object.values(diff).every((d) => d === 0) && cs.webSearch === have.webSearch
+      if (lagging.length) {
+        checks.push({
+          level: 'warn',
+          text: `${key}: cost-state steht hinter dem Transkript zurück (${lagging.join(', ')}). Die Session wurde fortgesetzt oder geleert, oder cost-state ist ein älterer Zwischenstand; die Transkriptsumme gilt.`,
+        })
+        continue
       }
-      const tokenExact = Object.entries(diff).every(([k, d]) => k === 'webSearch' || d === 0)
       if (tokenExact && mine) {
-        const drift = Math.abs(mine.costUsd - v.costUSD)
-        if (drift > Math.max(0.005, v.costUSD * 0.005)) {
-          checks.push({ level: 'fail', text: `${model}: Tokens stimmen exakt, aber der berechnete Preis (${mine.costUsd.toFixed(4)} USD) weicht von cost-state (${v.costUSD.toFixed(4)} USD) ab. prices.json ${prices.version} ist veraltet oder falsch.` })
+        const drift = Math.abs(mine.costUsd - cs.costUSD)
+        if (drift > Math.max(0.005, cs.costUSD * 0.005)) {
+          checks.push({ level: 'fail', text: `${key}: Tokens stimmen exakt, aber der berechnete Preis (${mine.costUsd.toFixed(4)} USD) weicht von cost-state (${cs.costUSD.toFixed(4)} USD) ab. prices.json ${prices.version} ist veraltet oder falsch.` })
         }
       }
-      const auxCost = v.costUSD - (mine?.costUsd ?? 0)
-      if (!tokenExact || auxCost > 0.0001) aux.models.push({ model, tokens: diff, costUsd: auxCost, inTranscript: !!mine })
-      aux.costUsd += auxCost
+      const auxCost = cs.costUSD - (mine?.costUsd ?? 0)
+      if (!tokenExact || auxCost > 0.0001) aux.models.push({ model: key, tokens: diff, costUsd: auxCost, inTranscript: !!mine })
+      aux.costUsd += Math.max(0, auxCost)
     }
     for (const m of models) {
-      if (!Object.keys(costState.modelUsage).some((k) => priceKey(k, prices) === m.model)) {
-        checks.push({ level: 'fail', text: `${m.model}: im Transkript, aber nicht in cost-state.` })
-      }
+      if (!csBy.has(m.model)) checks.push({ level: 'warn', text: `${m.model}: im Transkript, aber nicht in cost-state (frühere Session oder anderer Prozess); die Transkriptsumme gilt.` })
     }
-    const share = costState.totalCostUSD > 0 ? aux.costUsd / costState.totalCostUSD : 0
+    const share = (total + aux.costUsd) > 0 ? aux.costUsd / (total + aux.costUsd) : 0
     if (share > 0.01) {
       const partial = aux.models.filter((x) => x.inTranscript)
       checks.push({
         level: 'warn',
-        text: `${(share * 100).toFixed(1)} % der Session-Kosten (${aux.costUsd.toFixed(4)} USD) stehen nur in cost-state. ` +
+        text: `${(share * 100).toFixed(1)} % der Kosten (${aux.costUsd.toFixed(4)} USD) stehen nur in cost-state. ` +
           (partial.length
             ? `Für ${partial.map((x) => x.model).join(', ')} fehlen Tokens im Transkript: die Session wurde vermutlich fortgesetzt oder geleert.`
             : 'Das sind Hilfsaufrufe (z. B. WebSearch-Hilfsmodell), die kein Transkript haben.'),
       })
     }
   }
-  if (claudeTotal != null && costState) {
-    const d = Math.abs(claudeTotal - costState.totalCostUSD)
-    if (d > Math.max(0.005, costState.totalCostUSD * 0.01)) {
-      checks.push({ level: 'fail', text: `total_cost_usd aus claude -p (${claudeTotal.toFixed(4)} USD) weicht um ${d.toFixed(4)} USD von cost-state (${costState.totalCostUSD.toFixed(4)} USD) ab.` })
-    }
-  } else if (claudeTotal != null) {
-    const d = Math.abs(claudeTotal - total)
+  const grand = total + (aux?.costUsd ?? 0)
+  if (claudeTotal != null) {
+    const d = Math.abs(claudeTotal - grand)
     if (d > Math.max(0.005, claudeTotal * 0.01)) {
-      checks.push({ level: 'fail', text: `total_cost_usd aus claude -p (${claudeTotal.toFixed(4)} USD) weicht um ${d.toFixed(4)} USD von der Summe der Anfragen (${total.toFixed(4)} USD) ab.` })
+      checks.push({ level: 'fail', text: `total_cost_usd aus claude -p (${claudeTotal.toFixed(4)} USD) weicht um ${d.toFixed(4)} USD von der Summe aus Transkripten und Hilfsaufrufen (${grand.toFixed(4)} USD) ab.` })
     }
   }
   if (incomplete) checks.push({ level: 'warn', text: `${incomplete} Anfrage(n) ohne stop_reason (noch nicht abgeschlossen) wurden nicht mitgezählt.` })
@@ -162,7 +173,6 @@ export function buildReport({ requests, costState, map, prices, claudeTotal, ses
     checks.push({ level: 'warn', text: `${((unassigned.costUsd / total) * 100).toFixed(1)} % der Kosten sind keinem Element zugeordnet: Label-Konvention oder Kostenkarte prüfen.` })
   }
 
-  const grand = costState ? costState.totalCostUSD : total
   return {
     workflow: map.workflow, sessionId, claudeCodeVersion: version, pricesVersion: prices.version,
     totals: { transcriptUsd: total, auxiliaryUsd: aux?.costUsd ?? null, sessionUsd: grand, requests: requests.length },

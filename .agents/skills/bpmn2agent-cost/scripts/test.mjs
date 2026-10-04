@@ -83,12 +83,29 @@ test('a missing subagent transcript (resumed session) is a warning with the reas
   assert.match(rep.checks.map((c) => c.text).join('\n'), /fortgesetzt oder geleert/)
 })
 
-test('a transcript with more tokens than cost-state fails', () => {
+test('cost-state behind the transcript (resumed session) warns and the transcript sum counts', () => {
   const s = readSession(makeFixture(tmp(), { dropSubagent: true }).transcript)
   const full = readSession(makeFixture(tmp()).transcript)
   const rep = buildReport({ ...s, requests: full.requests, map: MAP, prices })
-  assert.equal(rep.ok, false)
-  assert.match(rep.checks.find((c) => c.level === 'fail').text, /mehr Tokens als cost-state/)
+  assert.equal(rep.ok, true)
+  assert.match(rep.checks.map((c) => c.text).join('\n'), /steht hinter dem Transkript zurück/)
+  near(rep.totals.sessionUsd, 5 * OPUS_COST + HAUS_COST, 'transcript sum plus the auxiliary call, never the smaller cost-state')
+})
+
+test('cost-state keys with a context variant ([1m]) are summed per priced model', () => {
+  const s = readSession(makeFixture(tmp()).transcript)
+  const half = (v) => ({ ...v, inputTokens: v.inputTokens / 2, outputTokens: v.outputTokens / 2, cacheReadInputTokens: v.cacheReadInputTokens / 2, cacheCreationInputTokens: v.cacheCreationInputTokens / 2, costUSD: v.costUSD / 2 })
+  const opus = s.costState.modelUsage['claude-opus-5-5']
+  const split = { ...s.costState, modelUsage: { ...s.costState.modelUsage, 'claude-opus-5-5': half(opus), 'claude-opus-5-5[1m]': half(opus) } }
+  const rep = buildReport({ ...s, costState: split, map: MAP, prices })
+  assert.equal(rep.ok, true, JSON.stringify(rep.checks))
+  assert.ok(!rep.checks.some((c) => /zurück|nicht in cost-state/.test(c.text)), JSON.stringify(rep.checks)) // the two [1m]/plain halves add up exactly
+})
+
+test('client-generated synthetic lines without requestId are skipped, not a format error', () => {
+  const fx = makeFixture(tmp())
+  fs.appendFileSync(fx.transcript, JSON.stringify({ type: 'assistant', isApiErrorMessage: true, message: { model: '<synthetic>', content: [], usage: {} } }) + '\n')
+  assert.equal(readSession(fx.transcript).synthetic, 2)
 })
 
 test('claude -p total is compared within 1 percent', () => {

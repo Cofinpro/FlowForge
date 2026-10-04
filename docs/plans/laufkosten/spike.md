@@ -19,12 +19,28 @@ bezahlt. Zwei Fragen bleiben für den Ende-zu-Ende-Test (T8) offen, siehe unten.
 | Tragen Subagent-Zeilen `attributionSkill`? | **Nein** (421 von 421 Zeilen leer in den SlideGen-Läufen). `attributionSkill` kommt nur im Hauptthread vor (und dort nur, wenn ein Skill aktiv ist). Im Muster orchestrator-agent ordnet also `agentType` + `description` zu, nicht der Skill. |
 | Preise | Die Tabelle aus dem `claude-api`-Skill (Input/Output) mit Cache-Lesen 0,1× (Opus 5.5: 0,05×), Cache-Schreiben 5 min 1,25× und 1 h 2× des Input-Preises reproduziert `costUSD` für `claude-opus-5-5`, `claude-opus-5`, `claude-sonnet-5`, `claude-sonnet-5-5` und `claude-haiku-4-5` (siehe `prices.json`). |
 
+## Reihenuntersuchung über alle lokalen Sessions
+
+Der Bericht lief über alle 137 Transkripte dieser Maschine (125 mit `cost-state`), mit leerer
+Kostenkarte: 37 stimmen ohne Hinweis, 88 mit Warnung, **0 Fehler, 0 Abstürze**. Zwei Annahmen aus dem
+ersten Entwurf haben echte Daten widerlegt und wurden korrigiert:
+
+- **Synthetische Zeilen** (`model: <synthetic>`, API-Fehlertexte, „No response requested“) tragen
+  keine `requestId` und keine Kosten. Sie werden übersprungen, bevor die `requestId` verlangt wird
+  (13 Abstürze vorher).
+- **`cost-state` hinter dem Transkript** kommt vor: `startTime` ist der Start des *Prozesses*; wer
+  eine Session fortsetzt, hat im Transkript die frühere Arbeit, `cost-state` zählt sie nicht (oder nur
+  einen älteren Zwischenstand). „Mehr Tokens im Transkript als in `cost-state`“ ist deshalb kein
+  Zuordnungsfehler.
+
 ## Folgen für den Plan
 
-- **Abgleich:** Tokens je Modell exakt, aber nur gegen die Transkript-Modelle. Die Differenz zu
-  `cost-state` ist der Eimer *Hilfsaufrufe* und wird ausgewiesen, kein Fehler. Ein Fehler ist nur
-  eine **negative** Differenz (Transkript hat mehr als `cost-state`) oder eine Lücke durch eine
-  fortgesetzte Session, die als Warnung mit Hinweis erscheint.
+- **Abgleich:** `cost-state` ist nur dann der harte Maßstab, wenn es Token für Token passt (ein
+  durchgehender Prozess, etwa `claude -p`). Dann muss auch der Preis aufgehen (sonst ist
+  `prices.json` veraltet: Fehler). Was nur in `cost-state` steht, ist der Eimer *Hilfsaufrufe*. Steht
+  `cost-state` **hinter** dem Transkript, ist das eine Warnung, kein Fehler (siehe Reihenuntersuchung);
+  die Transkriptsumme gilt, die Gesamtsumme ist immer Transkripte + Hilfsaufrufe. Namen mit
+  Kontextvariante (`claude-opus-5-5[1m]`) werden je bepreistem Modell zusammengezählt.
 - **Dedupe:** je `requestId` die Zeile mit den meisten `output_tokens`; Zeilen ohne `stop_reason` in
   der Endzeile gelten als unvollständig und werden gezählt und gemeldet.
 - **Hook:** Er soll nicht von Feldern des Hook-Payloads abhängen. Er liest nur `transcript_path`,

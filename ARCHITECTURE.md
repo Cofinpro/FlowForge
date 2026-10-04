@@ -249,11 +249,13 @@ wird verteilt oder geschätzt. Voraussetzung ist die Label-Konvention: jeder `ag
 
 **Abgleich.** Eine API-Antwort steht in mehreren Transkriptzeilen, endgültige Ausgabe-Tokens trägt nur
 die letzte; je `requestId` zählt die mit den meisten. Danach stimmen die Tokens je Modell mit dem
-`cost-state` der Session exakt überein und der Preis reproduziert dessen `costUSD` (an echten Läufen
-geprüft). Was nur in `cost-state` steht, sind Hilfsaufrufe (etwa das WebSearch-Hilfsmodell) und wird
-als eigener Eimer ausgewiesen. Mehr Tokens im Transkript als in `cost-state`, ein Preis, der nicht
-aufgeht, oder ein `total_cost_usd` aus `claude -p`, das um mehr als 1 % abweicht, sind Fehler. Fehlen
-Tokens, wurde die Session meist fortgesetzt oder geleert; das ist eine Warnung.
+`cost-state` der Session überein (bei einem durchgehenden Lauf exakt) und der Preis reproduziert
+dessen `costUSD`; an echten Läufen geprüft. Was nur in `cost-state` steht, sind Hilfsaufrufe (etwa
+das WebSearch-Hilfsmodell) und wird als eigener Eimer ausgewiesen; die Gesamtsumme ist immer
+Transkripte plus Hilfsaufrufe. Ein Preis, der bei exakt passenden Tokens nicht aufgeht, ein Modell
+ohne Preis oder ein `total_cost_usd` aus `claude -p`, das um mehr als 1 % abweicht, sind Fehler. Ist
+die Session fortgesetzt oder geleert worden, steht `cost-state` hinter dem Transkript oder deckt
+nur den letzten Prozess ab; das ist eine Warnung, und die Transkriptsumme gilt.
 
 **Grenzen.** Das Transkriptformat ist intern und kann sich mit jeder Claude-Code-Version ändern; der
 Leser scheitert dann laut statt still falsch zu summieren. Kosten außerhalb von Claude (Gemini/
