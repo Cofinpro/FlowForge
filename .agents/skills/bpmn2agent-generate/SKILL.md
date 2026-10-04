@@ -157,6 +157,14 @@ store: readers load the memory file first (missing or empty is fine); the writer
 insights into the fixed sections *Bewährt*, *Vermeiden*, *Offene Muster* instead of appending and
 keeps the file within `memory.maxLines`.
 
+**Per-task knowledge.** A task with its own `knowledge/<taskId>.md` (a reader of a `wissen` store) does not get
+its content merged into a skill's `references/domain-knowledge.md` (each file numbers its footnotes from 1). Once
+the skills exist, run `node ${CLAUDE_SKILL_DIR}/scripts/install-knowledge.mjs "$cacheDir" generated/<workflow>`:
+it installs each file as `references/<taskId>.md` in the skill that owns the task (the top-level skill for inline
+checkpoints), keeps the footnote sources and drops the verbatim quotes and FAQ ids (they stay in `knowledge/`),
+fixes the pointers between files, adds a contents line to long files, and writes the owners' `## Kontextquellen`
+sections for `wissen` stores. Re-run it after any change to `knowledge/`; it overwrites its own output.
+
 **Process input and output.** With `workflowIO.input`, the top-level skill gets `argument-hint`
 (one `[field]` per `required` entry, the whole value one quoted string: `argument-hint: "[a] [b]"`), an `## Input` section that asks for a missing required field
 via `AskUserQuestion` before step 1, and for `workflowIO.output` a last step naming the end result's

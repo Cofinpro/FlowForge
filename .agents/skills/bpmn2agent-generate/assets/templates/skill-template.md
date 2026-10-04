@@ -71,6 +71,10 @@ user for it via `AskUserQuestion` before starting step 1; never start with a gue
 
 ## Domain knowledge
 
+{{A task that has its own `knowledge/<taskId>.md` (reader of a `wissen` store) is NOT copied here: run
+`scripts/install-knowledge.mjs` (SKILL.md step 5), which installs it as `references/<taskId>.md` and writes the
+`## Kontextquellen` bullets for `wissen` stores. The text below is for elements grounded at phase or lane level.}}
+
 {{Copy the distilled, cited content from `generated/{{workflow}}/knowledge/{{ref}}.md` into
 `references/domain-knowledge.md` verbatim (footnotes intact) when `knowledge.refs` names a file for
 this element. For a `"websearch"` entry, do the same from the WebSearch-sourced knowledge file. For
