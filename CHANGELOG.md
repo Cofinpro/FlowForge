@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1](https://github.com/Cofinpro/lanecraft/compare/v0.4.0...v0.4.1) (2026-10-04)
+
+### Bug Fixes
+
+* **cost:** read Workflow-tool agents and complete their output tokens ([#9](https://github.com/Cofinpro/lanecraft/issues/9)) ([ba76017](https://github.com/Cofinpro/lanecraft/commit/ba760170949ef8ccacc0aa5dfdbf9feeaee9ef8b))
+
 ## [0.4.0](https://github.com/Cofinpro/lanecraft/compare/v0.3.0...v0.4.0) (2026-10-04)
 
 ### Features
