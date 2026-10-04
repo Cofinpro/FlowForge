@@ -243,6 +243,8 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Epic, User Story Map (Backbone aus Aktivitäten und Nutzer-Tasks). Output: Platz der Story unter ihrem Nutzer-Task im Epic-Zweig.</bpmn:documentation>
       <bpmn:incoming>F29</bpmn:incoming>
       <bpmn:outgoing>F30</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C1"><bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase3_C1</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Merge_Formulierung">
       <bpmn:incoming>F30</bpmn:incoming>
@@ -262,6 +264,8 @@
       <bpmn:documentation>Input: Story-Karte, Epic, Fachkonzept, Feedback-Eintrag. Output: Traceability-Eintrag Vision -&gt; Geschäftsziel -&gt; Epic -&gt; User Story, betroffene Fachkonzept-Kapitel und Link zum auslösenden Feedback.</bpmn:documentation>
       <bpmn:incoming>F32</bpmn:incoming>
       <bpmn:outgoing>F33</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C3"><bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase3_C3</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:businessRuleTask id="C4" name="INVEST-Selbstcheck durchführen">
       <bpmn:documentation>Input: Story-Karte. Output: INVEST-Befund (Independent, Negotiable, Valuable, Estimable, Small, Testable) je Kriterium.</bpmn:documentation>
@@ -298,6 +302,8 @@
       <bpmn:documentation>Input: Story-Karte, Fachkonzept, Ist-/Soll-Delta. Output: Fachregeln, gewünschtes Ergebnis, Wert - das 'Was', nicht das 'Wie'.</bpmn:documentation>
       <bpmn:incoming>F39</bpmn:incoming>
       <bpmn:outgoing>F43</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D2a" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D2a"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D2a</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D2d" name="Wireframes &amp; Interaktionsfluss beilegen">
       <bpmn:documentation>Input: betroffene Screens, bestehende Wireframes, Prototyp (falls getestet). Output: Wireframes/Mockups und Interaktionsfluss an der Story.</bpmn:documentation>
@@ -454,6 +460,8 @@
       <bpmn:documentation>Input: neue Story, gefundenes Duplikat. Output: bestehende Story um die neuen Akzeptanzkriterien und den Feedback-Link ergänzt; die neue Story entfällt.</bpmn:documentation>
       <bpmn:incoming>F74</bpmn:incoming>
       <bpmn:outgoing>F75</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P6" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P6"><bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase6_P6</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:endEvent id="End_StoryZusammengefuehrt" name="Story in bestehende Story überführt">
       <bpmn:incoming>F75</bpmn:incoming>
@@ -462,6 +470,8 @@
       <bpmn:documentation>Input: Plausibilitätsbefund. Output: Abhängigkeitslinks und Anpassungshinweise an betroffenen oder überholten Stories. Ohne Befund entfällt dieser Schritt.</bpmn:documentation>
       <bpmn:incoming>F72</bpmn:incoming>
       <bpmn:outgoing>F80</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P5" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P5"><bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase6_P5</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:userTask id="E4" name="Story priorisieren &amp; in Ready-Spalte stellen">
       <bpmn:documentation>Input: DoR-konforme, plausibilisierte Story. Output: priorisierte, sprint-reife User Story in der Ready-Spalte des Boards.</bpmn:documentation>
@@ -829,9 +839,12 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase3_di" bpmnElement="StoreRef_MethodikPhase3"><dc:Bounds x="4835" y="190" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4795" y="150" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C2_di" bpmnElement="DataIn_MethodikPhase3_C2"><di:waypoint x="4845" y="240" /><di:waypoint x="4845" y="265" /><di:waypoint x="4690" y="265" /><di:waypoint x="4690" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C4_di" bpmnElement="DataIn_MethodikPhase3_C4"><di:waypoint x="4875" y="240" /><di:waypoint x="4875" y="265" /><di:waypoint x="5070" y="265" /><di:waypoint x="5070" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C1_di" bpmnElement="DataIn_MethodikPhase3_C1"><di:waypoint x="4835" y="215" /><di:waypoint x="4760" y="215" /><di:waypoint x="4760" y="135" /><di:waypoint x="4200" y="135" /><di:waypoint x="4200" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C3_di" bpmnElement="DataIn_MethodikPhase3_C3"><di:waypoint x="4860" y="240" /><di:waypoint x="4860" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase4_di" bpmnElement="StoreRef_MethodikPhase4"><dc:Bounds x="6805" y="1365" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6655" y="1376" width="145" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D3_di" bpmnElement="DataIn_MethodikPhase4_D3"><di:waypoint x="6815" y="1365" /><di:waypoint x="6815" y="1350" /><di:waypoint x="6720" y="1350" /><di:waypoint x="6720" y="1335" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D4_di" bpmnElement="DataIn_MethodikPhase4_D4"><di:waypoint x="6845" y="1365" /><di:waypoint x="6845" y="1350" /><di:waypoint x="6940" y="1350" /><di:waypoint x="6940" y="1335" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D2a_di" bpmnElement="DataIn_MethodikPhase4_D2a"><di:waypoint x="6830" y="1415" /><di:waypoint x="6830" y="1430" /><di:waypoint x="6420" y="1430" /><di:waypoint x="6420" y="520" /><di:waypoint x="6280" y="520" /><di:waypoint x="6280" y="375" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D6_di" bpmnElement="DataIn_MethodikPhase4_D6"><di:waypoint x="6855" y="1390" /><di:waypoint x="7840" y="1390" /><di:waypoint x="7840" y="490" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase5_di" bpmnElement="StoreRef_MethodikPhase5"><dc:Bounds x="8150" y="1365" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="8035" y="1376" width="110" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E1_di" bpmnElement="DataIn_MethodikPhase5_E1"><di:waypoint x="8175" y="1365" /><di:waypoint x="8175" y="1335" /></bpmndi:BPMNEdge>
@@ -839,6 +852,8 @@ Ort: notebook:The Product - Business Design</bpmn:documentation>
       <bpmndi:BPMNShape id="StoreRef_MethodikPhase6_di" bpmnElement="StoreRef_MethodikPhase6"><dc:Bounds x="9535" y="190" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="9490" y="150" width="140" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P1_di" bpmnElement="DataIn_MethodikPhase6_P1"><di:waypoint x="9545" y="240" /><di:waypoint x="9545" y="262" /><di:waypoint x="9390" y="262" /><di:waypoint x="9390" y="285" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P4_di" bpmnElement="DataIn_MethodikPhase6_P4"><di:waypoint x="9575" y="240" /><di:waypoint x="9575" y="262" /><di:waypoint x="9740" y="262" /><di:waypoint x="9740" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P5_di" bpmnElement="DataIn_MethodikPhase6_P5"><di:waypoint x="9585" y="215" /><di:waypoint x="9660" y="215" /><di:waypoint x="9660" y="135" /><di:waypoint x="10220" y="135" /><di:waypoint x="10220" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P6_di" bpmnElement="DataIn_MethodikPhase6_P6"><di:waypoint x="9535" y="215" /><di:waypoint x="9470" y="215" /><di:waypoint x="9470" y="520" /><di:waypoint x="10220" y="520" /><di:waypoint x="10220" y="490" /></bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>
