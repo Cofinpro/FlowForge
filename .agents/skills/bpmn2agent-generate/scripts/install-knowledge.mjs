@@ -18,7 +18,8 @@
 //     is not installed) are removed; a note says where the quotes are;
 //   - a file over 100 lines gets a one-line contents list from its headings.
 // Then every owner skill gets one `## Kontextquellen` section (replaced when it exists): one line per
-// store, the store name verbatim, the task labels verbatim, the reference files.
+// store, the store name verbatim, the task labels verbatim, the reference files. Existing live and
+// gedächtnis bullets of that section are kept and follow the wissen lines.
 // Idempotent: re-running rewrites the same files from knowledge/.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -112,17 +113,23 @@ for (const [owner, ids] of Object.entries(byOwner)) {
   const p = path.join(skillsDir, owner, 'SKILL.md');
   if (!fs.existsSync(p)) continue;
   let t = fs.readFileSync(p, 'utf8');
+  // live and gedächtnis bullets are written by generate step 5, not here: carry them over
+  const old = t.match(/\n## Kontextquellen\n[\s\S]*?(?=\n## |$)/)?.[0] || '';
+  const keep = old.split('\n').filter((l) => /^- \*\*.+?\*\* \((live|gedächtnis)\b/.test(l));
   t = t.replace(/\n## Kontextquellen\n[\s\S]*?(?=\n## |$)/, '').replace(/\s+$/, '\n');
   const isTop = owner === workflow;
   let sec = '\n## Kontextquellen\n\nKnowledge stores, distilled at generation time into one file per task; no tool call at run time.';
   sec += isTop
     ? ' The phase files beside them hold the gateway criteria.\n\n'
-    : ' `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.\n\n';
+    : fs.existsSync(path.join(skillsDir, owner, 'references', 'domain-knowledge.md'))
+      ? ' `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.\n\n'
+      : '\n\n';
   for (const s of stores) {
     const mine = s.readers.filter((r) => ids.includes(r));
     if (!mine.length) continue;
     sec += `- **${s.name}** (wissen): ${mine.map((r) => `"${spec.elements[r].label}" → \`\${CLAUDE_SKILL_DIR}/references/${r}.md\``).join('; ')}\n`;
   }
+  if (keep.length) sec += `\nLive and memory stores, used at run time:\n\n${keep.join('\n')}\n`;
   fs.writeFileSync(p, t + sec);
 }
 
