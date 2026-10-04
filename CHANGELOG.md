@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/Cofinpro/lanecraft/compare/v0.3.0...v0.4.0) (2026-10-04)
+
+### Features
+
+* **cost:** attribute run cost to bpmn elements, lanes and phases ([46945b9](https://github.com/Cofinpro/lanecraft/commit/46945b93d7ece96063b0842dfffffd3e5afb5c4a))
+* **cost:** benchmark repeated runs and report spread per element ([98665bc](https://github.com/Cofinpro/lanecraft/commit/98665bce370003bea894bd5639e32b792f4adce8))
+* **cost:** read usage from session transcripts with a versioned price table ([ad47cdf](https://github.com/Cofinpro/lanecraft/commit/ad47cdf3b51101159c9c48ae7e00ab9974ac8614))
+* **generate:** emit a cost ledger hook and cost map per workflow ([2269775](https://github.com/Cofinpro/lanecraft/commit/226977533af1611366ea8ed75f717eb499184ced))
+* **generate:** overlay run cost on the mapping view ([3515c84](https://github.com/Cofinpro/lanecraft/commit/3515c841e84b93d7f0da1274ec21e0efcff2cc5a))
+* **generate:** prefix agent labels with the bpmn element id ([129cfce](https://github.com/Cofinpro/lanecraft/commit/129cfce4460e77482e203521e7db636727871f08))
+
+### Bug Fixes
+
+* **cost:** warn instead of fail when cost-state lags a resumed session ([3fd7ede](https://github.com/Cofinpro/lanecraft/commit/3fd7edea80d746c3e162e3f030c8e389e333dc2e))
+
 ## [0.3.0](https://github.com/Cofinpro/lanecraft/compare/v0.2.0...v0.3.0) (2026-10-04)
 
 ### Features
