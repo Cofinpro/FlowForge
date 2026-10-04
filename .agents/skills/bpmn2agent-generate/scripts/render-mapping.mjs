@@ -669,10 +669,46 @@ function isContainerShape(pe) {
   return type === 'bpmn:SubProcess' && pe.isExpanded === true;
 }
 
+// Lane/group borders are obstacles too (an annotation straddling a lane line reads as belonging to
+// both lanes), as thin strips. Rects below are padded by 2px, edge segments by 3px.
+// Rects carry `line: true` when they stand for a line (edge, lane/group border). A new annotation
+// must not sit on any rect, but its connector may cross lines, never boxes (shapes, labels).
+function strip(x1, y1, x2, y2, pad) {
+  const x = Math.min(x1, x2) - pad;
+  const y = Math.min(y1, y2) - pad;
+  return { x, y, width: Math.abs(x1 - x2) + 2 * pad, height: Math.abs(y1 - y2) + 2 * pad, line: true };
+}
+
 function collectExistingRects(plane) {
-  return (plane.planeElement || [])
-    .filter((pe) => pe.$type === 'bpmndi:BPMNShape' && pe.bounds && !isContainerShape(pe))
-    .map((pe) => ({ x: pe.bounds.x, y: pe.bounds.y, width: pe.bounds.width, height: pe.bounds.height }));
+  const rects = [];
+  for (const pe of plane.planeElement || []) {
+    if (pe.$type === 'bpmndi:BPMNShape' && pe.bounds) {
+      const b = pe.bounds;
+      if (isContainerShape(pe)) {
+        const type = pe.bpmnElement && pe.bpmnElement.$type;
+        if (type === 'bpmn:Lane') {
+          rects.push(strip(b.x, b.y, b.x + b.width, b.y, 3), strip(b.x, b.y + b.height, b.x + b.width, b.y + b.height, 3));
+        } else if (type === 'bpmn:Group') {
+          rects.push(strip(b.x, b.y, b.x, b.y + b.height, 3), strip(b.x + b.width, b.y, b.x + b.width, b.y + b.height, 3));
+        }
+      } else {
+        rects.push({ x: b.x - 2, y: b.y - 2, width: b.width + 4, height: b.height + 4, owner: pe });
+      }
+      // External label (names of events, gateways, data objects/stores, groups).
+      if (pe.label && pe.label.bounds && !isContainerShape(pe)) {
+        const l = pe.label.bounds;
+        rects.push({ x: l.x, y: l.y, width: l.width, height: l.height, owner: pe });
+      }
+    } else if (pe.$type === 'bpmndi:BPMNEdge') {
+      const wp = pe.waypoint || [];
+      for (let i = 0; i + 1 < wp.length; i += 1) rects.push(strip(wp[i].x, wp[i].y, wp[i + 1].x, wp[i + 1].y, 3));
+      if (pe.label && pe.label.bounds) {
+        const l = pe.label.bounds;
+        rects.push({ x: l.x, y: l.y, width: l.width, height: l.height, owner: pe });
+      }
+    }
+  }
+  return rects;
 }
 
 function placeAnnotation(plane, sourceShapeDi, width, height) {
@@ -680,24 +716,30 @@ function placeAnnotation(plane, sourceShapeDi, width, height) {
   const occupied = plane.__occupiedRects;
   const b = sourceShapeDi.bounds;
 
-  const candidates = [
-    { x: b.x + b.width + 30, y: b.y - height - 10 },
-    { x: b.x + b.width + 30, y: b.y + (b.height - height) / 2 },
-    { x: b.x - width - 30, y: b.y - height - 10 },
-    { x: b.x, y: b.y - height - 40 },
-    { x: b.x + b.width + 30, y: b.y + b.height + 20 },
-  ];
+  // Rings of candidates around the element, nearest first; within a ring the order prefers the
+  // top-right, then right, left and above (reads left to right, away from the flow row).
+  const candidates = [];
+  for (const d of [24, 50, 90, 140, 200, 280, 380]) {
+    candidates.push(
+      { x: b.x + b.width + d, y: b.y - height - 10 },
+      { x: b.x + b.width + d, y: b.y + (b.height - height) / 2 },
+      { x: b.x - width - d, y: b.y - height - 10 },
+      { x: b.x + (b.width - width) / 2, y: b.y - height - d },
+      { x: b.x + (b.width - width) / 2, y: b.y + b.height + d },
+      { x: b.x + b.width + d, y: b.y + b.height + 20 },
+      { x: b.x - width - d, y: b.y + b.height + 20 },
+      { x: b.x - width - d, y: b.y + (b.height - height) / 2 },
+    );
+  }
 
-  for (const base of candidates) {
-    let { x, y } = base;
-    for (let attempt = 0; attempt < 8; attempt += 1) {
-      const rect = { x: Math.max(0, x), y: Math.max(0, y), width, height };
-      if (!occupied.some((r) => rectsOverlap(r, rect))) {
-        occupied.push(rect);
-        return rect;
-      }
-      y += height + 15;
-    }
+  for (const { x, y } of candidates) {
+    const rect = { x: Math.max(0, x), y: Math.max(0, y), width, height };
+    if (occupied.some((r) => rectsOverlap(r, rect))) continue;
+    const [a, c] = connectorPoints(b, rect);
+    const crosses = occupied.some((r) => !r.line && r.owner !== sourceShapeDi && segmentHitsRect(a, c, r));
+    if (crosses) continue;
+    occupied.push(rect);
+    return rect;
   }
 
   plane.__fallbackCount = (plane.__fallbackCount || 0) + 1;
@@ -712,7 +754,7 @@ function placeAnnotation(plane, sourceShapeDi, width, height) {
   return rect;
 }
 
-function edgeWaypoints(moddle, srcBounds, rect) {
+function connectorPoints(srcBounds, rect) {
   let sx;
   let sy;
   let tx;
@@ -730,10 +772,30 @@ function edgeWaypoints(moddle, srcBounds, rect) {
     sx = srcBounds.x + srcBounds.width / 2; sy = srcBounds.y + srcBounds.height;
     tx = rect.x + rect.width / 2; ty = rect.y;
   }
-  return [
-    moddle.create('dc:Point', { x: sx, y: sy }),
-    moddle.create('dc:Point', { x: tx, y: ty }),
-  ];
+  return [{ x: sx, y: sy }, { x: tx, y: ty }];
+}
+
+function edgeWaypoints(moddle, srcBounds, rect) {
+  return connectorPoints(srcBounds, rect).map((pt) => moddle.create('dc:Point', pt));
+}
+
+// Liang-Barsky: does the segment a-b pass through rect r?
+function segmentHitsRect(a, b, r) {
+  let t0 = 0;
+  let t1 = 1;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const p = [-dx, dx, -dy, dy];
+  const q = [a.x - r.x, r.x + r.width - a.x, a.y - r.y, r.y + r.height - a.y];
+  for (let i = 0; i < 4; i += 1) {
+    if (p[i] === 0) {
+      if (q[i] < 0) return false;
+    } else {
+      const t = q[i] / p[i];
+      if (p[i] < 0) { if (t > t1) return false; if (t > t0) t0 = t; } else { if (t < t0) return false; if (t < t1) t1 = t; }
+    }
+  }
+  return true;
 }
 
 function createAnnotationDi(moddle, plane, annotation, assoc, rect, sourceShapeDi) {
