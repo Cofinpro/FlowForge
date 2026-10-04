@@ -44,3 +44,9 @@ results, write `03_prototyp-test.md` (`status: done`).
 Only when technically unclear. Fix timebox (1–3 days), learning goal and acceptance criteria of the
 spike first. Investigate what you can in the codebase; ask the user for the rest. Write
 `03_spike-report.md`: feasible yes/no, approach, effort, remaining risk (`status: done`).
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Fachliche Klärung** (wissen): "Gegen Epic-Ziel & Fachkonzept prüfen" → `${CLAUDE_SKILL_DIR}/references/K2.md`; "Ist-/Soll-Delta beschreiben" → `${CLAUDE_SKILL_DIR}/references/K3.md`; "Technische Auswirkungen grob einschätzen" → `${CLAUDE_SKILL_DIR}/references/K4.md`

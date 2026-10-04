@@ -62,9 +62,9 @@ erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm daz
 |---|---|---|---|
 | 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in lanecraft-Notation, `knowledge/faq/` |
 | 0 | `bpmn-authoring` | – | das `.bpmn` von Hand (XSD, bpmn-moddle, bpmnlint, Layout) |
-| 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved` |
-| 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
-| 3 | `bpmn2agent-design` | Spec, Rubriken | bestätigte Spec: `kind`, Pfade, Muster, Rollen, Artefakte |
+| 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved`; Stores und Prozess-Ein-/Ausgabe als `contextSources` / `workflowIO` |
+| 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web, Wissens-Stores | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
+| 3 | `bpmn2agent-design` | Spec, Rubriken | bestätigte Spec: `kind`, Pfade, Muster, Rollen, Artefakte, aufgelöste Tools der Live-Stores |
 | 4 | `bpmn2agent-generate` | bestätigte Spec, Vorlagen | alle Dateien unter `generated/<workflow>/` |
 | 5 | `bpmn2agent-verify` | `generated/<workflow>/`, `.bpmn` | nichts; Bericht in sechs Kategorien |
 
@@ -83,6 +83,8 @@ Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinande
 | `elements` | ein Eintrag je BPMN-Element: `kind`, `lane`, `generatedPaths`, `reason`, `gate` (Kriterien, `maxLoops`), `knowledge` |
 | `artifacts` | ein Vertrag je Datenobjekt: Pfadmuster, Frontmatter-Felder, Erzeuger, Verbraucher |
 | `pattern` | gewähltes Orchestrierungsmuster, Begründung, verworfene Alternativen, ggf. Phasen |
+| `contextSources` | ein Eintrag je Data Store: `art`, `ort`, `readers`, `writers`, bei `live` die aufgelösten `tools`, bei `gedaechtnis` `memory` (siehe [Kontextquellen](#kontextquellen)) |
+| `workflowIO` | Eingabe des ganzen Prozesses (Artefakt, Pflichtfelder) und sein Endergebnis |
 | `knowledge` | Notebooks je Lane/Element, Modus (`notebook`, `websearch`, `local-docs`, `unverified`), `refs` |
 | `openQuestions` | Befunde aus der Wissensprüfung mit Antwort des Anwenders |
 
@@ -100,6 +102,8 @@ Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinande
 | Gateway, Schleife, Start/Ende | Steuerlogik im Orchestrierungsmuster, keine eigene Datei |
 | aufgeklappter Teilprozess / Call Activity | wiederverwendbarer Skill oder eigener Teil-Workflow |
 | Datenobjekt | Artefaktvertrag |
+| Data Store | Kontextquelle (`contextSources`), je nach `Art:` Wissensreferenz, Tool-Freigabe oder Gedächtnisdatei |
+| prozessweite Ein-/Ausgabe | `workflowIO`; die Eingabe wird zum `argument-hint` des Orchestrators |
 
 `pattern-rubric.md` wählt aus Signalen des Diagramms (menschliche Aufgaben, Parallelität,
 Mehrfachinstanzen, Schleifen, Urteils-Gateways) eines von vier Mustern:
@@ -119,14 +123,75 @@ Event-Teilprozesse, Kompensation) meldet analyze mit einem Umbauvorschlag
 (`bpmn2agent-analyze/references/unsupported.md`). Bleibt der Anwender dabei, wird das Element als
 bewusste Lücke `not-generated`.
 
+## Kontextquellen
+
+Kontext ist am Ende Daten. Wer einen Prozess modelliert, überlegt deshalb beim Zeichnen, **welche
+Daten jeder Schritt braucht und wo sie liegen**. Daraus baut die Pipeline Wissensreferenzen,
+Tool-Freigaben, Schreibschutz und ein Gedächtnis über Läufe hinweg. Das Detaildesign steht in
+[`docs/plans/kontextquellen/plan.md`](docs/plans/kontextquellen/plan.md).
+
+**Notation.** Jede dauerhafte Quelle ist ein Data Store (Zylinder), benannt als fachlicher
+Datenbestand („Jira-Tickets Projekt LANE“), nicht als System. Seine Dokumentation trägt zwei Zeilen:
+
+```text
+Art: wissen | live | gedächtnis
+Ort: notebook:<Titel> | mcp:<Server> | cli:<Befehl> | <URL> | datei:<Pfad> | websearch
+```
+
+Lesen oder Schreiben ergibt sich nur aus der Pfeilrichtung: Store → Task liest, Task → Store
+schreibt. Es gibt keine `Zugriff:`-Zeile. Fehlt eine Zeile oder passt die Kombination nicht, fragt
+analyze nach, die Pipeline rät nie. (`Ort:` statt `Quelle:`, weil die Task-Dokumentation `Quelle:`
+schon für die Herkunft belegt.)
+
+| Art | erlaubter Ort | geladen | wird zu |
+|---|---|---|---|
+| `wissen` | `notebook:`, URL, `datei:`, `websearch` (`mcp:` nur als Snapshot bei verbundenem Server) | bei der Generierung | `knowledge/<taskId>.md`, dann `references/` des Skills |
+| `live` | `mcp:`, `cli:` | zur Laufzeit | Tool-Allowlist + `## Kontextquellen` im Skill |
+| `live` | `notebook:` (wie `mcp:gemini-notebook-mcp`), URL, `datei:` | zur Laufzeit | Tool-Allowlist bzw. `WebFetch` / `Read` |
+| `gedächtnis` | `datei:` (Standard `.claude/memory/<workflow>/<store>.md`) | zu Laufbeginn gelesen, am Ende geschrieben | kuratierte Datei + Cap-Hook |
+
+**Weg durch die Stufen.**
+
+| Stufe | Was mit den Stores passiert |
+|---|---|
+| 0 process-design | fragt je Schritt „Was muss er wissen, und wo liegt es?“ und zeichnet die Stores samt `Art:`/`Ort:` |
+| 1 analyze | inventarisiert Stores und Prozess-Ein-/Ausgabe nach `contextSources` / `workflowIO`, fragt bei fehlenden oder unpassenden Zeilen nach |
+| 2 knowledge | extrahiert für jeden lesenden Task aus genau den Wissens-Stores seiner Pfeile, eine Datei `knowledge/<taskId>.md` mit einem Abschnitt je Store; ohne Wissens-Store gilt die alte Lane-Zuordnung |
+| 3 design | löst die Tools der Live-Stores per ToolSearch auf (lesen/schreiben nach Name oder `readOnlyHint`, unklar = schreiben), platziert sie (`tools:` je Lane-Agent beim Orchestrator-Agent, sonst `permissions.allow`) und legt alles im Mapping-Plan zur Bestätigung vor |
+| 4 generate | schreibt `## Kontextquellen`-Abschnitte, `permissions.allow`, den Write-Guard-Hook (`ask`), den Memory-Cap-Hook und das `argument-hint` des Orchestrators |
+| 5 verify | prüft in einer eigenen Kategorie, dass jeder Store im Trace steht und Leser/Schreiber zu den Pfeilen passen, und dass vor jedem Live-Schreiben ein `userTask` liegt |
+
+**Regeln.**
+
+- **Ein `userTask` vor jedem Schreiben in einen Live-Store**, auf jedem Pfad. verify meldet sonst
+  einen Fehler, design bricht ab und schickt den Anwender ins Diagramm. Ein PreToolUse-Hook
+  (`<workflow>-write-guard.mjs`) fragt zusätzlich beim Aufruf der Schreib-Tools
+  (`permissionDecision: "ask"`). Eine Phase mit Live-Schreiben ist nie ein Workflow-Skript.
+- **Gedächtnis ist ein kuratiertes Dokument** mit den Abschnitten *Bewährt*, *Vermeiden*, *Offene
+  Muster* und höchstens 150 Zeilen. Es braucht einen schreibenden `serviceTask` und einen Leser;
+  Schreiben braucht keine Freigabe. Ein PostToolUse-Hook (`<workflow>-memory-cap.mjs`) meldet
+  darüber Exit 2 mit „verdichten“.
+- **Nicht aufgelöste Tools werden nie zu Wildcards.** Ist der Server nicht verbunden, bleibt der
+  Store `tools: unresolved`, verify warnt und generate lässt die Tools weg.
+- **Rückverfolgung:** Stores tragen `kind: context-source`, Prozess-Ein-/Ausgabe `workflow-input` /
+  `workflow-output`; die Mapping-Ansicht färbt Stores rosé, ein Store ohne Eintrag ist rot. Die
+  Memory-Dateien entstehen erst im Projekt des Anwenders, nicht im Output.
+
+**Bewusst nicht in v1:** Datenzustände (`[freigegeben]`) und daraus abgeleitete Status-Hooks,
+Freigabe-Records zur Laufzeit, zusätzliche Lint-Regeln (toter Store, `serviceTask` ohne Eingang),
+Pro-Lane-Tools im Workflow-Skript-Muster und die Erzeugung einer `.mcp.json` (keine Endpunkte oder
+Zugangsdaten im Output). Das Beispiel `dark-factory` bleibt Schnappschuss. Als Prüfstand dienen die
+Fixtures unter `.agents/skills/bpmn2agent-verify/fixtures/` (`context-flow.bpmn` grün,
+`context-flow-unguarded.bpmn` muss den Schreibfehler melden).
+
 ## Ergebnis und Rückverfolgbarkeit
 
 ```text
 generated/<workflow>/
   .claude/                   # Nutzlast im Aufbau eines Projekt-.claude/ (meta.outputLayout: claude-dir)
     agents/  skills/         #   die Artefakte; skills/<x>/scripts/ nur für echte Skript-Elemente
-    hooks/*.mjs              #   nur bei kind: hook
-    settings.json            #   meldet jeden Hook an ("$CLAUDE_PROJECT_DIR"/.claude/hooks/…)
+    hooks/*.mjs              #   bei kind: hook; dazu Write-Guard und Memory-Cap bei Kontextquellen
+    settings.json            #   meldet jeden Hook an ("$CLAUDE_PROJECT_DIR"/.claude/hooks/…), permissions.allow für Lese-Tools
     workflows/<workflow>.workflow.mjs  # nur beim Muster Workflow-Skript
   workflow-spec.yaml         # die Drehscheibe
   workflow-spec.draft.yaml   # nur während design (Schritt 6a–8), Eingabe des Architekten
@@ -153,6 +218,9 @@ Skripten). `bpmn2agent-verify/scripts/verify.mjs` prüft das in beide Richtungen
    Skill-/Agent-Ordner, `knowledge.refs` oder der einen Orchestrierungsdatei zuordnen.
 5. **lint** – Hook-JSON, `node --check` für Skripte, Workflow-Skript-Syntax.
 6. **no-red** – kein `unresolved`, keine offene Frage, die Mapping-Ansicht ist gültig.
+
+Dazu kommt, nur wenn das Diagramm Stores oder Prozess-Ein-/Ausgabe hat, die Kategorie
+**context-sources** (siehe [Kontextquellen](#kontextquellen)); sonst bleibt die Ausgabe unverändert.
 
 Die Mapping-Ansicht färbt jedes Element nach Ergebnis (erzeugt, Steuerlogik, bewusst nicht erzeugt,
 rot = offen) und verlinkt es mit seiner Datei.
@@ -188,13 +256,13 @@ Keine eigenen Stufen; die Stufen-Skills rufen sie an festen Stellen auf.
 
 | Helfer | Art | Einsatz (genau eine Stelle) |
 |---|---|---|
-| `agentic-workflow-architect` | Agent, nur lesend | prüft den Spec-Entwurf (`workflow-spec.draft.yaml`) vor dem Mapping-Plan; design 6a, immer |
+| `agentic-workflow-architect` | Agent, nur lesend | prüft den Spec-Entwurf (`workflow-spec.draft.yaml`) vor dem Mapping-Plan; design 6a, immer; bei Stores auch ungeschütztes Schreiben, zu breite Tool-Listen, Gedächtnis ohne Cap |
 | `orchestration-design` | Skill | acht Prüffragen zur Orchestrierung; Maßstab des Architekten |
 | `agentic-kb-librarian` | Agent | Designfragen, die die Referenzen nicht beantworten; fragt das Notebook und ergänzt das FAQ; design 6a |
 | `agentic-workflow-kb` | Skill | belegte Antworten auf Designfragen (FAQ + Referenzen); überall direkt lesbar |
 | `agent-authoring` | Skill | Rolle schneiden (design 5), Agenten schreiben (generate) |
 | `skill-authoring` | Skill | Skills schreiben (generate 5) |
-| `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11 |
+| `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11; bei Stores auch Tool-Listen, Cap und Write-Guard |
 | `trim-the-fat` | Skill, nur auf Anforderung | kürzt Skills, ohne ihr Verhalten zu ändern; generate 11, nur wenn der Anwender zustimmt |
 
 Befunde der Prüf-Agenten tragen ein Ziel: `design` (in der Spec lösbar), `generate` (Formulierung,
@@ -218,8 +286,11 @@ die Struktur des Diagramms).
 
 - `examples/dark-factory/` – vollständiger Lauf „Von der Produktvision zu User Stories“ als
   Schnappschuss. `generated/` wird nur über `tools/dark-factory-gen/regenerate.sh` erneuert.
-- `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau;
+- `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau,
+  mit Wissens-Stores und dem Product Backlog als Live-Store (`cli:gh`) samt Freigaben und Write-Guard;
   die Notebook-Frage dahinter liegt in `notebook-faq/`.
+- `examples/lanecraft/` – dieser Ablauf selbst als BPMN in lanecraft-Notation (sechs Lanes, neun
+  Stores); nur gezeichnet, noch nicht durch die Pipeline gelaufen.
 
 ## Wo ändere ich was?
 
@@ -228,6 +299,7 @@ die Struktur des Diagramms).
 | die Übersetzung eines BPMN-Elements ändern | `bpmn2agent-design/references/mapping-rubric.md` |
 | die Musterwahl ändern | `bpmn2agent-design/references/pattern-rubric.md` |
 | die Notation neu entworfener Prozesse ändern | `bpmn-process-design/SKILL.md` §4; muss zu `mapping-rubric.md` passen |
+| Stores (Art × Ort, Tool-Auflösung, Schreibschutz) ändern | `mapping-rubric.md` („Data stores → context sources“), dann Schema, analyze, design, generate-Vorlagen und verify nachziehen; Design in `docs/plans/kontextquellen/plan.md` |
 | ein Feld in der Spec ergänzen | `workflow-spec.schema.yaml`, dann analyze/design/generate/verify nachziehen |
 | Aussehen erzeugter Agenten/Skills ändern | `bpmn2agent-generate/assets/templates/` |
 | eine Prüfung ergänzen | `bpmn2agent-verify/scripts/verify.mjs` |

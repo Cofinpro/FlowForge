@@ -4,9 +4,8 @@
 ${CLAUDE_SKILL_DIR}/scripts/validate.sh <file>.bpmn
 ```
 
-Runs the three stages below in order, stops at the first failing one (a structural XSD failure makes
-later output noise) and exits non-zero. Read the script for the exact commands; tooling is cached in
-`${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`.
+Runs the three stages below in order, stops at the first failing one and exits non-zero. Exact
+commands are in the script; tooling is cached in `${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`.
 
 ## Stages
 
@@ -21,22 +20,22 @@ later output noise) and exits non-zero. Read the script for the exact commands; 
    `no-disconnected`, `no-implicit-start`/`-end`, `no-implicit-split`, `single-blank-start-event`,
    `sub-process-blank-start-event`, `end-event-required`/`start-event-required` (per scope — every
    sub-process needs its own), `label-required`, `fake-join`, `superfluous-gateway`,
-   `no-overlapping-elements` (the last three are warnings, which still fail at zero tolerance).
+   `no-overlapping-elements` (the last three are warnings; they still fail at zero tolerance).
    Misses: `standard-size` (not in `recommended`) and anything visual.
 
-Then render (SKILL step 6) — the only check for how the planes actually look.
+Then render (SKILL step 6): the only check of how the planes look.
 
 ## Typical errors and fixes
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| xmllint: element X not expected | wrong child order | check `xml-and-di.md`'s element order (flow elements before artifacts) |
-| xmllint: duplicate ID | copy-pasted a block without renaming IDs | rename per the `<ParentTaskId>_<suffix>` convention |
+| xmllint: element X not expected | wrong child order | follow `xml-and-di.md`'s element order (flow elements before artifacts) |
+| xmllint: duplicate ID | copy-pasted block with unchanged IDs | rename per the `<ParentTaskId>_<suffix>` convention |
 | xmllint: `xmlParseEntityRef: no name` | unescaped `&` in a name/label | escape it as `&amp;` |
-| moddle: unresolved reference | a flow/association points at an ID that doesn't exist yet, or a rename missed a reference | grep the old ID across the file — `sourceRef`, `targetRef`, `bpmnElement`, `dataObjectRef` |
-| bpmnlint `no-bpmndi` | added a semantic element without its DI shape/edge | every element added to `process`/`subProcess` needs a matching `BPMNShape`/`BPMNEdge` in its plane |
-| bpmnlint `sub-process-blank-start-event` / `single-blank-start-event` | refined a task into a subProcess but forgot the inner start event, or added a second one | exactly one blank `startEvent` per sub-process/process scope |
-| bpmnlint `no-implicit-start`/`-end` | a node has no incoming or no outgoing flow and isn't a start/end event | either it's missing a flow, or it should be a start/end event |
-| bpmnlint `label-required` | a new task, event, forking gateway or conditional flow has no `name` | name it per `modelling-rules.md`'s naming convention |
-| bpmnlint `fake-join` (warn) | a loop-back or merge was wired as two incoming flows into an ordinary task | insert an explicit XOR merge gateway before it |
-| Renders but shapes overlap | coordinate arithmetic mistake | recheck against `layout.md`'s grid, especially after inserting a new element mid-row (every shape after it needs its x shifted) |
+| moddle: unresolved reference | a flow/association points at a missing ID, or a rename missed a reference | grep the old ID across the file — `sourceRef`, `targetRef`, `bpmnElement`, `dataObjectRef` |
+| bpmnlint `no-bpmndi` | semantic element without its DI shape/edge | add the matching `BPMNShape`/`BPMNEdge` in its plane |
+| bpmnlint `sub-process-blank-start-event` / `single-blank-start-event` | missing inner start event after refining a task, or a second one | exactly one blank `startEvent` per sub-process/process scope |
+| bpmnlint `no-implicit-start`/`-end` | a non-start/end node has no incoming or no outgoing flow | add the missing flow, or make it a start/end event |
+| bpmnlint `label-required` | task, event, forking gateway or conditional flow without `name` | name it per `modelling-rules.md` |
+| bpmnlint `fake-join` (warn) | loop-back or merge wired as two incoming flows into an ordinary task | insert an explicit XOR merge gateway before it |
+| Renders but shapes overlap | coordinate slip | recheck against `layout.md`'s grid; after inserting an element mid-row, shift every shape after it |

@@ -17,8 +17,8 @@ spec, traceability, the knowledge layer and the helper skills/agents fit togethe
 - Notebook answers are kept, not thrown away: record every `notebook_query` result with
   `.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add`. Agentic-design questions go to
   `.agents/skills/agentic-workflow-kb/faq/`; check its `README.md` before asking the notebook again.
-- The `bpmn2agent-*` skills write relative to the cwd into `generated/<workflow>/`. For the example, run
-  them (and `bpmn-authoring` on its BPMN) from `examples/dark-factory/`.
+- The `bpmn2agent-*` skills write relative to the cwd into `generated/<workflow>/`. For an example, run
+  them (and `bpmn-authoring` on its BPMN) from that example's folder, e.g. `examples/dark-factory/`.
 - Never edit `examples/dark-factory/generated/` by hand. Edit the generator sources in
   `examples/dark-factory/tools/dark-factory-gen/` and run `regenerate.sh`; it must end with
   `RESULT: PASS`, `no reference problems`, the three smoke lines and `mapping view ok`.

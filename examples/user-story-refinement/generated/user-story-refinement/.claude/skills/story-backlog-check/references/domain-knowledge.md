@@ -36,7 +36,7 @@ back to refinement (loop cap 3); duplicate → merge; otherwise continue.
   link to the existing story; a cluster of overlaps becomes one header story with the others as
   bullets and a combined estimate [backlog-plausibilitaet-1: 17, 18, 19, 20, 21]. The new card moves
   to a rejected/trash state with the reason recorded [backlog-plausibilitaet-1: 28, 29].
-- **"Betroffene Stories zur Anpassung markieren"** — impact analysis over the traceability links;
+- **"Anpassungen an betroffenen Stories vorschlagen"** (applied after approval by "Betroffene Stories im Backlog markieren") — impact analysis over the traceability links;
   affected stories get a note and a new version, superseded ones a recorded reason
   [backlog-plausibilitaet-1: 23, 24, 25, 26, 27, 28, 29]. Time-sensitive stories get a "best before"
   date [backlog-plausibilitaet-1: 31, 32].

@@ -25,7 +25,9 @@ Generated {{date}} from `generated/{{workflow}}/workflow-spec.yaml`
   - "**<r> red element(s), <q> open question(s) — resolve before approval.** Details: "Red — open /
     unresolved" and "Open questions carried forward" below."
   Then one line "<g> element(s) deliberately not generated (grey) — not an error." and one line
-  linking the viewer: "Interactive, read-only view of the same mapping: [`index.html`](index.html)."}}
+  linking the viewer: "Interactive, read-only view of the same mapping: [`index.html`](index.html)."
+  When a store has `tools: unresolved`, add: "<u> store(s) without resolved tools — no tool access and no
+  write guard emitted for them; see "Context sources"."}}
 
 ## Pattern
 
@@ -51,6 +53,7 @@ Generated {{date}} from `generated/{{workflow}}/workflow-spec.yaml`
 | Teal | `orchestrator` | Gateways, loop back-edges, multi-instance markers — no file of its own. |
 | Amber | `human-checkpoint` | `userTask`/`manualTask`: a person decides here. |
 | Brown | `artifact-contract` | A data object with a path/frontmatter contract. |
+| Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. {{Delete this row when the spec has neither.}} |
 | **Grey** | `not-generated` | Deliberately not generated; reason shown in the table below. Not an error. |
 | **Red** | `unresolved` | Unmapped or still an open question; blocks `bpmn2agent-verify`'s "no red in the map" check. |
 
@@ -74,7 +77,9 @@ colours" section — this table is the textual mirror of what `mapping/workflow-
     not-generated/unresolved too.
   - "Notes": for not-generated/unresolved, the element's `reason` verbatim (this is the grey/red
     annotation text). For a gate, its kind + maxLoops. For a hook, its event and matcher as
-    registered in `.claude/settings.json`. Otherwise blank.
+    registered in `.claude/settings.json`. For a `context-source`: Art and Ort, e.g. "live · mcp:atlassian"
+    (details under "Context sources"); for `workflow-input`/`workflow-output`: the artifact id.
+    Otherwise blank.
 }}
 | {{label}} | {{bpmnType}} | {{laneLabel}} | {{kind}} | {{generatedPaths joined}} | {{reason / gate / pairing note}} |
 
@@ -90,6 +95,40 @@ colours" section — this table is the textual mirror of what `mapping/workflow-
   element resolved to a concrete kind." if empty. A non-empty section here means
   bpmn2agent-verify's "no red in the map" check will fail until these are resolved (back to
   bpmn2agent-design, or the diagram itself per its step 2 triage).}}
+
+## Context sources
+
+{{Only when the spec has `contextSources` or `workflowIO`; delete the section otherwise. One
+  subsection per `contextSources.<id>`, in spec order, the store name verbatim as the heading:}}
+
+### {{contextSources.<id>.name}}
+
+- **Art / Ort:** {{art}} / {{ort.type}}{{:ort.ref}}
+- **Readers:** {{reader task labels, verbatim}} · **Writers:** {{writer task labels, verbatim, or "none"}}
+- **Tools (live):** read `{{tools.read}}` · write `{{tools.write}}` — or "unresolved: no tools emitted"
+  (verify warns; generate never emits a wildcard).
+- **Placement:** {{agent `tools:` of `<agentName>` (orchestrator-agent lanes) | `.claude/settings.json`
+  → `permissions.allow`. For the second: "Lesezugriff nicht pro Rolle getrennt" — the read tools are
+  allowed for every role; write tools are never pre-approved.}}
+- **Write guard:** {{approval step label(s) before the write + "PreToolUse hook asks at the call" |
+  "no writers" | "skipped: tools unresolved"}}
+- **Memory (gedächtnis):** {{memory.path}}, cap {{maxLines}} lines, cap hook {{path}} | omit
+- **Knowledge (wissen):** {{knowledge file(s) per reading task, e.g. `knowledge/<taskId>.md`}} | omit
+
+{{Then one line each for `workflowIO.input` ("Process input: {{artifact}}, required: {{fields}} — becomes
+  the argument-hint / Input section of {{top-level file}}") and `workflowIO.output` ("Process output:
+  {{artifact}} — contract for the end result"), when set.}}
+
+### Context hooks
+
+{{Hooks that no element's `generatedPaths` claims, by path, with event, matcher as registered in
+  `.claude/settings.json`, and the store elements their `bpmn:` header names. "None." if the spec has
+  no live store with write tools and no memory store. A skipped guard is listed here with the reason.}}
+
+| Hook | Event / matcher | Stores | Purpose |
+|---|---|---|---|
+| `{{.claude/hooks/<workflow>-write-guard.mjs}}` | PreToolUse / `{{write tools}}` | {{store names}} | Asks before writing into a live store. |
+| `{{.claude/hooks/<workflow>-memory-cap.mjs}}` | PostToolUse / `Write\|Edit\|MultiEdit` | {{store names}} | Exit 2 above the line cap. |
 
 ## Roles
 

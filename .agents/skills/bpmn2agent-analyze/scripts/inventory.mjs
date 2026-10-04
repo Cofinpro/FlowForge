@@ -4,9 +4,12 @@
 // Parses <file.bpmn> with bpmn-moddle and prints a JSON inventory to stdout: every
 // process/subProcess scope, every lane, every flow node (with lane/scope/documentation/
 // incoming/outgoing/multi-instance/boundary-events/eventDefinitions), every sequence flow,
-// every data object/reference + data association, every text annotation + its associated
-// element, computed pattern-rubric signals (per scope and aggregated), and a `findings`
-// array of things bpmn2agent-analyze's SKILL.md should ask the business user about.
+// every data object/reference + data association, every data store reference (`dataStores[]`:
+// parsed Art:/Ort: documentation, readers/writers from the arrow direction), the process-wide
+// input/output (`processIO`: real ioSpecification plus the data-object convention), every text
+// annotation + its associated element, computed pattern-rubric signals (per scope and
+// aggregated), and a `findings` array of things bpmn2agent-analyze's SKILL.md should ask the
+// business user about.
 //
 // bpmn-moddle is resolved via createRequire against <cacheDir>/package.json, same reasoning
 // as bpmn-authoring/scripts/check-moddle.mjs: Node's ESM resolver won't find a package
@@ -93,11 +96,42 @@ function extractCollectionHint(el, textAnnotationsByAssociatedId) {
   return null;
 }
 
+// --- data stores: `Art:` / `Ort:` lines in the store reference's <documentation> ---
+// Art x Ort matrix, same as references/conventions.md and mapping-rubric.md.
+const ART_ORT_MATRIX = {
+  wissen: new Set(['notebook', 'url', 'datei', 'websearch', 'mcp']),
+  live: new Set(['mcp', 'cli', 'notebook', 'url', 'datei']),
+  gedaechtnis: new Set(['datei']),
+};
+const normaliseArt = (raw) =>
+  raw.trim().toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss');
+function parseOrt(raw) {
+  const v = raw.trim();
+  if (/^https?:\/\/\S+$/i.test(v)) return { type: 'url', ref: v };
+  if (/^websearch$/i.test(v)) return { type: 'websearch' };
+  const m = /^(notebook|mcp|cli|datei):\s*(\S.*)$/i.exec(v);
+  return m ? { type: m[1].toLowerCase(), ref: m[2].trim() } : null;
+}
+function parseStoreDoc(doc) {
+  const artRaw = /^\s*Art:[ \t]*(.*?)\s*$/im.exec(doc || '')?.[1] ?? null;
+  const ortRaw = /^\s*Ort:[ \t]*(.*?)\s*$/im.exec(doc || '')?.[1] ?? null;
+  const art = artRaw ? (normaliseArt(artRaw) in ART_ORT_MATRIX ? normaliseArt(artRaw) : null) : null;
+  const ort = ortRaw ? parseOrt(ortRaw) : null;
+  const problems = [];
+  if (!artRaw) problems.push('missing-art');
+  else if (!art) problems.push('unparseable-art');
+  if (!ortRaw) problems.push('missing-ort');
+  else if (!ort) problems.push('unparseable-ort');
+  if (art && ort && !ART_ORT_MATRIX[art].has(ort.type)) problems.push('invalid-combination');
+  return { artRaw, ortRaw, art, ort, problems };
+}
+
 const scopes = [];
 const lanes = [];
 const flowNodes = [];
 const sequenceFlows = [];
 const dataObjects = [];
+const dataStores = [];
 const textAnnotations = [];
 const associationsRaw = []; // bpmn:Association elements, resolved into textAnnotations after the walk
 const findings = [];
@@ -207,6 +241,21 @@ function walkScope(scopeEl, scopeId, parentScopeId, scopeType) {
         name: el.name || null,
         scopeId,
         dataObjectRef: el.dataObjectRef?.id || null,
+      });
+      continue;
+    }
+    if (el.$type === 'bpmn:DataStoreReference') {
+      // The visible node carries the documentation; the root bpmn:DataStore is unnamed (like
+      // DataObject vs. DataObjectReference), so Art:/Ort: are read from the reference.
+      dataStores.push({
+        id: el.id,
+        name: el.name || null,
+        scopeId,
+        dataStoreRef: el.dataStoreRef?.id || null,
+        documentation: docText(el),
+        ...parseStoreDoc(docText(el)),
+        readers: [],
+        writers: [],
       });
       continue;
     }
@@ -363,6 +412,103 @@ function collectDataAssociations(scopeEl) {
 }
 for (const proc of rootProcesses) collectDataAssociations(proc);
 
+// --- data stores: readers/writers from the arrow direction (store -> task = read, task ->
+// store = write; no access line), then validity findings. Associations hanging on a subProcess
+// element count like those on a task. ---
+const flowNodeById = new Map(flowNodes.map((n) => [n.id, n]));
+const dataStoreById = new Map(dataStores.map((d) => [d.id, d]));
+const addUnique = (arr, id) => { if (!arr.includes(id)) arr.push(id); };
+for (const a of dataObjects) {
+  if (a.kind === 'dataInputAssociation') {
+    for (const ref of a.dataRefIds) if (dataStoreById.has(ref)) addUnique(dataStoreById.get(ref).readers, a.activityId);
+  } else if (a.kind === 'dataOutputAssociation') {
+    for (const ref of a.dataRefIds) if (dataStoreById.has(ref)) addUnique(dataStoreById.get(ref).writers, a.activityId);
+  }
+}
+const storeLabel = (d) => `${d.id}${d.name ? ` ("${d.name}")` : ''}`;
+for (const d of dataStores) {
+  const doc = d.problems.filter((p) => p !== 'invalid-combination');
+  if (doc.length) {
+    pushFinding(
+      'store-missing-art-ort', 'warning',
+      `Data store ${storeLabel(d)}: ${doc.map((p) => `${p.startsWith('missing') ? 'missing' : 'unreadable'} ${p.endsWith('art') ? 'Art:' : 'Ort:'} line`).join(', ')} in its documentation.`,
+      { elementId: d.id, problems: doc, artRaw: d.artRaw, ortRaw: d.ortRaw }
+    );
+  }
+  if (d.problems.includes('invalid-combination')) {
+    pushFinding(
+      'store-invalid-art-ort', 'warning',
+      `Data store ${storeLabel(d)}: Art "${d.art}" does not work with Ort type "${d.ort.type}" (allowed Ort for ${d.art}: ${[...ART_ORT_MATRIX[d.art]].join(', ')}).`,
+      { elementId: d.id, art: d.art, ort: d.ort, allowedOrt: [...ART_ORT_MATRIX[d.art]] }
+    );
+  }
+  if (!d.readers.length && !d.writers.length) {
+    pushFinding(
+      'store-without-associations', 'warning',
+      `Data store ${storeLabel(d)} has no data association at all: no task reads from or writes to it.`,
+      { elementId: d.id }
+    );
+  } else if (d.art === 'gedaechtnis') {
+    const serviceWriters = d.writers.filter((id) => flowNodeById.get(id)?.bpmnType === 'bpmn:ServiceTask');
+    const missing = [];
+    if (!serviceWriters.length) missing.push('writer');
+    if (!d.readers.length) missing.push('reader');
+    if (missing.length) {
+      pushFinding(
+        'memory-store-incomplete', 'warning',
+        `Memory store ${storeLabel(d)} (Art: gedächtnis) has no ${missing.join(' and no ')}: it needs at least one writing serviceTask and one reader.${missing.includes('writer') && d.writers.length ? ` Its current writer(s) ${d.writers.join(', ')} are not serviceTasks.` : ''}`,
+        { elementId: d.id, missing, readers: d.readers, writers: d.writers }
+      );
+    }
+  }
+}
+
+// --- process-wide input/output: a real ioSpecification dataInput/dataOutput on the workflow's
+// process, or the data-object convention (input = reference nobody produces that some activity
+// reads; output = reference that is produced but nobody reads; both only when the process draws
+// at least one data-object read). Only top-level workflow processes count (not sub-processes,
+// not processes some callActivity calls). ---
+const calledProcessIds = new Set(flowNodes.map((n) => n.calledElement).filter(Boolean));
+const ioScopes = rootProcesses.filter((p) => !calledProcessIds.has(p.id));
+const processIO = { inputs: [], outputs: [] };
+for (const proc of ioScopes) {
+  const io = proc.ioSpecification;
+  for (const di of io?.dataInputs || []) {
+    const readers = [];
+    for (const a of dataObjects) {
+      if (a.kind === 'dataInputAssociation' && a.dataRefIds.includes(di.id)) addUnique(readers, a.activityId);
+    }
+    processIO.inputs.push({ id: di.id, name: di.name || null, source: 'ioSpecification', scopeId: proc.id, readers });
+  }
+  for (const dout of io?.dataOutputs || []) {
+    const writers = [];
+    for (const a of dataObjects) {
+      if (a.kind === 'dataOutputAssociation' && a.dataRefIds.includes(dout.id)) addUnique(writers, a.activityId);
+    }
+    processIO.outputs.push({ id: dout.id, name: dout.name || null, source: 'ioSpecification', scopeId: proc.id, writers });
+  }
+  // "Nobody reads / nobody produces" only says something when the diagram models reads at all;
+  // a diagram that draws only output associations (reads sit in the task text) has no signal.
+  const objectRefs = dataObjects.filter((d) => d.kind === 'dataObjectReference' && d.scopeId === proc.id);
+  const refIds = new Set(objectRefs.map((r) => r.id));
+  const readsModelled = dataObjects.some(
+    (a) => a.kind === 'dataInputAssociation' && a.dataRefIds.some((id) => refIds.has(id))
+  );
+  for (const ref of readsModelled ? objectRefs : []) {
+    const readers = [];
+    const writers = [];
+    for (const a of dataObjects) {
+      if (a.kind === 'dataInputAssociation' && a.dataRefIds.includes(ref.id)) addUnique(readers, a.activityId);
+      if (a.kind === 'dataOutputAssociation' && a.dataRefIds.includes(ref.id)) addUnique(writers, a.activityId);
+    }
+    if (!writers.length && readers.length) {
+      processIO.inputs.push({ id: ref.id, name: ref.name, source: 'convention', scopeId: proc.id, readers });
+    } else if (writers.length && !readers.length) {
+      processIO.outputs.push({ id: ref.id, name: ref.name, source: 'convention', scopeId: proc.id, writers });
+    }
+  }
+}
+
 // --- signals per scope (pattern-rubric.md), computed from THIS scope's own flow nodes/
 // flows only (nested sub-process scopes get their own signals, computed independently, so
 // bpmn2agent-design can recurse per callActivity/subProcess as the rubric requires) ---
@@ -462,6 +608,8 @@ const inventory = {
   flowNodes,
   sequenceFlows,
   dataObjects,
+  dataStores,
+  processIO,
   textAnnotations,
   signals: aggregate,
   findings,

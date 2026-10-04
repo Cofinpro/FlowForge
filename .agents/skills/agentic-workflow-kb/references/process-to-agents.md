@@ -15,6 +15,7 @@ Distilled from FAQ `process-to-agents-1`, with the element table from
 | Parallel branches | parallel subagents, merged downstream | [process-to-agents-1: 18–21] |
 | Human approval | HITL checkpoint (pause/resume, edit arguments) | [process-to-agents-1: 22–25] |
 | Data artifact | typed state, memory store or persistent file | [process-to-agents-1: 12, 21, 26, 27, 28] |
+| Data store (cylinder) | context source: knowledge reference, live tool access or memory file, by `Art:` | repo design decision, not notebook-cited |
 
 ## Where each part belongs
 
@@ -53,6 +54,14 @@ extraction, classification and routine calls. A small model can propose, a stron
 - Missing domain-expert review of real failures [process-to-agents-1: 79, 80, 81].
 
 ## For bpmn2agent
+
+**Data stores (repo design decision, from `docs/plans/kontextquellen/plan.md`; not notebook-cited).**
+A data store is a context source with an `Art:` (`wissen` → cited reference loaded at generation,
+`live` → tool allowlist read at run time, `gedächtnis` → curated memory file with a line cap) and
+an `Ort:`; the arrow direction alone says read or write. Every write into a live store needs a
+`userTask` before it plus an `ask` hook behind it, and a phase with such a write is never a
+workflow script. Ask during design: does each task have a store for what it must know, and does
+each store have a reader?
 
 This confirms the pipeline's defaults (lane → agent, service task → skill or checklist item,
 script task → script, gateway → orchestrator logic, user task → checkpoint, data object →

@@ -33,3 +33,9 @@ Only for "Technisches Risiko offen". Same rules as the spike in `story-clarifica
 learning goal, acceptance criteria first; ask the user for what you can't investigate. Write the
 result to `03_spike-report.md`: create it if absent (`version: 1`), otherwise add a section and
 bump `version`; `status: done`.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Definition of Ready** (wissen): "Definition of Ready prüfen" → `${CLAUDE_SKILL_DIR}/references/E1.md`; "Auf Fake- & Waisen-Story prüfen" → `${CLAUDE_SKILL_DIR}/references/E3.md`

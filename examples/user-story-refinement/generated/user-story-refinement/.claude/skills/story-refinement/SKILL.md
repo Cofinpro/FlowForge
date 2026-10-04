@@ -45,3 +45,9 @@ spike first, core vs. enhancement), never by architectural layer. For each part 
   `status: draft`.
 
 List the part stories in the order they should run. The calling skill closes the parent.
+
+## Kontextquellen
+
+Knowledge stores, distilled at generation time into one file per task; no tool call at run time. `${CLAUDE_SKILL_DIR}/references/domain-knowledge.md` keeps the phase-level criteria.
+
+- **Product-Methodik: Refinement** (wissen): "Wert & Fachregeln erläutern (Was)" → `${CLAUDE_SKILL_DIR}/references/D2a.md`; "Akzeptanzkriterien in Given-When-Then formulieren" → `${CLAUDE_SKILL_DIR}/references/D3.md`; "Beispieltabellen ergänzen (Specification by Example)" → `${CLAUDE_SKILL_DIR}/references/D4.md`; "Story vertikal schneiden (Splitting-Muster)" → `${CLAUDE_SKILL_DIR}/references/D6.md`

@@ -53,6 +53,15 @@ wrong falls back to one sequential agent with shared context
 | Role confusion from overloaded prompts | single responsibility, third-person descriptions for routing [multi-agent-handoffs-1: 50, 77–82] |
 | Cost explosion | zero-token script orchestrators, small models for routine steps, prompt caching, concurrency caps [multi-agent-handoffs-1: 15, 19, 44, 83–88] |
 
+## Context sources at handoff (repo design decision)
+
+Not notebook-cited; from `docs/plans/kontextquellen/plan.md`. Artifacts carry one run's handoff;
+data stores carry what outlives a handoff or a run. A role reads the stores it needs (knowledge
+reference, live tool, memory file) instead of receiving them pasted in the handoff, and its tool
+list names only those stores' tools. Where lanes are not agents, the read tools are shared and the
+plan says so. Memory is a curated file with a line cap that the writing step rewrites, never an
+append-only log.
+
 ## For bpmn2agent
 
 BPMN data objects become `artifacts.<id>` contracts (path + frontmatter) — this is the

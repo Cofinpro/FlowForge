@@ -11,9 +11,9 @@ bpmn:
 # BPMN → Agent Verification
 
 Input: a `generated/<workflow>/` that `bpmn2agent-generate` wrote (fully, partly, or before the
-`.bpmn` changed). This skill never edits anything; it says what is wrong, where the fix belongs, and
-re-checks after the fix. Ask every question via `AskUserQuestion` with options and a
-recommendation, in the user's language.
+`.bpmn` changed). Never edit anything: say what is wrong and where the fix belongs, and re-check
+after the fix. Ask every question via `AskUserQuestion` with options and a recommendation, in the
+user's language.
 
 ## 1. Run `verify.mjs`
 
@@ -23,9 +23,9 @@ node ${CLAUDE_SKILL_DIR}/scripts/verify.mjs \
   generated/<workflow>
 ```
 
-Run it from the directory that contains `generated/` (the cwd the pipeline started in); it
-resolves `spec.meta.sourceBpmn.path` against the cwd. Exit `0` → step 4. Otherwise at least one
-category has a `FAIL`; continue to step 2. `--json` replaces the text report with structured output.
+Run it from the directory that contains `generated/` (the pipeline's starting cwd); it resolves
+`spec.meta.sourceBpmn.path` against the cwd. Exit `0` → step 4; otherwise (some category has a
+`FAIL`) → step 2. `--json` replaces the text report with structured output.
 
 Categories, in run order:
 
@@ -34,13 +34,32 @@ Categories, in run order:
 3. **element-to-artifact** — every element/lane has a spec entry; every `generatedPaths` entry exists.
 4. **artifact-to-element** — every file has a correct `bpmn:` header and is claimed by an element,
    bundled in a recorded skill/agent directory, listed in `knowledge.refs`, or is the one
-   orchestration file for `pattern.chosen`.
+   orchestration file for `pattern.chosen`, or a context hook
+   (`.claude/hooks/<workflow>-write-guard.mjs` / `-memory-cap.mjs`) that a store in `contextSources`
+   needs: a live store with write tools, a memory store.
 5. **lint** — scripts pass `node --check`; Workflow script `meta` is a literal and its body parses;
    `.claude/settings.json` registers exactly the `.claude/hooks/` scripts; installables sit inside
    `.claude/`, with no npm imports or `package.json` there (legacy layout: each hook
    `*.settings.json` parses and pairs with its script).
 6. **no-red** — no `kind: unresolved`, no `openQuestions[]` with `answer: null`, and
    `mapping/workflow-mapped.bpmn` (if rendered) validates.
+
+Plus **context-sources**, run after element-to-artifact only when the diagram has data stores or a
+process `dataInput`/`dataOutput`, or the spec has `contextSources`/`workflowIO` (otherwise absent,
+output unchanged). Each finding ends with `[fix in bpmn2agent-<route>]`, and step 2 routes it
+there:
+
+- every store and every real (`ioSpecification`) process input/output has an `elements.<id>` entry
+  (`context-source` / `workflow-input` / `workflow-output`) and a `contextSources` entry /
+  `workflowIO` → design. A data object that only looks like an input or output by convention needs
+  one only if the user picked it; the rest stay plain artifacts.
+- `contextSources.*.readers`/`writers` (and `art`, `ort.type`) match the diagram's arrows → analyze (stale spec)
+- **write guard:** a task writing into a `live` store needs a `userTask` on **every** path from the
+  start (loops and sub-processes included: a loop's first pass must be guarded too) → analyze
+  (draw an approval step in the diagram)
+- a live-store write inside a `workflow-script` phase (`pattern.chosen` or a `mixed` phase) → design
+- `tools: unresolved` → design (warning)
+- a `gedaechtnis` store without writer or reader in the spec → analyze
 
 ## 2. Translate and route
 
@@ -59,13 +78,13 @@ mapping for just this part?"*
 Surface `WARN` findings too (e.g. a spec element with no current BPMN node usually means the
 `.bpmn` was edited without re-running analyze); they don't fail the run.
 
-Generate-routed findings: hand them to `bpmn2agent-generate` without asking and report afterwards.
-Design- and analyze-routed findings: ask once, one batched `AskUserQuestion` per verify pass.
+Hand generate-routed findings to `bpmn2agent-generate` without asking and report afterwards. For
+design- and analyze-routed findings, ask once: one batched `AskUserQuestion` per verify pass.
 
 ## 3. Loop
 
-After the upstream skill reports its fix, re-run step 1 in full — a spec change can ripple into
-files not yet regenerated. Repeat until exit `0`, at most 3 verify rounds per pipeline run. At the
+After the upstream skill reports its fix, re-run step 1 in full (a spec change can ripple into
+files not yet regenerated). Repeat until exit `0`, at most 3 verify rounds per pipeline run. At the
 cap, or when the same finding (category + file) returns unchanged twice, stop and ask: send the
 remaining findings to design, change the diagram (loop A), or accept a handoff marked
 **unverified** with the findings listed. Never report success at the cap.
@@ -81,3 +100,5 @@ and `mapping/report.md` (plus `mapping/index.html` if rendered).
 - `scripts/verify.mjs <cacheDir> <generated/<workflow>> [--json]` — read-only, exit `0` iff no
   `fail` finding. Read its header comment before changing it.
 - `fixtures/approval-flow.bpmn` — smoke-test diagram.
+- `fixtures/context-flow.bpmn` — one store per Art, a guarded live write, process input/output;
+  `context-flow-unguarded.bpmn` is the same without the approval step (verify must report the write guard).

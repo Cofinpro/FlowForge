@@ -27,6 +27,14 @@
 #   sdlc:collection             -> elements.<id>.collection
 #   sdlc:bundle                 -> artifacts.<id>.bundledIn (informational, not a separate section)
 #
+# Beyond the sdlc: vocabulary, two optional top-level sections carry context the diagram draws as
+# data stores and process-wide input/output (plan: docs/plans/kontextquellen/plan.md):
+#
+#   dataStoreReference        -> contextSources.<id> (+ elements.<storeRefId>.kind: context-source)
+#   ioSpecification dataInput/dataOutput (or the "no producer" / "no reader" data-object
+#                               convention) -> workflowIO.{input,output}
+#                               (+ elements.<id>.kind: workflow-input | workflow-output)
+#
 $schema: "http://json-schema.org/draft-07/schema#"
 $id: "https://ai-sdlc.internal/schemas/bpmn2agent/workflow-spec.schema.yaml"
 title: workflow-spec
@@ -63,6 +71,18 @@ properties:
     type: object
     additionalProperties:
       $ref: "#/definitions/artifact"
+  contextSources:
+    description: >
+      One entry per durable data store the diagram draws (bpmn:dataStoreReference): knowledge to
+      ground steps (wissen), a live system read/written at run time (live), or a curated memory file
+      carried across runs (gedaechtnis). Map key is a kebab-case store id. Deliberately separate from
+      `artifacts`: artifacts live for one run, stores outlive it and have different fields. Absent in
+      specs of diagrams without data stores.
+    type: object
+    additionalProperties:
+      $ref: "#/definitions/contextSource"
+  workflowIO:
+    $ref: "#/definitions/workflowIO"
   pattern:
     $ref: "#/definitions/pattern"
   knowledge:
@@ -155,7 +175,7 @@ definitions:
         description: >
           BPMN element type, e.g. task/userTask/manualTask/serviceTask/scriptTask/businessRuleTask/
           callActivity/subProcess/exclusiveGateway/parallelGateway/inclusiveGateway/startEvent/
-          endEvent/boundaryEvent/dataObjectReference/lane. See mapping-rubric.md for the v1
+          endEvent/boundaryEvent/dataObjectReference/dataStoreReference/dataInput/dataOutput/lane. See mapping-rubric.md for the v1
           supported/unsupported construct list.
       label:
         type: string
@@ -172,9 +192,16 @@ definitions:
           - orchestrator
           - human-checkpoint
           - artifact-contract
+          - context-source
+          - workflow-input
+          - workflow-output
           - not-generated
           - unresolved
-        description: Generation decision for this element. See mapping-rubric.md for how each is chosen.
+        description: >
+          Generation decision for this element. See mapping-rubric.md for how each is chosen.
+          context-source = a dataStoreReference (its details live in `contextSources.<id>`);
+          workflow-input / workflow-output = the process-wide input/output (details in `workflowIO`).
+          None of the three has a generated file of its own.
       generatedPaths:
         type: array
         items: { type: string }
@@ -299,6 +326,133 @@ definitions:
         type: array
         items: { type: string }
         description: Ids of higher-level bundle artifacts this one rolls up into (sdlc:bundle equivalent), if any.
+
+  contextSource:
+    type: object
+    required: [name, bpmnElement, art, ort]
+    additionalProperties: false
+    properties:
+      name:
+        type: string
+        description: Verbatim data store label from the BPMN (a business data set such as "Jira-Tickets Projekt LANE", not a system).
+      bpmnElement:
+        type: string
+        description: id of the bpmn:dataStoreReference; also the key into `elements` (kind context-source).
+      art:
+        enum: [wissen, live, gedaechtnis]
+        description: >
+          wissen = reference knowledge loaded at generation time into knowledge/<taskId>.md; live = a
+          system read (and maybe written) at run time through tools; gedaechtnis = a curated memory
+          file read at the start and written at the end of a run. Valid Art x Ort combinations are
+          in mapping-rubric.md.
+      ort:
+        type: object
+        required: [type]
+        additionalProperties: false
+        properties:
+          type:
+            enum: [notebook, mcp, cli, url, datei, websearch]
+          ref:
+            type: string
+            description: >
+              notebook title, MCP server name, CLI command, URL or file path, as written after the
+              prefix of the diagram's "Ort:" line. Omitted for websearch.
+      readers:
+        type: array
+        items: { type: string }
+        description: Element ids of tasks with a data input association from this store (store -> task = read).
+      writers:
+        type: array
+        items: { type: string }
+        description: Element ids of tasks with a data output association to this store (task -> store = write).
+      tools:
+        description: >
+          Only for art: live. Tools the readers/writers use, resolved by bpmn2agent-design (MCP tool
+          names, Bash(<cmd> <subcmd>:*) patterns, WebFetch, Read) and split by read vs. write; unclear
+          counts as write. The literal "unresolved" means the source could not be resolved (e.g. MCP
+          server not connected): verify warns, generate emits no tools for it (never a wildcard).
+        oneOf:
+          - type: object
+            additionalProperties: false
+            properties:
+              read:
+                type: array
+                items: { type: string }
+              write:
+                type: array
+                items: { type: string }
+          - const: unresolved
+      memory:
+        type: object
+        required: [path]
+        additionalProperties: false
+        description: "Only for art: gedaechtnis."
+        properties:
+          path:
+            type: string
+            description: >
+              Memory file relative to the run's cwd; default .claude/memory/<workflow>/<store>.md,
+              overridden by the diagram's "Ort: datei:<path>".
+          maxLines:
+            type: integer
+            minimum: 1
+            default: 150
+            description: Line cap enforced by a PostToolUse hook (exit 2 asks Claude to condense).
+    allOf:
+      - if:
+          properties: { art: { const: wissen } }
+        then:
+          properties:
+            ort:
+              properties:
+                type: { enum: [notebook, mcp, url, datei, websearch] }
+            tools: false
+            memory: false
+      - if:
+          properties: { art: { const: live } }
+        then:
+          properties:
+            ort:
+              properties:
+                type: { enum: [notebook, mcp, cli, url, datei] }
+            memory: false
+      - if:
+          properties: { art: { const: gedaechtnis } }
+        then:
+          properties:
+            ort:
+              properties:
+                type: { const: datei }
+            tools: false
+
+  workflowIO:
+    type: object
+    additionalProperties: false
+    description: >
+      Process-wide input and output: a real ioSpecification dataInput/dataOutput, or by convention a
+      data object nobody produces (input) / nobody reads (output). Both become artifact contracts;
+      the orchestrator derives its argument-hint from the input's required fields.
+    properties:
+      input:
+        type: object
+        required: [artifact]
+        additionalProperties: false
+        properties:
+          artifact:
+            type: string
+            description: Artifact type id; key into the top-level `artifacts` map.
+          required:
+            type: array
+            items: { type: string }
+            description: Frontmatter fields the orchestrator must have before starting; it asks when one is missing.
+      output:
+        type: object
+        required: [artifact]
+        additionalProperties: false
+        properties:
+          artifact:
+            type: string
+            description: Artifact type id; the contract for the final result.
 
   pattern:
     type: object

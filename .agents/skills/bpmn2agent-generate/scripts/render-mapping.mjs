@@ -30,6 +30,14 @@
 //   orchestrator      teal    #E0F7FA / #006064  — gateway / loop-back / multi-instance control flow
 //   human-checkpoint  amber   #FFFDE7 / #7A5C00  — userTask/manualTask -> AskUserQuestion step
 //   artifact-contract brown   #EFEBE9 / #4E342E  — data object with a path/frontmatter contract
+//   context-source    rose      #F8BBD0 / #880E4F  — data store (Art wissen|live|gedaechtnis) and, under
+//                                                  the same colour, the process-wide input/output
+//                                                  (kind workflow-input / workflow-output). A hue no
+//                                                  other kind uses (it sat too close to the
+//                                                  orchestrator teal before) and a stronger fill than
+//                                                  the pale pink of unresolved; the annotation names
+//                                                  the Art / the artifact. The legend entry (and its
+//                                                  strings) only appears when a diagram has one.
 //   not-generated     grey    #F5F5F5 / #616161  — deliberately not generated (reason on click/hover)
 //   unresolved        red     #FFEBEE / #C62828  — also used for two extra red cases not in the
 //                                                  kind enum: an element with NO spec.elements
@@ -53,6 +61,9 @@
 //   added to THAT sub-process's own `artifacts` array and its own BPMNPlane, not the top-level one
 //   (see addAnnotation()/collectElements()) — otherwise bpmn-js would try to render them on the
 //   wrong plane.
+// - A `bpmn:DataStoreReference` is NOT exempt: with no `elements.<id>` entry it shows red like any
+//   unmapped node (verify requires the entry too). Process `ioSpecification` dataInput/dataOutput are
+//   indexed like flow nodes (they are not flowElements) so workflow-input/-output get coloured.
 // - `bpmn:DataObject`/`bpmn:DataObjectReference` elements are excluded from the "no spec entry ->
 //   red/unmapped" sweep (see classifyElement): the schema models an artifact TYPE under
 //   `artifacts.<id>`, not a 1:1 link to one specific dataObjectReference id, so most diagrams will
@@ -90,13 +101,19 @@ const PALETTE = {
   orchestrator: { fill: '#E0F7FA', stroke: '#006064' },
   'human-checkpoint': { fill: '#FFFDE7', stroke: '#7A5C00' },
   'artifact-contract': { fill: '#EFEBE9', stroke: '#4E342E' },
+  'context-source': { fill: '#F8BBD0', stroke: '#880E4F' },
   'not-generated': { fill: '#F5F5F5', stroke: '#616161' },
   unresolved: { fill: '#FFEBEE', stroke: '#C62828' },
 };
 const KIND_ORDER = [
   'agent-checklist', 'skill', 'script', 'hook', 'orchestrator',
-  'human-checkpoint', 'artifact-contract', 'not-generated', 'unresolved',
+  'human-checkpoint', 'artifact-contract', 'context-source', 'not-generated', 'unresolved',
 ];
+// Spec kinds that share another kind's colour bucket (and legend entry).
+const COLOR_KEY_OF = { 'workflow-input': 'context-source', 'workflow-output': 'context-source' };
+// Legend entry, strings and annotation exist only when a diagram has such elements, so diagrams
+// without data stores render byte-for-byte as before.
+const OPTIONAL_KINDS = ['context-source', 'workflow-input', 'workflow-output'];
 
 // Both languages must define the same keys (the viewer reads them without fallbacks).
 const STRINGS = {
@@ -178,9 +195,13 @@ const STRINGS = {
       orchestrator: 'Orchestrator',
       'human-checkpoint': 'Human checkpoint',
       'artifact-contract': 'Artifact contract',
+      'context-source': 'Context source',
+      'workflow-input': 'Process input',
+      'workflow-output': 'Process output',
       'not-generated': 'Not generated',
       unresolved: 'Unresolved',
     },
+    artNames: { wissen: 'knowledge', live: 'live system', gedaechtnis: 'memory' },
     kindHelp: {
       'agent-checklist': 'A checklist item in the responsible agent.',
       skill: 'Its own skill that Claude runs for this step.',
@@ -189,6 +210,9 @@ const STRINGS = {
       orchestrator: 'Control flow: decision, loop, parallelism — no file of its own.',
       'human-checkpoint': 'A person decides here (question to the user).',
       'artifact-contract': 'A document with a fixed storage location and format.',
+      'context-source': 'A data store (knowledge, live system, memory) or the process input/output — no file of its own.',
+      'workflow-input': 'The input the workflow needs to start.',
+      'workflow-output': 'The result the workflow ends with.',
       'not-generated': 'Deliberately left out, with a reason. Not an error.',
       unresolved: 'Not mapped or an open question — must be resolved.',
     },
@@ -271,9 +295,13 @@ const STRINGS = {
       orchestrator: 'Orchestrierung',
       'human-checkpoint': 'Menschliche Prüfung',
       'artifact-contract': 'Artefakt-Vertrag',
+      'context-source': 'Kontextquelle',
+      'workflow-input': 'Prozess-Eingabe',
+      'workflow-output': 'Prozess-Ausgabe',
       'not-generated': 'Nicht generiert',
       unresolved: 'Ungelöst',
     },
+    artNames: { wissen: 'Wissen', live: 'Live-System', gedaechtnis: 'Gedächtnis' },
     kindHelp: {
       'agent-checklist': 'Ein Punkt in der Checkliste des zuständigen Agenten.',
       skill: 'Eigener Skill, den Claude für diesen Schritt ausführt.',
@@ -282,6 +310,9 @@ const STRINGS = {
       orchestrator: 'Ablaufsteuerung: Entscheidung, Schleife, Parallelität — keine eigene Datei.',
       'human-checkpoint': 'Hier entscheidet ein Mensch (Rückfrage an den Nutzer).',
       'artifact-contract': 'Dokument mit festem Ablageort und Format.',
+      'context-source': 'Datenspeicher (Wissen, Live-System, Gedächtnis) oder Prozess-Ein-/Ausgabe — keine eigene Datei.',
+      'workflow-input': 'Eingabe, die der Workflow zum Start braucht.',
+      'workflow-output': 'Ergebnis, mit dem der Workflow endet.',
       'not-generated': 'Bewusst weggelassen, mit Begründung. Kein Fehler.',
       unresolved: 'Nicht gemappt oder offene Frage — muss geklärt werden.',
     },
@@ -296,8 +327,8 @@ main().catch((err) => {
 async function main() {
   const spec = yaml.load(readFileSync(specPath, 'utf8'));
   const lang = (spec.meta && spec.meta.language || 'en').toLowerCase().startsWith('de') ? 'de' : 'en';
-  const strings = STRINGS[lang];
   assertSameKeys(STRINGS.en, STRINGS.de, 'STRINGS');
+  const fullStrings = STRINGS[lang];
 
   const xml = readFileSync(bpmnPath, 'utf8');
   const moddle = new BpmnModdle();
@@ -312,10 +343,11 @@ async function main() {
   // Classify every element the traversal found.
   const entries = {};
   for (const [id, info] of index) {
-    const cls = classifyElement(id, info.bo, spec, strings);
+    const cls = classifyElement(id, info.bo, spec, fullStrings);
     if (!cls) continue; // excluded (unmapped data object with no explicit entry)
     entries[id] = { ...cls, id, bo: info.bo, containerBo: info.containerBo, topProcessId: info.topProcessId, subProcessChain: info.subProcessChain };
   }
+  const strings = stringsFor(fullStrings, entries);
 
   // Colour + annotate.
   let usedColorExtension = false;
@@ -386,6 +418,17 @@ function assertSameKeys(a, b, where) {
   }
 }
 
+// Drops the context-source strings when no element uses them (see OPTIONAL_KINDS).
+function stringsFor(base, entries) {
+  const used = new Set(Object.values(entries).flatMap((e) => [e.kind, e.colorKey]));
+  const out = { ...base, kindNames: { ...base.kindNames }, kindHelp: { ...base.kindHelp } };
+  for (const k of OPTIONAL_KINDS) {
+    if (!used.has(k)) { delete out.kindNames[k]; delete out.kindHelp[k]; }
+  }
+  if (!used.has('context-source')) delete out.artNames;
+  return out;
+}
+
 function ensureYaml(dir) {
   mkdirSync(dir, { recursive: true });
   if (!existsSync(path.join(dir, 'package.json'))) {
@@ -409,6 +452,12 @@ function collectElements(definitions) {
   }
 
   function walk(container, topProcessId, chain) {
+    // ioSpecification dataInput/dataOutput are not flowElements; index them so the process-wide
+    // input/output can be coloured (and flagged red when the spec has no entry for them).
+    const io = container.ioSpecification;
+    for (const d of io ? [...(io.dataInputs || []), ...(io.dataOutputs || [])] : []) {
+      index.set(d.id, { bo: d, containerBo: container, topProcessId, subProcessChain: chain.slice() });
+    }
     for (const fe of container.flowElements || []) {
       if (fe.$type === 'bpmn:SequenceFlow') continue;
       index.set(fe.id, { bo: fe, containerBo: container, topProcessId, subProcessChain: chain.slice() });
@@ -463,6 +512,13 @@ function classifyElement(id, bo, spec, strings) {
     reason: specEl.reason || null,
     generatedPaths: specEl.generatedPaths || [],
   };
+  if (specEl.kind === 'context-source') {
+    const cs = Object.values(spec.contextSources || {}).find((c) => c.bpmnElement === id);
+    if (cs) base.detail = { art: cs.art, ort: cs.ort };
+  } else if (specEl.kind === 'workflow-input' || specEl.kind === 'workflow-output') {
+    const io = spec.workflowIO && spec.workflowIO[specEl.kind === 'workflow-input' ? 'input' : 'output'];
+    if (io) base.detail = { artifact: io.artifact };
+  }
 
   if (specEl.kind === 'unresolved') {
     return { ...base, statusLabel: 'unresolved', colorKey: 'unresolved' };
@@ -473,7 +529,7 @@ function classifyElement(id, bo, spec, strings) {
   if (specEl.kind === 'not-generated') {
     return { ...base, statusLabel: 'not-generated', colorKey: 'not-generated' };
   }
-  return { ...base, statusLabel: specEl.kind, colorKey: specEl.kind };
+  return { ...base, statusLabel: specEl.kind, colorKey: COLOR_KEY_OF[specEl.kind] || specEl.kind };
 }
 
 // ── colouring ─────────────────────────────────────────────────────────────
@@ -512,6 +568,12 @@ function annotationText(entry, strings) {
     const names = [...new Set(entry.generatedPaths.map(artifactName))];
     return truncate(`${strings.kindNames[entry.kind] || entry.kind}: ${names.join(', ')}`, 120);
   }
+  const d = entry.detail;
+  if (d && d.art) {
+    const ort = d.ort ? ` · ${d.ort.type}${d.ort.ref ? `:${d.ort.ref}` : ''}` : '';
+    return truncate(`${strings.kindNames[entry.kind]}: ${strings.artNames[d.art] || d.art}${ort}`, 120);
+  }
+  if (d && d.artifact) return truncate(`${strings.kindNames[entry.kind]}: ${d.artifact}`, 120);
   return null;
 }
 
@@ -682,9 +744,10 @@ function buildHtml({ spec, strings, lang, mappedXml, entries, processInfos, outD
   }
   for (const l of levelById.values()) if (l.parentId && levelById.has(l.parentId)) levelById.get(l.parentId).children.push(l.id);
 
+  const kindOrder = KIND_ORDER.filter((k) => !OPTIONAL_KINDS.includes(k) || strings.kindNames[k]);
   const mappingData = {};
   const filesByPath = new Map();
-  const counts = Object.fromEntries(KIND_ORDER.map((k) => [k, 0]));
+  const counts = Object.fromEntries(kindOrder.map((k) => [k, 0]));
   const calls = {};
   for (const [id, e] of Object.entries(entries)) {
     const files = (e.generatedPaths || []).map((p) => ({ path: p, href: relHref(outDir, p) }));
@@ -735,7 +798,7 @@ function buildHtml({ spec, strings, lang, mappedXml, entries, processInfos, outD
   };
   const filesList = [...filesByPath.values()].sort((a, b) => a.path.localeCompare(b.path));
   const processList = processInfos.filter((p) => p.diagramId).map((p) => ({ id: p.id, name: p.name, diagramId: p.diagramId }));
-  const legend = KIND_ORDER.map((k) => ({ key: k, fill: PALETTE[k].fill, stroke: PALETTE[k].stroke }));
+  const legend = kindOrder.map((k) => ({ key: k, fill: PALETTE[k].fill, stroke: PALETTE[k].stroke }));
 
   // Agents for the highlight filter: every lane of the same role shares one agent (agentName).
   const agents = new Map();
@@ -764,7 +827,7 @@ function buildHtml({ spec, strings, lang, mappedXml, entries, processInfos, outD
   const BPMN_JS = 'https://cdn.jsdelivr.net/npm/bpmn-js@17.11.1/dist';
   const viewerCss = readViewerAsset('viewer.css');
   const viewerJs = readViewerAsset('viewer.js');
-  const palette = KIND_ORDER.map((k) => `  --fill-${k}: ${PALETTE[k].fill};\n  --stroke-${k}: ${PALETTE[k].stroke};`).join('\n');
+  const palette = kindOrder.map((k) => `  --fill-${k}: ${PALETTE[k].fill};\n  --stroke-${k}: ${PALETTE[k].stroke};`).join('\n');
   const t = (key) => escapeHtml(strings[key]);
 
   return `<!doctype html>

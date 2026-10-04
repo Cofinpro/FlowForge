@@ -1,91 +1,78 @@
 # Unsupported constructs (v1) — flag red, suggest a rewrite
 
-`bpmn2agent-analyze` never silently drops a construct it can't generate from. Every element listed
-here gets a `findings[]` entry (`severity: "unresolved"`) from `inventory.mjs`, must be surfaced to
-the business user during the interview, and — once written to the spec draft by
-`bpmn2agent-analyze` — gets `kind: unresolved` with a `reason` explaining *why*, so it renders red in
-the mapping view (`mapping-rubric.md`'s legend) instead of vanishing. `bpmn2agent-verify`'s "no red
-in the map" check fails the run until every one of these is either rewritten out of the source
-`.bpmn` (by the human modeler, never by this pipeline) or explicitly accepted as an open, unresolved
-gap.
+`bpmn2agent-analyze` never silently drops a construct it can't generate from. For every construct here
+`inventory.mjs` emits a `findings[]` entry (`severity: "unresolved"`). Surface it to the business user in
+the interview. In the spec draft it gets `kind: unresolved` with a `reason` saying *why*, so it renders
+red in the mapping view (`mapping-rubric.md`'s legend). `bpmn2agent-verify`'s "no red in the map" check
+fails until each one is rewritten out of the source `.bpmn` (by the human modeler, never by this
+pipeline) or explicitly accepted as an open gap.
 
 ## Pools and message flows
 
-**Why unsupported**: a second pool + message flows models cross-organization or cross-system
-choreography — a different system or company doing its own thing and exchanging messages with this
-one. This family generates *one* coherent set of agents/skills for *one* process; it has no model
-for "an external system I don't control."
+**Why unsupported**: a second pool with message flows models choreography with an external system or
+organization. The pipeline generates one set of agents/skills for one process and has no model for a
+system it doesn't control.
 
-**Detection**: `inventory.mjs` flags this once per diagram (`unsupported-pools-message-flows`) when
-the `bpmn:Collaboration` root element has more than one `bpmn:participant` connected by at least one
-`bpmn:messageFlow`.
+**Detection**: `unsupported-pools-message-flows`, once per diagram, when the `bpmn:Collaboration` has
+more than one `bpmn:participant` connected by at least one `bpmn:messageFlow`.
 
-**Rewrite suggestion**: if the second pool actually represents a *role* your own team/agents play
-(not a genuinely external system), flatten it into a lane of the single process instead — that's
-exactly what lanes are for. If it's genuinely external (a customer, a vendor system, a different
-department that won't run this pipeline), the interaction with it has to be modelled as a step your
-process takes (e.g. a `serviceTask` "send the request to X" / a `userTask` "wait for Y's reply"),
-not as a second pool.
+**Rewrite suggestion**: if the second pool is really a *role* your own team/agents play, flatten it into
+a lane of the single process. If it is genuinely external (a customer, a vendor system, a department
+that won't run this pipeline), model the interaction as a step of your process (e.g. a `serviceTask`
+"send the request to X" / a `userTask` "wait for Y's reply"), not as a second pool.
 
 ## Timer events (start, intermediate, boundary)
 
-**Why unsupported**: nothing in this pipeline's generated output (skills, hooks, orchestrator
-agents, Workflow scripts) has a wall-clock scheduler. A generated Workflow script only ever runs
-when a human deliberately starts it (see `pattern-rubric.md`); there's no daemon to wake up an
-orchestrator agent at a timer.
+**Why unsupported**: no generated output (skills, hooks, orchestrator agents, Workflow scripts) has a
+wall-clock scheduler. A generated Workflow script runs only when a human starts it (see
+`pattern-rubric.md`); nothing wakes an orchestrator agent at a timer.
 
-**Detection**: `inventory.mjs` flags any flow node whose `eventDefinitions` includes
-`bpmn:TimerEventDefinition` (`unsupported-timer-event`).
+**Detection**: `unsupported-timer-event`, any flow node whose `eventDefinitions` includes
+`bpmn:TimerEventDefinition`.
 
-**Rewrite suggestion**: model the timer as a loop cap on the enclosing gate instead (`gate.maxLoops`
-in the spec) — "retry up to N times" rather than "wait until a clock fires." If the intent is
-genuinely a scheduled/recurring run, that's an operational concern for whoever runs the generated
-artifacts (e.g. an external cron/scheduler invoking the workflow), not something the BPMN itself
-should express.
+**Rewrite suggestion**: model the timer as a loop cap on the enclosing gate (`gate.maxLoops` in the
+spec): "retry up to N times" instead of "wait until a clock fires". A genuinely scheduled/recurring run
+is an operational concern for whoever runs the generated artifacts (e.g. an external cron/scheduler
+invoking the workflow), not something the BPMN should express.
 
 ## Message events (start, intermediate, boundary)
 
-**Why unsupported**: same root cause as pools/message flows — a message event models a signal from
-outside this process's own control flow, which only makes sense with a choreography partner this
-pipeline doesn't generate for.
+**Why unsupported**: like pools/message flows, a message event models a signal from outside the
+process's own control flow, which needs a choreography partner the pipeline doesn't generate for.
 
-**Detection**: `inventory.mjs` flags any flow node whose `eventDefinitions` includes
-`bpmn:MessageEventDefinition` (`unsupported-message-event`).
+**Detection**: `unsupported-message-event`, any flow node whose `eventDefinitions` includes
+`bpmn:MessageEventDefinition`.
 
-**Rewrite suggestion**: if the message's sender is really a role your own agents play, flatten it
-into a lane and turn the message exchange into an ordinary sequence flow (a task that produces what
-the message would have carried, followed by a task that consumes it). If it's genuinely an external
-system, model receiving from it as an explicit step (e.g. a `serviceTask` your agent performs by
-calling out, or a `userTask` where a human relays the result in).
+**Rewrite suggestion**: if the sender is really a role your own agents play, flatten it into a lane and
+turn the exchange into an ordinary sequence flow (a task producing what the message carried, followed by
+a task consuming it). If it is genuinely external, model receiving from it as an explicit step (e.g. a
+`serviceTask` your agent performs by calling out, or a `userTask` where a human relays the result in).
 
 ## Event sub-processes (`subProcess triggeredByEvent="true"`)
 
-**Why unsupported**: an event sub-process runs detached from the main flow, triggered by an event
-that can fire at any point while its parent is active (e.g. "budget exhausted, anywhere in this
-phase") — there's no equivalent of "a handler that can interrupt any step" in any of the three
-generated orchestration patterns; each one processes its steps in an explicit, traceable order.
+**Why unsupported**: an event sub-process runs detached from the main flow and can fire at any point
+while its parent is active (e.g. "budget exhausted, anywhere in this phase"). None of the three
+generated orchestration patterns has a handler that can interrupt any step; each runs its steps in an
+explicit, traceable order.
 
-**Detection**: `inventory.mjs` flags any `bpmn:SubProcess`/`bpmn:Transaction` with
-`triggeredByEvent="true"` (`unsupported-event-subprocess`).
+**Detection**: `unsupported-event-subprocess`, any `bpmn:SubProcess`/`bpmn:Transaction` with
+`triggeredByEvent="true"`.
 
-**Rewrite suggestion**: if the event sub-process is really guarding one specific activity (e.g. "if
-this step fails, do X"), model it as an explicit boundary error event on that activity instead —
-that construct *is* supported (see mapping-rubric.md's v1 supported list). If it genuinely needs to
-watch the whole run rather than one activity, express it as its own agent-checklist item ("check for
-condition X before/after every step") on the role that owns the surrounding phase, rather than as
-BPMN control flow.
+**Rewrite suggestion**: if it really guards one specific activity ("if this step fails, do X"), model it
+as a boundary error event on that activity, which *is* supported (see mapping-rubric.md's v1 supported
+list). If it must watch the whole run, express it as an agent-checklist item ("check for condition X
+before/after every step") on the role owning the surrounding phase, not as BPMN control flow.
 
 ## Compensation (compensation events and `isForCompensation` activities)
 
-**Why unsupported**: compensation models an automatic, engine-driven rollback triggered by a
-cancellation — none of the generated patterns have a transactional engine underneath them to trigger
-it; a Claude agent/skill/hook has no built-in "undo this activity" mechanism to hook into.
+**Why unsupported**: compensation is an automatic, engine-driven rollback triggered by a cancellation.
+No generated pattern has a transactional engine to trigger it, and a Claude agent/skill/hook has no
+built-in "undo this activity" mechanism.
 
-**Detection**: `inventory.mjs` flags any flow node whose `eventDefinitions` includes
-`bpmn:CompensateEventDefinition`, or that has `isForCompensation="true"` set
-(`unsupported-compensation`).
+**Detection**: `unsupported-compensation`, any flow node whose `eventDefinitions` includes
+`bpmn:CompensateEventDefinition`, or with `isForCompensation="true"`.
 
 **Rewrite suggestion**: model the rollback as an explicit, separate task on the happy path's error
-branch instead — "if the approval is later reversed, do Y" becomes an ordinary task reachable via a
-gateway, not an implicit compensation handler. This keeps the rollback logic visible in the diagram
-and traceable to a generated step, exactly like every other task.
+branch: "if the approval is later reversed, do Y" becomes an ordinary task reachable via a gateway, not
+an implicit compensation handler. This keeps the rollback visible in the diagram and traceable to a
+generated step.

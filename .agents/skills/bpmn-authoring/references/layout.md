@@ -1,8 +1,7 @@
 # Layout conventions (grid & coordinates)
 
-DI is hand-laid on the grid below (`bpmn-auto-layout` can't produce drill-down planes).
-
-Sizes and why: `xml-and-di.md`, "Standard sizes".
+Lay out DI by hand on the grid below (`bpmn-auto-layout` can't produce drill-down planes). Sizes:
+`xml-and-di.md`, "Standard sizes".
 
 ## Top-level plane grid
 
@@ -16,6 +15,16 @@ Sizes and why: `xml-and-di.md`, "Standard sizes".
 - **Data objects**: `y=170`, height 50, centred above the task that outputs them; labels above them.
   Input associations from an earlier data object route via a waypoint at `y=195` before dropping into
   the consuming task's top edge.
+- **Data stores** (`dataStoreReference`, 50×50): below the task row, inside the lane of their first
+  reader, ~60px under the task bottom, label beside or below the store. Read arrows run straight up
+  into the task's bottom edge. A store that is also written later gets its write arrow routed in a
+  channel below the stores (own `y` per store, ~25px apart) so no two arrows cross; with lanes, put
+  the lane that the happy path leaves and re-enters above the other, so the vertical hops do not
+  cross those channels. Several stores under one task sit side by side.
+- **Process input/output** (`dataInput`/`dataOutput`, 36×50): the input left of the start event, the
+  output right of the end event, both in the data-object band above the task row (`y=170`, or the
+  lane's top band). Route the input's association along `y≈195` into the first consuming task's top
+  edge; route the output's association over the tasks between its producer and the end.
 - **Groups (phase bands)**: `y=40`, `height=500`, from just left of the phase's first task to just
   right of its last, ~30–40px padding; label bounds inside the top of the band.
 - New elements extend this row; never start a second main row.
@@ -43,13 +52,13 @@ Each child plane is an independent coordinate space; don't reuse the parent's co
 
 ## General
 
-- Never let two shapes' bounding boxes overlap (`no-overlapping-elements` is a warning; treat it as
-  an error). When in doubt, add horizontal space rather than stacking vertically.
+- Never let two shapes' bounding boxes overlap (treat the `no-overlapping-elements` warning as an
+  error). When in doubt, add horizontal space rather than stacking vertically.
 - Several loop-backs in one plane (e.g. a three-outcome gateway with two targets): sort them by
-  horizontal span; the shortest runs closest to the row, longer ones further below — same at the top
-  level and in child planes.
-- Escape every name/label/condition for XML (`&` → `&amp;`, `"`, `<`, `>`) — German labels often
-  contain `&`, and an unescaped one fails xmllint with `xmlParseEntityRef: no name`. When generating
-  XML from a script, escape once, centrally.
-- Most planes that validate but look wrong have a coordinate slip: an off gap after inserting a
-  shape mid-row (shift every shape after it), or a waypoint that doesn't touch its shape's border.
+  horizontal span; the shortest runs closest to the row, longer ones further below — top level and
+  child planes alike.
+- Escape every name/label/condition for XML (`&` → `&amp;`, `"`, `<`, `>`); an unescaped `&` (common
+  in German labels) fails xmllint with `xmlParseEntityRef: no name`. When generating XML from a
+  script, escape once, centrally.
+- A plane that validates but looks wrong usually has a coordinate slip: an off gap after inserting a
+  shape mid-row (shift every shape after it), or a waypoint not touching its shape's border.
