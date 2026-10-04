@@ -3,12 +3,12 @@ meta:
   workflowName: user-story-refinement
   sourceBpmn:
     path: user-story-refinement.bpmn
-    sha256: 0fc6b3fa6d0326b22db772e2cee8277f02452a4604cf6f215787b36e208a8f35
+    sha256: c6c9b4a41a7d8cbab5483a19e65322346c311ff8b512069488d5069c2ba11a6e
   language: de
   generatorVersion: 0.1.0
   outputLayout: claude-dir
   created: '2026-09-26T09:53:22.108Z'
-  updated: '2026-10-04T08:18:02.587Z'
+  updated: '2026-10-04T09:01:44.728Z'
 roles:
   product-owner:
     bpmnLaneId: Lane_ProductOwner
@@ -48,6 +48,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-triage/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/I1.md
       - generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
   I2:
     bpmnType: serviceTask
@@ -61,6 +62,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-triage/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/I2.md
       - generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
   Gw_Bug:
     bpmnType: exclusiveGateway
@@ -112,6 +114,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/K1.md
       - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     gate:
       kind: human
@@ -130,6 +133,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/K2.md
       - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
   Gw_Fachkonzept:
     bpmnType: exclusiveGateway
@@ -165,7 +169,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+      - generated/user-story-refinement/knowledge/K3.md
   K5:
     bpmnType: serviceTask
     label: Betroffene Screens & Abläufe identifizieren
@@ -185,6 +189,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-clarification/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/K4.md
       - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
   Par_KlaerungJoin:
     bpmnType: parallelGateway
@@ -241,6 +246,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/B5.md
       - generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     gate:
       kind: human
@@ -280,7 +286,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+      - generated/user-story-refinement/knowledge/C1.md
   Merge_Formulierung:
     bpmnType: exclusiveGateway
     lane: product-owner
@@ -298,7 +304,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+      - generated/user-story-refinement/knowledge/C2.md
   C3:
     bpmnType: serviceTask
     label: Bezug zu Epic, Fachkonzept & Feedback dokumentieren
@@ -308,7 +314,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+      - generated/user-story-refinement/knowledge/C3.md
   C4:
     bpmnType: businessRuleTask
     label: INVEST-Selbstcheck durchführen
@@ -318,7 +324,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-writing/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
+      - generated/user-story-refinement/knowledge/C4.md
     gate:
       kind: critic
       criteria:
@@ -355,6 +361,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/D1.md
       - generated/user-story-refinement/knowledge/phase-4-refinement.md
     gate:
       kind: human
@@ -375,6 +382,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/D2a.md
       - generated/user-story-refinement/knowledge/phase-4-refinement.md
   D2d:
     bpmnType: serviceTask
@@ -423,6 +431,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/D3.md
       - generated/user-story-refinement/knowledge/phase-4-refinement.md
   D4:
     bpmnType: serviceTask
@@ -433,7 +442,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-4-refinement.md
+      - generated/user-story-refinement/knowledge/D4.md
   Merge_Schaetzung:
     bpmnType: exclusiveGateway
     lane: entwicklung
@@ -451,6 +460,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/D5.md
       - generated/user-story-refinement/knowledge/phase-4-refinement.md
     gate:
       kind: human
@@ -490,6 +500,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/D6.md
       - generated/user-story-refinement/knowledge/phase-4-refinement.md
     condition: >-
       Every part story runs through "Story im Connextra-Format formulieren" and the rest of the flow one after another
@@ -504,7 +515,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+      - generated/user-story-refinement/knowledge/E1.md
   E2:
     bpmnType: serviceTask
     label: Begriffe mit Domänenmodell abgleichen
@@ -524,7 +535,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-readiness/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-5-definition-of-ready.md
+      - generated/user-story-refinement/knowledge/E3.md
   Gw_Ready:
     bpmnType: exclusiveGateway
     label: Definition of Ready erfüllt?
@@ -578,7 +589,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+      - generated/user-story-refinement/knowledge/P1.md
   P7:
     bpmnType: serviceTask
     label: Konsistenz mit bestehenden Abläufen prüfen
@@ -626,7 +637,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+      - generated/user-story-refinement/knowledge/P4.md
   Gw_Plausibel:
     bpmnType: exclusiveGateway
     label: Konsistent mit dem übrigen Backlog?
@@ -651,7 +662,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+      - generated/user-story-refinement/knowledge/P6.md
   End_StoryZusammengefuehrt:
     bpmnType: endEvent
     label: Story in bestehende Story überführt
@@ -668,7 +679,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/story-backlog-check/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
-      - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+      - generated/user-story-refinement/knowledge/P5.md
   E4:
     bpmnType: userTask
     label: Story priorisieren & in Ready-Spalte stellen
@@ -680,6 +691,7 @@ elements:
       - generated/user-story-refinement/.claude/skills/user-story-refinement/SKILL.md
     knowledge:
       - 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
+      - generated/user-story-refinement/knowledge/E4.md
       - generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     gate:
       kind: human
@@ -919,7 +931,17 @@ artifacts:
       - Gw_Ready
       - Gw_Plausibel
   feedback:
-    pathPattern: generated/user-story-refinement/artifacts/feedback/{id}.md
+    pathPattern: '{feedback} (feedback text or file the user hands over at the start, read-only)'
+    frontmatter:
+      - field: feedback
+        required: true
+        description: The raw user or stakeholder feedback, as text or a path to a file.
+      - field: backlog
+        required: true
+        description: Location of the existing project backlog and user story map.
+      - field: fachkonzept
+        required: true
+        description: Location of the existing epic and Fachkonzept documents.
     consumers:
       - I1
 contextSources:
@@ -941,9 +963,11 @@ contextSources:
       type: notebook
       ref: The Product - Business Design
     readers:
+      - K1
       - K2
       - K3
       - K4
+      - B5
   product-methodik-story-formulieren:
     name: "Product-Methodik: Story formulieren"
     bpmnElement: StoreRef_MethodikPhase3
@@ -964,9 +988,11 @@ contextSources:
       type: notebook
       ref: The Product - Business Design
     readers:
+      - D1
       - D2a
       - D3
       - D4
+      - D5
       - D6
   product-methodik-definition-of-ready:
     name: "Product-Methodik: Definition of Ready"
@@ -990,11 +1016,14 @@ contextSources:
       - P4
       - P6
       - P5
+      - E4
 workflowIO:
   input:
     artifact: feedback
     required:
       - feedback
+      - backlog
+      - fachkonzept
   output:
     artifact: sprint-reife-user-story
 openQuestions:
@@ -1121,6 +1150,14 @@ openQuestions:
     answer: >-
       Keep the lane-level notebook mapping (The Product - Business Design); the phase knowledge files still apply. Decided by the business user.
     answeredAt: '2026-10-04T08:30:45.725Z'
+  - elementId: Gw_Erkenntnis
+    question: >-
+      The notebook names more outcomes after a spike or prototype test than the diagram has: persevere, pivot, kill and another experiment. "Tragen die Erkenntnisse die Story?" has only two exits, Ja and Nein. Keep two exits, or add exits for pivot / another experiment?
+    source: 'NotebookLM: The Product - Business Design [store-phase-2-klaerung-5]'
+    answer: >-
+      Keep two exits (Ja / Nein). A pivot goes through "Nein" with a note, and a further experiment is started by the
+      human at "Erkenntnisse auswerten". No diagram change. Decided by the business user.
+    answeredAt: '2026-10-04T09:01:44.728Z'
 knowledge:
   notebooks:
     - id: 7cfe6e95-cb2b-4b23-88ed-fac6f7b3a6c0
@@ -1149,6 +1186,11 @@ knowledge:
         - P4
         - P5
         - P6
+        - K1
+        - B5
+        - D1
+        - D5
+        - E4
   mode: notebook
   refs:
     Start_FeedbackEingegangen: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
@@ -1159,7 +1201,7 @@ knowledge:
     Gw_Bezug: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     End_AnStoryUebergeben: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
     End_FeedbackGeparkt: generated/user-story-refinement/knowledge/phase-1-eingang-triage.md
-    K1: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    K1: generated/user-story-refinement/knowledge/K1.md
     K2: generated/user-story-refinement/knowledge/K2.md
     Gw_Fachkonzept: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     End_FachkonzeptAenderung: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
@@ -1172,7 +1214,7 @@ knowledge:
     K6: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     B4: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     Merge_Validierung: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
-    B5: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
+    B5: generated/user-story-refinement/knowledge/B5.md
     Gw_Erkenntnis: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     End_AnliegenVerworfen: generated/user-story-refinement/knowledge/phase-2-fachliche-klaerung.md
     Merge_Einordnung: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
@@ -1183,7 +1225,7 @@ knowledge:
     C4: generated/user-story-refinement/knowledge/C4.md
     Gw_Invest: generated/user-story-refinement/knowledge/phase-3-story-formulieren.md
     Merge_Refinement: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D1: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D1: generated/user-story-refinement/knowledge/D1.md
     Par_AmigosSplit: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D2a: generated/user-story-refinement/knowledge/D2a.md
     D2d: generated/user-story-refinement/knowledge/phase-4-refinement.md
@@ -1193,7 +1235,7 @@ knowledge:
     D3: generated/user-story-refinement/knowledge/D3.md
     D4: generated/user-story-refinement/knowledge/D4.md
     Merge_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
-    D5: generated/user-story-refinement/knowledge/phase-4-refinement.md
+    D5: generated/user-story-refinement/knowledge/D5.md
     Gw_Schaetzung: generated/user-story-refinement/knowledge/phase-4-refinement.md
     Gw_Sprintgroesse: generated/user-story-refinement/knowledge/phase-4-refinement.md
     D6: generated/user-story-refinement/knowledge/D6.md
@@ -1214,7 +1256,7 @@ knowledge:
     P6: generated/user-story-refinement/knowledge/P6.md
     End_StoryZusammengefuehrt: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
     P5: generated/user-story-refinement/knowledge/P5.md
-    E4: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
+    E4: generated/user-story-refinement/knowledge/E4.md
     End_StorySprintReady: generated/user-story-refinement/knowledge/phase-6-plausibilitaet-freigabe.md
 pattern:
   chosen: skill-chain-hooks

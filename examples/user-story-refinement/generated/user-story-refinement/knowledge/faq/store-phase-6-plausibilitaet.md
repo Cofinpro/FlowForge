@@ -432,3 +432,292 @@ When merging an overlapping or duplicate card into a surviving story, transfer a
 | 36 | Cohn, User Stories Applied (2004) | 14.3 What could cause the customer to have a difficult time prioritizing stories? Answer: The stories may be the wrong size (either too large or too small) or the stories may not clearly express value to users or customers. [...] |
 
 ---
+## store-phase-6-plausibilitaet-5: E4: who decides a story's backlog position, with which criteria, and what is recorded about the decision?
+
+- asked 2026-10-04 · notebook "The Product - Business Design" · conversation `bc952e53-5b21-4372-982b-e48370482962`
+- Sources: Kelly, The Art of Agile Product Ownership (2019); Cohn, User Stories Applied (2004); Product School, The Product Book (2017); Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014); Anforderungsverwaltung.pdf; Anforderungserhebung.pdf; Humble et al., Lean Enterprise; Pohl & Rupp, Basiswissen Requirements Engineering (2015); Olsen, The Lean Product Playbook
+- Note: Inline result re-entered by the extraction agent; cited passages are excerpts that start at the relevant sentences (omissions marked [...]), answer text unchanged.
+
+**Question**
+
+> Context: a Product Owner (human decision) places a new, ready user story into the product backlog order ('Story priorisieren & in Ready-Spalte stellen'). Per the sources: who decides the priority and position of a story in the backlog, which criteria does the decision use (value, cost/effort, risk, dependencies, time criticality), what information must the PO get from the development team beforehand, and what must be recorded about the decision (priority, rank, rationale)? Please cite the sources with short verbatim quotes.
+
+**Answer** (verbatim, citation markers resolve in the table below)
+
+##### 1. Decision Maker: Who Decides Priority and Backlog Position?
+
+The **Product Owner** (or the customer role in XP/Agile) holds sole authority over deciding the priority and position of user stories in the backlog [1-3]. While stakeholders and development teams provide input, the PO acts as the final decision maker [1, 4].
+
+* **Sole Backlog Responsibility**: *"The Product Owner is the sole person responsible for managing the Product Backlog. Product Backlog management includes... Ordering the items in the Product Backlog to best achieve goals and missions"* [5].
+* **Single Decision Maker**: *"One person is responsible for managing and controlling the Product Backlog. That person is referred to as the Product Owner... The Product Owner is one person not a committee"* [2].
+* **Final Authority on Sequence**: *"Collectively, the developers have a sequence in which they would like to implement the stories, as will the customer. When there is a disagreement to the sequence, the customer wins. Every time"* [6].
+
+---
+
+##### 2. Prioritization Criteria Used
+
+When evaluating where a user story belongs in the backlog order, the decision balances five main criteria:
+
+1. **Business & User Value**: Maximizing customer desirability, strategic impact, and business outcomes [5, 7, 8].
+   * *Verbatim Quote*: *"The Product Owner is responsible for maximizing the value of the product resulting from work of the Development Team"* [5], guided by *"the desirability of the story to a broad base of users or customers"* [8].
+2. **Cost / Effort**: Evaluating effort estimates relative to value to determine return on investment [4, 9].
+   * *Verbatim Quote*: *"Stories cannot be prioritized without considering their costs. Factored into the prioritization is the cost of each story"* [4] to focus on *"the highest-scoring opportunities first, as they provide the most value for the lowest cost"* [9].
+3. **Risk**: Mitigating technical uncertainty, market risk, or security/compliance exposure [10-12].
+   * *Verbatim Quote*: Balancing priorities requires assessing *"the risk that the story cannot be completed as desired"* [11] and accounting for *"Risk Reduction"* or early risk discovery [10, 12].
+4. **Dependencies & Technical Cohesiveness**: Factoring in prerequisites, architecture, and inter-story relationships [11, 13, 14].
+   * *Verbatim Quote*: Factoring in *"the impact the story will have on other stories if deferred"* [11] as well as *"the cohesiveness of the story in relation to other stories"* [8, 13].
+5. **Time Criticality & Cost of Delay**: Accounting for deadlines, time sensitivity, or lost opportunity cost over time [12, 15, 16].
+   * *Verbatim Quote*: Considering *"Time Criticality: Existieren Deadlines, bis zu der die Anforderung umgesetzt sein muss... Stiftet die Anforderung nur bis zu einem gewissen Zeitpunkt einen Nutzen"* [12] using the *"Cost of Delay method... which calculates how much money we lose by not having the feature available when we need it"* [16].
+
+---
+
+##### 3. Information Required from the Development Team Beforehand
+
+Before the Product Owner can place or reprioritize a story in the backlog, the development team must supply critical technical input [4, 6]:
+
+* **Effort Estimates**: The team's estimation of complexity, size, or duration [4, 6].
+  * *Verbatim Quote*: *"Minimally, a customer needs to know approximately how long each story will take. Before the stories are prioritized, they have already been estimated and the estimates written on the story cards"* [6].
+* **Technical Risk & Feasibility Warnings**: Early alerts regarding technical complexity or novel challenges [4, 17, 18].
+  * *Verbatim Quote*: *"They may suggest that the priority of a story be changed based on its technical risk"* [4, 17] because developers are responsible for *"providing information (sometimes including your underlying assumptions and possible alternatives) to the customer in order to help her prioritize the stories"* [18].
+* **Deferred Cost & Architectural Dependencies**: Highlighting infrastructural needs or hidden costs if deferred [19, 20].
+  * *Verbatim Quote*: Developers assist by *"identifying stories that can be deferred but may become much more costly to develop if implemented later"* [20] and flagging *"infrastructural or nonfunctional needs such as performance"* [19].
+
+---
+
+##### 4. What Must Be Recorded About the Decision
+
+To maintain transparency, traceability, and backlog hygiene, three attributes must be documented regarding the decision [14, 21-23]:
+
+1. **Priority Class / Value**: Categorizing the story (e.g., Must/Should/Could/Won't or a numerical business value score) [11, 24, 25].
+2. **Rank / Exact Sequential Position**: Assigning the absolute 1-to-N position in the backlog stack [18, 26-28].
+   * *Verbatim Quote*: *"Stories should be prioritized into a specific order (first, second, third and so on) rather than into groups"* [18, 28] to form a *"rank-ordered to-do list"* [26].
+3. **Rationale & Assumptions**: Capturing the reason for the rank and underlying trade-off assumptions [14, 21-23, 29].
+   * *Verbatim Quote*: *"Um eine bessere Nachvollziehbarkeit der Bewertung zu gewährleisten, sollte der Grund für die/die Annahmen hinter der Einschätzung dokumentiert werden"* [22], making *"assumptions explicit, visible, and recorded alongside the work being discussed so we can validate them"* [21], and recording the attribute *"Begründung: Beschreibt, weshalb diese Anforderung für das geplante System von Bedeutung ist"* [14, 23, 29].
+
+---
+
+🎯 Would you like to explore specific prioritization frameworks mentioned in your sources (such as WSJF, Kano, or Weighted Value vs. Cost) to see how to calculate priority scores for your ready user stories?
+
+**Citations**
+
+| # | Source | Cited passage |
+|---|---|---|
+| 1 | Kelly, The Art of Agile Product Ownership (2019) | And someone has to make those decisions. Three guesses who that is? My answer is The Product Owner. The Product Owner is the decision maker. When working agile, the thing being built is in a constant state of flux [...] |
+| 2 | Kelly, The Art of Agile Product Ownership (2019) | One person is responsible for managing and controlling the Product Backlog. That person is referred to as the Product Owner. ... The Product Owner is one person not a committee. ... Customer: A role on the team for choosing what stories the system has to satisfy, what stories are needed first and what can be deferred … |
+| 3 | Cohn, User Stories Applied (2004) | customer of Extreme Programming. The product owner is largely responsible for placing items onto and prioritizing the product backlog list of needed functionality. |
+| 4 | Cohn, User Stories Applied (2004) | The customer team listens to their opinions but then prioritizes stories in the manner that maximizes the value delivered to the organization. Stories cannot be prioritized without considering their costs. [...] Factored into the prioritization is the cost of each story. The cost of a story is the estimate given to it … |
+| 5 | Kelly, The Art of Agile Product Ownership (2019) | The Product Owner is responsible for maximizing the value of the product resulting from work of the Development Team. [...] The Product Owner is the sole person responsible for managing the Product Backlog. Product Backlog management includes: Clearly expressing Product Backlog items; Ordering the items in the Product … |
+| 6 | Cohn, User Stories Applied (2004) | Collectively, the developers have a sequence in which they would like to implement the stories, as will the customer. When there is a disagreement to the sequence, the customer wins. Every time. However, customers cannot prioritize without some information from the development team. Minimally, a customer needs to know … |
+| 7 | Kelly, The Art of Agile Product Ownership (2019) | First off, the portfolio board looked at all the jobs to be done and ranked them by value and priority. [...] It took time to realize that business need and value should be the driver. |
+| 8 | Cohn, User Stories Applied (2004) | Additionally, customers and users have their own set of factors they could use to sort the stories, including the following: the desirability of the story to a broad base of users or customers the desirability of the story to a small number of important users or customers the cohesiveness of the story in relation to … |
+| 9 | Product School, The Product Book (2017) | A simple way to compare priorities is to come up with a value vs. cost number. [...] score = value÷cost. Focus on the highest-scoring opportunities first, as they provide the most value for the lowest cost. You might choose to change priorities based on other factors, but this will give you a good starting point. |
+| 10 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | To avoid falling into this trap, delivery teams should work with stakeholders to set explicit deadlines for addressing major risks at a sustainable pace. [...] This helps to prevent difficult and risky work from being constantly postponed and replaced with small short-term wins. |
+| 11 | Cohn, User Stories Applied (2004) | Prioritizing the Stories There are many dimensions along which we can sort stories. Among the technical factors we can use are: the risk that the story cannot be completed as desired (for example, with desired performance characteristics or with a novel algorithm) the impact the story will have on other stories if … |
+| 12 | Anforderungsverwaltung.pdf | Time Criticality Existieren Deadlines, bis zu der die Anforderung umgesetzt sein muss (regulatorische Anforderungen bspw.)? Stiftet die Anforderung nur bis zu einem gewissen Zeitpunkt einen Nutzen (First Mover Advantage, Ausnutzen von Markttrends,…)? Risk Reduction und / oder Opportunity Enablement Werden mit der … |
+| 13 | Cohn, User Stories Applied (2004) | The desirability of the feature to a broad base of users or customers The desirability of the feature to a small number of important users or customers The cohesiveness of the story in relation to other stories. [...] The developers have different priorities for many of the stories. They may suggest that the priority … |
+| 14 | Anforderungserhebung.pdf | Zu jeder Anforderung soll eine Klassifikation zur Priorisierung vorgenommen werden [...] Begründung [...] Priorität („niedrig“, „mittel“, „hoch“ und „kritisch“; Stufen von 1 bis n oder absolute Prioritätszahlen, so dass jede einzelne Anforderung eine individuelle Priorität besitzt) [...] Beziehungen zu anderen … |
+| 15 | Anforderungsverwaltung.pdf | Dieses Vorgehen gilt unter der Voraussetzung, dass es keine Deadlines für einzelne Anforderungen (regulatorische Verpflichtungen bspw.) vorliegen. Ist dies der Fall so muss dieser Faktor über eine hohe Bewertung beim Cost of Delay (Time Criticality) berücksichtigt werden. |
+| 16 | Humble et al., Lean Enterprise | Features were prioritized using the Cost of Delay method [...] which estimates the value of a feature in dollars by calculating how much money we lose by not having the feature available when we need it. [...] Putting in the extra effort to calculate a dollar value is essential to reveal assumptions, come to a shared … |
+| 17 | Cohn, User Stories Applied (2004) | But, even when going after the juicy bits first, we still need to consider risk when prioritizing stories. Many developers have a tendency to want to do the riskiest stories first. Sometimes this is appropriate but the decision must still be made by the customer. However, the customer considers input from the … |
+| 18 | Cohn, User Stories Applied (2004) | Developer Responsibilities You are responsible for providing information (sometimes including your underlying assumptions and possible alternatives) to the customer in order to help her prioritize the stories. You are responsible for resisting the urge to prioritize infrastructural or architectural needs higher than … |
+| 19 | Cohn, User Stories Applied (2004) | [...] once the customer was made aware of the extremely high risk associated with these stories, enough of them were given higher priorities in order to determine what was involved in developing the novel algorithms. |
+| 20 | Cohn, User Stories Applied (2004) | [...] Story Card 9.3. Generate 50 images per second. In this case the customer had written Story Card 9.3 for us. However, she prioritized it fairly low. Our first few iterations would be targeted at developing features that could be shown to prospects and used to generate initial sales and interest in the product. |
+| 21 | Humble et al., Lean Enterprise | It's important to make these assumptions explicit, visible, and recorded alongside the work being discussed so we can validate them. The most important thing to bear in mind is that we are aiming for accuracy, not precision, in our estimates. |
+| 22 | Anforderungsverwaltung.pdf | Der WSFJ kann allerdings auch genutzt werden, um ein sich veränderndes Backlog laufend zu bewerten (Anpassung bestehender bzw. Bewertung neuer Anforderung). [...] Um eine bessere Nachvollziehbarkeit der Bewertung zu gewährleisten, sollte der Grund für die/die Annahmen hinter der Einschätzung dokumentiert werden. |
+| 23 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | Name Eindeutiger, charakterisierender Name. Beschreibung [...] Version [...] Autor [...] Quelle [...] Begründung Beschreibt, weshalb diese Anforderung für das geplante System von Bedeutung ist. |
+| 24 | Cohn, User Stories Applied (2004) | To start prioritizing, Lori sorts the story cards into four piles based on their importance to the targeted go-live date in four weeks: Must Have, Should Have, Could Have, and Won't Have. |
+| 25 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | Ein-Kriteriums-Klassifikation Eine in der Praxis häufig verwendete Priorisierungstechnik basiert auf einer Klassifizierung von Anforderungen im Hinblick auf die Wichtigkeit der Realisierung dieser Anforderungen für den Erfolg des Systems. |
+| 26 | Olsen, The Lean Product Playbook | A backlog is a rank-ordered to-do list. User stories are written and placed on the product backlog by the Product Owner [...] The Product Owner, or PO for short, is responsible for using input from customers and stakeholders to create the prioritized backlog of user stories. |
+| 27 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | [...] Allerdings haben die analytischen Verfahren den Vorteil, dass sie den Grad an Subjektivität in den Priorisierungsresultaten signifikant reduzieren können [...] |
+| 28 | Cohn, User Stories Applied (2004) | Stories should be prioritized into a specific order (first, second, third and so on) rather than into groups (very high, high, medium and so on). Stories are prioritized by the customer but with input from the developers. |
+| 29 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | Titel [...] Beschreibung [...] Begründung: Hier werden die wichtigsten Gründe für die vorgeschlagene Änderung zusammengefasst. [...] Priorität aus Sicht des Antragstellers: Wichtigkeit dieser Änderung aus dem Blickwinkel des Antragstellers |
+
+---
+## store-phase-6-plausibilitaet-6: E4: what makes a story eligible for the Ready column and sprint planning, and who confirms it?
+
+- asked 2026-10-04 · notebook "The Product - Business Design" · conversation `86508c52-3246-441f-bf4a-ae0be35e3f86`
+- Sources: Olsen, The Lean Product Playbook; Product School, The Product Book (2017); Cohn, User Stories Applied (2004); Anforderungsverwaltung.pdf
+- Note: Inline result re-entered by the extraction agent; cited passages are excerpts that start at the relevant sentences (omissions marked [...]), answer text unchanged.
+
+**Question**
+
+> Context: a Kanban-style board with a 'Ready' column from which the team pulls work into sprint planning. Per the sources: what makes a user story eligible to be placed in the Ready column / selected for sprint planning (Definition of Ready, estimate, team agreement, size that fits a sprint, dependencies resolved), who confirms it, and what is recorded or checked at that moment? Please cite the sources with short verbatim quotes.
+
+**Answer** (verbatim, citation markers resolve in the table below)
+
+In agile and Kanban frameworks, the **Ready column** serves as a queue of fully refined work items waiting to be pulled into development or committed during sprint planning [1, 2]. The goal is to ensure the team *"never starve developers for work and always have at least one sprint’s worth of fully groomed backlog ready to go"* [3].
+
+---
+
+##### 1. What Makes a User Story Eligible for the "Ready" Column / Sprint Selection?
+
+A user story must satisfy several core refinement and Definition of Ready (DoR) criteria before it can be placed in the Ready column or selected for a sprint:
+
+* **Clarity & Well-Written Intent (Backlog Grooming)**:
+  The story must be clearly articulated and understood by the delivery team. As noted in the sources, *"The Product Owner will groom the backlog to make sure that stories being considered for the next sprint are well written and understood by the team"* [4].
+* **Explicit Acceptance Criteria**:
+  The criteria that define when a story is complete must be established upfront. Grooming ensures that *"each new item for the backlog has acceptance criteria: How do you know the item is done properly?"* [5]. These criteria are used to *"confirm when a story is completed and working as intended"* [6].
+* **Estimatable**:
+  The team must be able to gauge the story's effort or complexity. Per Bill Wake's **INVEST** criteria, a story must be *"Estimable: A good story is one whose scope can be reasonably estimated"* [7]. It is critical that *"developers to be able to estimate (or at least take a guess at) the size of a story or the amount of time it will take to turn a story into working code"* [8].
+* **Right Size for a Sprint**:
+  The story must be small enough to be completed within a single iteration. *"Stories that are too big to complete in one iteration are called epics, which must be broken down before they can be accepted into a sprint"* [9]. Furthermore, *"if a story won’t fit in an iteration, you can split the story into two or more smaller stories"* [10].
+* **Resolved Dependencies & Independent (INVEST)**:
+  To prevent work from stalling, dependencies should be minimized or resolved so the story is *"Independent: A good story should be independent of other stories. Stories shouldn’t overlap in concept and should be implementable in any order"* [7]. Customers/POs are responsible for ensuring stories *"are independent, are testable, and are appropriately sized"* [11].
+* **Capacity & Priority Alignment**:
+  Items in the backlog must be prioritized by value, and the total selected points must align with the team's historical capacity: *"the engineering team will agree on whether they can commit to it during the sprint"* [12].
+
+---
+
+##### 2. Who Confirms It?
+
+Eligibility is confirmed **collaboratively between the Product Owner (or Product Manager/Customer) and the Development Team**:
+
+* **Product Owner Role**: The Product Owner writes and prioritizes the stories from customer and stakeholder input [13]. *"The PO usually does this with the dev lead or dev manager in a backlog grooming meeting (also called a backlog refinement meeting)"* [4].
+* **Development Team Role**: While the Product Owner sets business priority, the team evaluates the technical feasibility, estimates the work, and determines commitment [12, 14]. As summarized in the rules of Scrum, *"The Product Owner prioritizes the work but the team selects the work they will perform during a sprint"* [15], and *"it will always be up to the team to determine how much they can commit to completing"* [16].
+
+---
+
+##### 3. What is Recorded or Checked at That Moment?
+
+When a story is confirmed as "Ready" or selected during sprint planning, the following items are verified and recorded on the card or task board:
+
+1. **Story Point Estimates**: Relative effort estimates (story points, T-shirt sizes, or ideal days) determined by the team are recorded directly on the card: *"Before the stories are prioritized, they have already been estimated and the estimates written on the story cards"* [17, 18].
+2. **Acceptance Criteria**: Detailed acceptance criteria and test reminders are attached to the card to define the boundaries of "Done" [5, 6, 19].
+3. **Rank-Ordered Backlog Position**: Cards are sorted in strict numerical or visual order so developers can pull from the top [1, 20].
+4. **Velocity / Capacity Check**: During sprint planning, the cumulative story points are checked against the team's expected velocity: *"if you add up the story points on the tasks everyone agrees to do, it should come out to that velocity"* [12, 21].
+5. **Task Disaggregation & Developer Sign-Off (if using Task Boards)**: When expanding stories into the sprint backlog, stories are disaggregated into constituent tasks where *"one developer accepts responsibility for each task"* [22] and *"developers individually estimate the tasks they've accepted to make sure they are not over-committed"* [22, 23].
+
+---
+
+💡 *Would you like to generate a tailored report or visual workflow diagram summarizing the backlog refinement and sprint planning process?*
+
+**Citations**
+
+| # | Source | Cited passage |
+|---|---|---|
+| 1 | Olsen, The Lean Product Playbook | Backlog: Items to be potentially worked on, sorted in priority order. Ready: Items that have been selected from the backlog and are ready for development. In development: Items that a developer has started working on. [...] |
+| 2 | Olsen, The Lean Product Playbook | Some columns represent work being done (e.g., in dev, in testing) while others represent items waiting to be worked on (e.g., ready, development done). The latter type of columns are queues of work. When a team member frees up capacity after finishing work on one item, they pull the top item from the appropriate queue … |
+| 3 | Olsen, The Lean Product Playbook | The goal is to make sure that you never starve developers for work and always have at least one sprint’s worth of fully groomed backlog ready to go. This requires some balance, because you don’t want to specify too many sprints in advance, as things could change. |
+| 4 | Olsen, The Lean Product Playbook | The Product Owner will groom the backlog to make sure that stories being considered for the next sprint are well written and understood by the team. The PO usually does this with the dev lead or dev manager in a backlog grooming meeting (also called a backlog refinement meeting). |
+| 5 | Product School, The Product Book (2017) | In addition to adding clarity, during grooming you will make sure each new item for the backlog has acceptance criteria: How do you know the item is done properly?. |
+| 6 | Olsen, The Lean Product Playbook | Well-written user stories include acceptance criteria, which are used to confirm when a story is completed and working as intended. QA testers help check to see if acceptance criteria are met and ensure the quality of the product. |
+| 7 | Olsen, The Lean Product Playbook | INVEST: Independent: A good story should be independent of other stories. Stories shouldn’t overlap in concept and should be implementable in any order. Negotiable: [...] Valuable: [...] Estimable: A good story is one whose scope can be reasonably |
+| 8 | Cohn, User Stories Applied (2004) | Estimatable It is important for developers to be able to estimate (or at least take a guess at) the size of a story or the amount of time it will take to turn a story into working code. |
+| 9 | Olsen, The Lean Product Playbook | Stories with points at the high end of your scoring range have large scope and uncertainty and should be broken down into smaller stories, as discussed in Chapter 6. Stories that are too big to complete in one iteration are called epics, which must be broken down before they can be accepted into a sprint. |
+| 10 | Cohn, User Stories Applied (2004) | Velocity is the amount of work the developers can complete in an iteration. The sum of the estimates of the stories placed in an iteration cannot exceed the velocity the developers forecast for that iteration. If a story won't fit in an iteration, you can split the story into two or more smaller stories. |
+| 11 | Cohn, User Stories Applied (2004) | Customer Responsibilities You are responsible for writing stories that are promises to converse rather than detailed specifications, have value to users or to yourself, are independent, are testable, and are appropriately sized. |
+| 12 | Product School, The Product Book (2017) | You'll pick the key things you want to work on based on priority/business value, and the engineering team will agree on whether they can commit to it during the sprint. [...] During this planning meeting, if you add up the story points on the tasks everyone agrees to do, it should come out to that velocity. |
+| 13 | Olsen, The Lean Product Playbook | All work that the team completes comes from the product backlog of user stories. A backlog is a rank-ordered to-do list. User stories are written and placed on the product backlog by the Product Owner, one of the three roles specified in Scrum. |
+| 14 | Anforderungsverwaltung.pdf | Im Refinement werden inhaltliche Details gemeinsam (Product Owner und Team) geklärt, Aufwände geschätzt und die Reihenfolge der User Stories im Product Backlog definiert. [...] Im Sprint Planning wird entschieden, welche User Stories im kommenden Sprint gemäß der Priorisierung im Backlog vom Entwicklerteam umgesetzt … |
+| 15 | Cohn, User Stories Applied (2004) | 15.4 Who is responsible for prioritizing work and for selecting the work the team will perform during a sprint? Answer: The Product Owner prioritizes the work but the team selects the work they will perform during a sprint. Naturally they are expected to select from among the top priority items. |
+| 16 | Cohn, User Stories Applied (2004) | [...] During the second half of the sprint planning meeting, the team meets separately to discuss what they heard and decide how much they can commit to during the coming sprint. Conceptually, the team starts at the top of the prioritized product backlog list and draws a line after the lowest of the high priority … |
+| 17 | Cohn, User Stories Applied (2004) | [...] Before the stories are prioritized, they have already been estimated and the estimates written on the story cards, as shown in Story Card 9.1. At this point the customer does not sum the estimates and make decisions about what will or won't fit in a release. |
+| 18 | Olsen, The Lean Product Playbook | At the start of each sprint, the team holds a sprint planning meeting where they decide which stories they plan to accomplish in the iteration and move those stories from the product backlog to the sprint backlog. Part of this process requires that the team estimate the scope of each story using story points, which … |
+| 19 | Cohn, User Stories Applied (2004) | Testing is best viewed as a two-step process: First, notes about future tests are jotted on the back of story cards. [...] Second, the test notes are turned into full-fledged tests that are used to demonstrate that the story has been been correctly and fully coded. |
+| 20 | Olsen, The Lean Product Playbook | Having your backlog rank ordered makes it clear which item should be done next. [...] A developer can reliably pull the item at the top of the stack and start working on it without having to confer with anyone. |
+| 21 | Olsen, The Lean Product Playbook | When sprint planning is complete, the team should be clear on the set of stories they plan to accomplish in the sprint. They should choose the highest priority stories from the product backlog, and the total number of points for those stories should match the team’s expected velocity for the iteration. |
+| 22 | Cohn, User Stories Applied (2004) | Discuss a story. Disaggregate the story into its constituent tasks. One developer accepts responsibility for each task. After all stories have been discussed and all tasks have been accepted, developers individually estimate the tasks they've accepted to make sure they are not over-committed. |
+| 23 | Cohn, User Stories Applied (2004) | Developers assess whether they have over-committed themselves by estimating each task they have accepted. [...] You are responsible for ensuring you take on an appropriate amount of work. |
+
+---
+## store-phase-6-plausibilitaet-7: E4: how do affected or dependent stories change a new story's position, and when must a story wait?
+
+- asked 2026-10-04 · notebook "The Product - Business Design" · conversation `48de298c-9dec-43cb-a3b6-348f069ec73a`
+- Sources: Olsen, The Lean Product Playbook; Humble et al., Lean Enterprise; Pohl & Rupp, Basiswissen Requirements Engineering (2015); Cohn, User Stories Applied (2004); Anforderungserhebung.pdf; Anforderungsverwaltung.pdf; Evans, Domain-Driven Design (2003); Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014)
+- Note: Inline result re-entered by the extraction agent; cited passages are excerpts that start at the relevant sentences (omissions marked [...]), answer text unchanged.
+
+**Question**
+
+> Context: a new story passed a plausibility check against the backlog, and the check found other existing stories that are affected by it (they must be adjusted, or they depend on it or overlap with it). Per the sources: how does this affect the new story's priority and position in the backlog and the order of the affected stories — should dependencies and predecessor/successor relations determine the order, should affected stories be re-prioritised or re-estimated together with it, and when must a story wait? Please cite the sources with short verbatim quotes.
+
+**Answer** (verbatim, citation markers resolve in the table below)
+
+When a new story passes a plausibility check and reveals dependencies, adjustments, or overlaps with existing backlog items, it triggers a dynamic reprioritization process [1-3]. 
+
+---
+
+##### 1. Impact on Priority and Backlog Position
+The introduction of an affecting or affected story requires unfreezing the backlog order to evaluate the new context [1]. Backlog rank order is not static; it adjusts flexibly when new requirements or information alter business value or effort [1, 4].
+
+* **Customer/Business Value Drives Order**: While developers provide input on technical sequence, the customer or Product Owner ultimately determines the final priority based on value and cost [2, 5, 6].
+* **Verbatim Quote**: As Dan Olsen notes in *The Lean Product Playbook*:
+  > *"Most of the time, your backlog is like ice; the rank order is frozen and fixed. But when new requirements come in or priorities change, you briefly melt the ice into liquid water so you can rearrange things."* [1]
+* **Verbatim Quote**: Mike Cohn emphasizes customer authority over sequence in *User Stories Applied*:
+  > *"Collectively, the developers have a sequence in which they would like to implement the stories, as will the customer. When there is a disagreement to the sequence, the customer wins. Every time."* [5]
+
+---
+
+##### 2. Role of Dependencies and Predecessor/Successor Relations
+Dependencies and predecessor/successor relations **do not dictate business priority by themselves**, but they heavily influence technical feasibility and planning [7, 8].
+
+* **Traceability and Impact**: Backlog lists explicitly record relationships such as *"Beziehungen zu anderen Anforderungen (Vorgänger, Nachfolger, Abhängigkeiten)"* to track interdependencies [9, 10].
+* **Handling High-Priority / Low-Priority Conflicts**: If a high-priority story depends on a low-priority story, or if two stories overlap, treating them independently creates estimation and scheduling bottlenecks [7, 8]. Teams must resolve this by combining overlapping stories or splitting stories to isolate dependencies [8, 11, 12].
+* **Verbatim Quote**: Mike Cohn highlights the friction dependencies create in backlog planning:
+  > *"Dependencies between stories can also make estimation much harder than it needs to be. For example, suppose the customer has selected as high priority a story that is dependent on a story that is low priority."* [7]
+* **Verbatim Quote**: Cohn further explains:
+  > *"When two or more stories are dependent upon one another, it becomes difficult to plan the individual stories into iterations."* [8]
+
+---
+
+##### 3. Re-Prioritizing and Re-Estimating Affected Stories Together
+**Yes**, affected stories **must be re-estimated and re-prioritised together** with the new story [3, 4, 11, 13]. 
+
+* **Implementation Order Alters Effort**: When stories overlap or depend on each other, the effort estimate of one story changes depending on whether its predecessor or related story is built first [11]. 
+* **Impact Analysis (*Auswirkungsanalyse*)**: Systematic requirements management requires analyzing all affected items and downstream artifacts together before making prioritization decisions [3, 13].
+* **Verbatim Quote**: Mike Cohn points out the impact of execution sequence on estimates:
+  > *"...the estimate assigned to a small story can change dramatically depending on the order in which the story is implemented... Stories like these should be combined for planning purposes."* [11]
+* **Verbatim Quote**: Cohn reinforces continuous re-estimation:
+  > *"...re-estimate the stories whenever you learn something new that affects the estimates."* [4]
+* **Verbatim Quote**: *Anforderungsverwaltung.pdf* details the formal impact analysis process:
+  > *"Im Rahmen der Auswirkungsanalyse wird der Aufwand für die Durchführung der beantragten Änderung ermittelt. Zur Ermittlung des Änderungsaufwands werden zunächst alle Anforderungen ermittelt, die von der Änderung betroffen sind..."* [3]
+* **Verbatim Quote**: *Anforderungsverwaltung.pdf* adds:
+  > *"Angenommene Anforderungsänderungen werden im nächsten Schritt durch das Change-Control Board priorisiert."* [13]
+
+---
+
+##### 4. When Must a Story Wait?
+A story must wait (be deferred, delayed, or placed in a "not now" queue) under four specific conditions:
+
+1. **Unresolved Upstream or External Dependencies**: When a story relies on external teams, third-party specialists, or upstream deliverables that are not yet ready [14, 15].
+   * **Verbatim Quote** (Eric Evans, *Domain-Driven Design*): 
+     > *"The downstream project will be delayed until the team ultimately learns to live with what it is given."* [14]
+2. **High Uncertainty or Technical Risk (Spikes Needed)**: When a complex story requires prior research or an investigative spike, the functional story must wait in a subsequent iteration while the spike is completed first [16, 17].
+   * **Verbatim Quote** (Mike Cohn, *User Stories Applied*): 
+     > *"When possible, it works well to put the investigative story in one iteration and the other stories in one or more subsequent iterations."* [16, 17]
+3. **Misalignment with Milestone Scope ("Not Now")**: When stories do not contribute to the current milestone's focus or primary user segment, they are designated as "not now" items [18, 19].
+   * **Verbatim Quote** (Gojko Adzic et al., *Fifty Quick Ideas to Improve Your User Stories*): 
+     > *"Saying ‘no’ might be politically inappropriate, but asking people to accept ‘not now’ is perfectly fine."* [19]
+4. **Capacity & Work-in-Process (WIP) Limits**: When development capacity is full or lower Cost of Delay (CD3) scores dictate that higher-value items be pulled first [2, 20].
+   * **Verbatim Quote** (*Lean Enterprise*): 
+     > *"When development capacity became available, the highest priority feature would be 'pulled' from the list."* [2]
+
+---
+
+💡 Would you like to map these story dependencies visually into a user story map or flow diagram to see how they impact your upcoming release iterations?
+
+**Citations**
+
+| # | Source | Cited passage |
+|---|---|---|
+| 1 | Olsen, The Lean Product Playbook | Having your backlog rank ordered makes it clear which item should be done next. It also makes it much easier to determine where new requirements belong in the backlog when they come up. [...] Most of the time, your backlog is like ice; the rank order is frozen and fixed. But when new requirements come in or priorities … |
+| 2 | Humble et al., Lean Enterprise | They created a backlog of features [...] called the Dynamic Priority List. When new features were proposed, they would be quickly triaged, causing the backlog to be reprioritized. When development capacity became available, the highest priority feature would be “pulled” from the list. |
+| 3 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | Auswirkungsanalyse Im Rahmen der Auswirkungsanalyse wird der Aufwand für die Durchführung der beantragten Änderung ermittelt. Zur Ermittlung des Änderungsaufwands werden zunächst alle Anforderungen ermittelt, die von der Änderung betroffen sind, einschließlich der neu definierten Anforderungen. Anschließend werden die … |
+| 4 | Cohn, User Stories Applied (2004) | Monitor each iteration's velocity and re-estimate the stories whenever you learn something new that affects the estimates. [...] Stories should be prioritized into a specific order (first, second, third and so on) rather than into groups (very high, high, medium and so on). Stories are prioritized by the customer but … |
+| 5 | Cohn, User Stories Applied (2004) | [...] Collectively, the developers have a sequence in which they would like to implement the stories, as will the customer. When there is a disagreement to the sequence, the customer wins. Every time. However, customers cannot prioritize without some information from the development team. |
+| 6 | Humble et al., Lean Enterprise | Using this approach, we can determine the impact of time on value and make prioritization decisions on an economic basis. [...] move away from relying on the most senior person in the room making the prioritization call. |
+| 7 | Cohn, User Stories Applied (2004) | [...] prioritization and planning problems. For example, suppose the customer has selected as high priority a story that is dependent on a story that is low priority. Dependencies between stories can also make estimation much harder than it needs to be. |
+| 8 | Cohn, User Stories Applied (2004) | Interdependent Stories Symptom: Difficulty planning iterations because of dependencies between stories. Discussion: When two or more stories are dependent upon one another, it becomes difficult to plan the individual stories into iterations. The team finds itself in a situation where a particular story may only be … |
+| 9 | Anforderungserhebung.pdf | [...] Weitere optionale Attribute: Risiken, Typisierung, Aufwand, zugeordnetes Release, juristische Verbindlichkeit [...] Beziehungen zu anderen Anforderungen (Vorgänger, Nachfolger, Abhängigkeiten) |
+| 10 | Anforderungsverwaltung.pdf | 5.2 Traceability Traceability (Nachverfolgbarkeit) beschreibt die Fähigkeit, Anforderungen über ihren gesamten Lebenszyklus hinweg eindeutig zu verfolgen. Sie ermöglicht es, Abhängigkeiten zwischen Anforderungen sowie deren Beziehungen zu vorgelagerten und nachgelagerten Artefakten transparent zu machen. |
+| 11 | Cohn, User Stories Applied (2004) | [...] the estimate assigned to a small story can change dramatically depending on the order in which the story is implemented. For example, consider these two small stories: Search results may be saved to an XML file. Search results may be saved to an HTML file. There is clearly a great deal of overlapping work … |
+| 12 | Cohn, User Stories Applied (2004) | [...] Lori may think it is critical for users to edit their credit cards but she may be willing to wait a few iterations for the ability for users to change addresses. The original story is split, resulting in 19.5 and 19.6. |
+| 13 | Pohl & Rupp, Basiswissen Requirements Engineering (2015) | Beurteilung der Änderung Nach Abschluss der Auswirkungsanalyse nimmt das Change-Control Board eine Beurteilung der beantragten Änderung vor. Hierzu werden Aufwand und Nutzen gegenübergestellt [...] Angenommene Anforderungsänderungen werden im nächsten Schritt durch das Change-Control Board priorisiert. |
+| 14 | Evans, Domain-Driven Design (2003) | When two development teams have an upstream/downstream relationship in which the upstream has no motivation to provide for the downstream team's needs, the downstream team is helpless. [...] The downstream project will be delayed until the team ultimately learns to live with what it is given. |
+| 15 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | When the deliverable is outside the zone of control of the delivery team, there are two common situations: the expectation is completely unrealistic, or the story is not completely actionable by the delivery group. [...] Such stories might need the involvement of an external specialist, or a different part of the … |
+| 16 | Cohn, User Stories Applied (2004) | The key benefit of breaking out a story that cannot be estimated is that it allows the customer to prioritize the research separately from the new functionality. [...] |
+| 17 | Cohn, User Stories Applied (2004) | Consider Putting the Spike in a Different Iteration When possible, it works well to put the investigative story in one iteration and the other stories in one or more subsequent iterations. Normally, only the investigative story can be estimated. |
+| 18 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | The stakeholders identified Twitter and Facebook users as important segments for this milestone, and agreed that everything else could be postponed. [...] it was easy to argue that back-office report changes fell into the ‘not now’ category. |
+| 19 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Key benefits The key advantage of this approach is reducing interruptions while avoiding political conflict. Saying ‘no’ might be politically inappropriate, but asking people to accept ‘not now’ is perfectly fine. |
+| 20 | Olsen, The Lean Product Playbook | Looking at the work item cards in Figure 12.4, when the developer working on card D finishes, he would move it from “in dev” to “done.” However, he would not be able to pull Card F forward from “ready” because “development” is at its WIP limit of 3. [...] |
+
+---

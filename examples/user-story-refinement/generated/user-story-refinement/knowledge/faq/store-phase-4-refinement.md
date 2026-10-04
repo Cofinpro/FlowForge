@@ -457,3 +457,258 @@ To choose the right pattern, identify the primary driver of the story's size or 
 | 58 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Both examples illustrate how having to make frequent deliveries makes teams focus on short-term wins and neglect long-term risks, until the work becomes completely unsustainable. This is caused not only by the pressure to deliver but also by doing progress reports mostly by tracking activity. Prioritisation is a big … |
 
 ---
+## store-phase-4-refinement-5: D5: How Planning Poker / relative estimation works (reference stories, scale, roles, convergence, too-big stories, recording, pitfalls)
+
+- asked 2026-10-04 · notebook "The Product - Business Design" · conversation `0e899011-612e-4b69-8b7b-8e7911f70f4a`
+- Sources: Olsen, The Lean Product Playbook; Cohn, User Stories Applied (2004); Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014); LeMay, Product Management in Practice (2022); Bland, Testing Business Ideas (2019); Patton, User Story Mapping
+
+**Question**
+
+> D5: How does Planning Poker / relative story point estimation work in the sources? Cover: the reference story or baseline stories used for comparison, the card scale and why it is non-linear, who estimates and who only answers questions, how the team handles disagreement and when estimates count as converged, what to do when a story is too big or too uncertain to estimate (spike, split), what is recorded afterwards, and which mistakes or pitfalls the sources name (e.g. converting points to hours, anchoring, false precision). Please cite the sources.
+
+**Answer** (verbatim, citation markers resolve in the table below)
+
+**Planning Poker** (and relative story point estimation in general) is designed to generate fast, realistic estimates as a team while avoiding common human biases in estimation [1-3]. Here is how the process works across the sources:
+
+---
+
+##### 1. Reference Stories and Baseline Stories
+Relative estimation relies on comparing new work against existing, well-understood baseline stories rather than attempting to calculate absolute hours from scratch [1, 4-8]:
+* **Reference Sets:** Teams establish a reference set of user stories of known sizes (e.g., a standard 1-point story or baseline examples for each point level/T-shirt size) to serve as benchmarks [1].
+* **Triangulation:** As new stories are estimated, the team **triangulates** them by evaluating their relative size against existing stories [6, 8]. For instance, a 3-point story should be clearly larger than a 2-point story and smaller than a 4- or 5-point story [6, 9].
+* **Visual Triangulation:** A common technique is pinning story cards under vertical columns on a wall labeled by point values, quickly checking whether a newly estimated story is "about the same" as others in that column [9, 10]. Teams using simpler heuristics can select representative stories for bucketing into categories like Small/Big/Unknown or Goldilocks (Too Big, Too Small, Just Right) [11].
+
+---
+
+##### 2. The Card Scale and Non-Linearity
+Planning Poker uses specific, constrained card scales rather than continuous numbers [4, 12]:
+* **Common Scales:** The most widespread scale is the **Fibonacci series** (\\(1, 2, 3, 5, 8, 13, \dots\\)) [1, 4] or a **modified sequence** (\\(½, 1, 2, 3, 5, 8, 13, 20, 40, 80\\)) [12]. Other teams use **powers of two** (\\(1, 2, 4, 8, 16\\)) or **T-shirt sizes** (\\(S, M, L, XL\\)) [11, 13, 14].
+* **Why the Scale Is Non-Linear:**
+  1. **Forces Distinct Choices:** Non-linear gaps force estimators to make clear, deliberate distinctions rather than agonizing over minor variations [4].
+  2. **Reflects Uncertainty:** Precision decreases as story size increases—as scope grows, our knowledge about the work becomes much less precise [12, 15, 16].
+  3. **Eliminates False Precision:** Debating whether a large feature is \\(7\\) or \\(8\\) points implies an accuracy the team does not possess [16]. Constraining options forces the team to decide between \\(5\\) or \\(8\\) (or \\(40\\) vs. \\(80\\) for epics) without getting bogged down in meaningless granular debates [12, 16].
+
+---
+
+##### 3. Roles: Who Estimates vs. Who Answers Questions
+Planning Poker establishes strict boundaries between roles to protect estimate integrity [2, 3, 17]:
+* **The Development Team (Who Estimates):** Only the developers, programmers, and technical delivery team members who will implement and test the software vote on estimates [1-4, 17]. Story estimates are owned **collectively by the team**, not by individual developers [2, 3, 8].
+* **The Product Owner / Customer (Who Only Answers Questions):**
+  * The Product Owner or customer presents the story, clarifies details, and answers domain questions as developers ask them [18-23].
+  * The Product Owner is **strictly forbidden from estimating** because they are not writing the code [2, 3, 17].
+  * The Product Owner must **not gasp, editorialize, or express shock** at high estimates [2, 3, 17]. If an estimate is higher than expected, the PO should offer clarification on a simpler intended scope (e.g., *"I see how that's 10 points as described, but all I really want is..."*) [17].
+
+---
+
+##### 4. Handling Disagreement and Convergence
+* **Simultaneous Card Reveal:** After discussing a story, each participant privately selects a card and all estimators reveal their cards simultaneously [1, 21, 23]. This prevents groupthink and stops people from anchoring on the first number spoken [1, 21, 24].
+* **Resolving Disagreements:** If estimates differ significantly, the **highest and lowest estimators explain their rationale** [1, 21]. The high estimator might point out hidden technical complexity or setup tasks, while the low estimator might share a simpler technical shortcut [25, 26].
+* **Re-voting and Convergence:** The team briefly discusses the new perspectives for a few minutes, asks the Product Owner for any needed clarifications, and votes again [1, 26]. 
+* **When Estimates Count as Converged:**
+  * Convergence usually occurs within **2 to 3 rounds** [27].
+  * Absolute identical consensus across every participant is **not required** [28]. If three developers vote \\(4\\) and one votes \\(3\\), the facilitator simply asks if the low estimator is comfortable agreeing to \\(4\\) [28]. The goal is **reasonableness**, not wasting time negotiating tiny differences [28].
+
+---
+
+##### 5. Overly Large or Uncertain Stories (Spikes & Splitting)
+When a story cannot be estimated, teams apply two core remedies based on the root cause [13, 29-31]:
+* **Story Too Big (Epics / Compound Stories):** If a story has too large a scope to fit into a single iteration, it must be **disaggregated / split** into smaller constituent user stories (e.g., separating basic search from advanced search, or card editing from address editing) [13, 20, 32, 33].
+* **High Uncertainty / Technical Unknowns (Spikes):**
+  * When developers lack domain or technical knowledge, they create a **spike**—an Extreme Programming (XP) technique defined as a brief, time-boxed research program or prototype to evaluate feasibility [29, 31, 34].
+  * The unestimatable story is split into two separate stories: (1) a **time-boxed investigative spike** to explore the problem, and (2) a **feature story** to implement the actual functionality [29, 31].
+  * **Iteration Separation:** Ideally, the investigative spike is scheduled in one iteration and the implementation story is deferred to a subsequent iteration [35, 36]. This allows the Product Owner to prioritize the research independently without introducing uncertainty into the current sprint [35, 36].
+  * Teams can also time-box analysis discussions (e.g., two 20-minute blocks); if agreement remains out of reach, the PO either splits the story or removes it for offline analysis [37].
+
+---
+
+##### 6. What Is Recorded Afterwards
+* **Story Points / Sizing:** The agreed point estimate is recorded directly on the story card or entered into the backlog management tracking tool [26, 38-40].
+* **Context & Clarifications:** Key notes, assumptions, or specific acceptance criteria surfaced during the estimation conversation are jotted on the card to serve as reminders for implementation [26, 38, 41].
+
+---
+
+##### 7. Pitfalls and Mistakes Named in the Sources
+The sources flag several major mistakes when using story points and Planning Poker:
+
+1. **Converting Points Directly to Hours:** Story points are relative measures of effort, complexity, or ideal work—not clock hours [4, 14, 42]. Converting points directly to hours or attempting to track velocity in actual hours spent distorts the purpose of relative sizing [43-46].
+2. **Anchoring & Groupthink:** Allowing senior stakeholders or vocal team members to speak their numbers first anchors the group [24, 47]. Planning Poker's simultaneous reveal explicitly guards against this bias [1, 21].
+3. **False Precision:**
+   * Arguing over small differences on large estimates (e.g., debating \\(7\\) vs. \\(8\\) or \\(79\\) vs. \\(80\\)) [12, 16].
+   * Reporting team velocity with fractional decimals (e.g., \\(43.8\\) points) [48].
+   * Treating story point totals as precise statistical forecasts without accounting for confidence intervals [43].
+4. **Cross-Team Velocity Comparisons:** Comparing story point velocity between different teams is a major management trap [49, 50]. Story point definitions and scales are relative to each specific team [50].
+5. **Post-Hoc Point Adjustments:** Changing the point value of a completed story after the sprint because it took more or fewer hours than expected [45, 51]. Velocity calculations must always use the original estimated points [45, 51].
+6. **Gaming / Cheating Metrics:** Pressuring teams to artificially increase story point velocity leads to gaming (e.g., inflating point values, skipping testing, or rushing incomplete code into production, resulting in hundreds of defects) [52].
+7. **Using Sizing as Rigid Commitments:** Summing story point estimates months in advance to lock in fixed delivery dates creates rigid anchors that destroy the adaptive benefits of Agile development [43, 44, 47].
+
+---
+
+🎯 Would you like to explore how to calculate and use team velocity for release planning, or examine specific patterns for splitting large user stories into smaller estimatable pieces?
+
+**Citations**
+
+| # | Source | Cited passage |
+|---|---|---|
+| 1 | Olsen, The Lean Product Playbook | Scrum teams use several techniques to reduce their story estimation error and achieve a more stable velocity. Teams will often discuss and estimate story points together, versus having only one team member size a given story. Some teams develop a reference set of user stories of different known sizes. Comparing … |
+| 2 | Cohn, User Stories Applied (2004) | involved the better. The customer participates while the programmers estimate, but she isn't allowed to contribute her personal estimates or editorialize when she hears an estimate she disapproves of. < Day Day Up > < Day Day Up > Estimating My preferred estimation approach is derived from the Wideband Delphi approach … |
+| 3 | Cohn, User Stories Applied (2004) | overall expected effort in a project, we will eventually need to convert estimates into time. Starting with ideal time makes that conversion a little simpler than starting with an entirely nebulous unit. < Day Day Up > < Day Day Up > Estimate as a Team Story estimates need to be owned collectively by the team. Later, … |
+| 4 | Olsen, The Lean Product Playbook | See Figure 12.1 for a visual depiction of the flow of work, meetings, and deliverables in Scrum. At the start of each sprint, the team holds a sprint planning meeting where they decide which stories they plan to accomplish in the iteration and move those stories from the product backlog to the sprint backlog. Part of … |
+| 5 | Cohn, User Stories Applied (2004) | story relative to other stories. So, a story estimated at four story points is expected to take twice as long as a story estimated at two story points. The release plan is built by assigning stories to the iterations in the release. The developers state their expected velocity, which is the number of story points they … |
+| 6 | Cohn, User Stories Applied (2004) | it. < Day Day Up > < Day Day Up > Triangulate After the first few estimates have been made, it becomes possible (and necessary) to triangulate the estimates. Triangulating an estimate refers to estimating a story based on its relationship to one or more other stories. Suppose a story is estimated at four story points. … |
+| 7 | Cohn, User Stories Applied (2004) | one that: allows us to change our mind whenever we have new information about a story works for both epics and smaller stories doesn't take a lot of time provides useful information about our progress and the work remaining is tolerant of imprecision in the estimates can be used to plan releases < Day Day Up > < Day … |
+| 8 | Cohn, User Stories Applied (2004) | < Day Day Up > < Day Day Up > Summary Estimate stories in story points, which are relative estimates of the complexity, effort or duration of a story. Estimating stories needs to be done by the team, and the estimates are owned by the team rather than individuals. Triangulate an estimate by comparing it to other … |
+| 9 | Cohn, User Stories Applied (2004) | that it is roughly larger than the two-point story yet smaller than the four-point story. None of this is exact, but triangulation is an effective means for a team to verify that they aren't gradually altering the meaning of a story point. A good way to triangulate is to pin story cards to the wall based on their … |
+| 10 | Cohn, User Stories Applied (2004) | estimated, pin it in the appropriate location. Very quickly compare the newly-estimated story to others in the column to see if it is "about the same." Figure 8.1. Pin story cards to the wall to facilitate triangulation. < Day Day Up > < Day Day Up > Using Story Points At the end of an iteration the team counts the … |
+| 11 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | How to make it work One good idea is to select several representative stories to serve as a reference, and compare any new stories to them. Again, avoid numerical labels. For example, group stories into small, big and unknown. Many teams use T-shirt sizes, which is also a good approach as long as the number of choices … |
+| 12 | Cohn, User Stories Applied (2004) | values such as: ½, 1, 2, 3, 5, 8, 13, 20, 40, 80 This is appealing because it reflects the truth that as estimates get larger, we know less about them. If the team has an epic to consider they'll have to decide whether it's a 40 or an 80, but they won't have to think about whether it's a 79 or an 80. < Day Day Up > < … |
+| 13 | Olsen, The Lean Product Playbook | Build Your Product Using Agile Development 207 FIGURE 12.1 Scrum Framework estimated values is the “powers of two” scale: 1, 2, 4, 8, 16, and so forth. T-shirt sizing, another popular technique, uses sizes such as small, medium, large, and extra large to estimate the scope of stories. Stories with points at the high … |
+| 14 | Olsen, The Lean Product Playbook | If story points seem a bit abstract to you, it’s because they are—at least at first. The goal is to determine a team’s capacity for work by tracking how many story points they complete each iteration—which is called velocity. Once a team has calculated their average velocity, they can use that number of story points … |
+| 15 | Cohn, User Stories Applied (2004) | pair days or ideal individual programmer days, and any differences will be reflected in the velocity. Precision Decreases as Story Size Increases A problem with estimating in story points is that differences between some numbers can be hard to justify. For example, suppose the developers are considering a story and … |
+| 16 | Cohn, User Stories Applied (2004) | differences of that magnitude. However, now suppose the developers are arguing over whether a story should be seven or eight story points. In most cases a one point difference between numbers that large is too small to be discussed with any relevance. Arguing about whether a story is worth seven or eight story points … |
+| 17 | Cohn, User Stories Applied (2004) | of line (either too high or too low) she may need to provide some guidance or clarification. For example, she may offer something along the lines of "I can see how that might be ten story points as you're describing it but I think I'm asking for something much, much simpler. All I really want is …" < Day Day Up > < … |
+| 18 | Cohn, User Stories Applied (2004) | estimates. Here's how it works: First, gather together the customer and the developers who will participate in creating the estimates. Bring along the story cards and a stack of additional blank note cards. (Bring some blank cards even if you're maintaining the story descriptions electronically.) Distribute a handful … |
+| 19 | Cohn, User Stories Applied (2004) | about the difficulty of programming a story, the customer may change her mind about the priority of a story. The iteration planning meeting is the perfect time for the customer to express these priority changes to the team. To start the meeting, the customer starts with her highest priority story and reads it to the … |
+| 20 | Cohn, User Stories Applied (2004) | impact on the estimate, it's worth asking her. Naturally Lori says she wants both. She wants a basic search mode where the value in one field searches both author and title. She then wants an advanced search screen where any or all of these fields can be used in combination. Even with both search modes the story isn't … |
+| 21 | Cohn, User Stories Applied (2004) | others. If the team has defined a story point as a day of ideal work, the developers think about how many ideal days the story will take to complete. If, instead, the team has defined a story point as, for example, the complexity of the story then the estimate is of the perceived complexity of the story. When everyone … |
+| 22 | Cohn, User Stories Applied (2004) | be accurate at the end of each iteration. If there was any question about this the team could have asked the customer. Guidelines Because stories are already fairly small it is not necessary to set very precise guidelines around the desired size of a task. Use these guidelines when disaggregating stories into tasks: … |
+| 23 | Cohn, User Stories Applied (2004) | story cards and a few dozen blank cards. The programmers talk about 19.1, clarify a few details on it by asking questions of Lori, and then each programmer writes his or her estimate on an index card. When everyone is done, each programmer holds his or her card up so everyone can see it. They've written: Rafe: 1 Jay: … |
+| 24 | LeMay, Product Management in Practice (2022) | What are the goals of this particular Agile ceremony or ritual? On a scale of 1–10, to what extent do we think that this ceremony or ritual is achieving its goals? I’ve often deployed that second question “scrum poker” style, asking everybody on my team to privately write down their answer and then share their answer … |
+| 25 | Cohn, User Stories Applied (2004) | estimators explain their estimates. It's important that this does not come across as attacking those estimators. Rather, you want to learn what it is they were thinking about. As an example, the high estimator may say, "Well, to test this story we're going to need to create a mock database object and that might take … |
+| 26 | Cohn, User Stories Applied (2004) | database. Also, I didn't think about needing more data—maybe that will be a problem." At this point the group discusses it for up to a few minutes. Other estimators will undoubtedly have opinions on whatever reasons the high and low estimators were at the extremes. The customer clarifies issues as they come up. A note … |
+| 27 | Cohn, User Stories Applied (2004) | estimate, the cards are again displayed. In many cases the estimates will already converge by the second round. But, if they have not, repeat the process of having the high and low estimators explain the thinking behind their estimates. In many cases the high and low estimators will not be the same as in the first … |
+| 28 | Cohn, User Stories Applied (2004) | continue the process as long as estimates are moving closer together. It isn't necessary that everyone in the room turn over a card with exactly the same estimate written down. If I'm involved in an estimation meeting, and on the second round four estimators tell me 4, 4, 4, and 3 story points, I will ask the low … |
+| 29 | Cohn, User Stories Applied (2004) | estimate the task. The solution in this case is to send one or more developers on what Extreme Programming calls a spike, which is a brief experiment to learn about an area of the application. During the spike the developers learn just enough that they can estimate the task. The spike itself is always given a defined … |
+| 30 | Cohn, User Stories Applied (2004) | The story is too big.3. First, the developers may lack domain knowledge. If the developers do not understand a story as it is written, they should discuss it with the customer who wrote the story. Again, it's not necessary to understand all the details about a story, but the developers need to have a general … |
+| 31 | Cohn, User Stories Applied (2004) | timebox around the investigative story, or spike. Even if the story cannot be estimated with any reasonable accuracy, it is still possible to define the maximum amount of time that will be spent learning. Complex stories are also common when developing new or extending known algorithms. One team in a biotech company … |
+| 32 | Cohn, User Stories Applied (2004) | Finally, the developers may not be able to estimate a story if it is too big. For example, for the BigMoneyJobs website, the story "A Job Seeker can find a job" is too large. In order to estimate it the developers will need to disaggregate it into smaller, constituent stories. A Lack of Domain Knowledge As an example … |
+| 33 | Cohn, User Stories Applied (2004) | flexibility during release planning and it allows the customer to prioritize work at a much finer level. In our case, for example, Lori may think it is critical for users to edit their credit cards but she may be willing to wait a few iterations for the ability for users to change addresses. The original story is … |
+| 34 | Bland, Testing Business Ideas (2019) | P O P -U P S T O R E S IM U LA T IO N 306 COST SETUP TIME CAPABILITIES Product / Technology / Data EVIDENCE STRENGTH RUN TIME DESIRABILITY · FEASIBILITY · VIABILITY The Extreme Programming Spike is ideal for quickly evaluating whether or not your solution is feasible, usually with software. The Extreme Programming … |
+| 35 | Cohn, User Stories Applied (2004) | product. In situations like this one it is difficult to estimate how long the research story will take. Consider Putting the Spike in a Different Iteration When possible, it works well to put the investigative story in one iteration and the other stories in one or more subsequent iterations. Normally, only the … |
+| 36 | Cohn, User Stories Applied (2004) | about how much can be accomplished in that iteration. The key benefit of breaking out a story that cannot be estimated is that it allows the customer to prioritize the research separately from the new functionality. If the customer has only the complex story to prioritize ("Add novel extensions to standard expectation … |
+| 37 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | For example, a team we recently worked with created a policy to limit the total discussion to three hours, and within that time-box, limit each story to two diverge and merge cycles of 20 minutes each. Allowing for a small break during the three hours, this effectively allows the team to discuss between three and six … |
+| 38 | Patton, User Story Mapping | As you begin to discuss stories, you’ll add information that summarizes some of your discussions. That’ll include stuff like: Story number When you get a bunch of these or put them into a tracking system, this will help you find them—sort of like the Dewey Decimal System in a library. But, whatever you do, please … |
+| 39 | Cohn, User Stories Applied (2004) | disagreement to the sequence, the customer wins. Every time. However, customers cannot prioritize without some information from the development team. Minimally, a customer needs to know approximately how long each story will take. Before the stories are prioritized, they have already been estimated and the estimates … |
+| 40 | Cohn, User Stories Applied (2004) | already familiar with all likely searching options and is pretty confident about the direction they should go, which is why his estimate is so much lower. Everyone is asked to write down a new estimate. When they're down they again show their cards. This time the cards say: Rafe: 1 Jay: 1 Maria: 1 That was pretty … |
+| 41 | Cohn, User Stories Applied (2004) | they become comfortable with the concept that story cards are reminders to talk later rather than formal commitments or descriptions of specific functionality. < Day Day Up > < Day Day Up > Estimatable It is important for developers to be able to estimate (or at least take a guess at) the size of a story or the amount … |
+| 42 | Cohn, User Stories Applied (2004) | whatsoever—no meetings, no email, no phone calls, and so on). Another team may define a story point as an ideal week of work. Yet another team may define a story point as a measure of the complexity of the story. Because of the wide variety of meanings for story points, Joshua Kerievsky has suggested that story points … |
+| 43 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Calculating a long-term estimate based on stories assumes that all planned stories will be delivered and that nothing new will come up during delivery, which completely defeats the purpose of adaptive planning. Even where someone can correctly predict time-to-deliver for all stories, long-term estimates based on … |
+| 44 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Instead of using story points and velocity for capacity planning, try to manage capacity based on analysis time or number of stories. Estimate capacity based on rolling number of stories Teams who work in time-boxed iterations often use story points to calculate velocity, and then plan capacity based on velocity. … |
+| 45 | Cohn, User Stories Applied (2004) | twelve-point story. Additionally, if you frequently find iterations finishing with many partially complete stories (even if they are all half-point stories), this may be a symptom of a lack of teamwork on the team. With an all–for–one approach the team will learn they are better off joining together to complete some … |
+| 46 | Cohn, User Stories Applied (2004) | and those actually completed for each iteration. Don't try to predict trends in velocity after only one or two iterations. The number of actual hours spent completing a task or a story have no bearing on velocity. Post big, visible charts in common areas where everyone can see them. A cumulative story point chart (as … |
+| 47 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Avoid using numeric story sizes Story sizing is one of those universal causes of heated debates in online forums, and a stumbling block for many inexperienced teams. Story sizing is useful for one purpose: deciding whether a story is too big to implement or small enough to get fast feedback. Almost any story sizing … |
+| 48 | Cohn, User Stories Applied (2004) | natural difficulty of figuring out what percentage of a story is complete. Second, we don't want to imply a false precision to velocity by reporting it with fractional values like 43.8. Third, incomplete stories do not typically represent anything of value to users or customers. So, even though they may have been … |
+| 49 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Another typical problem is using velocity for long-term trend management, or for cross-team comparisons. Use this number only for capacity planning, and calculate it based on the rolling average of the previous few iterations. This number will change over time as the product matures and business opportunities change, … |
+| 50 | Cohn, User Stories Applied (2004) | Your team's story points are not equivalent to my team's story points. A story your team estimates as worth three story points may be worth five to my team. When a story (possibly an epic) is disaggregated into its constituent stories, the sum of the estimates for the individual stories does not need to equal the … |
+| 51 | Cohn, User Stories Applied (2004) | the iteration is complete, do not change the points the team earns for any story in the iteration. For example, suppose a story was estimated to be four story points but was much larger. After the fact, the team acknowledges they should have estimated it at seven points. This story contrbutes four points to the … |
+| 52 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Measuring capacity with story points is dangerous because it stimulates the wrong behaviour: cheating to achieve some arbitrary numeric targets. One of our clients worked with a large consultancy that had committed to increasing team productivity – of course measured in story points. As the process changed, the team … |
+
+---
+## store-phase-4-refinement-6: D1: How a Three Amigos refinement is prepared and run (attendees, preparation, agenda and time-box, outputs, postponing)
+
+- asked 2026-10-04 · notebook "The Product - Business Design" · conversation `0c6566da-3bc7-47f6-a2f4-e4241513a184`
+- Sources: Kelly, The Art of Agile Product Ownership (2019); Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014); Patton, User Story Mapping
+- Note: Inline result re-entered by the extraction agent; answer text unchanged, cited passages of some references shortened (…) or trimmed to the passage parts used.
+
+**Question**
+
+> D1: How is a Three Amigos refinement meeting for a user story prepared and run, as the sources document it? Cover: who attends and how many people; what must be ready beforehand (story card, initial scenarios or examples, wireframes, prior discovery work); how long it takes and the agenda or time-box (including how many discussion rounds); what the outputs are and who writes them up; and under which conditions the sources say the conversation should be postponed, escalated to the whole team, or the story sent back because it is not ready. Please cite the sources.
+
+**Answer** (verbatim, citation markers resolve in the table below)
+
+Based on the provided sources, a **Three Amigos refinement meeting** (also referred to as a "Power of Three" or story workshop) is a structured, tactical collaboration designed to refine user stories right before development begins [1-3].
+
+---
+
+##### 1. Attendance & Group Size
+* **Core Roles**: The meeting brings together three primary perspectives [2, 3]:
+  1. **Business / Product / Analysis**: A Product Owner, Business Analyst, or UX designer who understands user needs, business goals, and the *why/what* of the story [4, 5].
+  2. **Development**: A programmer/developer who understands the codebase, technical feasibility, and *how* the feature will be built [6, 7].
+  3. **Testing**: A QA tester who brings a critical eye, applies testing heuristics, and plays the "What-About" game to spot potential failure modes [6, 7].
+* **Group Size**: Ideally **3 to 5 people** ("dinner conversation sized") to keep discussions productive and avoid "design by committee" or unproductive crowd dynamics [7-9].
+* **4 or 5 Amigos**: If specific expertise is required—such as a Database Administrator (DBA) or a specialized business domain expert—expanding to 4 or 5 participants is completely acceptable as long as all key perspectives are represented [2].
+* **Hands-on Participants**: The meeting **must include the actual developers and testers** who will build and test the story, rather than arbitrary stand-ins, to prevent knowledge transfer issues and repeated discussions during iteration planning [10]. Teams may also allow team members to opt in to sessions [11, 12].
+
+---
+
+##### 2. Preparation & Prerequisites
+Before holding a Three Amigos session, the following assets and conditions should be ready:
+* **Story Card**: A basic written story card or backlog item serving as a placeholder for the conversation [1, 13].
+* **Initial Scenarios or Examples**: The business representative or analyst prepares a few initial working scenarios illustrating how they envision the story functioning [14].
+* **Prior Discovery Work & UI Assets**: Context from earlier product discovery, user personas, journey maps, architectural sketches, wireframes, or low-fidelity UI mockups/prototypes [5, 15, 16].
+* **Scheduling & Bottleneck Planning**: If key roles (such as a single business representative) are bottlenecks, sessions should be scheduled upfront around their availability (e.g., dedicated 1-hour slots per pair each week) [17] or planned approximately one iteration/cycle ahead [18].
+
+---
+
+##### 3. Duration, Agenda, & Time-Boxing
+* **Timing & Cadence**: Sessions occur immediately before a story is developed or are scheduled one cycle ahead to perform first-pass analysis [1, 18].
+* **Typical Agenda**:
+  1. **Story & Scenario Introduction**: The analyst or business representative introduces the story card and presents initial success scenarios [14].
+  2. **Technical Feasibility Probe**: The developer evaluates the story against the existing architecture, probing for technical risks, functional gaps, and inconsistencies [14].
+  3. **Testing Heuristics & Boundary Checks**: The tester considers how to test the story, introducing edge cases and unconsidered scenarios [6, 14].
+* **Discussion Rounds (Diverge & Merge Cycles)**:
+  * Discussions are often run using **diverge and merge cycles** [19].
+  * **Diverge phase**: Participants or sub-groups explore the story for **10 to 15 minutes** (or up to 20 minutes), capturing their understanding using 3 to 4 simple, concrete examples on whiteboards or flipcharts [20-22].
+  * **Merge phase**: Groups reconvene to compare examples, highlighting formatting differences, mental model misalignments, and open question marks [19, 20].
+* **Time-Box Rules**:
+  * Individual story discussions are strict time-boxes (e.g., pausing after **30 minutes**) [23].
+  * A story is typically limited to **two diverge and merge cycles** (e.g., two 20-minute blocks) [21].
+  * Overall refinement sessions can be capped at **3 hours**, allowing a team to discuss between 3 and 6 stories for an upcoming two-week iteration [21].
+
+---
+
+##### 4. Outputs & Documentation
+* **Primary Deliverables**:
+  1. **Agreed Acceptance Criteria / Tests**: Clear, agreed-upon conditions and confirmation criteria defining when the story is complete [1, 4, 14, 24, 25].
+  2. **Right-Sized User Stories**: Larger items split into small development stories that take **1 to 3 days** to build and test [24].
+  3. **Concrete Examples & Models**: Whiteboard sketches, domain modeling notes, identified boundary conditions, and recorded open questions [14, 21, 26].
+* **Who Writes Them Up**:
+  * **Whiteboard / Flipchart Sessions**: One designated amigo is responsible for capturing the meeting notes and sharing the results with the wider team [26].
+  * **Screen-Sharing / Monitor Sessions**: Participants enter meeting notes and acceptance criteria directly into digital boards or tracking tools in real time during the conversation [26].
+
+---
+
+##### 5. Conditions for Postponement, Escalation, or Rejection
+* **Escalate to Whole Team**: If the three amigos discover that a story involves a **major impact on the current architecture** or a **globally significant feature change**, the smaller session should be paused and the discussion escalated to the entire delivery team [18].
+* **Postpone / Send Back for Detailed Analysis**:
+  * If after 30 minutes or two diverge-merge cycles (approx. 40 minutes) the story is **still too vague, complex, or uncertain** for the team to agree on scope or business risk [21, 23].
+  * If the story requires extensive business clarification or coordination with external stakeholders/third-party teams that cannot be resolved in the session [18, 21].
+* **Split the Story**:
+  * If main scenarios are clear but exception cases require further business clarification, the story is **split** so the clear portion can proceed immediately while exceptions are sent back for clarification [21].
+  * If the story is too large to complete in a single iteration, it is split into smaller, "right-sized" independent slices [21, 23, 24].
+
+---
+
+💡 *Would you like to draft a standardized "Three Amigos Refinement Checklist" or template based on these guidelines to share with your delivery teams?*
+
+**Citations**
+
+| # | Source | Cited passage |
+|---|---|---|
+| 1 | Kelly, The Art of Agile Product Ownership (2019) | As I never tire of repeating: a story is a placeholder for a conversation. No matter how imperfect a story is, when it comes to be developed, a conversation needs to be had. Some teams formalize this as a “3-Amigos” meeting—alternatively this is sometimes called a “Power of Three.” 3-Amigos occurs immediately before a … |
+| 2 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | A common mistake in this situation is to delegate the task of analysing a story to just one person. Instead, create small conversations that involve at least one person representing each of the development, testing and analysis roles. A common name for such conversations, which Gojko used also in Specification by … |
+| 3 | Patton, User Story Mapping | The Three Amigos ¡Three Amigos! is the name of a mediocre 1986 western comedy starring Steve Martin, Chevy Chase, and Martin Short. What does this film have to do with Agile software development and stories? There’s a more tactical triad of collaborators that’s valuable during story workshops. … |
+| 4 | Kelly, The Art of Agile Product Ownership (2019) | A BA may work with Programmers and Testers too: Using the BA’s knowledge of the business to write acceptance criteria and tests; perhaps taking part in “3-Amigos” sessions or pairing with a developer as they practice BDD … |
+| 5 | Patton, User Story Mapping | And, of course, we’ll need someone who understands what we’re building, who it’s for, and why we’re building it, so we’ll need a member of that core product discovery team. That person is the second amigo. At this stage we’re often not introducing a new feature idea. We likely already did that back in discovery. Now … |
+| 6 | Patton, User Story Mapping | During this last best conversation, we really need to consider lots of details and alternatives for implementation, so we’ll need a developer from the team who’ll build the software—ideally, one of the developers who will actually work on it. For this small piece of software to be considered done, it’ll need to be … |
+| 7 | Patton, User Story Mapping | Keep the workshop small to stay productive. Three to five people is a good size. Include the right people. For this conversation to be effective, include: Someone who understands users and how the user interface could or should work—often a product owner, user experience professional, or business analyst One or two … |
+| 8 | Patton, User Story Mapping | There’s a nasty anti-pattern I often see here. Some think that since anyone in a team might pick up the story and do work on it, everyone on the team should be involved in every conversation. Perhaps you work at this company. You’ll know it because you’ll hear lots of people complaining that there are way too many … |
+| 9 | Patton, User Story Mapping | As you might recall from Chapter 11, story workshops are small, productive conversations where the right people work together to tell the stories one last time, and in the process make all the tough decisions about exactly what they’ll choose to build. … That’s usually three to five people. |
+| 10 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | How to make it work Make sure to involve people who will actually work on delivering the story. A common mistake teams make is to delegate the three-amigos analysis to whoever has time, so the people who actually end up delivering the software do not participate in the discussions. This creates problems for knowledge … |
+| 11 | Patton, User Story Mapping | The problem isn’t that story conversations are hard. Well, actually they can be pretty hard at times. But all conversations are made tougher by trying to include too many people. If many of those people aren’t interested or motivated to participate, you’re doomed. … Allow team members to opt in to these conversations. … |
+| 12 | Patton, User Story Mapping | Story Workshop Recipe Use a story workshop to refine understanding and define specifically what the development team will build. The workshop is a product conversation—supported by lots of pictures and data—that helps the team make decisions and arrive at confirmation: the acceptance criteria for what we’ll choose to … |
+| 13 | Patton, User Story Mapping | If you’re not getting together to have rich discussions about your stories, then you’re not really using stories. Ron Jeffries and the 3 Cs … Card Write what you’d like to see in the software on a bunch of index cards. Conversation Get together and have a rich conversation about what software to build. Confirmation … |
+| 14 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | The typical way to run a three-amigo meeting is to start with the analyst or business representative introducing a story and presenting a few initial scenarios of how they would see a story working. Then the developer considers the story in the context of the existing infrastructure and probes for potential functional … |
+| 15 | Kelly, The Art of Agile Product Ownership (2019) | … George was glad for a Friday where he got to spend time with the team, hold some 3-Amigos sessions to flesh out acceptance criteria, review some screen changes, do some tests, update his product backlog and quarter plan … |
+| 16 | Patton, User Story Mapping | UI prototypes Architectural and technical design sketches Architectural or technical prototypes Lots of collaboration with team members, users, customers, stakeholders, and subject matter experts Minimize and plan … Discovery Is for Building Shared Understanding |
+| 17 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | For teams where one of the roles is a clear bottleneck (for example there is only one business representative), it’s useful to plan three-amigo conversations upfront around the availability of that role. For example, each pair of developers and testers gets a one-hour slot with the business representative each Monday. … |
+| 18 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | It’s important to recognise when the entire team needs to know about some important decision or participate in a discussion. If the three amigos end up discussing a major impact on the current architecture or some globally significant feature change, then it might be worth pausing the smaller discussion and continuing … |
+| 19 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Our preferred way of facilitating story discussions for teams of 10 to 20 people is to split the team into several smaller groups, get groups to capture their understanding of a story using examples, then bring the groups together to compare results. … After several cycles of splitting and bringing groups together, … |
+| 20 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | To get the best results, communicate that the purpose of the diverge part is not to find all the answers, but to find good questions quickly. Time-box diverge cycles to about 10 to 15 minutes and bring the team together to discuss the results. In particular, focus on the differences among the groups: differences in … |
+| 21 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | For example, a team we recently worked with created a policy to limit the total discussion to three hours, and within that time-box, limit each story to two diverge and merge cycles of 20 minutes each. Allowing for a small break during the three hours, this effectively allows the team to discuss between three and six … |
+| 22 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Finally, diverge and merge cycles help to avoid reliance on a single source of all knowledge. … Get groups to use concrete examples to capture their understanding and write those examples down on a whiteboard or a flipchart. … We ask groups to start writing down three to four very simple examples as soon as possible. … |
+| 23 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | How to make it work Time-box story discussions to avoid a single complex item taking too long. For example, pause a discussion after 30 minutes and see if it’s worth continuing with the analysis or not. If the story is too complex, perhaps the examples discussed in the first half hour are a good initial slice. If you … |
+| 24 | Patton, User Story Mapping | This group will work through the details and agree on specific acceptance criteria for the story. It’s out of this conversation that we’ll have our best estimate of how long it will take to build and test the software. And it’s often in this conversation that we’ll make decisions to split the story into smaller, … |
+| 25 | Patton, User Story Mapping | … So, when we feel like we’re converging on a good solution, we’ll need to start focusing on the answer to these questions: If we build what we agree to, what will we check to see that we’re done? The answer to this question is usually a short list of things to check. This list is often called acceptance criteria, or … |
+| 26 | Adzic et al., Fifty Quick Ideas to Improve Your User Stories (2014) | Three-amigo conversations are best with a flipchart or a whiteboard, but they can also be very effective around a monitor, or even using screen-sharing remotely. If you organise conversations with a flipchart, one of the three amigos is responsible for writing up the results of the conversation and sharing them with … |
+
+---
