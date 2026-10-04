@@ -11,6 +11,7 @@ How `bpmn2agent-design` turns each analyzed BPMN element into a `kind` in `workf
 - [Data stores → context sources](#data-stores--context-sources)
 - [v1 supported / unsupported constructs](#v1-supported--unsupported-constructs)
 - [Legend: mapping view colours](#legend-mapping-view-colours)
+- [Language rule](#language-rule)
 - [Worked mini example](#worked-mini-example)
 
 ## The rubric
@@ -190,6 +191,15 @@ kind or status name, so colour is never the only signal. Exact values: the heade
 | Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (knowledge, live system, memory) or the process-wide input/output; no file of its own. A greener shade than the `orchestrator` teal, so the two stay apart; the annotation names the Art. |
 | **Grey** | `not-generated` | Deliberately not generated; the element's `reason` is shown in its annotation and on click. Not an error. |
 | **Red** | `unresolved` | Unmapped or still an open question; blocks `bpmn2agent-verify`'s "no red in the map" check. |
+
+## Language rule
+
+- BPMN labels (lanes, tasks, gateways, flows, events, data objects, stores) stay verbatim in the
+  diagram's language (`meta.language`) wherever they appear: skills, agents, scripts, reports.
+- Everything else in generated skills, agents, scripts, hooks and `mapping/report.md` is English.
+- Exceptions: the generated `README.md` is in `meta.language`; the fixed German tokens stay German
+  (`## Kontextquellen`, "nur nach Freigabe", "Lesezugriff nicht pro Rolle getrennt", the memory
+  sections *Bewährt*, *Vermeiden*, *Offene Muster*, and the `Art:`/`Ort:` values).
 
 ## Worked mini example
 
