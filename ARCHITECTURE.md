@@ -257,11 +257,19 @@ ohne Preis oder ein `total_cost_usd` aus `claude -p`, das um mehr als 1 % abweic
 die Session fortgesetzt oder geleert worden, steht `cost-state` hinter dem Transkript oder deckt
 nur den letzten Prozess ab; das ist eine Warnung, und die Transkriptsumme gilt.
 
+**Agents des Workflow-Tools.** Ihre Transkripte liegen unter `subagents/workflows/<run>/`, und
+`meta.json` trägt neben der Beschreibung (dem Label) auch `workflowPhase`. Die Ausgabe-Tokens stehen dort
+aber nur als Zwischenstand, Eingabe und Cache sind exakt. Der Bericht schließt das auf zwei Wegen: mit
+`--otel` (die `api_request`-Ereignisse der Telemetrie, per `request_id` verbunden) exakt, ohne nach
+`cost-state` und Textlänge verteilt und als **geschätzt** ausgewiesen. Die Gesamtsumme ist in beiden
+Fällen exakt; am Pilotlauf lag die Schätzung je Element zusammen 1,8 % der Kosten daneben.
+
 **Grenzen.** Das Transkriptformat ist intern und kann sich mit jeder Claude-Code-Version ändern; der
 Leser scheitert dann laut statt still falsch zu summieren. Kosten außerhalb von Claude (Gemini/
-NotebookLM über MCP) werden gezählt, aber nicht bepreist. OpenTelemetry (`claude_code.cost.usage`
-mit `agent.name`, `skill.name`) taugt als Gegenprobe über viele Läufe und fürs Dashboard, kennt aber
-keine Element-ID und gibt `agent.name` nur mit `OTEL_LOG_TOOL_DETAILS=1` preis.
+NotebookLM über MCP) werden gezählt, aber nicht bepreist. OpenTelemetry allein
+(`claude_code.cost.usage` mit `agent.name`, `skill.name`) taugt als Gegenprobe und fürs Dashboard, kennt
+aber keine Element-ID und gibt `agent.name` nur mit `OTEL_LOG_TOOL_DETAILS=1` preis; als Quelle für
+`cost-report` sind die `api_request`-Ereignisse mit `request_id` brauchbar.
 
 ## Wissensschicht
 

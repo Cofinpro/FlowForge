@@ -5,7 +5,7 @@ import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
 import { fileURLToPath } from 'node:url'
-import { buildReport, attribute } from './cost-report.mjs'
+import { buildReport, attribute, completeRequests, elementIdOf } from './cost-report.mjs'
 import { HAUS_COST, MAP, OPUS_COST, makeFixture } from './fixture.mjs'
 import { costOf, loadPrices, readSession, sumUsage } from './read-usage.mjs'
 
@@ -48,6 +48,71 @@ test('attribution order: description id, skill, lane, main, unassigned', () => {
   assert.deepEqual(by.req_a3, { type: 'unassigned', id: 'nicht zugeordnet' })
 })
 
+test('agents of the Workflow tool (subagents/workflows/<run>/) are read, with their phase', () => {
+  const s = readSession(makeFixture(tmp()).transcript)
+  const a3 = s.requests.find((r) => r.requestId === 'req_a3')
+  assert.equal(a3.source, 'subagent')
+  assert.equal(a3.phase, 'Eingang')
+  assert.equal(s.files, 4) // main + three agents, one of them nested
+})
+
+test('a composite dispatch label resolves to the inner element, an unknown one to nothing', () => {
+  assert.equal(elementIdOf('K2 Story prüfen', MAP), 'K2')
+  assert.equal(elementIdOf('Call_X/C1 Einordnen', MAP), 'C1')
+  assert.equal(elementIdOf('Call_X/ZZ nope', MAP), null)
+  assert.equal(elementIdOf(null, MAP), null)
+})
+
+test('phase: the map wins, else the agent\'s own workflowPhase, else none', () => {
+  const s = readSession(makeFixture(tmp()).transcript)
+  const rep = buildReport({ ...s, map: MAP, prices })
+  const by = Object.fromEntries(rep.byPhase.map((p) => [p.name, p.requests]))
+  assert.deepEqual(by, { 'Prüfung': 1, 'Eingang': 2, '(ohne Phase)': 2 }) // K2 by map; C1 by map + a3 by meta; main + QA lane agent
+})
+
+test('workflow agents with snapshot-only output: total stays exact, the missing output is an estimate', () => {
+  const s = readSession(makeFixture(tmp(), { snapshotWorkflowAgents: true }).transcript)
+  assert.equal(s.incomplete, 1)
+  const rep = buildReport({ ...s, map: MAP, prices })
+  assert.equal(rep.ok, true, JSON.stringify(rep.checks))
+  near(rep.totals.sessionUsd, 5 * OPUS_COST + HAUS_COST, 'exact total from cost-state')
+  assert.equal(rep.estimate.requests, 1)
+  near(rep.estimate.outputTokens, 2000 - 3, 'the exact gap')
+  near(rep.totals.estimatedUsd, (1997 * 20) / 1e6, 'only the missing output is estimated')
+  assert.match(rep.checks.map((c) => c.text).join('\n'), /sind geschätzt/)
+})
+
+test('without cost-state an incomplete request stays a flagged lower bound', () => {
+  const s = readSession(makeFixture(tmp(), { snapshotWorkflowAgents: true }).transcript)
+  const rep = buildReport({ ...s, costState: null, map: MAP, prices })
+  assert.equal(rep.estimate, null)
+  assert.match(rep.checks.map((c) => c.text).join('\n'), /nur eine Untergrenze/)
+})
+
+test('no estimate when tokens do not match (resumed session): lower bound instead of a wrong split', () => {
+  const s = readSession(makeFixture(tmp(), { snapshotWorkflowAgents: true }).transcript)
+  const requests = s.requests.filter((r) => r.requestId !== 'req_a1') // an earlier process is missing
+  const rep = buildReport({ ...s, requests, map: MAP, prices })
+  assert.equal(rep.estimate, null)
+  assert.match(rep.checks.map((c) => c.text).join('\n'), /Untergrenze/)
+})
+
+test('telemetry api_request events make it exact: output per request and the helper call', () => {
+  const s = readSession(makeFixture(tmp(), { snapshotWorkflowAgents: true }).transcript)
+  const otel = new Map([
+    ['req_a3', { requestId: 'req_a3', model: 'claude-opus-5-5', querySource: 'repl', usage: { input: 1000, output: 2000, cacheRead: 100000, cacheWriteTotal: 15000 }, costUsd: OPUS_COST }],
+    ['aux1', { requestId: 'aux1', model: 'claude-haiku-4-5-20251001', querySource: 'web_search_tool', usage: { input: 10000, output: 1000, cacheRead: 0, cacheWriteTotal: 0 }, costUsd: HAUS_COST }],
+  ])
+  const rep = buildReport({ ...s, otel, map: MAP, prices })
+  assert.equal(rep.ok, true, JSON.stringify(rep.checks))
+  assert.equal(rep.estimate, null)
+  near(rep.totals.sessionUsd, 5 * OPUS_COST + HAUS_COST, 'total')
+  near(rep.totals.auxiliaryUsd, 0, 'nothing left only in cost-state')
+  const aux = rep.byUnit.find((u) => u.type === 'auxiliary')
+  near(aux.costUsd, HAUS_COST, 'helper call priced as OpenTelemetry reports it')
+  assert.equal(completeRequests({ requests: s.requests, costState: null, otel, prices }).info.otel.matched, 1)
+})
+
 test('a skill shared by several elements is attributed to the skill, not guessed', () => {
   const r = { source: 'main', attributionSkill: 'story-check', description: null, agentType: null }
   assert.deepEqual(attribute(r, MAP), { type: 'skill', id: 'story-check' })
@@ -80,7 +145,7 @@ test('a missing subagent transcript (resumed session) is a warning with the reas
   // cost-state of the full session against only the main thread: tokens missing, not exceeding
   const rep = buildReport({ ...full, requests: s.requests, map: MAP, prices })
   assert.equal(rep.ok, true)
-  assert.match(rep.checks.map((c) => c.text).join('\n'), /fortgesetzt oder geleert/)
+  assert.match(rep.checks.map((c) => c.text).join('\n'), /fortgesetzte bzw\. geleerte Session/)
 })
 
 test('cost-state behind the transcript (resumed session) warns and the transcript sum counts', () => {

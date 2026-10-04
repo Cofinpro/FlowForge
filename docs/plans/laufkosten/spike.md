@@ -55,7 +55,44 @@ ersten Entwurf haben echte Daten widerlegt und wurden korrigiert:
 - **`cost-report` braucht die Spec nicht:** Er liest nur die Kostenkarte. Im Erzeuger-Repo liegt sie
   unter `generated/<workflow>/.claude/hooks/<workflow>-cost-map.json`.
 
-## Offen für T8 (braucht einen echten Lauf)
+## Pilotlauf mit dem Workflow-Tool (dark-factory, 2026-10-04)
+
+Ein echter Lauf von `product-vision-to-user-stories` im Factory-Repo (`agentCap: 14`, 15 Agents,
+Gesamtkosten 10,02 USD), mit Kostenprotokoll-Hook, einem Hook, der die Payloads mitschreibt, und
+OpenTelemetry in eine lokale Senke. Die drei offenen Fragen sind beantwortet; zwei Annahmen waren
+falsch und wurden korrigiert.
+
+| Frage | Befund |
+|---|---|
+| Hook-Payload | `SubagentStop`: `agent_id`, `agent_type`, `agent_transcript_path`, `transcript_path` (**Hauptthread**), `session_id`, `cwd`, `permission_mode`, `prompt_id`, `effort`, `stop_hook_active`, `background_tasks`, `session_crons`, `scratchpad_dir`. `Stop`: dazu `last_assistant_message`. `SessionEnd`: `reason` (`prompt_input_exit`, `clear`), `session_id`, `transcript_path`. **Keine Token- oder Kostenfelder.** Der Hook braucht weiterhin nur `transcript_path`. |
+| Feuert `SubagentStop` für Workflow-Agents? | **Ja**, 15 Ereignisse für 15 Agents. |
+| Wo liegen die Transkripte der Workflow-Agents? | **Tiefer als gedacht:** `<session>/subagents/workflows/<workflowRun>/agent-<id>.jsonl` (+ `.meta.json`, `journal.jsonl`), daneben `<session>/workflows/<workflowRun>.json`. Leser und Hook scannten nur `subagents/*.jsonl` und fanden 0 von 15 Agents (0,16 von 10,02 USD). Beide scannen jetzt jede Tiefe. |
+| Ist das Label die `description`? | **Ja**, und `meta.json` trägt zusätzlich `workflowPhase` (der `phase()`-Titel). Phase und Element kommen damit aus dem Transkript, nicht aus der Spec. 15 von 15 Labels beginnen mit einer Element-ID; zwei Formen kamen vor, die der Plan nicht kannte: zusammengesetzte IDs `Call_R1/R_4` (innerer Schritt einer Call Activity, gilt der Teil nach `/`) und Elemente, die die Spec als `hook` oder `orchestrator` führt, die die Fabrik aber als Agent ausführt (die Karte führt jetzt alle ausführbaren Elemente). |
+| OpenTelemetry-Gegenprobe | `claude_code.cost.usage` summiert auf **10,0193 USD**, also exakt `cost-state` und die Summe des Berichts. Die `api_request`-Ereignisse tragen dieselbe `request_id` wie die Transkriptzeilen, dazu exakte Tokens und `cost_usd`. `agent.name` kam mit `OTEL_LOG_TOOL_DETAILS=1` im Klartext. |
+
+**Korrigierte Annahme: Ausgabe-Tokens der Workflow-Agents.** Im Transkript eines Workflow-Agents trägt
+die Zeile einer Anfrage nur den Zwischenstand der Ausgabe (16 statt 365 Tokens, kein `stop_reason`),
+der Endwert wird nie nachgetragen. Von 168 Anfragen waren nur 34 vollständig. Eingabe- und
+Cache-Tokens stimmen dagegen bei allen 168 exakt mit OpenTelemetry überein. Der Rest (1,26 USD) sind 52
+Hilfsaufrufe (`web_search_tool`, `web_fetch_apply`), die in keinem Transkript stehen. Zwei Wege, das zu
+schließen:
+
+- **Mit Telemetrie (exakt):** `cost-report.mjs --otel` ersetzt je `request_id` die Ausgabe und führt die
+  Hilfsaufrufe als eigene Zeilen. Summe 10,0193 USD, nichts geschätzt.
+- **Ohne Telemetrie (geschätzt, gekennzeichnet):** Stimmen Eingabe und Cache je Modell exakt mit
+  `cost-state` überein, ist die fehlende Ausgabe in der Summe exakt bekannt. Sie wird nach Textlänge auf
+  die unvollständigen Anfragen verteilt. Am Pilot: Gesamtsumme exakt, je Element eine Abweichung von
+  zusammen 1,8 % der Kosten (größter Einzelfehler 0,05 USD bei einem Element mit 0,67 USD). Stimmen die
+  Tokens nicht überein (fortgesetzte Session), gibt es keine Schätzung, nur eine Untergrenze mit Hinweis.
+
+Nicht brauchbar: `totalTokens` und `tokens` in `workflows/<run>.json` entsprechen keiner Kombination
+aus Eingabe, Cache und Ausgabe.
+
+**Was der Lauf gekostet hat** (exakt): Phase *0 Idee-Brief & DR-01* 6,90 USD, davon der Schritt
+„Claims extrahieren & Abdeckung prüfen“ (`R_3b`) allein 2,76 USD (27 % des Laufs); Lane *Researcher*
+6,24 USD; Hilfsaufrufe 1,26 USD.
+
+## Früher offen (jetzt beantwortet)
 
 1. **Hook-Payload:** Welche Felder `SubagentStop`, `Stop` und `SessionEnd` tatsächlich liefern und
    ob `SubagentStop` auch für Agents aus dem Workflow-Tool feuert. Der Hook ist so gebaut, dass er

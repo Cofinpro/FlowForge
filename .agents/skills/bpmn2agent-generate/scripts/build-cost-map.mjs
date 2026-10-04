@@ -16,6 +16,9 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 
 const COST_BEARING = new Set(['skill', 'script', 'agent-checklist'])
+// Never dispatched as a step. Everything else may be: a hand-maintained workflow also runs a `hook`
+// or `orchestrator` element as an agent, so its label must resolve to the element, not to a lane.
+const NOT_DISPATCHED = new Set(['context-source', 'workflow-input', 'workflow-output', 'not-generated'])
 
 /** .../skills/<name>/... -> <name>; .../agents/<name>.md -> agent:<name>; else null */
 function ownerOf(p) {
@@ -41,7 +44,7 @@ export function buildCostMap(spec) {
       if (COST_BEARING.has(el.kind)) (skills[o.skill] ??= new Set()).add(id)
       else if (el.kind === 'orchestrator' || el.kind === 'human-checkpoint') orchestrationSkills.add(o.skill)
     }
-    if (!COST_BEARING.has(el.kind)) continue
+    if (NOT_DISPATCHED.has(el.kind)) continue
     elements[id] = {
       label: el.label,
       lane: el.lane ?? null,

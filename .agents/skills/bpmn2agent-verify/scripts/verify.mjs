@@ -952,7 +952,7 @@ if (!spec) {
           artCat.fail(
             `"${relPath}" does not match the spec` +
             (missing.length ? `; elements missing from it: [${missing.join(', ')}]` : '') +
-            (foreign.length ? `; elements it lists that the spec does not have as cost-bearing: [${foreign.join(', ')}]` : '') +
+            (foreign.length ? `; elements it lists that the spec does not have as dispatchable: [${foreign.join(', ')}]` : '') +
             ' — re-run bpmn2agent-generate step 6b',
             'generate'
           );

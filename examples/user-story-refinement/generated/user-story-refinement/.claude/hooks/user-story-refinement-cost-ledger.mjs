@@ -15,7 +15,7 @@
 //
 // Line shapes (one JSON object per line):
 //   {kind:'request', sessionId, requestId, source, agentId, agentType, description, attributionSkill,
-//    attributionMcpServer, attributionMcpTool, model, usage:{input,output,cacheRead,cacheWrite5m,cacheWrite1h,webSearch}}
+//    attributionMcpServer, attributionMcpTool, model, phase, final, chars, usage:{input,output,cacheRead,cacheWrite5m,cacheWrite1h,webSearch}}
 //   {kind:'cost-state', sessionId, version, costState:{totalCostUSD, hasUnknownModelCost, modelUsage}}
 //
 // Smoke test (expect two lines, then none on a second run):
@@ -46,6 +46,8 @@ function toUsage(u) {
 }
 
 // One API request spans several lines; only the last carries the final output_tokens.
+const chars = new Map() // requestId -> length of the content it produced (a weight for completing output tokens later)
+
 function readThread(file, meta, requests) {
   for (const e of jsonLines(file)) {
     if (e.type !== 'assistant' || !e.requestId || !e.message?.usage || !e.message.model) continue
@@ -55,12 +57,24 @@ function readThread(file, meta, requests) {
     if (!cur || usage.output >= cur.usage.output) {
       requests.set(e.requestId, {
         kind: 'request', requestId: e.requestId, source: meta.source, agentId: meta.agentId ?? null,
-        agentType: meta.agentType ?? null, description: meta.description ?? null,
+        agentType: meta.agentType ?? null, description: meta.description ?? null, phase: meta.phase ?? null,
         attributionSkill: e.attributionSkill ?? null, attributionMcpServer: e.attributionMcpServer ?? null,
         attributionMcpTool: e.attributionMcpTool ?? null, model: e.message.model, stopReason: e.message.stop_reason ?? null, usage,
       })
     }
+    chars.set(e.requestId, (chars.get(e.requestId) ?? 0) + JSON.stringify(e.message.content ?? '').length)
   }
+}
+
+function agentTranscripts(dir) {
+  if (!fs.existsSync(dir)) return []
+  const out = []
+  for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const p = path.join(dir, e.name)
+    if (e.isDirectory()) out.push(...agentTranscripts(p))
+    else if (/^agent-.*\.jsonl$/.test(e.name)) out.push(p)
+  }
+  return out
 }
 
 // Sleeps without spinning; a held lock only ever lasts for one append.
@@ -78,14 +92,12 @@ function main() {
 
   const requests = new Map()
   readThread(transcript, { source: 'main' }, requests)
-  const subDir = path.join(path.dirname(transcript), sessionId, 'subagents')
-  if (fs.existsSync(subDir)) {
-    for (const f of fs.readdirSync(subDir).filter((n) => /^agent-.*\.jsonl$/.test(n))) {
-      const agentId = f.slice('agent-'.length, -'.jsonl'.length)
-      let m = {}
-      try { m = JSON.parse(fs.readFileSync(path.join(subDir, `agent-${agentId}.meta.json`), 'utf8')) } catch { /* no meta */ }
-      readThread(path.join(subDir, f), { source: 'subagent', agentId, agentType: m.agentType, description: m.description }, requests)
-    }
+  // agents of the Workflow tool sit deeper: subagents/workflows/<run>/agent-<id>.jsonl
+  for (const file of agentTranscripts(path.join(path.dirname(transcript), sessionId, 'subagents'))) {
+    const agentId = path.basename(file).slice('agent-'.length, -'.jsonl'.length)
+    let m = {}
+    try { m = JSON.parse(fs.readFileSync(path.join(path.dirname(file), `agent-${agentId}.meta.json`), 'utf8')) } catch { /* no meta */ }
+    readThread(file, { source: 'subagent', agentId, agentType: m.agentType, description: m.description, phase: m.workflowPhase }, requests)
   }
   let costState = null
   let version = null
@@ -105,18 +117,23 @@ function main() {
   }
   if (fd < 0) return process.stderr.write(`${WORKFLOW} cost ledger: could not lock ${ledger}, skipped\n`)
   try {
-    const seen = new Set()
+    const seen = new Map() // requestId -> how it was last written
     let lastCostState = null
     if (fs.existsSync(ledger)) {
       for (const e of jsonLines(ledger)) {
         if (e.sessionId !== sessionId) continue
-        if (e.kind === 'request') seen.add(e.requestId)
+        if (e.kind === 'request') seen.set(e.requestId, `${e.usage?.output}|${e.final ?? true}`)
         if (e.kind === 'cost-state') lastCostState = JSON.stringify(e.costState)
       }
     }
+    // A request is (re)written when it is new or has improved. Agents of the Workflow tool never get a final
+    // output_tokens written back, so their rows stay final:false; the cost report completes them.
     const lines = []
     for (const r of requests.values()) {
-      if (r.stopReason && !seen.has(r.requestId)) { const { stopReason, ...row } = r; lines.push({ ...row, sessionId }) }
+      const sig = `${r.usage.output}|${!!r.stopReason}`
+      if (seen.get(r.requestId) === sig) continue
+      const { stopReason, ...row } = r
+      lines.push({ ...row, final: !!stopReason, chars: chars.get(r.requestId) ?? 0, sessionId })
     }
     if (costState) {
       const cs = { totalCostUSD: costState.totalCostUSD, hasUnknownModelCost: !!costState.hasUnknownModelCost, modelUsage: costState.modelUsage }
