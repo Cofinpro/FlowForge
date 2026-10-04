@@ -7,10 +7,14 @@
 // Layout it understands (internal Claude Code format, see docs/plans/laufkosten/spike.md):
 //   <dir>/<sessionId>.jsonl                     main thread, also holds the one `cost-state` entry
 //   <dir>/<sessionId>/subagents/agent-<id>.jsonl (+ .meta.json with agentType and description)
+//   <dir>/<sessionId>/subagents/workflows/<workflowRun>/agent-<id>.jsonl   agents of the Workflow tool;
+//       their meta.json also carries `workflowPhase`. Any depth below subagents/ is scanned.
 //
 // One API request spans several lines (one per content block). Only the last one carries the final
-// output_tokens, so each requestId keeps the line with the highest output_tokens. A request whose
-// final line has no stop_reason is incomplete: it is counted and reported, never silently summed.
+// output_tokens, so each requestId keeps the line with the highest output_tokens. Input and cache
+// tokens are exact on every line. A request whose best line has no stop_reason is `final: false`: its
+// output_tokens is only a streaming snapshot (the agents of the Workflow tool never get the final
+// value written back). It is kept, flagged, and cost-report decides how to complete it.
 // A line that looks like a request but lacks requestId/usage/model is a format change: fail loudly.
 
 import fs from 'node:fs'
@@ -57,6 +61,18 @@ function toUsage(u, where) {
   }
 }
 
+/** Every agent-<id>.jsonl below dir, at any depth (Workflow tool agents sit in workflows/<run>/). */
+function agentTranscripts(dir) {
+  if (!fs.existsSync(dir)) return []
+  const out = []
+  for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+    const p = path.join(dir, e.name)
+    if (e.isDirectory()) out.push(...agentTranscripts(p))
+    else if (/^agent-.*\.jsonl$/.test(e.name)) out.push(p)
+  }
+  return out
+}
+
 function readThread(file, meta, requests, stats) {
   for (const { line, entry } of jsonLines(file)) {
     if (entry.type !== 'assistant') continue
@@ -68,6 +84,8 @@ function readThread(file, meta, requests, stats) {
       throw new Error(`${where}: assistant entry without requestId/usage/model (transcript format changed?)`)
     }
     const usage = toUsage(msg.usage, where)
+    const chars = (stats.chars ??= new Map())
+    chars.set(entry.requestId, (chars.get(entry.requestId) ?? 0) + JSON.stringify(msg.content ?? '').length)
     const cur = requests.get(entry.requestId)
     if (!cur || usage.output >= cur.usage.output) {
       requests.set(entry.requestId, {
@@ -77,6 +95,7 @@ function readThread(file, meta, requests, stats) {
         agentType: meta.agentType,
         description: meta.description,
         parentAgentId: meta.parentAgentId,
+        phase: meta.phase ?? null,
         attributionSkill: entry.attributionSkill ?? null,
         attributionMcpServer: entry.attributionMcpServer ?? null,
         attributionMcpTool: entry.attributionMcpTool ?? null,
@@ -106,24 +125,23 @@ export function readSession(transcript) {
 
   const subDir = path.join(path.dirname(transcript), sessionId, 'subagents')
   let files = 1
-  if (fs.existsSync(subDir)) {
-    for (const f of fs.readdirSync(subDir).filter((n) => /^agent-.*\.jsonl$/.test(n)).sort()) {
-      const agentId = f.slice('agent-'.length, -'.jsonl'.length)
-      const metaFile = path.join(subDir, `agent-${agentId}.meta.json`)
-      const m = fs.existsSync(metaFile) ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : {}
-      readThread(path.join(subDir, f), {
-        source: 'subagent', agentId, agentType: m.agentType ?? null, description: m.description ?? null,
-        parentAgentId: m.parentAgentId ?? null,
-      }, requests, stats)
-      files++
-    }
+  for (const file of agentTranscripts(subDir)) {
+    const f = path.basename(file)
+    const agentId = f.slice('agent-'.length, -'.jsonl'.length)
+    const metaFile = path.join(path.dirname(file), `agent-${agentId}.meta.json`)
+    const m = fs.existsSync(metaFile) ? JSON.parse(fs.readFileSync(metaFile, 'utf8')) : {}
+    readThread(file, {
+      source: 'subagent', agentId, agentType: m.agentType ?? null, description: m.description ?? null,
+      parentAgentId: m.parentAgentId ?? null, phase: m.workflowPhase ?? null,
+    }, requests, stats)
+    files++
   }
-  const all = [...requests.values()]
+  const all = [...requests.values()].map((r) => ({ ...r, final: !!r.stopReason, chars: stats.chars?.get(r.requestId) ?? 0 }))
   return {
     sessionId,
     version,
-    requests: all.filter((r) => r.stopReason),
-    incomplete: all.filter((r) => !r.stopReason).length,
+    requests: all,
+    incomplete: all.filter((r) => !r.final).length,
     costState: costState && {
       totalCostUSD: costState.totalCostUSD,
       hasUnknownModelCost: !!costState.hasUnknownModelCost,
@@ -134,13 +152,37 @@ export function readSession(transcript) {
   }
 }
 
+/**
+ * Reads the `api_request` log events of an OTLP/JSON telemetry dump (one {path, body} per line, as the
+ * pilot sink writes it) into Map<request_id, exact per-request usage and cost>. Only events of
+ * `sessionId` count. `cost_usd` is Claude Code's own estimate, so it is kept as a cross-check.
+ */
+export function readOtel(file, sessionId) {
+  const out = new Map()
+  for (const { entry } of jsonLines(file)) {
+    for (const rl of entry.body?.resourceLogs ?? []) for (const sl of rl.scopeLogs ?? []) for (const lr of sl.logRecords ?? []) {
+      const a = Object.fromEntries((lr.attributes ?? []).map((x) => [x.key, Object.values(x.value)[0]]))
+      if (a['event.name'] !== 'api_request' || !a.request_id || (sessionId && a['session.id'] !== sessionId)) continue
+      out.set(a.request_id, {
+        requestId: a.request_id, model: a.model, querySource: a.query_source ?? null,
+        usage: {
+          input: Number(a.input_tokens), output: Number(a.output_tokens), cacheRead: Number(a.cache_read_tokens),
+          cacheWriteTotal: Number(a.cache_creation_tokens), webSearch: 0,
+        },
+        costUsd: Number(a.cost_usd),
+      })
+    }
+  }
+  return out
+}
+
 /** Reads ledger.jsonl lines written by the generated cost-ledger hook. */
 export function readLedger(file) {
-  const requests = new Map() // keyed by requestId: a line written twice counts once
+  const requests = new Map() // keyed by requestId: the latest line wins (a request may be re-written once final)
   const costStates = new Map()
   for (const { entry } of jsonLines(file)) {
     if (entry.kind === 'cost-state') costStates.set(entry.sessionId, entry)
-    else if (entry.kind === 'request') requests.set(`${entry.sessionId}/${entry.requestId}`, entry)
+    else if (entry.kind === 'request') requests.set(`${entry.sessionId}/${entry.requestId}`, { ...entry, final: entry.final ?? true }) // the first hook version wrote only final rows
   }
   return { requests: [...requests.values()], costStates }
 }

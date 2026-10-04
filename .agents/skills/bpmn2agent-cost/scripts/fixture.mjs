@@ -34,8 +34,14 @@ const u = (c, o = {}) => ({
 })
 
 /** One API request = a thinking line with a streaming snapshot, then the final line. */
-function request(id, model, extra = {}, c = OPUS_USAGE) {
+function request(id, model, extra = {}, c = OPUS_USAGE, final = true) {
   const base = { type: 'assistant', requestId: id, ...extra }
+  // an agent of the Workflow tool: every line keeps the streaming snapshot, none gets the final output
+  if (!final) {
+    return [
+      { ...base, message: { model, content: [{ type: 'text', text: 'x'.repeat(40) }], stop_reason: null, usage: u(c, { output: 3 }) } },
+    ]
+  }
   return [
     { ...base, message: { model, content: [{ type: 'thinking' }], stop_reason: null, usage: u(c, { output: 2 }) } },
     { ...base, message: { model, content: [{ type: 'text' }], stop_reason: 'end_turn', usage: u(c) } },
@@ -52,7 +58,7 @@ const write = (file, lines) => {
  * 3 subagent requests (element K2 by description, lane QA by agent type, unassigned) and a cost-state
  * that also holds a haiku auxiliary call which no transcript has.
  */
-export function makeFixture(dir, { dropSubagent = false, sessionId = 'sess-1' } = {}) {
+export function makeFixture(dir, { dropSubagent = false, sessionId = 'sess-1', snapshotWorkflowAgents = false } = {}) {
   const S = sessionId
   const OPUS = 'claude-opus-5-5'
   write(path.join(dir, `${S}.jsonl`), [
@@ -78,11 +84,13 @@ export function makeFixture(dir, { dropSubagent = false, sessionId = 'sess-1' } 
   const subs = [
     ['a1', { agentType: 'wf-qa', description: 'K2 Story prüfen' }],
     ['a2', { agentType: 'wf-qa', description: 'Nachfrage klären' }],
-    ['a3', { agentType: 'general-purpose', description: 'irgendwas' }],
+    // an agent of the Workflow tool: one level deeper, with the phase in its meta
+    ['a3', { agentType: 'general-purpose', description: 'irgendwas', workflowPhase: 'Eingang' }, 'workflows/wf_1'],
   ]
-  for (const [id, meta] of dropSubagent ? [] : subs) {
-    write(path.join(dir, S, 'subagents', `agent-${id}.jsonl`), request(`req_${id}`, OPUS))
-    fs.writeFileSync(path.join(dir, S, 'subagents', `agent-${id}.meta.json`), JSON.stringify({ ...meta, spawnDepth: 1 }))
+  for (const [id, meta, sub = ''] of dropSubagent ? [] : subs) {
+    const d = path.join(dir, S, 'subagents', sub)
+    write(path.join(d, `agent-${id}.jsonl`), request(`req_${id}`, OPUS, {}, OPUS_USAGE, !(snapshotWorkflowAgents && sub)))
+    fs.writeFileSync(path.join(d, `agent-${id}.meta.json`), JSON.stringify({ ...meta, spawnDepth: 1 }))
   }
   return { dir, transcript: path.join(dir, `${S}.jsonl`), map: MAP }
 }

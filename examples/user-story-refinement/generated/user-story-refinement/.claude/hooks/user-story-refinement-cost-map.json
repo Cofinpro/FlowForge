@@ -3,30 +3,60 @@
     "file": "user-story-refinement.bpmn",
     "elements": [
       "B4",
+      "B5",
       "C1",
       "C2",
       "C3",
       "C4",
+      "D1",
       "D2a",
       "D2b",
       "D2c",
       "D2d",
       "D3",
       "D4",
+      "D5",
       "D6",
       "E1",
       "E2",
       "E3",
+      "E4",
       "E5",
+      "End_AnStoryUebergeben",
+      "End_AnliegenVerworfen",
+      "End_BugUebergeben",
+      "End_FachkonzeptAenderung",
+      "End_FeedbackGeparkt",
+      "End_StorySprintReady",
+      "End_StoryVerworfen",
+      "End_StoryZusammengefuehrt",
+      "Gw_Bezug",
+      "Gw_Bug",
+      "Gw_Erkenntnis",
+      "Gw_Fachkonzept",
+      "Gw_Invest",
+      "Gw_Plausibel",
+      "Gw_Ready",
+      "Gw_Schaetzung",
+      "Gw_Sprintgroesse",
+      "Gw_Unsicherheit",
       "I1",
       "I2",
+      "I3",
       "I4",
+      "I5",
       "I6",
+      "K1",
       "K2",
       "K3",
       "K4",
       "K5",
       "K6",
+      "Merge_Einordnung",
+      "Merge_Formulierung",
+      "Merge_Refinement",
+      "Merge_Schaetzung",
+      "Merge_Validierung",
       "P1",
       "P10",
       "P2",
@@ -35,7 +65,15 @@
       "P5",
       "P6",
       "P7",
-      "P8"
+      "P8",
+      "P9",
+      "Par_AmigosJoin",
+      "Par_AmigosSplit",
+      "Par_KlaerungJoin",
+      "Par_KlaerungSplit",
+      "Par_PlausiJoin",
+      "Par_PlausiSplit",
+      "Start_FeedbackEingegangen"
     ]
   },
   "workflow": "user-story-refinement",
@@ -91,6 +129,15 @@
         "story-clarification"
       ]
     },
+    "B5": {
+      "label": "Erkenntnisse auswerten",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
     "C1": {
       "label": "Story unter Epic in User Story Map einordnen",
       "lane": "product-owner",
@@ -125,6 +172,15 @@
       "kind": "skill",
       "skills": [
         "story-writing"
+      ]
+    },
+    "D1": {
+      "label": "Refinement mit Three Amigos ansetzen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
       ]
     },
     "D2a": {
@@ -181,6 +237,15 @@
         "story-refinement"
       ]
     },
+    "D5": {
+      "label": "Story Points schätzen (Planning Poker)",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
     "D6": {
       "label": "Story vertikal schneiden (Splitting-Muster)",
       "lane": "product-owner",
@@ -217,6 +282,15 @@
         "story-readiness"
       ]
     },
+    "E4": {
+      "label": "Story priorisieren & Übernahme ins Backlog freigeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
     "E5": {
       "label": "Nachgelagerten Spike durchführen",
       "lane": "entwicklung",
@@ -224,6 +298,168 @@
       "kind": "skill",
       "skills": [
         "story-readiness"
+      ]
+    },
+    "End_AnliegenVerworfen": {
+      "label": "Anliegen verworfen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_AnStoryUebergeben": {
+      "label": "Als Änderung an offene Story übergeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_BugUebergeben": {
+      "label": "An Fehlerbearbeitung übergeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_FachkonzeptAenderung": {
+      "label": "Fachkonzept-Änderung beantragt",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_FeedbackGeparkt": {
+      "label": "Feedback im Opportunity Backlog geparkt",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_StorySprintReady": {
+      "label": "Story sprint-ready",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_StoryVerworfen": {
+      "label": "Story verworfen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "End_StoryZusammengefuehrt": {
+      "label": "Story in bestehende Story überführt",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Bezug": {
+      "label": "Wie hängt das Anliegen mit dem Backlog zusammen?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Bug": {
+      "label": "Fehlverhalten einer bestehenden Funktion?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Erkenntnis": {
+      "label": "Tragen die Erkenntnisse die Story?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Fachkonzept": {
+      "label": "Mit dem Fachkonzept vereinbar?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Invest": {
+      "label": "INVEST erfüllt?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Plausibel": {
+      "label": "Konsistent mit dem übrigen Backlog?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Ready": {
+      "label": "Definition of Ready erfüllt?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Schaetzung": {
+      "label": "Schätzungen konvergiert?",
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Sprintgroesse": {
+      "label": "Passt die Story in einen Sprint?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Gw_Unsicherheit": {
+      "label": "Relevante Unsicherheit offen?",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
       ]
     },
     "I1": {
@@ -244,6 +480,15 @@
         "story-triage"
       ]
     },
+    "I3": {
+      "label": "Änderungshinweis an offene Story freigeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
     "I4": {
       "label": "Änderungshinweis an offener Story ergänzen",
       "lane": "product-owner",
@@ -253,6 +498,15 @@
         "story-backlog-publish"
       ]
     },
+    "I5": {
+      "label": "Parken im Opportunity Backlog freigeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
     "I6": {
       "label": "Feedback im Opportunity Backlog anlegen",
       "lane": "product-owner",
@@ -260,6 +514,15 @@
       "kind": "skill",
       "skills": [
         "story-backlog-publish"
+      ]
+    },
+    "K1": {
+      "label": "Anliegen mit Feedbackgeber klären",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
       ]
     },
     "K2": {
@@ -305,6 +568,46 @@
       "kind": "skill",
       "skills": [
         "story-clarification"
+      ]
+    },
+    "Merge_Einordnung": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Merge_Formulierung": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Merge_Refinement": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Merge_Schaetzung": {
+      "lane": "entwicklung",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Merge_Validierung": {
+      "lane": "ux-design",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
       ]
     },
     "P1": {
@@ -386,6 +689,72 @@
       "kind": "skill",
       "skills": [
         "story-backlog-publish"
+      ]
+    },
+    "P9": {
+      "label": "Zusammenführung freigeben",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_AmigosJoin": {
+      "lane": "qa-test",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_AmigosSplit": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_KlaerungJoin": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_KlaerungSplit": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_PlausiJoin": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Par_PlausiSplit": {
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
+      ]
+    },
+    "Start_FeedbackEingegangen": {
+      "label": "Nutzer- oder Stakeholder-Feedback eingegangen",
+      "lane": "product-owner",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "user-story-refinement"
       ]
     }
   },

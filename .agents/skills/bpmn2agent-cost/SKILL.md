@@ -18,8 +18,23 @@ report the numbers the script prints and never recompute or round them yourself.
 - **Run data**, in this order:
   1. `.claude/runs/<workflow>/ledger.jsonl`, written by the workflow's cost-ledger hook; survives
      the cleanup of old transcripts. No session named → the newest.
-  2. A session transcript `~/.claude/projects/<project>/<session>.jsonl` (subagents sit next to it);
-     use it when the workflow has no ledger yet or to cross-check one.
+  2. A session transcript `~/.claude/projects/<project>/<session>.jsonl` (subagents sit next to it,
+     Workflow-tool agents under `subagents/workflows/<run>/`); use it when the workflow has no ledger
+     yet or to cross-check one.
+- **Telemetry (optional, makes it exact):** the transcripts of Workflow-tool agents only hold a
+  streaming snapshot of the output tokens. Without telemetry the report completes them from
+  `cost-state` and marks that share as estimated. To get exact numbers, start Claude Code with
+  telemetry pointed at the bundled sink and pass its file as `--otel`:
+
+  ```bash
+  node ${CLAUDE_SKILL_DIR}/scripts/otel-sink.mjs otel.jsonl &        # OTLP/HTTP JSON receiver on :4318
+  CLAUDE_CODE_ENABLE_TELEMETRY=1 OTEL_LOGS_EXPORTER=otlp OTEL_METRICS_EXPORTER=otlp \
+  OTEL_EXPORTER_OTLP_PROTOCOL=http/json OTEL_EXPORTER_OTLP_ENDPOINT=http://127.0.0.1:4318 \
+  OTEL_LOGS_EXPORT_INTERVAL=2000 claude
+  ```
+
+  Its `api_request` events carry the request id, so every request gets its exact usage, and the
+  web-search/fetch helper calls that have no transcript show up as *Hilfsaufrufe*.
 
 ## 2. Run the report
 
@@ -28,7 +43,7 @@ node ${CLAUDE_SKILL_DIR}/scripts/cost-report.mjs --map <cost-map.json> \
   --ledger .claude/runs/<workflow>/ledger.jsonl        # or: --session <session.jsonl>
 ```
 
-Optional: `--session-id <id>` (ledger with several runs), `--claude-json <file>` (result of
+Optional: `--otel <otel.jsonl>` (exact output tokens, see above), `--session-id <id>` (ledger with several runs), `--claude-json <file>` (result of
 `claude -p --output-format json`, its `total_cost_usd` is compared), `--out <dir>`. It writes
 `cost.json` and `cost.md` next to the ledger and prints the checks. Exit `1` means a reconciliation
 check failed: say which one and do not present the cost as reliable.
@@ -38,8 +53,11 @@ check failed: say which one and do not present the cost as reliable.
 - Lead with the total and the top elements; point at `cost.md` for the tables.
 - **nicht zugeordnet** over 5 % means the label convention or the cost map is off. Name where the
   requests came from (the report lists them); do not distribute the cost over elements.
-- **Hilfsaufrufe** are in the session total but in no transcript (web-search helper model and the
-  like). A warning that a model's tokens are missing means the session was resumed or cleared.
+- **Hilfsaufrufe** are in the session total but in no transcript (web-search/fetch helper calls). A
+  warning that a model's tokens are missing means that, or that the session was resumed or cleared.
+- **geschätzt**: say how much. The total is exact; only the split of the missing output tokens over
+  the Workflow agents follows text length (on a real run the per-element error summed to under 2 % of
+  the cost). Offer `--otel` for exact figures; never present the estimated share as measured.
 - MCP calls (Gemini/NotebookLM and others) are counted but carry no price: they are billed outside
   Claude.
 - Prices are those of `prices.json`; the report names its version. A failing "Preis reproduziert

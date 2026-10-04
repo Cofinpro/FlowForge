@@ -1,8 +1,9 @@
 # Laufkosten je BPMN-Element messen
 
 Status: umgesetzt am 2026-10-04 (T0 bis T8), Abweichungen und Befunde in [`spike.md`](spike.md).
-Offen für einen echten Lauf: die Felder der Hook-Payloads, das Verhalten des Workflow-Tools und der
-Abgleich mit OpenTelemetry (siehe spike.md „Offen für T8“). Aufgaben: [`tasks.md`](tasks.md).
+Der Pilotlauf mit dem Workflow-Tool ist ausgewertet (spike.md „Pilotlauf“) und hat zwei Korrekturen
+gebracht: Workflow-Agents liegen unter `subagents/workflows/<run>/`, und ihre Ausgabe-Tokens sind nur
+ein Zwischenstand (exakt mit `--otel`, sonst gekennzeichnet geschätzt). Aufgaben: [`tasks.md`](tasks.md).
 
 ## Ziel
 
