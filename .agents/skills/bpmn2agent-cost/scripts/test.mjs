@@ -4,10 +4,12 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
+import { fileURLToPath } from 'node:url'
 import { buildReport, attribute } from './cost-report.mjs'
 import { HAUS_COST, MAP, OPUS_COST, makeFixture } from './fixture.mjs'
 import { costOf, loadPrices, readSession, sumUsage } from './read-usage.mjs'
 
+const here = path.dirname(fileURLToPath(import.meta.url))
 const prices = loadPrices()
 const tmp = () => fs.mkdtempSync(path.join(os.tmpdir(), 'cost-test-'))
 const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, `${msg}: ${a} != ${b}`)
@@ -160,4 +162,73 @@ test('hook never fails the run: bad payload and missing transcript exit 0', () =
   const hook = path.join(project, '.claude', 'hooks', 'wf-cost-ledger.mjs')
   assert.equal(spawnSync('node', [hook], { input: 'not json', encoding: 'utf8' }).status, 0)
   assert.equal(runHook(project, '/nonexistent/x.jsonl').status, 0)
+})
+
+// ---- cost-bench ------------------------------------------------------------------------------
+import { aggregate, quantile, stats } from './cost-bench.mjs'
+
+test('stats: median, spread and IQR by linear interpolation', () => {
+  const s = stats([10, 1, 3, 2, 4])
+  assert.deepEqual([s.n, s.median, s.min, s.max, s.iqr], [5, 3, 1, 10, 2])
+  assert.equal(quantile([], 0.5), 0)
+})
+
+test('aggregate: a unit missing from a run counts as zero in that run', () => {
+  const mk = (cost, withK2) => ({
+    totals: { sessionUsd: cost },
+    byUnit: [{ type: 'element', id: 'C1', label: 'a', lane: 'po', costUsd: cost }, ...(withK2 ? [{ type: 'element', id: 'K2', label: 'b', lane: 'qa', costUsd: 1 }] : [])],
+    byLane: [{ name: 'po', costUsd: cost }], byPhase: [{ name: '(ohne Phase)', costUsd: cost }],
+  })
+  const agg = aggregate([mk(1, true), mk(2, false), mk(3, true)])
+  const k2 = agg.units.find((u) => u.id === 'K2')
+  assert.deepEqual(k2.perRun, [1, 0, 1])
+  assert.equal(agg.total.median, 2)
+})
+
+function fakeClaude(dir) {
+  const f = path.join(dir, 'fake-claude.mjs')
+  fs.writeFileSync(f, `
+import fs from 'node:fs'; import path from 'node:path'
+import { makeFixture, OPUS_COST, HAUS_COST } from ${JSON.stringify(path.join(here, 'fixture.mjs'))}
+const c = process.env.FAKE_COUNTER; const n = (fs.existsSync(c) ? Number(fs.readFileSync(c, 'utf8')) : 0) + 1
+fs.writeFileSync(c, String(n))
+fs.writeFileSync(path.join(process.cwd(), 'ran.txt'), 'x')
+makeFixture(path.join(process.env.CLAUDE_CONFIG_DIR, 'projects', 'p'), { sessionId: 'sess-' + n })
+console.log(JSON.stringify({ session_id: 'sess-' + n, total_cost_usd: 5 * OPUS_COST + HAUS_COST }))
+`)
+  return f
+}
+
+const bench = (args, env) => spawnSync('node', [path.join(here, 'cost-bench.mjs'), ...args], { encoding: 'utf8', env: { ...process.env, ...env } })
+
+test('cost-bench runs the fake claude N times in fresh copies and reports the spread', () => {
+  const d = tmp()
+  const template = path.join(d, 'template'); fs.mkdirSync(template); fs.writeFileSync(path.join(template, 'CLAUDE.md'), 'x')
+  const mapFile = path.join(d, 'map.json'); fs.writeFileSync(mapFile, JSON.stringify({ ...MAP, humanCheckpoints: [] }))
+  const out = path.join(d, 'out'); const counter = path.join(d, 'counter')
+  const r = bench(['--map', mapFile, '--prompt', 'go', '--template', template, '--runs', '3', '--drop-first', '--confirm', '--claude-bin', fakeClaude(d), '--out', out],
+    { CLAUDE_CONFIG_DIR: path.join(d, 'cfg'), FAKE_COUNTER: counter })
+  assert.equal(r.status, 0, r.stdout + r.stderr)
+  assert.equal(fs.readFileSync(counter, 'utf8'), '3')
+  assert.equal(fs.existsSync(path.join(template, 'ran.txt')), false) // the template itself stays untouched
+  const md = fs.readFileSync(path.join(out, 'bench.md'), 'utf8')
+  assert.match(md, /2 Läufe \(erster Lauf verworfen\)/)
+  const json = JSON.parse(fs.readFileSync(path.join(out, 'bench.json'), 'utf8'))
+  near(json.aggregate.total.median, 5 * OPUS_COST + HAUS_COST, 'median per run')
+  assert.equal(json.runs.length, 3)
+})
+
+test('cost-bench refuses human checkpoints and does not spend without --confirm', () => {
+  const d = tmp()
+  const mapFile = path.join(d, 'map.json'); const counter = path.join(d, 'counter')
+  const env = { CLAUDE_CONFIG_DIR: path.join(d, 'cfg'), FAKE_COUNTER: counter }
+  fs.writeFileSync(mapFile, JSON.stringify({ ...MAP, humanCheckpoints: [{ id: 'I3', label: 'freigeben' }] }))
+  const refused = bench(['--map', mapFile, '--prompt', 'go', '--confirm', '--claude-bin', fakeClaude(d)], env)
+  assert.equal(refused.status, 2)
+  assert.match(refused.stderr, /human checkpoints/)
+  fs.writeFileSync(mapFile, JSON.stringify({ ...MAP, humanCheckpoints: [] }))
+  const dry = bench(['--map', mapFile, '--prompt', 'go', '--claude-bin', fakeClaude(d)], env)
+  assert.equal(dry.status, 0)
+  assert.match(dry.stdout, /Re-run with --confirm/)
+  assert.equal(fs.existsSync(counter), false)
 })

@@ -52,8 +52,8 @@ const write = (file, lines) => {
  * 3 subagent requests (element K2 by description, lane QA by agent type, unassigned) and a cost-state
  * that also holds a haiku auxiliary call which no transcript has.
  */
-export function makeFixture(dir, { dropSubagent = false } = {}) {
-  const S = 'sess-1'
+export function makeFixture(dir, { dropSubagent = false, sessionId = 'sess-1' } = {}) {
+  const S = sessionId
   const OPUS = 'claude-opus-5-5'
   write(path.join(dir, `${S}.jsonl`), [
     { type: 'user', version: '2.1.283' },

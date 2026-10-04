@@ -53,6 +53,12 @@ export function buildCostMap(spec) {
   // a skill that some cost-bearing element owns is attributed to that element, never to orchestration
   for (const s of Object.keys(skills)) orchestrationSkills.delete(s)
 
+  // `claude -p` cannot answer a human checkpoint, so bpmn2agent-cost's benchmark needs to know them
+  const humanCheckpoints = Object.entries(spec.elements ?? {})
+    .filter(([, el]) => el.kind === 'human-checkpoint')
+    .map(([id, el]) => ({ id, label: el.label }))
+    .sort((a, b) => a.id.localeCompare(b.id))
+
   const agentTypes = {}
   const lanes = {}
   for (const [rid, role] of Object.entries(spec.roles ?? {})) {
@@ -69,6 +75,7 @@ export function buildCostMap(spec) {
     pattern: spec.pattern?.chosen ?? null,
     generatorVersion: spec.meta.generatorVersion ?? null,
     orchestration: { skills: [...orchestrationSkills].sort(), agentTypes: orchestratorAgents },
+    humanCheckpoints,
     elements: sorted(elements),
     skills: sorted(Object.fromEntries(Object.entries(skills).map(([k, v]) => [k, [...v].sort()]))),
     agentTypes: sorted(agentTypes),

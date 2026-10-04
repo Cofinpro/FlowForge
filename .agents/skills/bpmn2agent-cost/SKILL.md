@@ -45,6 +45,16 @@ check failed: say which one and do not present the cost as reliable.
 - Prices are those of `prices.json`; the report names its version. A failing "Preis reproduziert
   cost-state" check means the table is stale: update it from the current price list, then re-run.
 
+## 4. Repeated runs
+
+`scripts/cost-bench.mjs` runs the same input N times with `claude -p` (each in a fresh copy of a
+template project) and reports median, min/max and IQR per element, lane and phase; see its header for
+the options. Every run spends real money: print the plan first (no `--confirm`), tell the user the
+number of runs, and start only after they agree. It refuses a workflow with human checkpoints
+(`claude -p` cannot answer them) unless the prompt carries the answers (`--allow-checkpoints`).
+`--drop-first` leaves out the first run, whose cache writes make it dearer. Under 3 runs the spread
+says little.
+
 ## What this skill never does
 
 Edit the workflow, the spec or the price table without being asked, or turn missing data into an
