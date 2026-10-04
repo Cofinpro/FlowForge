@@ -6,6 +6,12 @@
   <bpmn:category id="Category_Group_Phase4"><bpmn:categoryValue id="CategoryValue_Group_Phase4" value="4 Refinement (Three Amigos)" /></bpmn:category>
   <bpmn:category id="Category_Group_Phase5"><bpmn:categoryValue id="CategoryValue_Group_Phase5" value="5 Definition of Ready" /></bpmn:category>
   <bpmn:category id="Category_Group_Phase6"><bpmn:categoryValue id="CategoryValue_Group_Phase6" value="6 Plausibilität gegen Backlog &amp; Freigabe" /></bpmn:category>
+  <bpmn:dataStore id="DataStore_MethodikPhase1" />
+  <bpmn:dataStore id="DataStore_MethodikPhase2" />
+  <bpmn:dataStore id="DataStore_MethodikPhase3" />
+  <bpmn:dataStore id="DataStore_MethodikPhase4" />
+  <bpmn:dataStore id="DataStore_MethodikPhase5" />
+  <bpmn:dataStore id="DataStore_MethodikPhase6" />
   <bpmn:process id="Process_UserStoryErstellenVerfeinern" name="Neue User Story aus Feedback erstellen &amp; verfeinern" isExecutable="false">
     <bpmn:documentation>Weg einer neuen User Story in einem laufenden IT-Projekt: Produktvision, Epics, Fachkonzept und Backlog existieren bereits. Auslöser ist Feedback von Nutzern oder Stakeholdern. Triage (Bug, Änderung an offener Story, neue Story unter einem Epic, parken), leichtgewichtige fachliche Klärung gegen Epic-Ziel und Fachkonzept, Spike oder Prototyp nur bei echter Unsicherheit, Story formulieren und gegen INVEST prüfen, Three-Amigos-Refinement, Definition of Ready und abschließend eine Plausibilitätsprüfung gegen die übrigen Stories im Backlog (Duplikate, widersprüchliche Akzeptanzkriterien, Abhängigkeiten, Ablaufkonsistenz). Wissensbasis: NotebookLM-Notebook &quot;The Product - Business Design&quot;.</bpmn:documentation>
     <bpmn:laneSet id="LaneSet_UserStory">
@@ -91,6 +97,8 @@
       <bpmn:documentation>Input: Rohfeedback, Quelle und Absender. Output: Feedback-Eintrag - beobachtetes Problem statt gewünschter Lösung ('Ich muss Abweichungen schneller finden' statt 'Ich brauche einen Excel-Export'), betroffene Nutzerrolle, Häufigkeit, Dringlichkeit, Link zur Quelle.</bpmn:documentation>
       <bpmn:incoming>F01</bpmn:incoming>
       <bpmn:outgoing>F02</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase1_I1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I1"><bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase1_I1</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Feedback_Ref"><bpmn:targetRef>DO_Feedback_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="I2" name="Verwandte Stories &amp; Epics im Backlog suchen">
@@ -98,7 +106,9 @@
       <bpmn:incoming>F02</bpmn:incoming>
       <bpmn:outgoing>F03</bpmn:outgoing>
       <bpmn:property id="Property_DO_Backlog_Ref" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase1_I2" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref"><bpmn:sourceRef>DO_Backlog_Ref</bpmn:sourceRef><bpmn:targetRef>Property_DO_Backlog_Ref</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase1_I2"><bpmn:sourceRef>StoreRef_MethodikPhase1</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase1_I2</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Bug" name="Fehlverhalten einer bestehenden Funktion?" default="F05">
       <bpmn:documentation>Bug = das System weicht von vereinbarten Akzeptanzkriterien oder Fachregeln ab. Kleine Bugs laufen über die Fehlerbearbeitung; erfordert die Korrektur neue Fähigkeiten oder geänderte Abläufe, ist es eine Story.</bpmn:documentation>
@@ -133,7 +143,9 @@
       <bpmn:incoming>F09</bpmn:incoming>
       <bpmn:outgoing>F10</bpmn:outgoing>
       <bpmn:property id="Property_DO_Fachkonzept_Ref" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase2_K2" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Fachkonzept_Ref"><bpmn:sourceRef>DO_Fachkonzept_Ref</bpmn:sourceRef><bpmn:targetRef>Property_DO_Fachkonzept_Ref</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K2"><bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase2_K2</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Fachkonzept" name="Mit dem Fachkonzept vereinbar?" default="F12">
       <bpmn:incoming>F10</bpmn:incoming>
@@ -154,6 +166,8 @@
       <bpmn:documentation>Input: Befund zu Epic und Fachkonzept, Feedback-Eintrag. Output: Ist-/Soll-Delta - wie verhält sich das System heute, wie nach der Story, was gehört ausdrücklich nicht dazu.</bpmn:documentation>
       <bpmn:incoming>F13</bpmn:incoming>
       <bpmn:outgoing>F16</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K3"><bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase2_K3</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_ScopeDelta_Ref"><bpmn:targetRef>DO_ScopeDelta_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="K5" name="Betroffene Screens &amp; Abläufe identifizieren">
@@ -165,6 +179,8 @@
       <bpmn:documentation>Input: Feedback-Eintrag, Architektur, betroffene Komponenten. Output: grobe Größe, betroffene Schnittstellen, offene technische Risiken (unbekannte APIs, Performance, Compliance-Grenzen).</bpmn:documentation>
       <bpmn:incoming>F15</bpmn:incoming>
       <bpmn:outgoing>F18</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase2_K4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase2_K4"><bpmn:sourceRef>StoreRef_MethodikPhase2</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase2_K4</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:parallelGateway id="Par_KlaerungJoin">
       <bpmn:incoming>F16</bpmn:incoming>
@@ -229,6 +245,8 @@
       <bpmn:documentation>Input: Platz in der Story Map, Nutzerrolle aus dem Fachkonzept, Problemformulierung, Ist-/Soll-Delta. Output: Story-Karte 'Als [Rolle] möchte ich [Ziel], damit [Nutzen]' - Nutzerziel statt 'Das System soll ...'. Die Karte ist ein Platzhalter für ein Gespräch, kein Vertrag.</bpmn:documentation>
       <bpmn:incoming>F31</bpmn:incoming>
       <bpmn:outgoing>F32</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C2" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C2"><bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase3_C2</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_StoryKarte_Ref"><bpmn:targetRef>DO_StoryKarte_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="C3" name="Bezug zu Epic, Fachkonzept &amp; Feedback dokumentieren">
@@ -240,6 +258,8 @@
       <bpmn:documentation>Input: Story-Karte. Output: INVEST-Befund (Independent, Negotiable, Valuable, Estimable, Small, Testable) je Kriterium.</bpmn:documentation>
       <bpmn:incoming>F33</bpmn:incoming>
       <bpmn:outgoing>F34</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase3_C4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase3_C4"><bpmn:sourceRef>StoreRef_MethodikPhase3</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase3_C4</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:businessRuleTask>
     <bpmn:exclusiveGateway id="Gw_Invest" name="INVEST erfüllt?" default="F35">
       <bpmn:incoming>F34</bpmn:incoming>
@@ -296,12 +316,16 @@
       <bpmn:documentation>Input: Fachregeln, Rand- und Negativfälle, Wireframes. Output: Akzeptanzkriterien als BDD-Szenarien (Gegeben / Wenn / Dann) auf der Rückseite der Karte.</bpmn:documentation>
       <bpmn:incoming>F47</bpmn:incoming>
       <bpmn:outgoing>F76</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D3"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D3</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Akzeptanz_Ref"><bpmn:targetRef>DO_Akzeptanz_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D4" name="Beispieltabellen ergänzen (Specification by Example)">
       <bpmn:documentation>Input: Akzeptanzkriterien. Output: Beispieltabellen mit konkreten Werten statt abstrakter Regeln.</bpmn:documentation>
       <bpmn:incoming>F76</bpmn:incoming>
       <bpmn:outgoing>F77</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D4"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D4</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Merge_Schaetzung">
       <bpmn:incoming>F77</bpmn:incoming>
@@ -328,11 +352,15 @@
       <bpmn:documentation>Input: zu große Story, Akzeptanzkriterien. Output: kleinere Teil-Stories (1-3 Tage) durch vertikalen Schnitt: Slice the Cake, Basisnutzen zuerst, Referenzdaten fest verdrahten, Backend 'auf Krücken'. Jede Teil-Story wird neu formuliert.</bpmn:documentation>
       <bpmn:incoming>F51</bpmn:incoming>
       <bpmn:outgoing>F52</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase4_D6" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase4_D6"><bpmn:sourceRef>StoreRef_MethodikPhase4</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase4_D6</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:businessRuleTask id="E1" name="Definition of Ready prüfen">
       <bpmn:documentation>Input: verfeinerte Story, Akzeptanzkriterien, Schätzung. Output: DoR-Befund: INVEST erfüllt, konkrete Rolle statt 'der Nutzer', Akzeptanzkriterien bestätigt, Wireframes vorhanden, keine offenen Blocker, Größe unter Kapazitätsgrenze.</bpmn:documentation>
       <bpmn:incoming>F50</bpmn:incoming>
       <bpmn:outgoing>F53</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase5_E1" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase5_E1"><bpmn:sourceRef>StoreRef_MethodikPhase5</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase5_E1</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:businessRuleTask>
     <bpmn:serviceTask id="E2" name="Begriffe mit Domänenmodell abgleichen">
       <bpmn:documentation>Input: Story-Karte, Akzeptanzkriterien, Domänenmodell aus dem Fachkonzept. Output: Abweichungen von der Ubiquitous Language (Entitäten, Rollen, Regeln).</bpmn:documentation>
@@ -343,6 +371,8 @@
       <bpmn:documentation>Input: Story-Karte, Traceability-Eintrag. Output: Befund, ob die Story ein verkleideter Entwickler-Task oder ohne Bezug zu Epic/Ziel ist.</bpmn:documentation>
       <bpmn:incoming>F54</bpmn:incoming>
       <bpmn:outgoing>F55</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase5_E3" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase5_E3"><bpmn:sourceRef>StoreRef_MethodikPhase5</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase5_E3</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Ready" name="Definition of Ready erfüllt?" default="F57">
       <bpmn:incoming>F55</bpmn:incoming>
@@ -371,7 +401,9 @@
       <bpmn:incoming>F62</bpmn:incoming>
       <bpmn:outgoing>F66</bpmn:outgoing>
       <bpmn:property id="Property_DO_Backlog_Ref2" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_MethodikPhase6_P1" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_DO_Backlog_Ref2"><bpmn:sourceRef>DO_Backlog_Ref2</bpmn:sourceRef><bpmn:targetRef>Property_DO_Backlog_Ref2</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P1"><bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase6_P1</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="P7" name="Konsistenz mit bestehenden Abläufen prüfen">
       <bpmn:documentation>Input: Wireframes der Story, Wireframes anderer Stories im selben Nutzer-Task. Output: Abweichungen von bestehenden Interaktionsmustern und UI-Begriffen.</bpmn:documentation>
@@ -399,6 +431,8 @@
       <bpmn:documentation>Input: Befunde zu Duplikaten, Abläufen, Abhängigkeiten und Akzeptanzkriterien. Output: Plausibilitätsbefund - Duplikate, Widersprüche, Abhängigkeiten und betroffene Stories, je mit Fundstelle.</bpmn:documentation>
       <bpmn:incoming>F70</bpmn:incoming>
       <bpmn:outgoing>F71</bpmn:outgoing>
+      <bpmn:property id="Property_MethodikPhase6_P4" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_MethodikPhase6_P4"><bpmn:sourceRef>StoreRef_MethodikPhase6</bpmn:sourceRef><bpmn:targetRef>Property_MethodikPhase6_P4</bpmn:targetRef></bpmn:dataInputAssociation>
       <bpmn:dataOutputAssociation id="DataOut_DO_Plausi_Ref"><bpmn:targetRef>DO_Plausi_Ref</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gw_Plausibel" name="Konsistent mit dem übrigen Backlog?" default="F72">
@@ -562,6 +596,30 @@
     <bpmn:dataObjectReference id="DO_Plausi_Ref" name="Plausibilitätsbefund" dataObjectRef="DO_Plausi" />
     <bpmn:dataObject id="DO_ReadyStory" />
     <bpmn:dataObjectReference id="DO_ReadyStory_Ref" name="Sprint-reife User Story" dataObjectRef="DO_ReadyStory" />
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase1" name="Product-Methodik: Eingang &amp; Triage" dataStoreRef="DataStore_MethodikPhase1">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase2" name="Product-Methodik: Fachliche Klärung" dataStoreRef="DataStore_MethodikPhase2">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase3" name="Product-Methodik: Story formulieren" dataStoreRef="DataStore_MethodikPhase3">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase4" name="Product-Methodik: Refinement" dataStoreRef="DataStore_MethodikPhase4">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase5" name="Product-Methodik: Definition of Ready" dataStoreRef="DataStore_MethodikPhase5">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_MethodikPhase6" name="Product-Methodik: Plausibilität &amp; Freigabe" dataStoreRef="DataStore_MethodikPhase6">
+      <bpmn:documentation>Art: wissen
+Ort: notebook:The Product - Business Design</bpmn:documentation>
+    </bpmn:dataStoreReference>
     <bpmn:group id="Group_Phase1" categoryValueRef="CategoryValue_Group_Phase1" />
     <bpmn:group id="Group_Phase2" categoryValueRef="CategoryValue_Group_Phase2" />
     <bpmn:group id="Group_Phase3" categoryValueRef="CategoryValue_Group_Phase3" />
@@ -750,6 +808,26 @@
       <bpmndi:BPMNEdge id="F75_di" bpmnElement="F75"><di:waypoint x="10290" y="445" /><di:waypoint x="10422" y="445" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F80_di" bpmnElement="F80"><di:waypoint x="10290" y="330" /><di:waypoint x="10370" y="330" /></bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="F81_di" bpmnElement="F81"><di:waypoint x="10510" y="330" /><di:waypoint x="10642" y="330" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase1_di" bpmnElement="StoreRef_MethodikPhase1"><dc:Bounds x="565" y="440" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="520" y="492" width="140" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase1_I1_di" bpmnElement="DataIn_MethodikPhase1_I1"><di:waypoint x="575" y="440" /><di:waypoint x="575" y="410" /><di:waypoint x="480" y="410" /><di:waypoint x="480" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase1_I2_di" bpmnElement="DataIn_MethodikPhase1_I2"><di:waypoint x="605" y="440" /><di:waypoint x="605" y="410" /><di:waypoint x="700" y="410" /><di:waypoint x="700" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase2_di" bpmnElement="StoreRef_MethodikPhase2"><dc:Bounds x="1960" y="450" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="1920" y="502" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K2_di" bpmnElement="DataIn_MethodikPhase2_K2"><di:waypoint x="1970" y="450" /><di:waypoint x="1970" y="420" /><di:waypoint x="1680" y="420" /><di:waypoint x="1680" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K3_di" bpmnElement="DataIn_MethodikPhase2_K3"><di:waypoint x="2000" y="450" /><di:waypoint x="2000" y="420" /><di:waypoint x="2340" y="420" /><di:waypoint x="2340" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase2_K4_di" bpmnElement="DataIn_MethodikPhase2_K4"><di:waypoint x="2010" y="475" /><di:waypoint x="2060" y="475" /><di:waypoint x="2060" y="915" /><di:waypoint x="2300" y="915" /><di:waypoint x="2300" y="945" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase3_di" bpmnElement="StoreRef_MethodikPhase3"><dc:Bounds x="4835" y="190" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="4795" y="150" width="130" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C2_di" bpmnElement="DataIn_MethodikPhase3_C2"><di:waypoint x="4845" y="240" /><di:waypoint x="4845" y="265" /><di:waypoint x="4690" y="265" /><di:waypoint x="4690" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase3_C4_di" bpmnElement="DataIn_MethodikPhase3_C4"><di:waypoint x="4875" y="240" /><di:waypoint x="4875" y="265" /><di:waypoint x="5070" y="265" /><di:waypoint x="5070" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase4_di" bpmnElement="StoreRef_MethodikPhase4"><dc:Bounds x="6805" y="1365" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="6655" y="1376" width="145" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D3_di" bpmnElement="DataIn_MethodikPhase4_D3"><di:waypoint x="6815" y="1365" /><di:waypoint x="6815" y="1350" /><di:waypoint x="6720" y="1350" /><di:waypoint x="6720" y="1335" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D4_di" bpmnElement="DataIn_MethodikPhase4_D4"><di:waypoint x="6845" y="1365" /><di:waypoint x="6845" y="1350" /><di:waypoint x="6940" y="1350" /><di:waypoint x="6940" y="1335" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase4_D6_di" bpmnElement="DataIn_MethodikPhase4_D6"><di:waypoint x="6855" y="1390" /><di:waypoint x="7840" y="1390" /><di:waypoint x="7840" y="490" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase5_di" bpmnElement="StoreRef_MethodikPhase5"><dc:Bounds x="8150" y="1365" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="8035" y="1376" width="110" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E1_di" bpmnElement="DataIn_MethodikPhase5_E1"><di:waypoint x="8175" y="1365" /><di:waypoint x="8175" y="1335" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase5_E3_di" bpmnElement="DataIn_MethodikPhase5_E3"><di:waypoint x="8200" y="1390" /><di:waypoint x="8580" y="1390" /><di:waypoint x="8580" y="375" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StoreRef_MethodikPhase6_di" bpmnElement="StoreRef_MethodikPhase6"><dc:Bounds x="9535" y="190" width="50" height="50" /><bpmndi:BPMNLabel><dc:Bounds x="9490" y="150" width="140" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P1_di" bpmnElement="DataIn_MethodikPhase6_P1"><di:waypoint x="9545" y="240" /><di:waypoint x="9545" y="262" /><di:waypoint x="9390" y="262" /><di:waypoint x="9390" y="285" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_MethodikPhase6_P4_di" bpmnElement="DataIn_MethodikPhase6_P4"><di:waypoint x="9575" y="240" /><di:waypoint x="9575" y="262" /><di:waypoint x="9740" y="262" /><di:waypoint x="9740" y="285" /></bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

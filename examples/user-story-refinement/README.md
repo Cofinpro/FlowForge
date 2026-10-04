@@ -34,6 +34,13 @@ wirklich etwas unklar ist.
 - Jede Aufgabe trägt in `<bpmn:documentation>` ein `Input: … Output: …`. Zwölf Datenobjekte zeigen
   die wichtigsten Artefakte, darunter drei Eingaben aus dem Projektrahmen: Product Backlog (zweimal:
   bei der Triage und bei der Duplikatprüfung) sowie Epic & Fachkonzept.
+- **Sechs Wissens-Stores**, je einer pro Phase (`Product-Methodik: Eingang & Triage`, `… Fachliche
+  Klärung`, `… Story formulieren`, `… Refinement`, `… Definition of Ready`, `… Plausibilität &
+  Freigabe`). Alle tragen `Art: wissen` und `Ort: notebook:The Product - Business Design`, also
+  dasselbe Notebook, nur fachlich nach Phase geschnitten. Die Pfeile gehen vom Store zur Aufgabe
+  (lesen): Triage → I1, I2 · Klärung → K2, K3, K4 · Story formulieren → C2, C4 · Refinement →
+  D3, D4, D6 · DoR → E1, E3 · Plausibilität → P1, P4. Aufgaben ohne Pfeil von einem Store (alle
+  übrigen) fallen auf die Lane-Zuordnung von `bpmn2agent-knowledge` zurück.
 
 ## Wissensgrundlage
 
