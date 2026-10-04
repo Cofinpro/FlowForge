@@ -94,6 +94,8 @@ Report in the user's language:
 - **Install** — nothing was written into a real `.claude/`; the user copies it:
   `cp -R generated/<workflow>/.claude/. <project>/.claude/` (merge `settings.json` `hooks` by hand
   if one exists). Details in `README.md`.
+- **Run cost** — the generated payload records every run's token usage; after a run the user gets
+  the cost per BPMN element with `/bpmn2agent-cost` (needs the lanecraft plugin).
 - **Runs only on invocation** — a generated Workflow script never runs automatically, not even in
   this pipeline; the user starts it via the Workflow tool.
 - **Claude-only** — hooks, the Workflow script and generated agents exist only in Claude Code;
