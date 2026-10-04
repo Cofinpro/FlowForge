@@ -50,6 +50,19 @@ Each child plane is an independent coordinate space; don't reuse the parent's co
   visits them top-to-bottom where possible. Shift the grid right to make room for the lane label
   (start event at `x=200`) and centre each shape vertically in its lane's band.
 
+## Labels
+
+Don't hand-place external labels; run `scripts/relabel.mjs` (SKILL.md step 6). Facts it relies on:
+
+- bpmn-js wraps an external label's text in a fixed ~90px box centred on the label bounds, top
+  aligned, whatever width the DI states. A longer word breaks mid-word; that is bpmn-js, not a layout
+  bug, and BPMN labels stay verbatim.
+- Gateway question labels go above-left, flow names above the line near the source (right of a
+  vertical segment), end events above, start events below, data objects above, stores below.
+- A flow name never goes on a segment shared with a sibling flow (it would read as both flows' name).
+- Leave room for it: ~30px free above the main row beside each gateway, and ≥50px between shapes
+  where a flow carries a name.
+
 ## General
 
 - Never let two shapes' bounding boxes overlap (treat the `no-overlapping-elements` warning as an

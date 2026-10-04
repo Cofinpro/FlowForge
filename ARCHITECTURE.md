@@ -322,7 +322,7 @@ die Struktur des Diagramms).
 - `node`, `python3`, `xmllint`. npm-Pakete (`bpmn-moddle`, `bpmnlint`, `js-yaml`, `ajv`,
   `playwright`) liegen in `~/.cache/bpmn-authoring-tools` (`BPMN_TOOLS_CACHE`) und werden beim
   ersten Lauf dort installiert, nie im Repo.
-- Wichtige Skripte: `bpmn-authoring/scripts/validate.sh` (BPMN prüfen), `render.mjs` (BPMN als PNG),
+- Wichtige Skripte: `bpmn-authoring/scripts/validate.sh` (BPMN prüfen), `relabel.mjs` (Beschriftungen überlappungsarm setzen), `render.mjs` (BPMN als PNG),
   `bpmn2agent-analyze/scripts/inventory.mjs` (Elementinventar und Signale),
   `bpmn2agent-generate/scripts/render-mapping.mjs` (Mapping-Ansicht),
   `bpmn2agent-verify/scripts/verify.mjs` (die sechs Prüfungen),

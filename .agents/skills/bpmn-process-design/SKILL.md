@@ -121,6 +121,7 @@ ${CLAUDE_SKILL_DIR}/../bpmn-authoring/scripts/validate.sh <workflow>.bpmn
 node ${CLAUDE_SKILL_DIR}/../bpmn2agent-analyze/scripts/inventory.mjs "$C" <workflow>.bpmn > <scratch>/inventory.json
 jq '.findings' <scratch>/inventory.json                                        # must be []
 jq '[.flowNodes[] | select(.bpmnType=="bpmn:Task") | .id]' <scratch>/inventory.json   # must be []
+node ${CLAUDE_SKILL_DIR}/../bpmn-authoring/scripts/relabel.mjs "$C" <workflow>.bpmn   # label positions only
 node ${CLAUDE_SKILL_DIR}/../bpmn-authoring/scripts/render.mjs "$C" <workflow>.bpmn <outDir>
 ```
 

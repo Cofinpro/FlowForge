@@ -60,7 +60,19 @@ at the first failing stage. Fix every finding before moving on; see `references/
 Tooling is fetched on demand into `${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}`; never
 add it to this repo's `package.json`.
 
-### 6. Render and eyeball
+### 6. Place the labels, render and eyeball
+
+```bash
+node ${CLAUDE_SKILL_DIR}/scripts/relabel.mjs "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" <file>.bpmn
+```
+
+Re-places every external label (events, gateways, data objects/stores, groups, flow names) so it
+avoids flow lines, shapes, lane/phase borders and other labels. Rewrites only label bounds, never
+the model or waypoints, so it is safe to re-run after every layout change. It lists labels that
+still collide; fix those by adding space in the layout (`references/layout.md`) and run it again.
+Run it before rendering, and again after you move shapes.
+
+Then render:
 
 ```bash
 node ${CLAUDE_SKILL_DIR}/scripts/render.mjs "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" <file>.bpmn <outDir>
@@ -73,7 +85,7 @@ planes show the intended detail. Without Playwright, paste the XML into https://
 
 ### 7. Iterate
 
-Repeat steps 2–6 per change. When modelling several phases/sub-processes, validate and render after
+Repeat steps 2–6 per change (re-run `relabel.mjs` whenever shapes moved). When modelling several phases/sub-processes, validate and render after
 each one, not in a batch.
 
 ## Files
@@ -84,4 +96,4 @@ each one, not in a batch.
 - `references/layout.md` — coordinate grid, top-level and per child plane.
 - `references/validation.md` — what each validation stage catches, typical errors and fixes.
 - `assets/skeleton.bpmn` (starting file), `assets/.bpmnlintrc` (lint config).
-- `scripts/validate.sh` (step 5, calls `scripts/check-moddle.mjs`), `scripts/render.mjs` (step 6).
+- `scripts/validate.sh` (step 5, calls `scripts/check-moddle.mjs`), `scripts/relabel.mjs` and `scripts/render.mjs` (step 6).
