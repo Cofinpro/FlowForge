@@ -1,0 +1,220 @@
+{
+  "bpmn": {
+    "file": "pr-review.bpmn",
+    "elements": [
+      "End_Gemergt",
+      "End_Verworfen",
+      "Gw_Freigegeben",
+      "Gw_Join_Pruefung",
+      "Gw_Kritisch",
+      "Gw_Merge_Nachbessern",
+      "Gw_Merge_Pruefung",
+      "Gw_Split_Pruefung",
+      "Start_PrEroeffnet",
+      "Task_CodePruefen",
+      "Task_Freigeben",
+      "Task_Mergen",
+      "Task_Nachbessern",
+      "Task_Sicherheit",
+      "Task_Tests",
+      "Task_Zusammenfassen",
+      "Task_Zusammenfuehren"
+    ]
+  },
+  "workflow": "pr-review",
+  "pattern": "skill-chain-hooks",
+  "generatorVersion": "1.0.0",
+  "orchestration": {
+    "skills": [
+      "pr-review"
+    ],
+    "agentTypes": []
+  },
+  "humanCheckpoints": [
+    {
+      "id": "Task_Freigeben",
+      "label": "Merge freigeben"
+    },
+    {
+      "id": "Task_Nachbessern",
+      "label": "Änderungen nachbessern"
+    }
+  ],
+  "elements": {
+    "End_Gemergt": {
+      "label": "Pull Request gemergt",
+      "lane": "tech-lead",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "End_Verworfen": {
+      "label": "Pull Request verworfen",
+      "lane": "tech-lead",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Freigegeben": {
+      "label": "Freigegeben?",
+      "lane": "tech-lead",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Join_Pruefung": {
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Kritisch": {
+      "label": "Kritische Befunde?",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Merge_Nachbessern": {
+      "lane": "autor",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Merge_Pruefung": {
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Gw_Split_Pruefung": {
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Start_PrEroeffnet": {
+      "label": "Pull Request eröffnet",
+      "lane": "autor",
+      "phase": null,
+      "kind": "orchestrator",
+      "skills": [
+        "pr-review"
+      ]
+    },
+    "Task_CodePruefen": {
+      "label": "Code auf Fehler und Stil prüfen",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "pr-code-review"
+      ]
+    },
+    "Task_Freigeben": {
+      "label": "Merge freigeben",
+      "lane": "tech-lead",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": []
+    },
+    "Task_Mergen": {
+      "label": "Pull Request mergen",
+      "lane": "tech-lead",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "pr-merge"
+      ]
+    },
+    "Task_Nachbessern": {
+      "label": "Änderungen nachbessern",
+      "lane": "autor",
+      "phase": null,
+      "kind": "human-checkpoint",
+      "skills": []
+    },
+    "Task_Sicherheit": {
+      "label": "Sicherheitsrisiken prüfen",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "pr-security-review"
+      ]
+    },
+    "Task_Tests": {
+      "label": "Tests und Linter ausführen",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "script",
+      "skills": [
+        "pr-review-reviewer"
+      ]
+    },
+    "Task_Zusammenfassen": {
+      "label": "Änderung zusammenfassen",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "pr-summary"
+      ]
+    },
+    "Task_Zusammenfuehren": {
+      "label": "Befunde zusammenführen",
+      "lane": "reviewer",
+      "phase": null,
+      "kind": "skill",
+      "skills": [
+        "pr-findings-merge"
+      ]
+    }
+  },
+  "skills": {
+    "pr-code-review": [
+      "Task_CodePruefen"
+    ],
+    "pr-findings-merge": [
+      "Task_Zusammenfuehren"
+    ],
+    "pr-merge": [
+      "Task_Mergen"
+    ],
+    "pr-review-reviewer": [
+      "Task_Tests"
+    ],
+    "pr-security-review": [
+      "Task_Sicherheit"
+    ],
+    "pr-summary": [
+      "Task_Zusammenfassen"
+    ]
+  },
+  "agentTypes": {
+    "pr-review-autor": "autor",
+    "pr-review-reviewer": "reviewer",
+    "pr-review-tech-lead": "tech-lead"
+  },
+  "lanes": {
+    "autor": "Autor",
+    "reviewer": "Reviewer",
+    "tech-lead": "Tech Lead"
+  }
+}

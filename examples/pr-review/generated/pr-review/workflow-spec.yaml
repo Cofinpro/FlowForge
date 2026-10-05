@@ -1,0 +1,437 @@
+# workflow-spec.yaml — confirmed by flowforge-design (mapping plan accepted by the business user)
+meta:
+  workflowName: pr-review
+  sourceBpmn:
+    path: pr-review.bpmn
+    sha256: e86d55980a84a4d28a57511c6a1204f4ac321d959ec158f1bbcd5c89ce0b3799
+  language: en
+  generatorVersion: 1.0.0
+  outputLayout: claude-dir
+  created: '2026-10-05T15:55:00.000Z'
+  updated: '2026-10-05T16:45:00.000Z'
+roles:
+  autor:
+    bpmnLaneId: Lane_Autor
+    label: Autor
+    agentName: pr-review-autor
+  reviewer:
+    bpmnLaneId: Lane_Reviewer
+    label: Reviewer
+    agentName: pr-review-reviewer
+  tech-lead:
+    bpmnLaneId: Lane_TechLead
+    label: Tech Lead
+    agentName: pr-review-tech-lead
+elements:
+  Start_PrEroeffnet:
+    bpmnType: startEvent
+    label: Pull Request eröffnet
+    lane: autor
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Gw_Merge_Pruefung:
+    bpmnType: exclusiveGateway
+    lane: reviewer
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Task_Zusammenfassen:
+    bpmnType: serviceTask
+    label: Änderung zusammenfassen
+    lane: reviewer
+    kind: skill
+    inputs:
+      - artifact: pr-nummer
+        required: true
+    outputs:
+      - artifact: kurzfassung
+    knowledge:
+      - generated/pr-review/knowledge/Task_Zusammenfassen.md
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-summary/SKILL.md
+  Gw_Split_Pruefung:
+    bpmnType: parallelGateway
+    lane: reviewer
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Task_CodePruefen:
+    bpmnType: serviceTask
+    label: Code auf Fehler und Stil prüfen
+    lane: reviewer
+    kind: skill
+    inputs:
+      - artifact: kurzfassung
+        required: true
+    outputs:
+      - artifact: befund-code
+    knowledge:
+      - generated/pr-review/knowledge/Task_CodePruefen.md
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-code-review/SKILL.md
+  Task_Tests:
+    bpmnType: scriptTask
+    label: Tests und Linter ausführen
+    lane: reviewer
+    kind: script
+    outputs:
+      - artifact: testergebnis
+    gate:
+      kind: deterministic
+      criteria:
+        - Runs the project's own test and lint commands (discovered from package.json scripts or the repo's documented commands) with a timeout, no Bash wildcard
+        - Writes testergebnis as JSON (status passed, failed or error, list of failures with file and line)
+        - A crash or timeout is status error, never silently passed and never silently hoch; the run stops and asks the Reviewer
+        - A failed test is a finding of severity hoch
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review-reviewer/scripts/run-tests-and-lint.mjs
+  Task_Sicherheit:
+    bpmnType: serviceTask
+    label: Sicherheitsrisiken prüfen
+    lane: reviewer
+    kind: skill
+    inputs:
+      - artifact: kurzfassung
+        required: true
+    outputs:
+      - artifact: befund-sicherheit
+    knowledge:
+      - generated/pr-review/knowledge/Task_Sicherheit.md
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-security-review/SKILL.md
+  Gw_Join_Pruefung:
+    bpmnType: parallelGateway
+    lane: reviewer
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Task_Zusammenfuehren:
+    bpmnType: serviceTask
+    label: Befunde zusammenführen
+    lane: reviewer
+    kind: skill
+    inputs:
+      - artifact: befund-code
+        required: true
+      - artifact: testergebnis
+        required: true
+      - artifact: befund-sicherheit
+        required: true
+    outputs:
+      - artifact: review-befund
+    knowledge:
+      - generated/pr-review/knowledge/Task_Zusammenfuehren.md
+    gate:
+      kind: deterministic
+      criteria:
+        - Critical means at least one finding of severity hoch (logic error, data loss, security hole, failed test), as in docs/review-guidelines.md
+        - The merged Review-Befund records recommendation kritisch or unkritisch, so the routing gateway reads one field
+        - Waits for all three inputs, even when one reports a failure
+        - Deduplicates by file and line, keeps the highest severity, sorts by severity; recommendation is derived from maxSeverity (hoch means kritisch)
+        - Counts its own loop in review-befund.kritischRounds; after the third round the pull request goes to approval anyway, with capReached true and a risk note in the Review-Befund
+      maxLoops: 3
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-findings-merge/SKILL.md
+  Gw_Kritisch:
+    bpmnType: exclusiveGateway
+    label: Kritische Befunde?
+    lane: reviewer
+    kind: orchestrator
+    condition: >-
+      Ja (max. 3×) when review-befund.recommendation is kritisch and review-befund.kritischRounds is below 3; otherwise
+      Nein, go to approval (with capReached true and a risk note after the third round). This loop counts separately from
+      the approval loop (freigabeRounds).
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Gw_Merge_Nachbessern:
+    bpmnType: exclusiveGateway
+    lane: autor
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Task_Nachbessern:
+    bpmnType: userTask
+    label: Änderungen nachbessern
+    lane: autor
+    kind: human-checkpoint
+    inputs:
+      - artifact: review-befund
+        required: true
+    knowledge: []
+    gate:
+      kind: human
+      criteria:
+        - Shows the Review-Befund and asks "Commits pushed?" with options (done, abort and discard) and a recommendation
+        - Records the head commit SHA after the push in review-befund.headSha so the later merge is pinned to what was reviewed
+  Task_Freigeben:
+    bpmnType: userTask
+    label: Merge freigeben
+    lane: tech-lead
+    kind: human-checkpoint
+    inputs:
+      - artifact: kurzfassung
+        required: true
+      - artifact: review-befund
+        required: true
+    knowledge: []
+    gate:
+      kind: human
+      criteria:
+        - Shows the Kurzfassung and the Review-Befund (with the risk note, if the cap was reached) before the decision
+        - The Tech Lead picks freigeben, nachbessern lassen or verwerfen; nothing is written to the repository before freigeben
+        - nachbessern lassen sends the work back to the author, at most 3 times (review-befund.freigabeRounds); at the cap only freigeben or verwerfen are offered, with the risk note shown
+        - verwerfen writes an uebergabenotiz for the author (reason plus Review-Befund summary) and does not close the pull request
+        - The recommended option follows review-befund.recommendation and capReached; verwerfen asks for a short reason
+      maxLoops: 3
+  Gw_Freigegeben:
+    bpmnType: exclusiveGateway
+    label: Freigegeben?
+    lane: tech-lead
+    kind: orchestrator
+    condition: >-
+      Ja when the Tech Lead freigibt; Nein (max. 3×) when nachbessern lassen; Verworfen when verwerfen. Routes on the answer to
+      Merge freigeben, no judgement of its own.
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  Task_Mergen:
+    bpmnType: serviceTask
+    label: Pull Request mergen
+    lane: tech-lead
+    kind: skill
+    knowledge: []
+    gate:
+      kind: deterministic
+      criteria:
+        - Merges only the head commit recorded in review-befund.headSha (gh pr merge --match-head-commit); a newer push stops the merge and sends it back to the Tech Lead
+        - Uses only the merge command with the squash method (confirmed by the user); no --admin and no other flags outside an allowlist
+        - If gh fails (conflict, branch protection, required checks), the raw error goes to the Tech Lead and the run does not end in End_Gemergt
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-merge/SKILL.md
+  End_Gemergt:
+    bpmnType: endEvent
+    label: Pull Request gemergt
+    lane: tech-lead
+    kind: orchestrator
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  End_Verworfen:
+    bpmnType: endEvent
+    label: Pull Request verworfen
+    lane: tech-lead
+    kind: orchestrator
+    outputs:
+      - artifact: uebergabenotiz
+    generatedPaths:
+      - generated/pr-review/.claude/skills/pr-review/SKILL.md
+  DataInput_PrNummer:
+    bpmnType: dataInput
+    label: PR-Nummer
+    kind: workflow-input
+  StoreRef_Richtlinien:
+    bpmnType: dataStoreReference
+    label: Review-Richtlinien
+    kind: context-source
+  StoreRef_Repo:
+    bpmnType: dataStoreReference
+    label: Pull Requests im Repository
+    kind: context-source
+artifacts:
+  pr-nummer:
+    pathPattern: generated/pr-review/artifacts/pr-nummer/{id}.md
+    frontmatter:
+      - field: prNummer
+        description: Number of the pull request to review
+        required: true
+    consumers:
+      - Task_Zusammenfassen
+  kurzfassung:
+    pathPattern: generated/pr-review/artifacts/kurzfassung/{id}.md
+    frontmatter:
+      - field: prNummer
+        required: true
+      - field: riskLevel
+        description: niedrig | mittel | hoch
+        required: true
+    producer: Task_Zusammenfassen
+    consumers:
+      - Task_CodePruefen
+      - Task_Sicherheit
+      - Task_Freigeben
+  befund-code:
+    pathPattern: generated/pr-review/artifacts/befund-code/{id}.md
+    frontmatter:
+      - field: findings
+        description: List of {file, line, severity, text}
+        required: true
+    producer: Task_CodePruefen
+    consumers:
+      - Task_Zusammenfuehren
+  testergebnis:
+    pathPattern: generated/pr-review/artifacts/testergebnis/{id}.json
+    frontmatter:
+      - field: status
+        description: passed | failed | error
+        required: true
+      - field: failures
+        description: List of {file, line, text}
+        required: true
+    producer: Task_Tests
+    consumers:
+      - Task_Zusammenfuehren
+  befund-sicherheit:
+    pathPattern: generated/pr-review/artifacts/befund-sicherheit/{id}.md
+    frontmatter:
+      - field: findings
+        description: List of {file, line, severity, text}
+        required: true
+    producer: Task_Sicherheit
+    consumers:
+      - Task_Zusammenfuehren
+  uebergabenotiz:
+    pathPattern: generated/pr-review/artifacts/uebergabenotiz/{id}.md
+    frontmatter:
+      - field: prNummer
+        required: true
+      - field: reason
+        description: The Tech Lead's short reason for verwerfen
+        required: true
+    producer: End_Verworfen
+  review-befund:
+    pathPattern: generated/pr-review/artifacts/review-befund/{id}.md
+    frontmatter:
+      - field: version
+        description: Total number of review rounds so far
+        required: true
+      - field: status
+        description: draft while the loops run, final once the Tech Lead decided
+        required: true
+      - field: kritischRounds
+        description: Rounds sent back by Kritische Befunde? (cap 3)
+        required: true
+      - field: freigabeRounds
+        description: Rounds sent back by Freigegeben? (cap 3)
+        required: true
+      - field: maxSeverity
+        description: Highest severity among the findings (hoch, mittel or niedrig)
+        required: true
+      - field: recommendation
+        description: kritisch when maxSeverity is hoch, else unkritisch; read by the Kritische Befunde? gateway
+        required: true
+      - field: capReached
+        description: true when a cap ended a loop; Merge freigeben shows the risk note
+        required: true
+      - field: headSha
+        description: Head commit of the pull request that was reviewed; the merge is pinned to it
+        required: true
+    producer: Task_Zusammenfuehren
+    consumers:
+      - Task_Nachbessern
+      - Task_Freigeben
+contextSources:
+  review-richtlinien:
+    name: Review-Richtlinien
+    bpmnElement: StoreRef_Richtlinien
+    art: wissen
+    ort:
+      type: datei
+      ref: docs/review-guidelines.md
+    readers:
+      - Task_CodePruefen
+  pull-requests-im-repository:
+    name: Pull Requests im Repository
+    bpmnElement: StoreRef_Repo
+    art: live
+    ort:
+      type: cli
+      ref: gh
+    readers:
+      - Task_Zusammenfassen
+    writers:
+      - Task_Mergen
+    tools:
+      read:
+        - Bash(gh pr view:*)
+        - Bash(gh pr diff:*)
+      write:
+        - Bash(gh pr merge:*)
+workflowIO:
+  input:
+    artifact: pr-nummer
+    required:
+      - prNummer
+pattern:
+  chosen: skill-chain-hooks
+  rationale: >-
+    Your diagram is attended: the Author fixes findings and the Tech Lead approves the merge, so a person is in the loop
+    at two points. The routing is simple: one yes/no on whether a finding is critical (severity hoch), one on approval.
+    I build it as a guided sequence of checklists. One entry skill walks the steps in order, calls one skill per review
+    step with the team guidelines, runs the tests and linter as a script, and stops at your two checkpoints. Code,
+    tests and security run one after another instead of at the same time. Both loops are capped at three rounds; after
+    the third round the pull request goes to approval with a risk note. The only write into the repository is the merge,
+    and it happens only after "Merge freigeben", with Claude Code asking once more at the call. Reading is not separated
+    per role (Lesezugriff nicht pro Rolle getrennt); a coordinating agent could give the Reviewer read-only access and
+    only the Tech Lead the right to merge.
+  alternativesConsidered:
+    - pattern: orchestrator-agent
+      whyNot: >-
+        The Reviewer only reads pull requests and only the Tech Lead merges (roleToolSpread), which a coordinator with one
+        agent per lane could separate. Not chosen: no gateway needs a case-by-case judgement (critical is a field of the
+        Review-Befund), the merge sits behind its own approval and a write-guard hook, and the lighter guided flow is
+        enough for a three-lane process.
+    - pattern: workflow-script
+      whyNot: >-
+        The flow pauses for the author and the Tech Lead, and the merge writes into a live store behind a user task; a
+        Workflow script cannot stop for people mid-run.
+knowledge:
+  mode: websearch
+  refs:
+    Task_CodePruefen: generated/pr-review/knowledge/Task_CodePruefen.md
+    Task_Zusammenfassen: generated/pr-review/knowledge/Task_Zusammenfassen.md
+    Task_Sicherheit: generated/pr-review/knowledge/Task_Sicherheit.md
+    Task_Zusammenfuehren: generated/pr-review/knowledge/Task_Zusammenfuehren.md
+openQuestions:
+  - elementId: Task_Zusammenfassen
+    question: No knowledge source is drawn for this step. Intentional, or a missing source?
+    answer: Ground with WebSearch (user decision, Reviewer lane).
+  - elementId: Task_Sicherheit
+    question: No knowledge source is drawn for this step. Intentional, or a missing source?
+    answer: Ground with WebSearch (user decision, Reviewer lane).
+  - elementId: Task_Zusammenfuehren
+    question: No knowledge source is drawn for this step. Intentional, or a missing source?
+    answer: Ground with WebSearch (user decision, Reviewer lane).
+  - elementId: Task_Mergen
+    question: No knowledge source is drawn for this step. Intentional, or a missing source?
+    answer: Intentional, no knowledge needed (mechanical gh merge after approval).
+  - elementId: Task_Sicherheit
+    question: The Review-Richtlinien store has a "Sicherheit" section, but only "Code auf Fehler und Stil prüfen" reads the store in the diagram. Should "Sicherheitsrisiken prüfen" also read it?
+    source: docs/review-guidelines.md
+    answer: Yes. Add a data association from the store to this task in the .bpmn (bpmn-authoring); until then the Sicherheit section is cited in its knowledge file.
+  - elementId: Gw_Kritisch
+    question: The diagram note calls any security risk, failed test or high-severity finding critical; the guidelines call only severity "hoch" critical (a security issue only if hoch). Which rule applies?
+    source: docs/review-guidelines.md
+    answer: Guidelines rule (critical = severity hoch; a failed test counts as hoch). Update the gateway note in the .bpmn to match.
+  - elementId: Task_Zusammenfuehren
+    question: Should the Review-Richtlinien store be drawn into "Befunde zusammenführen" (it needs the severity scale and the definition of critical)?
+    source: agentic-workflow-architect
+    answer: null
+  - elementId: Task_Sicherheit
+    question: Should the Pull Requests im Repository store also be drawn into "Code auf Fehler und Stil prüfen", "Tests und Linter ausführen" and "Sicherheitsrisiken prüfen" (they read the diff or branch)?
+    source: agentic-workflow-architect
+    answer: null
+  - elementId: End_Verworfen
+    question: What happens on verwerfen?
+    source: agentic-workflow-architect
+    answer: Write a handoff note for the author with the Tech Lead's reason; do not close the pull request (user decision).
+  - elementId: Task_Tests
+    question: Do pull requests from forks or external contributors occur (PR code runs before any human approval)?
+    source: agentic-workflow-architect
+    answer: No, team members only (user decision). The skills still treat diff content as untrusted data.
+  - elementId: Task_Mergen
+    question: Which merge method should the merge use?
+    source: agentic-workflow-architect
+    answer: Squash (user decision).
+  - elementId: Task_Mergen
+    question: Failure handling for gh view/diff, the test script and gh pr merge.
+    source: agentic-workflow-architect
+    answer: Design default, accepted with the plan. A gh error is fed back to the step and retried at most twice, then handed to the person at the checkpoint; the test script stops on a crash or timeout; a failed merge is reported to the Tech Lead and never ends in End_Gemergt.
