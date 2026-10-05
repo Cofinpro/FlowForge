@@ -1,8 +1,8 @@
 {
-  "name": "lanecraft",
+  "name": "flowforge",
   "version": "0.5.0",
   "private": true,
-  "description": "Dev tooling for the lanecraft Claude Code plugin (release, commit linting). The plugin itself needs no build.",
+  "description": "Dev tooling for the FlowForge Claude Code plugin (release, commit linting). The plugin itself needs no build.",
   "scripts": {
     "prepare": "husky",
     "validate": "claude plugin validate .",

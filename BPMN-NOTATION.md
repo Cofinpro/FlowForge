@@ -1,4 +1,4 @@
-# BPMN-Notation in lanecraft
+# FlowSpec: die BPMN-Notation
 
 Was jedes BPMN-2.0-Element bedeutet, wenn du damit einen agentischen Workflow und seinen Kontext
 modellierst, und was die `bpmn2agent`-Pipeline daraus erzeugt. Die Regeln selbst stehen in den
@@ -217,7 +217,7 @@ nennt die Art zusätzlich als Text.
 ## Quellen
 
 - [`bpmn-process-design/SKILL.md`](.agents/skills/bpmn-process-design/SKILL.md): die
-  lanecraft-Notation beim Entwerfen, Schritt 4
+  FlowSpec-Notation beim Entwerfen, Schritt 4
 - [`bpmn2agent-analyze/references/conventions.md`](.agents/skills/bpmn2agent-analyze/references/conventions.md):
   wie die Analyse ein Diagramm liest
 - [`bpmn2agent-analyze/references/unsupported.md`](.agents/skills/bpmn2agent-analyze/references/unsupported.md):

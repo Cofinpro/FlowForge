@@ -231,7 +231,7 @@ writes, deterministically:
   It is data, not a script, and carries the `bpmn` trace as a JSON key.
 - the three registrations in `.claude/settings.json`.
 
-Nothing is priced here: the lanecraft plugin's `bpmn2agent-cost` reads the ledger and the map after a
+Nothing is priced here: the FlowForge plugin's `bpmn2agent-cost` reads the ledger and the map after a
 run. Smoke-test the hook with a piped payload (`{"transcript_path": …}`); the template header has the
 expectation.
 
@@ -278,7 +278,7 @@ Include:
   the user, no `.mcp.json`), "Gedächtnis" (path, cap, who reads and writes), which hooks guard what,
   the permissions merge, and the required input from `workflowIO`.
 - Run costs: the ledger hook records every run into `.claude/runs/<workflow>/ledger.jsonl`; add
-  `.claude/runs/` to `.gitignore`; with the lanecraft plugin installed, `/bpmn2agent-cost` reports the
+  `.claude/runs/` to `.gitignore`; with the FlowForge plugin installed, `/bpmn2agent-cost` reports the
   cost per BPMN element (the plugin carries the logic and the price table, this payload only the data).
 - Every `openQuestions[]` entry with `answer: null`, and the eval scenarios from step 5 as open items.
 - Pointers to `mapping/report.md` and `mapping/index.html`.

@@ -4,7 +4,7 @@ Status: Entwurf, abgestimmt am 2026-10-03. Aufgaben: [`tasks.md`](tasks.md).
 
 ## Ziel
 
-Kontext ist am Ende Daten. Wer einen Prozess für lanecraft modelliert, soll beim Zeichnen
+Kontext ist am Ende Daten. Wer einen Prozess für FlowForge modelliert, soll beim Zeichnen
 überlegen, **welche Daten jeder Schritt braucht und wo sie liegen**. Aus diesen Angaben baut die
 Pipeline Wissensreferenzen, Tool-Freigaben, Schreibschutz und ein Gedächtnis über Läufe hinweg.
 

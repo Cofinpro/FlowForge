@@ -106,7 +106,7 @@ Alle drei sind dasselbe GitHub-Backlog, nach Phase geschnitten.
   angemeldet in `settings.json`.
 - **Kostenprotokoll** (`hooks/user-story-refinement-cost-ledger.mjs`, `hooks/user-story-refinement-cost-map.json`):
   schreibt nach jedem Lauf die verbrauchten Tokens nach `.claude/runs/user-story-refinement/ledger.jsonl`
-  (ohne Preise, ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: lanecraft-Plugin
+  (ohne Preise, ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: FlowForge-Plugin
   installieren, danach `/bpmn2agent-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
 - **Agenten, Skripte:** keine.
 

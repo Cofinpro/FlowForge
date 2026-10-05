@@ -1,4 +1,4 @@
-# Beispiel: lanecraft als BPMN
+# Beispiel: FlowForge als BPMN
 
 Der Ablauf dieses Repos, in seiner eigenen Notation gezeichnet: Ein Fachanwender bringt ein Ziel
 oder ein fertiges BPMN-Diagramm mit. Ohne Diagramm entwirft `bpmn-process-design` den Prozess aus
@@ -10,13 +10,13 @@ installierte Workflow.
 Das Diagramm beschreibt den Ablauf, wie `ARCHITECTURE.md` und die Stufen-Skills ihn festlegen. Es
 ist noch nicht durch die Pipeline gelaufen; es gibt also kein `generated/`.
 
-![lanecraft als BPMN](lanecraft.png)
+![FlowForge als BPMN](flowforge.png)
 
 ## Aufbau
 
 - **Eine Ebene, sechs Lanes** (Lane = Rolle):
 
-| Lane | Teil von lanecraft |
+| Lane | Teil von FlowForge |
 |---|---|
 | Fachanwender | Intake und alle menschlichen Entscheidungen |
 | Prozessmodellierung | `bpmn-process-design`, `bpmn-authoring` (nur ohne vorhandenes Diagramm) |
@@ -50,7 +50,7 @@ ist noch nicht durch die Pipeline gelaufen; es gibt also kein `generated/`.
 |---|---|---|---|
 | Fach-Notebooks: Prozessrecherche | live | `mcp:gemini-notebook-mcp` | → Prozess im Notebook recherchieren |
 | Fach-Notebooks: Wissensextraktion | live | `mcp:gemini-notebook-mcp` | → Fachwissen je Task extrahieren, Diagramm mit Fachwissen hinterfragen |
-| BPMN-Notation lanecraft | wissen | `datei:BPMN-NOTATION.md` | → BPMN-Diagramm zeichnen |
+| BPMN-Notation FlowSpec | wissen | `datei:BPMN-NOTATION.md` | → BPMN-Diagramm zeichnen |
 | Mapping- & Muster-Rubrik | wissen | `datei:.agents/skills/bpmn2agent-design/references/` | → Elemente zuordnen & Muster wählen |
 | Agentic-Design-Wissensbasis | wissen | `datei:.agents/skills/agentic-workflow-kb/references/` | → Entwurf gegen Wissensbasis prüfen |
 | Notebook „Agentic Workflows“ | live | `mcp:gemini-notebook-mcp` | → Entwurf gegen Wissensbasis prüfen |
@@ -79,11 +79,11 @@ ist noch nicht durch die Pipeline gelaufen; es gibt also kein `generated/`.
 Von der Repo-Wurzel aus:
 
 ```bash
-.agents/skills/bpmn-authoring/scripts/validate.sh examples/lanecraft/lanecraft.bpmn
+.agents/skills/bpmn-authoring/scripts/validate.sh examples/flowforge/flowforge.bpmn
 ```
 
 Stand: XSD gültig, 0 bpmn-moddle-Warnungen, 0 bpmnlint-Befunde; `inventory.mjs` meldet keine
 Befunde und keinen untypisierten Task.
 
-Das Diagramm ist so breit, dass `render.mjs` es auf 1600 px zusammenstaucht. `lanecraft.png` ist
+Das Diagramm ist so breit, dass `render.mjs` es auf 1600 px zusammenstaucht. `flowforge.png` ist
 deshalb in voller Größe gerendert und auf 60 % verkleinert.

@@ -72,7 +72,7 @@ Element-ID, gefolgt vom Label wörtlich.
    `generatedPaths`. Dazu `workflow`, `pattern`, `generatorVersion` und die Namen des
    Top-Level-Skills bzw. Orchestrators (→ Eimer *Orchestrierung*). Eine gekürzte Laufzeitfassung
    der Rückverfolgung, ohne Logik.
-2. **`cost-report`** (lanecraft, neuer Helper-Skill `bpmn2agent-cost`): liest Ledger **oder**
+2. **`cost-report`** (FlowForge, neuer Helper-Skill `bpmn2agent-cost`): liest Ledger **oder**
    direkt eine Session-ID bzw. einen Transkriptpfad, dazu `cost-map.json` (im Projekt der
    Nutzerin) oder ersatzweise `workflow-spec.yaml` (im Erzeuger-Repo). Wendet die
    Preistabelle an, ordnet nach der Tabelle oben zu und schreibt `cost.json` + `cost.md`:
@@ -93,7 +93,7 @@ Element-ID, gefolgt vom Label wörtlich.
    frischen Arbeitskopien, sammelt die Session-IDs und berichtet je Element Median, Min/Max und
    Interquartilsabstand.
 
-## Verteilung: was mit dem Workflow kommt, was in lanecraft bleibt
+## Verteilung: was mit dem Workflow kommt, was in FlowForge bleibt
 
 Die Spec ist Review-Material und wird nie ins Projekt der Nutzerin kopiert. Damit Kosten dort
 auswertbar sind, wo der Workflow läuft, gilt: **Der Payload trägt Daten, das Plugin die Logik.**
@@ -102,16 +102,16 @@ auswertbar sind, wo der Workflow läuft, gilt: **Der Payload trägt Daten, das P
 |---|---|---|
 | Ledger-Hook | Payload `.claude/hooks/` | `cp -R generated/<workflow>/.claude/.` |
 | `cost-map.json` | Payload `.claude/hooks/` | dieselbe Kopie |
-| `cost-report`, Abgleich, `prices.json` | lanecraft-Plugin, Skill `bpmn2agent-cost` | Plugin-Installation |
-| `cost-bench`, Mapping-Overlay | lanecraft-Plugin | nur im Erzeuger-Repo sinnvoll (braucht `generated/`) |
+| `cost-report`, Abgleich, `prices.json` | FlowForge-Plugin, Skill `bpmn2agent-cost` | Plugin-Installation |
+| `cost-bench`, Mapping-Overlay | FlowForge-Plugin | nur im Erzeuger-Repo sinnvoll (braucht `generated/`) |
 
-- **Ablauf für Nutzerinnen:** Workflow installieren, lanecraft-Plugin installieren, Workflow
+- **Ablauf für Nutzerinnen:** Workflow installieren, FlowForge-Plugin installieren, Workflow
   laufen lassen, danach `/bpmn2agent-cost` im selben Projekt.
 - **Warum nicht alles in den Payload:** Jede Workflow-Kopie hätte eine eigene, veraltende
   Preistabelle, und ein Report-Skript ohne BPMN-Element verstieße gegen die Regel aus generate
   Schritt 4. Der Hook ist wie die Kontext-Hooks eine benannte Ausnahme; `cost-map.json` ist
   Daten, kein Skript.
-- **Ohne lanecraft-Plugin** sammelt der Hook trotzdem. Der Ledger lässt sich später auswerten,
+- **Ohne FlowForge-Plugin** sammelt der Hook trotzdem. Der Ledger lässt sich später auswerten,
   auch in einem anderen Projekt.
 - **Später:** Werden generierte Workflows als Plugins veröffentlicht (wie dark-factory), wandert
   der Hook in das `hooks.json` des Plugins und `cost-map.json` reist mit. Die Aufteilung bleibt
