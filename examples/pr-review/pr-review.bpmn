@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_PrReview" targetNamespace="https://example.com/bpmn/pr-review">
+  <bpmn:dataStore id="DataStore_Richtlinien" />
+  <bpmn:dataStore id="DataStore_Repo" />
+  <bpmn:process id="Process_PrReview" name="Pull Request prüfen und mergen" isExecutable="false">
+    <bpmn:documentation>Der Weg eines Pull Requests bis zum Merge: eine KI fasst die Änderung zusammen und prüft Code, Tests und Sicherheit parallel, fasst die Befunde zusammen und schickt den Autor bei kritischen Befunden zurück. Den Merge gibt immer der Tech Lead frei. Wissensbasis: die Review-Richtlinien des Teams.</bpmn:documentation>
+    <bpmn:ioSpecification id="IoSpec_PrReview">
+      <bpmn:dataInput id="DataInput_PrNummer" name="PR-Nummer" />
+      <bpmn:inputSet id="InputSet_PrReview"><bpmn:dataInputRefs>DataInput_PrNummer</bpmn:dataInputRefs></bpmn:inputSet>
+      <bpmn:outputSet id="OutputSet_PrReview" />
+    </bpmn:ioSpecification>
+    <bpmn:laneSet id="LaneSet_PrReview">
+      <bpmn:lane id="Lane_Autor" name="Autor">
+        <bpmn:flowNodeRef>Start_PrEroeffnet</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Merge_Nachbessern</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Nachbessern</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_Reviewer" name="Reviewer">
+        <bpmn:flowNodeRef>Gw_Merge_Pruefung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Zusammenfassen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Split_Pruefung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CodePruefen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Tests</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Sicherheit</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Join_Pruefung</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Zusammenfuehren</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Kritisch</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_TechLead" name="Tech Lead">
+        <bpmn:flowNodeRef>Task_Freigeben</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gw_Freigegeben</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Mergen</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Gemergt</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Verworfen</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="Start_PrEroeffnet" name="Pull Request eröffnet">
+      <bpmn:documentation>Auslöser: Ein Entwickler öffnet einen Pull Request. Input: PR-Nummer.</bpmn:documentation>
+      <bpmn:outgoing>Flow_01</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gw_Merge_Pruefung">
+      <bpmn:incoming>Flow_01</bpmn:incoming>
+      <bpmn:incoming>Flow_15</bpmn:incoming>
+      <bpmn:outgoing>Flow_02</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Zusammenfassen" name="Änderung zusammenfassen">
+      <bpmn:documentation>Input: PR-Nummer, Diff und Beschreibung des Pull Requests. Output: Kurzfassung der Änderung - was ändert sich, welche Dateien und Module sind betroffen, wie groß ist das Risiko.</bpmn:documentation>
+      <bpmn:incoming>Flow_02</bpmn:incoming>
+      <bpmn:outgoing>Flow_03</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Repo_Zusammenfassen" name="__targetRef_placeholder" />
+      <bpmn:property id="Property_DataIn_PrNummer_Zusammenfassen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Repo_Zusammenfassen"><bpmn:sourceRef>StoreRef_Repo</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Repo_Zusammenfassen</bpmn:targetRef></bpmn:dataInputAssociation>
+      <bpmn:dataInputAssociation id="DataIn_PrNummer_Zusammenfassen"><bpmn:sourceRef>DataInput_PrNummer</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_PrNummer_Zusammenfassen</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gw_Split_Pruefung">
+      <bpmn:incoming>Flow_03</bpmn:incoming>
+      <bpmn:outgoing>Flow_04</bpmn:outgoing>
+      <bpmn:outgoing>Flow_05</bpmn:outgoing>
+      <bpmn:outgoing>Flow_06</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_CodePruefen" name="Code auf Fehler und Stil prüfen">
+      <bpmn:documentation>Input: Kurzfassung der Änderung, Review-Richtlinien des Teams. Output: Befunde zu Logikfehlern, Lesbarkeit und Stil, je mit Datei, Zeile und Schweregrad.</bpmn:documentation>
+      <bpmn:incoming>Flow_04</bpmn:incoming>
+      <bpmn:outgoing>Flow_07</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Richtlinien_CodePruefen" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Richtlinien_CodePruefen"><bpmn:sourceRef>StoreRef_Richtlinien</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Richtlinien_CodePruefen</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:scriptTask id="Task_Tests" name="Tests und Linter ausführen">
+      <bpmn:documentation>Input: Branch des Pull Requests. Output: Ergebnis von Testsuite und Linter (bestanden oder fehlgeschlagen, Liste der Fehler). Rein mechanisch.</bpmn:documentation>
+      <bpmn:incoming>Flow_05</bpmn:incoming>
+      <bpmn:outgoing>Flow_08</bpmn:outgoing>
+    </bpmn:scriptTask>
+    <bpmn:serviceTask id="Task_Sicherheit" name="Sicherheitsrisiken prüfen">
+      <bpmn:documentation>Input: Kurzfassung der Änderung, Diff. Output: Befunde zu Geheimnissen im Code, unsicherer Eingabeverarbeitung und neuen Abhängigkeiten, je mit Schweregrad.</bpmn:documentation>
+      <bpmn:incoming>Flow_06</bpmn:incoming>
+      <bpmn:outgoing>Flow_09</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:parallelGateway id="Gw_Join_Pruefung">
+      <bpmn:incoming>Flow_07</bpmn:incoming>
+      <bpmn:incoming>Flow_08</bpmn:incoming>
+      <bpmn:incoming>Flow_09</bpmn:incoming>
+      <bpmn:outgoing>Flow_10</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:serviceTask id="Task_Zusammenfuehren" name="Befunde zusammenführen">
+      <bpmn:documentation>Input: Befunde aus Code-Prüfung, Tests und Sicherheitsprüfung. Output: Review-Befund - dedupliziert, nach Schweregrad sortiert, mit Empfehlung (kritisch oder unkritisch).</bpmn:documentation>
+      <bpmn:incoming>Flow_10</bpmn:incoming>
+      <bpmn:outgoing>Flow_11</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Befund_Zusammenfuehren"><bpmn:targetRef>DataObjRef_Befund</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gw_Kritisch" name="Kritische Befunde?" default="Flow_13">
+      <bpmn:documentation>Kritisch ist ein Befund mit Schweregrad hoch, ein fehlgeschlagener Test oder ein Sicherheitsrisiko. Nach höchstens drei Runden geht der Pull Request trotzdem zur Freigabe, mit Risikohinweis.</bpmn:documentation>
+      <bpmn:incoming>Flow_11</bpmn:incoming>
+      <bpmn:outgoing>Flow_12</bpmn:outgoing>
+      <bpmn:outgoing>Flow_13</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:exclusiveGateway id="Gw_Merge_Nachbessern">
+      <bpmn:incoming>Flow_12</bpmn:incoming>
+      <bpmn:incoming>Flow_19</bpmn:incoming>
+      <bpmn:outgoing>Flow_14</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:userTask id="Task_Nachbessern" name="Änderungen nachbessern">
+      <bpmn:documentation>Input: Review-Befund. Output: neue Commits im Pull Request, die die Befunde beheben.</bpmn:documentation>
+      <bpmn:incoming>Flow_14</bpmn:incoming>
+      <bpmn:outgoing>Flow_15</bpmn:outgoing>
+      <bpmn:property id="Property_DataIn_Befund_Nachbessern" name="__targetRef_placeholder" />
+      <bpmn:dataInputAssociation id="DataIn_Befund_Nachbessern"><bpmn:sourceRef>DataObjRef_Befund</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Befund_Nachbessern</bpmn:targetRef></bpmn:dataInputAssociation>
+    </bpmn:userTask>
+    <bpmn:userTask id="Task_Freigeben" name="Merge freigeben">
+      <bpmn:documentation>Input: Kurzfassung der Änderung, Review-Befund. Output: Entscheidung des Tech Leads - freigeben, nachbessern lassen oder verwerfen. Freigabe vor dem Schreiben ins Repository.</bpmn:documentation>
+      <bpmn:incoming>Flow_13</bpmn:incoming>
+      <bpmn:outgoing>Flow_16</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gw_Freigegeben" name="Freigegeben?" default="Flow_17">
+      <bpmn:incoming>Flow_16</bpmn:incoming>
+      <bpmn:outgoing>Flow_17</bpmn:outgoing>
+      <bpmn:outgoing>Flow_19</bpmn:outgoing>
+      <bpmn:outgoing>Flow_20</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Task_Mergen" name="Pull Request mergen">
+      <bpmn:documentation>Input: freigegebener Pull Request. Output: gemergter Branch, Pull Request geschlossen.</bpmn:documentation>
+      <bpmn:incoming>Flow_17</bpmn:incoming>
+      <bpmn:outgoing>Flow_18</bpmn:outgoing>
+      <bpmn:dataOutputAssociation id="DataOut_Repo_Mergen"><bpmn:targetRef>StoreRef_Repo</bpmn:targetRef></bpmn:dataOutputAssociation>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="End_Gemergt" name="Pull Request gemergt">
+      <bpmn:documentation>Der Pull Request ist im Hauptzweig.</bpmn:documentation>
+      <bpmn:incoming>Flow_18</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="End_Verworfen" name="Pull Request verworfen">
+      <bpmn:documentation>Der Tech Lead hat den Pull Request abgelehnt; der Autor bekommt eine Übergabenotiz.</bpmn:documentation>
+      <bpmn:incoming>Flow_20</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_01" sourceRef="Start_PrEroeffnet" targetRef="Gw_Merge_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_02" sourceRef="Gw_Merge_Pruefung" targetRef="Task_Zusammenfassen" />
+    <bpmn:sequenceFlow id="Flow_03" sourceRef="Task_Zusammenfassen" targetRef="Gw_Split_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_04" sourceRef="Gw_Split_Pruefung" targetRef="Task_CodePruefen" />
+    <bpmn:sequenceFlow id="Flow_05" sourceRef="Gw_Split_Pruefung" targetRef="Task_Tests" />
+    <bpmn:sequenceFlow id="Flow_06" sourceRef="Gw_Split_Pruefung" targetRef="Task_Sicherheit" />
+    <bpmn:sequenceFlow id="Flow_07" sourceRef="Task_CodePruefen" targetRef="Gw_Join_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_08" sourceRef="Task_Tests" targetRef="Gw_Join_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_09" sourceRef="Task_Sicherheit" targetRef="Gw_Join_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_10" sourceRef="Gw_Join_Pruefung" targetRef="Task_Zusammenfuehren" />
+    <bpmn:sequenceFlow id="Flow_11" sourceRef="Task_Zusammenfuehren" targetRef="Gw_Kritisch" />
+    <bpmn:sequenceFlow id="Flow_12" sourceRef="Gw_Kritisch" targetRef="Gw_Merge_Nachbessern" name="Ja (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Ja (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_13" sourceRef="Gw_Kritisch" targetRef="Task_Freigeben" name="Nein" />
+    <bpmn:sequenceFlow id="Flow_14" sourceRef="Gw_Merge_Nachbessern" targetRef="Task_Nachbessern" />
+    <bpmn:sequenceFlow id="Flow_15" sourceRef="Task_Nachbessern" targetRef="Gw_Merge_Pruefung" />
+    <bpmn:sequenceFlow id="Flow_16" sourceRef="Task_Freigeben" targetRef="Gw_Freigegeben" />
+    <bpmn:sequenceFlow id="Flow_17" sourceRef="Gw_Freigegeben" targetRef="Task_Mergen" name="Ja" />
+    <bpmn:sequenceFlow id="Flow_18" sourceRef="Task_Mergen" targetRef="End_Gemergt" />
+    <bpmn:sequenceFlow id="Flow_19" sourceRef="Gw_Freigegeben" targetRef="Gw_Merge_Nachbessern" name="Nein (max. 3×)">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Nein (max. 3×)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_20" sourceRef="Gw_Freigegeben" targetRef="End_Verworfen" name="Verworfen">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Verworfen</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:dataObject id="DataObj_Befund" />
+    <bpmn:dataObjectReference id="DataObjRef_Befund" name="Review-Befund" dataObjectRef="DataObj_Befund" />
+    <bpmn:dataStoreReference id="StoreRef_Richtlinien" name="Review-Richtlinien" dataStoreRef="DataStore_Richtlinien">
+      <bpmn:documentation>Art: wissen
+Ort: datei:docs/review-guidelines.md</bpmn:documentation>
+    </bpmn:dataStoreReference>
+    <bpmn:dataStoreReference id="StoreRef_Repo" name="Pull Requests im Repository" dataStoreRef="DataStore_Repo">
+      <bpmn:documentation>Art: live
+Ort: cli:gh</bpmn:documentation>
+    </bpmn:dataStoreReference>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_PrReview">
+    <bpmndi:BPMNPlane id="BPMNPlane_PrReview" bpmnElement="Process_PrReview">
+      <bpmndi:BPMNShape id="Lane_Autor_di" bpmnElement="Lane_Autor" isHorizontal="true">
+        <dc:Bounds x="160" y="40" width="1790" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_Reviewer_di" bpmnElement="Lane_Reviewer" isHorizontal="true">
+        <dc:Bounds x="160" y="230" width="1790" height="500" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_TechLead_di" bpmnElement="Lane_TechLead" isHorizontal="true">
+        <dc:Bounds x="160" y="730" width="1790" height="260" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Start_PrEroeffnet_di" bpmnElement="Start_PrEroeffnet">
+        <dc:Bounds x="330" y="117" width="36" height="36" />
+      <bpmndi:BPMNLabel><dc:Bounds x="303" y="85" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Merge_Pruefung_di" bpmnElement="Gw_Merge_Pruefung" isMarkerVisible="true">
+        <dc:Bounds x="400" y="495" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Zusammenfassen_di" bpmnElement="Task_Zusammenfassen">
+        <dc:Bounds x="500" y="470" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Split_Pruefung_di" bpmnElement="Gw_Split_Pruefung">
+        <dc:Bounds x="690" y="495" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_CodePruefen_di" bpmnElement="Task_CodePruefen">
+        <dc:Bounds x="790" y="340" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Tests_di" bpmnElement="Task_Tests">
+        <dc:Bounds x="790" y="470" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Sicherheit_di" bpmnElement="Task_Sicherheit">
+        <dc:Bounds x="790" y="600" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Join_Pruefung_di" bpmnElement="Gw_Join_Pruefung">
+        <dc:Bounds x="980" y="495" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Zusammenfuehren_di" bpmnElement="Task_Zusammenfuehren">
+        <dc:Bounds x="1080" y="470" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Kritisch_di" bpmnElement="Gw_Kritisch" isMarkerVisible="true">
+        <dc:Bounds x="1270" y="495" width="50" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1304" y="506" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Merge_Nachbessern_di" bpmnElement="Gw_Merge_Nachbessern" isMarkerVisible="true">
+        <dc:Bounds x="1180" y="110" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Nachbessern_di" bpmnElement="Task_Nachbessern">
+        <dc:Bounds x="950" y="85" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Freigeben_di" bpmnElement="Task_Freigeben">
+        <dc:Bounds x="1370" y="760" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gw_Freigegeben_di" bpmnElement="Gw_Freigegeben" isMarkerVisible="true">
+        <dc:Bounds x="1560" y="785" width="50" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1462" y="740" width="90" height="15" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Mergen_di" bpmnElement="Task_Mergen">
+        <dc:Bounds x="1660" y="760" width="140" height="100" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Gemergt_di" bpmnElement="End_Gemergt">
+        <dc:Bounds x="1850" y="792" width="36" height="36" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1823" y="760" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Verworfen_di" bpmnElement="End_Verworfen">
+        <dc:Bounds x="1567" y="890" width="36" height="36" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1596" y="894" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataObjRef_Befund_di" bpmnElement="DataObjRef_Befund">
+        <dc:Bounds x="1132" y="390" width="36" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1166" y="408" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Richtlinien_di" bpmnElement="StoreRef_Richtlinien">
+        <dc:Bounds x="835" y="245" width="50" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="871" y="256" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StoreRef_Repo_di" bpmnElement="StoreRef_Repo">
+        <dc:Bounds x="545" y="890" width="50" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="598" y="901" width="90" height="28" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="DataInput_PrNummer_di" bpmnElement="DataInput_PrNummer">
+        <dc:Bounds x="552" y="290" width="36" height="50" />
+      <bpmndi:BPMNLabel><dc:Bounds x="525" y="272" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_01_di" bpmnElement="Flow_01">
+        <di:waypoint x="348" y="153" />
+        <di:waypoint x="348" y="520" />
+        <di:waypoint x="400" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_02_di" bpmnElement="Flow_02">
+        <di:waypoint x="450" y="520" />
+        <di:waypoint x="500" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03_di" bpmnElement="Flow_03">
+        <di:waypoint x="640" y="520" />
+        <di:waypoint x="690" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_04_di" bpmnElement="Flow_04">
+        <di:waypoint x="715" y="495" />
+        <di:waypoint x="715" y="390" />
+        <di:waypoint x="790" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_05_di" bpmnElement="Flow_05">
+        <di:waypoint x="740" y="520" />
+        <di:waypoint x="790" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06_di" bpmnElement="Flow_06">
+        <di:waypoint x="715" y="545" />
+        <di:waypoint x="715" y="650" />
+        <di:waypoint x="790" y="650" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07_di" bpmnElement="Flow_07">
+        <di:waypoint x="930" y="390" />
+        <di:waypoint x="1005" y="390" />
+        <di:waypoint x="1005" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08_di" bpmnElement="Flow_08">
+        <di:waypoint x="930" y="520" />
+        <di:waypoint x="980" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_09_di" bpmnElement="Flow_09">
+        <di:waypoint x="930" y="650" />
+        <di:waypoint x="1005" y="650" />
+        <di:waypoint x="1005" y="545" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
+        <di:waypoint x="1030" y="520" />
+        <di:waypoint x="1080" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
+        <di:waypoint x="1220" y="520" />
+        <di:waypoint x="1270" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12">
+        <di:waypoint x="1295" y="495" />
+        <di:waypoint x="1295" y="135" />
+        <di:waypoint x="1230" y="135" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1286" y="468" width="90" height="15" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
+        <di:waypoint x="1295" y="545" />
+        <di:waypoint x="1295" y="810" />
+        <di:waypoint x="1370" y="810" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1267" y="557" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
+        <di:waypoint x="1180" y="135" />
+        <di:waypoint x="1090" y="135" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15">
+        <di:waypoint x="950" y="135" />
+        <di:waypoint x="425" y="135" />
+        <di:waypoint x="425" y="495" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16">
+        <di:waypoint x="1510" y="810" />
+        <di:waypoint x="1560" y="810" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17">
+        <di:waypoint x="1610" y="810" />
+        <di:waypoint x="1660" y="810" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1586" y="792" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18">
+        <di:waypoint x="1800" y="810" />
+        <di:waypoint x="1850" y="810" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19">
+        <di:waypoint x="1585" y="785" />
+        <di:waypoint x="1585" y="70" />
+        <di:waypoint x="1205" y="70" />
+        <di:waypoint x="1205" y="110" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1582" y="420" width="90" height="15" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20">
+        <di:waypoint x="1585" y="835" />
+        <di:waypoint x="1585" y="890" />
+      <bpmndi:BPMNLabel><dc:Bounds x="1570" y="847" width="90" height="14" /></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Richtlinien_CodePruefen_di" bpmnElement="DataIn_Richtlinien_CodePruefen">
+        <di:waypoint x="860" y="295" />
+        <di:waypoint x="860" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Repo_Zusammenfassen_di" bpmnElement="DataIn_Repo_Zusammenfassen">
+        <di:waypoint x="570" y="890" />
+        <di:waypoint x="570" y="570" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_PrNummer_Zusammenfassen_di" bpmnElement="DataIn_PrNummer_Zusammenfassen">
+        <di:waypoint x="570" y="340" />
+        <di:waypoint x="570" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataIn_Befund_Nachbessern_di" bpmnElement="DataIn_Befund_Nachbessern">
+        <di:waypoint x="1150" y="390" />
+        <di:waypoint x="1150" y="210" />
+        <di:waypoint x="1020" y="210" />
+        <di:waypoint x="1020" y="185" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Befund_Zusammenfuehren_di" bpmnElement="DataOut_Befund_Zusammenfuehren">
+        <di:waypoint x="1150" y="470" />
+        <di:waypoint x="1150" y="440" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="DataOut_Repo_Mergen_di" bpmnElement="DataOut_Repo_Mergen">
+        <di:waypoint x="1730" y="860" />
+        <di:waypoint x="1730" y="965" />
+        <di:waypoint x="570" y="965" />
+        <di:waypoint x="570" y="940" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
