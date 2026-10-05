@@ -47,7 +47,7 @@ Sechs Skizzen erklären die Idee in etwa 15 Minuten, in dieser Reihenfolge
 Das Repo ist Claude-Code-Plugin und Marketplace zugleich:
 
 ```text
-/plugin marketplace add Cofinpro/flowforge
+/plugin marketplace add Cofinpro/FlowForge
 /plugin install flowforge@flowforge
 ```
 
@@ -80,7 +80,7 @@ Notebook-Wissen optional der `gemini-notebook-mcp`-Server.
 ```json
 {
   "extraKnownMarketplaces": {
-    "flowforge": { "source": { "source": "github", "repo": "Cofinpro/flowforge" } }
+    "flowforge": { "source": { "source": "github", "repo": "Cofinpro/FlowForge" } }
   },
   "enabledPlugins": { "flowforge@flowforge": true }
 }
@@ -91,7 +91,7 @@ Kommandozeile: `claude plugin install flowforge@flowforge --scope project`. Ohne
 Installation nur für dich.
 
 **Zugriff.** Claude Code holt das Plugin mit den eigenen Git-Zugangsdaten von GitHub. Ist das Repo
-privat, braucht jeder im Team Lesezugriff auf `Cofinpro/flowforge`.
+privat, braucht jeder im Team Lesezugriff auf `Cofinpro/FlowForge`.
 
 **Aufrufen.** Skills und Agenten des Plugins tragen das Präfix `flowforge:`, z. B.
 `/flowforge:bpmn-to-agentic-workflow` oder `/flowforge:bpmn-authoring`.
