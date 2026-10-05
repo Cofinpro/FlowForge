@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.0](https://github.com/Cofinpro/lanecraft/compare/v0.4.1...v0.5.0) (2026-10-04)
+
+### Features
+
+* **bpmn-authoring:** add relabel.mjs to place labels without overlaps ([27c41ca](https://github.com/Cofinpro/lanecraft/commit/27c41caa47b974e3e95c7260cbf9cb8106cb3742))
+
+### Bug Fixes
+
+* **examples:** reposition user-story-refinement labels to avoid overlaps ([bc6cd03](https://github.com/Cofinpro/lanecraft/commit/bc6cd03243bcde9f3179b2e4d8aa24728df5bd11))
+* **mapping:** keep annotations off labels, shapes and flow lines ([eca1698](https://github.com/Cofinpro/lanecraft/commit/eca16988a4fe4c0af9aae3e94de5aa0ec4034230))
+
 ## [0.4.1](https://github.com/Cofinpro/lanecraft/compare/v0.4.0...v0.4.1) (2026-10-04)
 
 ### Bug Fixes
