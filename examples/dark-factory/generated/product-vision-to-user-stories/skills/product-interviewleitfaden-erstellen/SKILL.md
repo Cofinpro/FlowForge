@@ -10,7 +10,7 @@ bpmn:
 
 # Erhebungstechniken & Interviewleitfaden erstellen (step 2.1.2)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Erhebungstechniken & Interviewleitfaden erstellen" (serviceTask, lane "Interviewer") by `bpmn2agent-generate`. Is the script the panel interview (product-panel-befragung, mode interview) follows in S2.1.4; its problem-ranking block is what S2.1.4 synthesises into the G-P2 kill signal, and the SP2.1 critic judges it against rubric interview-guide. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Erhebungstechniken & Interviewleitfaden erstellen" (serviceTask, lane "Interviewer") by `flowforge-generate`. Is the script the panel interview (product-panel-befragung, mode interview) follows in S2.1.4; its problem-ranking block is what S2.1.4 synthesises into the G-P2 kill signal, and the SP2.1 critic judges it against rubric interview-guide. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-interviewer` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

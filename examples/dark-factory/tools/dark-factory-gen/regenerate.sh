@@ -12,7 +12,7 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FACTORY="$(cd "$HERE/../.." && pwd)"   # examples/dark-factory/: BPMN, generated/, tools/
-REPO="$(cd "$FACTORY/../.." && pwd)"   # bpmn2agent repo root: .agents/skills/
+REPO="$(cd "$FACTORY/../.." && pwd)"   # flowforge repo root: .agents/skills/
 CACHE="${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}"
 BPMN=product-vision-to-user-stories.bpmn
 WF=generated/product-vision-to-user-stories
@@ -22,7 +22,7 @@ mkdir -p "$HERE/.build"
 echo "── 1/7 validate BPMN"
 bash "$REPO"/.agents/skills/bpmn-authoring/scripts/validate.sh "$BPMN"
 echo "── 2/7 inventory + sdlc extraction"
-node "$REPO"/.agents/skills/bpmn2agent-analyze/scripts/inventory.mjs "$CACHE" "$BPMN" > "$HERE/.build/inv.json"
+node "$REPO"/.agents/skills/flowforge-analyze/scripts/inventory.mjs "$CACHE" "$BPMN" > "$HERE/.build/inv.json"
 python3 "$HERE/extract-sdlc.py" "$BPMN" > "$HERE/.build/sdlc.json"
 echo "── 3/7 workflow-spec.yaml"
 node "$HERE/build-spec.mjs"
@@ -32,11 +32,11 @@ echo "── 5/7 workflow script"
 node "$HERE/assemble-workflow.mjs"
 echo "── 6/7 mapping report + render"
 node "$HERE/gen-report.mjs"
-node "$REPO"/.agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs "$CACHE" "$WF/workflow-spec.yaml" "$BPMN" "$WF/mapping"
+node "$REPO"/.agents/skills/flowforge-generate/scripts/render-mapping.mjs "$CACHE" "$WF/workflow-spec.yaml" "$BPMN" "$WF/mapping"
 echo "── 7/7 verify + reference audit + smoke test"
-node "$REPO"/.agents/skills/bpmn2agent-verify/scripts/verify.mjs "$CACHE" "$WF"
+node "$REPO"/.agents/skills/flowforge-verify/scripts/verify.mjs "$CACHE" "$WF"
 node "$HERE/check-refs.mjs"
 node "$HERE/smoke.mjs" > /dev/null && echo "smoke test ok"
 node "$HERE/smoke-stories.mjs" > /dev/null && echo "story smoke ok"
 env -u GEMINI_API_KEY node "$HERE/smoke-research.mjs" > /dev/null && echo "research smoke ok"
-node "$REPO"/.agents/skills/bpmn2agent-generate/scripts/check-mapping-view.mjs "$CACHE" "$WF/mapping/index.html"
+node "$REPO"/.agents/skills/flowforge-generate/scripts/check-mapping-view.mjs "$CACHE" "$WF/mapping/index.html"

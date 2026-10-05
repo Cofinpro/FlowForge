@@ -107,7 +107,7 @@ Alle drei sind dasselbe GitHub-Backlog, nach Phase geschnitten.
 - **Kostenprotokoll** (`hooks/user-story-refinement-cost-ledger.mjs`, `hooks/user-story-refinement-cost-map.json`):
   schreibt nach jedem Lauf die verbrauchten Tokens nach `.claude/runs/user-story-refinement/ledger.jsonl`
   (ohne Preise, ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: FlowForge-Plugin
-  installieren, danach `/bpmn2agent-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
+  installieren, danach `/flowforge-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
 - **Agenten, Skripte:** keine.
 
 Andere Umgebungen (z. B. `.codex/`): die Skills sind neutral geschrieben und lassen sich dorthin
@@ -166,6 +166,6 @@ Keine. Während des Laufs entschieden:
 
 ## Neu erzeugen
 
-Ändert sich `user-story-refinement.bpmn`, `bpmn-to-agentic-workflow` erneut starten; gefragt
+Ändert sich `user-story-refinement.bpmn`, `flowforge-run` erneut starten; gefragt
 wird nur nach dem, was sich geändert hat. Bereits kopierte Dateien bleiben unberührt; nach einem
 Blick in `mapping/report.md` `.claude/` einfach neu kopieren.

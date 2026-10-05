@@ -21,7 +21,7 @@ Your steps, in BPMN order:
 
 Before returning, confirm the skill's self-check passed and `commit-artifact.mjs` accepted every output file.
 
-<!-- regenerate boundary: bpmn2agent-generate only rewrites the checklist bullets and the domain
+<!-- regenerate boundary: flowforge-generate only rewrites the checklist bullets and the domain
      knowledge section above a re-run; anything you add below this line is preserved. -->
 
 ## Domain knowledge

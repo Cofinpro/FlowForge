@@ -57,7 +57,7 @@ for (const [id, [skill, phaseDir, phKey]] of Object.entries(STEP_SKILLS)) {
   const skillMd = fm({ name: skill, description: c.description, bpmn: bpmnHdr(extraEls) }) + `
 # ${el.label} (step ${key})
 
-Generated from \`${BPMN}\`'s "${el.label}" (${el.bpmnType}, lane "${laneLabel(el)}") by \`bpmn2agent-generate\`. ${c.purpose} It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from \`${BPMN}\`'s "${el.label}" (${el.bpmnType}, lane "${laneLabel(el)}") by \`flowforge-generate\`. ${c.purpose} It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the \`product-${role}\` agent. Binding rules: \`${RULES}\` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 
@@ -233,7 +233,7 @@ ${lines.join('\n')}
 
 Before returning, confirm the skill's self-check passed and \`commit-artifact.mjs\` accepted every output file.
 
-<!-- regenerate boundary: bpmn2agent-generate only rewrites the checklist bullets and the domain
+<!-- regenerate boundary: flowforge-generate only rewrites the checklist bullets and the domain
      knowledge section above a re-run; anything you add below this line is preserved. -->
 
 ## Domain knowledge

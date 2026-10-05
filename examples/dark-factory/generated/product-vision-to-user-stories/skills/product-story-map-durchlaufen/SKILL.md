@@ -10,7 +10,7 @@ bpmn:
 
 # Map durchlaufen: Luecken & Abhaengigkeiten finden (step 4.1.5)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Map durchlaufen: Luecken & Abhaengigkeiten finden" (serviceTask, lane "Architekt") by `bpmn2agent-generate`. Gives the SP4.1 critic and the release-slicing steps (S4.2.2/S4.2.3) an explicit list of gaps and dependencies so slices are buildable in order. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Map durchlaufen: Luecken & Abhaengigkeiten finden" (serviceTask, lane "Architekt") by `flowforge-generate`. Gives the SP4.1 critic and the release-slicing steps (S4.2.2/S4.2.3) an explicit list of gaps and dependencies so slices are buildable in order. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-architekt` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

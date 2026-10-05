@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["K_1"]}
 //
 // Generated from "Rubric laden" (scriptTask, Process_K) in product-vision-to-user-stories.bpmn by
-// bpmn2agent-generate. Deterministic step — no LLM call.
+// flowforge-generate. Deterministic step — no LLM call.
 //
 // Usage: node load-rubric.mjs <rubricId> <artifact.md> [<artifact.md> ...]
 // Resolves ../references/rubrics/<rubricId>.md. A composite rubric (phase-*, gate-*) lists

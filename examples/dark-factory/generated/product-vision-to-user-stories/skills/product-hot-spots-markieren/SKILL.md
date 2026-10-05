@@ -10,7 +10,7 @@ bpmn:
 
 # Hot Spots & Friktionspunkte markieren (step 3.1.2)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Hot Spots & Friktionspunkte markieren" (serviceTask, lane "UX-/Journey-Designer") by `bpmn2agent-generate`. Turns the current journey into a ranked list of HS items that S3.1.3 must address or explicitly skip in the future state and that S4.1.4 turns into edge-case/detail cards; HS is a recommended trace edge (Gedächtnis §10.2). It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Hot Spots & Friktionspunkte markieren" (serviceTask, lane "UX-/Journey-Designer") by `flowforge-generate`. Turns the current journey into a ranked list of HS items that S3.1.3 must address or explicitly skip in the future state and that S4.1.4 turns into edge-case/detail cards; HS is a recommended trace edge (Gedächtnis §10.2). It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-ux` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

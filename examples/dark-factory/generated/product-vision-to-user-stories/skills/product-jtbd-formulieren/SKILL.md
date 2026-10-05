@@ -10,7 +10,7 @@ bpmn:
 
 # Jobs-to-be-Done formulieren (step 2.1.6)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Jobs-to-be-Done formulieren" (serviceTask, lane "UX-/Journey-Designer") by `bpmn2agent-generate`. JOB items are a link in the mandatory trace chain (OPP | JOB → IMP) and feed the journeys in S3.1.1; the SP2.1 critic and G-P2 judge their evidence mix. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Jobs-to-be-Done formulieren" (serviceTask, lane "UX-/Journey-Designer") by `flowforge-generate`. JOB items are a link in the mandatory trace chain (OPP | JOB → IMP) and feed the journeys in S3.1.1; the SP2.1 critic and G-P2 judge their evidence mix. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-ux` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

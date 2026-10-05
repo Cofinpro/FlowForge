@@ -213,7 +213,7 @@ Agenten selbst festgelegt. Bitte prüfe sie:
 ## Mapping-Ansicht neu rendern
 
 ```bash
-node .agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs \
+node .agents/skills/flowforge-generate/scripts/render-mapping.mjs \
   "${BPMN_TOOLS_CACHE:-$HOME/.cache/bpmn-authoring-tools}" \
   factory/generated/product-vision-to-user-stories/workflow-spec.yaml factory/product-vision-to-user-stories.bpmn \
   factory/generated/product-vision-to-user-stories/mapping
@@ -221,7 +221,7 @@ node .agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs \
 
 ## Neu generieren
 
-Wenn sich `product-vision-to-user-stories.bpmn` ändert, starte `bpmn-to-agentic-workflow` erneut.
+Wenn sich `product-vision-to-user-stories.bpmn` ändert, starte `flowforge-run` erneut.
 Die Analyse vergleicht Element für Element und fragt nur nach, was neu oder geändert ist. Danach
 baut `bash factory/tools/dark-factory-gen/regenerate.sh` das Plugin neu; Zielprojekte sehen die Änderung nach
 `/reload-plugins`.

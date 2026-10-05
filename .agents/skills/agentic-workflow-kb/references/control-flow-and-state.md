@@ -56,7 +56,7 @@ Hybrid recommendation: a deterministic engine owns the process structure (sequen
 audit trail); agents work *inside* the task nodes that need unstructured reasoning
 [control-flow-and-state-1: 19, 39, 48, 57, 58, 59].
 
-## For bpmn2agent
+## For flowforge
 
 This is the reasoning behind `mapping-rubric.md`'s "gateway → orchestrator logic" and the
 `gate.maxLoops` default of 3. Two checks worth adding in design: every loop has a termination

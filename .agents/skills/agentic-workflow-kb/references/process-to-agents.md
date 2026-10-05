@@ -53,7 +53,7 @@ extraction, classification and routine calls. A small model can propose, a stron
 - Context bloat from dumping data or traces [process-to-agents-1: 50, 77, 78].
 - Missing domain-expert review of real failures [process-to-agents-1: 79, 80, 81].
 
-## For bpmn2agent
+## For flowforge
 
 **Data stores (repo design decision, from `docs/plans/kontextquellen/plan.md`; not notebook-cited).**
 A data store is a context source with an `Art:` (`wissen` → cited reference loaded at generation,

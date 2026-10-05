@@ -10,7 +10,7 @@ bpmn:
 
 # Ziel & Kennzahlen festlegen (Why) (step 1.2.1)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Ziel & Kennzahlen festlegen (Why)" (serviceTask, lane "Stratege") by `bpmn2agent-generate`. GOAL items are the "Why" level of the impact map and a mandatory link of the trace chain (IMP → GOAL → VIS); S1.2.2 derives actors from them and S1.2.6 states roadmap milestones as movements of the OMTM. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Ziel & Kennzahlen festlegen (Why)" (serviceTask, lane "Stratege") by `flowforge-generate`. GOAL items are the "Why" level of the impact map and a mandatory link of the trace chain (IMP → GOAL → VIS); S1.2.2 derives actors from them and S1.2.6 states roadmap milestones as movements of the OMTM. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-stratege` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

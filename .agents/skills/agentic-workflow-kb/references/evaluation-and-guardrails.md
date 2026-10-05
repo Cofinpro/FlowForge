@@ -58,9 +58,9 @@ Track tokens per workflow, tool failure/retry rates, fallback frequency and P95 
 reduce with context compaction, routing to small models and prompt caching; roll out with shadow
 mode or canaries [evaluation-and-guardrails-1: 77–95].
 
-## For bpmn2agent
+## For flowforge
 
-`bpmn2agent-verify` is a static check (trace, schema, lint) — it proves structure, not behaviour.
+`flowforge-verify` is a static check (trace, schema, lint) — it proves structure, not behaviour.
 Behavioural evals for a generated workflow are still missing: per generated skill, ≥ 3 scenarios
 from the BPMN's own paths (happy path, each gateway branch, a loop hitting `maxLoops`). Any agent
 that reads untrusted input and can write outward (PRs, messages) is a trifecta candidate and should

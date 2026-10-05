@@ -1,7 +1,7 @@
 # FlowSpec: die BPMN-Notation
 
 Was jedes BPMN-2.0-Element bedeutet, wenn du damit einen agentischen Workflow und seinen Kontext
-modellierst, und was die `bpmn2agent`-Pipeline daraus erzeugt. Die Regeln selbst stehen in den
+modellierst, und was die `flowforge`-Pipeline daraus erzeugt. Die Regeln selbst stehen in den
 Skills; diese Seite fasst sie an einem Ort zusammen (Quellen am Ende).
 
 **Grundidee:** Lane = Rolle, Aufgabentyp = wer die Arbeit macht (KI, Mensch, Skript, Regel),
@@ -131,7 +131,7 @@ nachgefragt.
 **Regeln je Art:**
 
 - `wissen` wird nur gelesen.
-- `live`: Vor jedem Schreiben liegt auf **jedem** Pfad ein User Task; `bpmn2agent-verify` meldet
+- `live`: Vor jedem Schreiben liegt auf **jedem** Pfad ein User Task; `flowforge-verify` meldet
   sonst einen Fehler. Ein PreToolUse-Hook (`<workflow>-write-guard.mjs`, `permissionDecision:
   "ask"`) sichert die Schreib-Tools zusätzlich ab. Eine Phase mit Live-Schreiben wird nie ein
   Workflow-Skript. Tools werden per Name eingeordnet (`get/list/search/read/fetch/view` lesen,
@@ -160,7 +160,7 @@ verschiedene Wörter.
 
 ## Nicht unterstützt (v1)
 
-`bpmn2agent-analyze` meldet diese Elemente rot und schlägt einen Umbau vor. Bleibst du dabei, wird
+`flowforge-analyze` meldet diese Elemente rot und schlägt einen Umbau vor. Bleibst du dabei, wird
 das Element eine bewusste, grau markierte Lücke.
 
 | Element | warum nicht | stattdessen |
@@ -200,7 +200,7 @@ nennt die Art zusätzlich als Text.
 | Braun | `artifact-contract` | Datenobjekt mit Ablageort und Kopfdaten |
 | Rosé | `context-source`, `workflow-input`, `workflow-output` | Data Store oder Prozess-Ein-/Ausgabe |
 | Grau | `not-generated` | bewusst nicht erzeugt, mit Begründung; kein Fehler |
-| Rot | `unresolved` | offen; `bpmn2agent-verify` schlägt fehl, bis es geklärt ist |
+| Rot | `unresolved` | offen; `flowforge-verify` schlägt fehl, bis es geklärt ist |
 
 ## Kurz-Checkliste vor dem Zeichnen
 
@@ -216,19 +216,19 @@ nennt die Art zusätzlich als Text.
 
 ## Quellen
 
-- [`bpmn-process-design/SKILL.md`](.agents/skills/bpmn-process-design/SKILL.md): die
+- [`flowforge-model/SKILL.md`](.agents/skills/flowforge-model/SKILL.md): die
   FlowSpec-Notation beim Entwerfen, Schritt 4
-- [`bpmn2agent-analyze/references/conventions.md`](.agents/skills/bpmn2agent-analyze/references/conventions.md):
+- [`flowforge-analyze/references/conventions.md`](.agents/skills/flowforge-analyze/references/conventions.md):
   wie die Analyse ein Diagramm liest
-- [`bpmn2agent-analyze/references/unsupported.md`](.agents/skills/bpmn2agent-analyze/references/unsupported.md):
+- [`flowforge-analyze/references/unsupported.md`](.agents/skills/flowforge-analyze/references/unsupported.md):
   nicht unterstützte Konstrukte und Umbauten
-- [`bpmn2agent-design/references/mapping-rubric.md`](.agents/skills/bpmn2agent-design/references/mapping-rubric.md):
+- [`flowforge-design/references/mapping-rubric.md`](.agents/skills/flowforge-design/references/mapping-rubric.md):
   Element → Artefakt, Kontextquellen, Farblegende
-- [`bpmn2agent-design/references/pattern-rubric.md`](.agents/skills/bpmn2agent-design/references/pattern-rubric.md):
+- [`flowforge-design/references/pattern-rubric.md`](.agents/skills/flowforge-design/references/pattern-rubric.md):
   Wahl des Orchestrierungsmusters
 - [`bpmn-authoring/references/modelling-rules.md`](.agents/skills/bpmn-authoring/references/modelling-rules.md)
   und [`xml-and-di.md`](.agents/skills/bpmn-authoring/references/xml-and-di.md): Modellierregeln,
   Schleifen, XML für Data Stores und `ioSpecification`
 - [`ARCHITECTURE.md`](ARCHITECTURE.md#kontextquellen): Kontextquellen durch die Stufen
 - Beispiele: [`examples/user-story-refinement/`](examples/user-story-refinement/),
-  Fixture [`context-flow.bpmn`](.agents/skills/bpmn2agent-verify/fixtures/context-flow.bpmn)
+  Fixture [`context-flow.bpmn`](.agents/skills/flowforge-verify/fixtures/context-flow.bpmn)

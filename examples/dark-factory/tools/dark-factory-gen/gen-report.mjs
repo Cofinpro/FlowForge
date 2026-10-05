@@ -51,7 +51,7 @@ bpmn:
 
 Generated ${spec.meta.updated.slice(0, 10)} from \`generated/${spec.meta.workflowName}/workflow-spec.yaml\`
 (source \`${BPMN}\` @ \`${spec.meta.sourceBpmn.sha256.slice(0, 12)}…\`). This is the trace target for
-\`bpmn2agent-verify\` — every row below must correspond to what's actually on disk.
+\`flowforge-verify\` — every row below must correspond to what's actually on disk.
 
 Elements by kind: ${Object.entries(kinds).map(([k, n]) => `${k} ${n}`).join(' · ')} (total ${ids.length}).
 
@@ -75,7 +75,7 @@ ${spec.pattern.alternativesConsidered.map((a) => `- **${a.pattern}** — ${a.why
 
 ### Deviations from the generator defaults (confirmed with the user, 2026-09-25)
 
-- **Role agents despite workflow-script.** \`bpmn2agent-generate\` normally generates agents only
+- **Role agents despite workflow-script.** \`flowforge-generate\` normally generates agents only
   for the orchestrator-agent pattern. Here the Workflow script runs every step with
   \`agentType: df-<role>\`, so the 10 role agents are real runtime components (docs/dark-factory/implementation.md §2: "ein Agent pro agentRole"). Every step element claims its role's agent file.
 - **Lanes → roles.** The diagram draws one lane per role per sub-process (42 lanes). Each lane has its
@@ -102,7 +102,7 @@ also names its kind or status, so the colour is never the only signal.
 | Amber | \`human-checkpoint\` | A person decides here (none in this fully autonomous process). |
 | Brown | \`artifact-contract\` | A data object with a path/frontmatter contract. |
 | **Grey** | \`not-generated\` | Deliberately not generated; reason shown under "Grey" below. Not an error. |
-| **Red** | \`unresolved\` | Unmapped or still an open question; blocks \`bpmn2agent-verify\`'s "no red in the map" check. |
+| **Red** | \`unresolved\` | Unmapped or still an open question; blocks \`flowforge-verify\`'s "no red in the map" check. |
 
 ## Element → artifact map
 

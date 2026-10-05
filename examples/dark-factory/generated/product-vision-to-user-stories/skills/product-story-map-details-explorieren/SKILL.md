@@ -10,7 +10,7 @@ bpmn:
 
 # Details, Alternativen & Randfaelle explorieren (step 4.1.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Details, Alternativen & Randfaelle explorieren" (serviceTask, lane "QA-Perspektive") by `bpmn2agent-generate`. Fills the vertical axis of the map with detail cards that S4.1.5 walks for gaps and dependencies and that S4.2.1–4.2.5 slice into releases; later S5.1.1 turns cards into stories. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Details, Alternativen & Randfaelle explorieren" (serviceTask, lane "QA-Perspektive") by `flowforge-generate`. Fills the vertical axis of the map with detail cards that S4.1.5 walks for gaps and dependencies and that S4.2.1–4.2.5 slice into releases; later S5.1.1 turns cards into stories. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-qa` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

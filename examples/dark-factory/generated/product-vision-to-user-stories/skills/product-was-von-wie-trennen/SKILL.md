@@ -10,7 +10,7 @@ bpmn:
 
 # Was von Wie trennen (step 5.2.2)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Was von Wie trennen" (serviceTask, lane "Backlog-Autor") by `bpmn2agent-generate`. Produces story-refined — the implementation-neutral story text plus separated technical notes — which 5.2.3 (wireframe/domain model), 5.2.4 (size class), 6.1.1 (confirmation) and the dor critic consume. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Was von Wie trennen" (serviceTask, lane "Backlog-Autor") by `flowforge-generate`. Produces story-refined — the implementation-neutral story text plus separated technical notes — which 5.2.3 (wireframe/domain model), 5.2.4 (size class), 6.1.1 (confirmation) and the dor critic consume. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-backlog-autor` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

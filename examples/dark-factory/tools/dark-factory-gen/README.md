@@ -1,7 +1,7 @@
 # dark-factory-gen: Generator-Quellen der Dark Factory
 
 Mit diesen Quellen entstand am 2026-09-25 `examples/dark-factory/generated/product-vision-to-user-stories/`,
-im Lauf der Pipeline `bpmn-to-agentic-workflow`. Aus diesem Stand wurde das Plugin `dark-factory` gebaut.
+im Lauf der Pipeline `flowforge-run`. Aus diesem Stand wurde das Plugin `dark-factory` gebaut.
 Seit 2026-09-26 wird das Plugin im Repo `ai-sdlc-dojo-2026-factory` (`plugins/dark-factory/`) von Hand
 gepflegt; `generated/` hier ist ein Schnappschuss und wird nicht mehr dorthin übertragen.
 
@@ -18,12 +18,12 @@ Das Skript läuft in 7 Schritten (vom Repo-Root oder von überall):
 4. 52 Schritt-Skills, 41 Rubrics und 10 Agenten generieren
 5. Workflow-Skript zusammensetzen und prüfen
 6. Mapping-Report schreiben und rendern
-7. `bpmn2agent-verify`, Referenzprüfung, Rauchtests und die Browser-Prüfung der Mapping-Ansicht
+7. `flowforge-verify`, Referenzprüfung, Rauchtests und die Browser-Prüfung der Mapping-Ansicht
    (`check-mapping-view.mjs`, braucht Internet für das bpmn-js-CDN) ausführen
 
 Voraussetzungen: `node`, `python3` und `xmllint`. Die npm-Tools (`bpmn-moddle`, `bpmnlint`,
 `js-yaml`, `ajv`, `playwright`) liegen in `~/.cache/bpmn-authoring-tools`. Die Skripte der
-`bpmn-authoring`/`bpmn2agent-*`-Skills (`.agents/skills/`) installieren sie dort beim ersten Lauf.
+`bpmn-authoring`/`flowforge-*`-Skills (`.agents/skills/`) installieren sie dort beim ersten Lauf.
 
 ## Dateien
 
@@ -56,7 +56,7 @@ Voraussetzungen: `node`, `python3` und `xmllint`. Die npm-Tools (`bpmn-moddle`, 
 
 ## Bei einer BPMN-Änderung
 
-Die Pipeline-Skills (`bpmn-to-agentic-workflow`) diffen nach Element-ID und fragen nur zu Neuem
+Die Pipeline-Skills (`flowforge-run`) diffen nach Element-ID und fragen nur zu Neuem
 nach. Die Entscheidungen daraus werden in `build-spec.mjs` (Mapping) und `content/*.json`
 (Inhalt neuer Schritte) nachgetragen. Danach neu erzeugen.
 

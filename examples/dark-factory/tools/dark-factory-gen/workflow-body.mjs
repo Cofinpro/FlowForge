@@ -21,7 +21,7 @@ export const meta = {
   ],
 }
 
-// Generated from product-vision-to-user-stories.bpmn by bpmn2agent-generate for pattern.chosen:
+// Generated from product-vision-to-user-stories.bpmn by flowforge-generate for pattern.chosen:
 // workflow-script. CLAUDE-ONLY: this is a Claude Code Workflow tool script.
 //
 // IMPORTANT — this file is only ever a saved script. Nothing runs it automatically; you start it

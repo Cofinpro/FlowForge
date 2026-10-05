@@ -10,7 +10,7 @@ bpmn:
 
 # Lean / Business Model Canvas abbilden (step 1.1.3)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Lean / Business Model Canvas abbilden" (serviceTask, lane "Stratege") by `bpmn2agent-generate`. The canvas is the business-model baseline: S1.1.5 checks the value proposition against it, S1.1.6 extracts its assumptions, and G-P3 compares panel willingness to pay against its pricing model. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Lean / Business Model Canvas abbilden" (serviceTask, lane "Stratege") by `flowforge-generate`. The canvas is the business-model baseline: S1.1.5 checks the value proposition against it, S1.1.6 extracts its assumptions, and G-P3 compares panel willingness to pay against its pricing model. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-stratege` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

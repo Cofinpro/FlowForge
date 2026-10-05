@@ -10,7 +10,7 @@ bpmn:
 
 # Outcome-basierte Release-Ziele festlegen (step 4.2.1)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Outcome-basierte Release-Ziele festlegen" (serviceTask, lane "Stratege") by `bpmn2agent-generate`. Defines what each release must change for users and the business, so S4.2.2 cuts a skeleton serving release 1 and S4.2.5 checks every slice has a learning goal. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Outcome-basierte Release-Ziele festlegen" (serviceTask, lane "Stratege") by `flowforge-generate`. Defines what each release must change for users and the business, so S4.2.2 cuts a skeleton serving release 1 and S4.2.5 checks every slice has a learning goal. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-stratege` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

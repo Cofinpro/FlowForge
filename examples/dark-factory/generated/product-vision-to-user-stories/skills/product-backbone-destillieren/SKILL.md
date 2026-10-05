@@ -10,7 +10,7 @@ bpmn:
 
 # Backbone destillieren (Activities & Tasks) (step 4.1.3)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Backbone destillieren (Activities & Tasks)" (serviceTask, lane "Backlog-Autor") by `bpmn2agent-generate`. Creates the ACTV/UT/EP skeleton of the trace chain (UT → EP/ACTV → OPP|JOB) that S4.1.4 details, S4.2.x slices and S5.1.1 turns into stories; S6.2.1/6.2.2 traverse it for orphan checks. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Backbone destillieren (Activities & Tasks)" (serviceTask, lane "Backlog-Autor") by `flowforge-generate`. Creates the ACTV/UT/EP skeleton of the trace chain (UT → EP/ACTV → OPP|JOB) that S4.1.4 details, S4.2.x slices and S5.1.1 turns into stories; S6.2.1/6.2.2 traverse it for orphan checks. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-backlog-autor` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

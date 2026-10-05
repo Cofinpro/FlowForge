@@ -8,7 +8,7 @@ bpmn:
 
 # Groessenklasse bestimmen (S/M/L) (step 5.2.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Groessenklasse bestimmen (S/M/L)" (serviceTask, lane "Architekt") by `bpmn2agent-generate`. The size-estimate replaces story points (Gedächtnis §4); the dor critic (SP5.2_CallK) and SP56_Gw use it — L sends the story back via G-Split to 5.1.3 — and 7 reports sizes in the backlog export. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Groessenklasse bestimmen (S/M/L)" (serviceTask, lane "Architekt") by `flowforge-generate`. The size-estimate replaces story points (Gedächtnis §4); the dor critic (SP5.2_CallK) and SP56_Gw use it — L sends the story back via G-Split to 5.1.3 — and 7 reports sizes in the backlog export. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-architekt` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

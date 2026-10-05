@@ -62,7 +62,7 @@ list names only those stores' tools. Where lanes are not agents, the read tools 
 plan says so. Memory is a curated file with a line cap that the writing step rewrites, never an
 append-only log.
 
-## For bpmn2agent
+## For flowforge
 
 BPMN data objects become `artifacts.<id>` contracts (path + frontmatter) — this is the
 artifact-handoff pattern. Give every artifact a schema-like frontmatter and have the consuming

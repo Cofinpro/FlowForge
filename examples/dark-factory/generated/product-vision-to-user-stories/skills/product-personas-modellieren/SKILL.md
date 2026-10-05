@@ -10,7 +10,7 @@ bpmn:
 
 # User Roles & Personas modellieren (step 2.1.5)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "User Roles & Personas modellieren" (serviceTask, lane "UX-/Journey-Designer") by `bpmn2agent-generate`. Gives S2.1.6, S2.2.1, S3.1.1, S4.1.1 and S6.1.2 the concrete roles every later job, journey and story is written for; its evidence mix decides the G-P2 "more research" route. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "User Roles & Personas modellieren" (serviceTask, lane "UX-/Journey-Designer") by `flowforge-generate`. Gives S2.1.6, S2.2.1, S3.1.1, S4.1.1 and S6.1.2 the concrete roles every later job, journey and story is written for; its evidence mix decides the G-P2 "more research" route. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-ux` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

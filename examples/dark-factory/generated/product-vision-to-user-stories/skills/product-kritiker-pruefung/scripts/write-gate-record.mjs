@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["K_5"]}
 //
 // Generated from "Gate-Record schreiben" (scriptTask, Process_K) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic step — no LLM call
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic step — no LLM call
 // (Gedächtnis §12). Also used by product-phasen-gate for phase-gate records.
 //
 // Usage: node write-gate-record.mjs <runDir> <record.json>

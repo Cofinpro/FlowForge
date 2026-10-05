@@ -10,7 +10,7 @@ bpmn:
 
 # Three-Amigos-Debatte (3 Perspektiven) (step 5.2.1)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Three-Amigos-Debatte (3 Perspektiven)" (serviceTask, lane "Backlog-Autor") by `bpmn2agent-generate`. The amigos-protocol replaces the human three-amigos session (Gedächtnis §4); 5.2.2 uses it to separate What from How, and its edge cases feed 6.1.1 confirmation notes and 6.1.2 SBE examples. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Three-Amigos-Debatte (3 Perspektiven)" (serviceTask, lane "Backlog-Autor") by `flowforge-generate`. The amigos-protocol replaces the human three-amigos session (Gedächtnis §4); 5.2.2 uses it to separate What from How, and its edge cases feed 6.1.1 confirmation notes and 6.1.2 SBE examples. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-backlog-autor` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

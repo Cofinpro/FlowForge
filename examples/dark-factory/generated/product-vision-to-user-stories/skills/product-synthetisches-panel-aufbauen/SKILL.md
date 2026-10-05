@@ -10,7 +10,7 @@ bpmn:
 
 # Synthetisches Panel aus Research-Korpus aufbauen (step 2.1.3)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Synthetisches Panel aus Research-Korpus aufbauen" (serviceTask, lane "Researcher") by `bpmn2agent-generate`. Replaces the proto-panel; product-panel-befragung plays these profiles in S2.1.4 (interviews), S2.2.1, S2.2.5, S3.1.1, S3.1.3 and the gates G-P2/G-P3, and the SP2.1 critic judges them against rubric panel-grounding. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Synthetisches Panel aus Research-Korpus aufbauen" (serviceTask, lane "Researcher") by `flowforge-generate`. Replaces the proto-panel; product-panel-befragung plays these profiles in S2.1.4 (interviews), S2.2.1, S2.2.5, S3.1.1, S3.1.3 and the gates G-P2/G-P3, and the SP2.1 critic judges them against rubric panel-grounding. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-researcher` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

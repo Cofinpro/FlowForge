@@ -59,7 +59,7 @@ Immediate: the edit goes into state/context and the agent retries. Longer term: 
 repeated edits, feed review comments into prompts and schemas, turn failed traces into regression
 tests [human-in-the-loop-1: 10, 12, 41, 58–65, 70–72].
 
-## For bpmn2agent
+## For flowforge
 
 `userTask`/`manualTask` → `AskUserQuestion` with options + recommendation (already the pipeline
 rule) matches "presenting a decision". Check that side-effecting steps sit **after** the

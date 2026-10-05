@@ -9,7 +9,7 @@ Kontext ist am Ende Daten. Wer einen Prozess für FlowForge modelliert, soll bei
 Pipeline Wissensreferenzen, Tool-Freigaben, Schreibschutz und ein Gedächtnis über Läufe hinweg.
 
 Heute modelliert das Diagramm nur Übergaben (Data Objects → Artefaktverträge). Wissensquellen
-ordnet `bpmn2agent-knowledge` erst nachträglich Lanes zu. `dataStoreReference` ignoriert die
+ordnet `flowforge-knowledge` erst nachträglich Lanes zu. `dataStoreReference` ignoriert die
 Pipeline (`inventory.mjs` überspringt es, die Mapping-Ansicht würde es rot färben).
 
 ## Notation
@@ -141,7 +141,7 @@ haben einen anderen Lebenszyklus und andere Felder.
 
 ## Prüfstand
 
-Neue Fixture `.agents/skills/bpmn2agent-verify/fixtures/context-flow.bpmn` mit:
+Neue Fixture `.agents/skills/flowforge-verify/fixtures/context-flow.bpmn` mit:
 - je einem Store pro Art
 - einem geschützten Schreiben (`userTask` → Schreib-Task → Live-Store)
 - Prozess-Ein- und -Ausgabe (einmal echt, einmal per Konvention)

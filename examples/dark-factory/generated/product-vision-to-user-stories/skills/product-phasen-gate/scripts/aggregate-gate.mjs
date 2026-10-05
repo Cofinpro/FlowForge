@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["PG_1"]}
 //
 // Generated from "Verdikt aggregieren" (businessRuleTask, Process_PG) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. The counting rules of Gedächtnis
+// product-vision-to-user-stories.bpmn by flowforge-generate. The counting rules of Gedächtnis
 // §9.2/§9.3 are deterministic and live here; the kritiker only supplies the judgement inputs
 // (critic verdict, whether objections were addressed, whether a kill assumption is refuted,
 // whether viability failed).

@@ -1,6 +1,6 @@
 ---
 name: agentic-kb-librarian
-description: Answers one agentic-design question with citations from agentic-workflow-kb; queries the "Agentic Workflows" NotebookLM notebook and records a new FAQ entry when the KB has no answer. Give it the question and where it came up. Called from bpmn2agent-design step 6a. For reviewing a whole design use agentic-workflow-architect.
+description: Answers one agentic-design question with citations from agentic-workflow-kb; queries the "Agentic Workflows" NotebookLM notebook and records a new FAQ entry when the KB has no answer. Give it the question and where it came up. Called from flowforge-design step 6a. For reviewing a whole design use agentic-workflow-architect.
 tools: Read, Grep, Glob, Bash, Write, Edit, ToolSearch, mcp__gemini-notebook-mcp__notebook_query
 model: sonnet
 skills:

@@ -10,7 +10,7 @@ bpmn:
 
 # Orphan- & Fake-Stories aussortieren (step 6.2.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Orphan- & Fake-Stories aussortieren" (businessRuleTask, lane "Kritiker") by `bpmn2agent-generate`. Produces backlog-cleaned, the input of 6.2.5 (traceability matrix), the traceability critic at SP6.2_Gw and step 7 export; rubric backlog-hygiene requires no orphans, no fake stories, no duplicates. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Orphan- & Fake-Stories aussortieren" (businessRuleTask, lane "Kritiker") by `flowforge-generate`. Produces backlog-cleaned, the input of 6.2.5 (traceability matrix), the traceability critic at SP6.2_Gw and step 7 export; rubric backlog-hygiene requires no orphans, no fake stories, no duplicates. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-kritiker` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

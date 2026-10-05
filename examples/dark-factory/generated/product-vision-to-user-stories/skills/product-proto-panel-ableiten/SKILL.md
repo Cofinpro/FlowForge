@@ -10,7 +10,7 @@ bpmn:
 
 # Proto-Panel aus Research ableiten (step 1.1.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Proto-Panel aus Research ableiten" (serviceTask, lane "Researcher") by `bpmn2agent-generate`. The proto panel is the synthetic audience for Phase 1 only: it rates the value proposition fit in S1.1.5 (panel mode rating), informs actors in S1.2.2 and votes at G-P1; it is replaced by the full 6-persona panel in 2.1.3. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Proto-Panel aus Research ableiten" (serviceTask, lane "Researcher") by `flowforge-generate`. The proto panel is the synthetic audience for Phase 1 only: it rates the value proposition fit in S1.1.5 (panel mode rating), informs actors in S1.2.2 and votes at G-P1; it is replaced by the full 6-persona panel in 2.1.3. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-researcher` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

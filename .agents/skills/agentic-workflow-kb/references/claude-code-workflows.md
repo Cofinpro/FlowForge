@@ -60,7 +60,7 @@ and scripts; multi-stage tasks as Workflow scripts with `schema` handoffs; valid
 after edits (plan–validate–execute) with failures fed back; `budget` guards in loops; rely on
 autocompaction for long sessions [claude-code-workflows-1: 1, 7, 13, 20, 46, 47, 52–59].
 
-## For bpmn2agent
+## For flowforge
 
 `pattern-rubric.md`'s "Workflow script" pattern generates exactly this kind of file; it is never
 run by the pipeline itself. The guide's three-of-five rule is a useful sanity check on that choice.

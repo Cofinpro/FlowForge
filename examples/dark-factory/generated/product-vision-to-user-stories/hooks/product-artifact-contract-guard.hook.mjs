@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["K_1"]}
 //
 // Claude Code PreToolUse hook, generated alongside "Rubric laden" (scriptTask, Process_K) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Enforces the storage contract of
+// product-vision-to-user-stories.bpmn by flowforge-generate. Enforces the storage contract of
 // Gedächtnis §11.2 at write time, so a producing agent learns immediately instead of burning a
 // critic iteration (K.1 refuses to judge an uncommitted artifact):
 //   - Metadata is script-owned: no tool write to runs/<id>/**/*.meta.json, run.json, history/**,

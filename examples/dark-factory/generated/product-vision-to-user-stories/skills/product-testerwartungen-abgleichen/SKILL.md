@@ -10,7 +10,7 @@ bpmn:
 
 # Fachliche vs. technische Testerwartungen abgleichen (step 6.1.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Fachliche vs. technische Testerwartungen abgleichen" (serviceTask, lane "Architekt") by `bpmn2agent-generate`. Delivers the final acceptance-criteria set per story that the gherkin critic judges at SP6.1_Gw ("Testbar & eindeutig?"); the result feeds 6.2 hygiene checks and the export in 7. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Fachliche vs. technische Testerwartungen abgleichen" (serviceTask, lane "Architekt") by `flowforge-generate`. Delivers the final acceptance-criteria set per story that the gherkin critic judges at SP6.1_Gw ("Testbar & eindeutig?"); the result feeds 6.2 hygiene checks and the export in 7. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-architekt` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

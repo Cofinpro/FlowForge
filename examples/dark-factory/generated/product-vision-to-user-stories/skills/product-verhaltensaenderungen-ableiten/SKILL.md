@@ -10,7 +10,7 @@ bpmn:
 
 # Verhaltensaenderungen ableiten (How) (step 1.2.3)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Verhaltensaenderungen ableiten (How)" (serviceTask, lane "UX-/Journey-Designer") by `bpmn2agent-generate`. IMP items are the "How" level and a mandatory link of the trace chain (… → OPP/JOB → IMP → GOAL); S1.2.4 collects deliverables per impact and S1.2.5 scores them by leverage and risk. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Verhaltensaenderungen ableiten (How)" (serviceTask, lane "UX-/Journey-Designer") by `flowforge-generate`. IMP items are the "How" level and a mandatory link of the trace chain (… → OPP/JOB → IMP → GOAL); S1.2.4 collects deliverables per impact and S1.2.5 scores them by leverage and risk. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-ux` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

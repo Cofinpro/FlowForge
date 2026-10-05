@@ -9,7 +9,7 @@ bpmn:
 
 # Neue User Story aus Feedback erstellen & verfeinern
 
-Generated from `user-story-refinement.bpmn` by `bpmn2agent-generate`. This skill is the spine of
+Generated from `user-story-refinement.bpmn` by `flowforge-generate`. This skill is the spine of
 the process: it walks the six phases in diagram order, calls one phase skill per phase and stops
 for the team at every checkpoint. The team decides; you prepare, propose and record.
 

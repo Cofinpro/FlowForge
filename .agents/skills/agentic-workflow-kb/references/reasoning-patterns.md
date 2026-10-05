@@ -24,7 +24,7 @@ Distilled from FAQ `reasoning-patterns-1`. Tag `[reasoning-patterns-1: n]`.
 - Plan-and-execute: the planner returns a structured plan marking parallel vs. sequential steps;
   each executor gets exactly one step and may touch only its files [reasoning-patterns-1: 36, 41, 45].
 
-## For bpmn2agent
+## For flowforge
 
 A BPMN rework loop (check → back to the task) is reflection with a cap: the gate's critique should
 be passed back to the task as explicit input, not just "try again". Judgement gateways with several

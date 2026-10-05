@@ -1,12 +1,12 @@
 # Architektur
 
-Wie bpmn2agent aus einem BPMN-Diagramm prüfbare Claude-Code-Artefakte macht, welche Teile es dafür
+Wie flowforge aus einem BPMN-Diagramm prüfbare Claude-Code-Artefakte macht, welche Teile es dafür
 gibt und wo man was ändert. Die Verzeichnisübersicht steht in `README.md`.
 
 ## Idee in einem Satz
 
 Ein Fachanwender zeichnet einen Prozess als BPMN (Lane = Rolle) oder lässt ihn von
-`bpmn-process-design` aus Ziel und Notebook entwerfen; eine Kette von Skills übersetzt
+`flowforge-model` aus Ziel und Notebook entwerfen; eine Kette von Skills übersetzt
 ihn Schritt für Schritt in eine Spezifikation (`workflow-spec.yaml`), lässt die Übersetzung vom
 Fachanwender bestätigen und schreibt daraus Agenten, Skills, Skripte, Hooks und genau eine
 Orchestrierungsdatei, jede mit Rückverweis auf ihr BPMN-Element.
@@ -29,7 +29,7 @@ flowchart LR
   V -- grün --> H["Übergabe:<br/>README, mapping/report.md"]
 ```
 
-`bpmn-to-agentic-workflow` ist der Einstieg. Er macht selbst nichts Inhaltliches, sondern ruft die
+`flowforge-run` ist der Einstieg. Er macht selbst nichts Inhaltliches, sondern ruft die
 fünf Stufen-Skills nacheinander auf, trägt die beiden Schleifen und berichtet am Ende. Jede Frage an
 den Menschen läuft über `AskUserQuestion` mit Optionen und einer Empfehlung, in der Sprache des
 Anwenders.
@@ -60,13 +60,13 @@ erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm daz
 
 | Stufe | Skill | Liest | Schreibt |
 |---|---|---|---|
-| 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in FlowSpec-Notation, `knowledge/faq/` |
+| 0 | `flowforge-model` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in FlowSpec-Notation, `knowledge/faq/` |
 | 0 | `bpmn-authoring` | – | das `.bpmn` von Hand (XSD, bpmn-moddle, bpmnlint, Layout) |
-| 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved`; Stores und Prozess-Ein-/Ausgabe als `contextSources` / `workflowIO` |
-| 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web, Wissens-Stores | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
-| 3 | `bpmn2agent-design` | Spec, Rubriken | bestätigte Spec: `kind`, Pfade, Muster, Rollen, Artefakte, aufgelöste Tools der Live-Stores |
-| 4 | `bpmn2agent-generate` | bestätigte Spec, Vorlagen | alle Dateien unter `generated/<workflow>/` |
-| 5 | `bpmn2agent-verify` | `generated/<workflow>/`, `.bpmn` | nichts; Bericht in sechs Kategorien |
+| 1 | `flowforge-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved`; Stores und Prozess-Ein-/Ausgabe als `contextSources` / `workflowIO` |
+| 2 | `flowforge-knowledge` | Spec, NotebookLM / Web, Wissens-Stores | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
+| 3 | `flowforge-design` | Spec, Rubriken | bestätigte Spec: `kind`, Pfade, Muster, Rollen, Artefakte, aufgelöste Tools der Live-Stores |
+| 4 | `flowforge-generate` | bestätigte Spec, Vorlagen | alle Dateien unter `generated/<workflow>/` |
+| 5 | `flowforge-verify` | `generated/<workflow>/`, `.bpmn` | nichts; Bericht in sechs Kategorien |
 
 Wiederholte Läufe sind der Normalfall: analyze vergleicht das `.bpmn` per Element-ID und sha256 und
 fragt nur nach Neuem oder Geändertem; design fasst bereits entschiedene Elemente nicht an.
@@ -74,7 +74,7 @@ fragt nur nach Neuem oder Geändertem; design fasst bereits entschiedene Element
 ## Die Spezifikation als Drehscheibe
 
 Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinander. Das Schema liegt in
-`bpmn2agent-design/assets/workflow-spec.schema.yaml`.
+`flowforge-design/assets/workflow-spec.schema.yaml`.
 
 | Schlüssel | Inhalt |
 |---|---|
@@ -90,7 +90,7 @@ Alle Stufen reden nur über `generated/<workflow>/workflow-spec.yaml` miteinande
 
 ## Übersetzungsregeln
 
-`bpmn2agent-design/references/mapping-rubric.md` entscheidet je Element:
+`flowforge-design/references/mapping-rubric.md` entscheidet je Element:
 
 | BPMN | wird zu |
 |---|---|
@@ -120,7 +120,7 @@ Risikohinweis weiter.
 
 Nicht unterstützte Konstrukte (Pools mit Nachrichtenflüssen, Timer- und Nachrichtenereignisse,
 Event-Teilprozesse, Kompensation) meldet analyze mit einem Umbauvorschlag
-(`bpmn2agent-analyze/references/unsupported.md`). Bleibt der Anwender dabei, wird das Element als
+(`flowforge-analyze/references/unsupported.md`). Bleibt der Anwender dabei, wird das Element als
 bewusste Lücke `not-generated`.
 
 ## Kontextquellen
@@ -181,7 +181,7 @@ schon für die Herkunft belegt.)
 Freigabe-Records zur Laufzeit, zusätzliche Lint-Regeln (toter Store, `serviceTask` ohne Eingang),
 Pro-Lane-Tools im Workflow-Skript-Muster und die Erzeugung einer `.mcp.json` (keine Endpunkte oder
 Zugangsdaten im Output). Das Beispiel `dark-factory` bleibt Schnappschuss. Als Prüfstand dienen die
-Fixtures unter `.agents/skills/bpmn2agent-verify/fixtures/` (`context-flow.bpmn` grün,
+Fixtures unter `.agents/skills/flowforge-verify/fixtures/` (`context-flow.bpmn` grün,
 `context-flow-unguarded.bpmn` muss den Schreibfehler melden).
 
 ## Ergebnis und Rückverfolgbarkeit
@@ -209,7 +209,7 @@ anmeldet. Specs ohne `outputLayout` (das `dark-factory`-Beispiel) behalten den a
 `skills/`, `agents/`, `hooks/*.hook.settings.json` direkt unter `generated/<workflow>/`.
 
 Jede erzeugte Datei trägt `bpmn: {file, elements}` (Frontmatter bei Markdown, Kopfkommentar bei
-Skripten). `bpmn2agent-verify/scripts/verify.mjs` prüft das in beide Richtungen:
+Skripten). `flowforge-verify/scripts/verify.mjs` prüft das in beide Richtungen:
 
 1. **spec-schema** – die Spec entspricht dem Schema.
 2. **source-bpmn** – sha256 stimmt noch, das `.bpmn` ist weiter gültig.
@@ -238,7 +238,7 @@ Preise in einer Tabelle, und die BPMN-Element-ID steckt in jedem Label. Design u
 |---|---|---|
 | `hooks/<workflow>-cost-ledger.mjs` | erzeugter Payload (generate 6b, immer) | hängt bei `SubagentStop`, `Stop` und `SessionEnd` jede abgeschlossene API-Anfrage einmal an `.claude/runs/<workflow>/ledger.jsonl` an: rohe Token-Zahlen, keine Preise, kein Netz, bricht nie einen Lauf ab |
 | `hooks/<workflow>-cost-map.json` | erzeugter Payload | schlüsselt auf, welcher Skill, Agent-Typ und welche Element-ID im Transkript zu welchem Element, welcher Lane und welcher Phase gehört; `verify` prüft sie gegen die Spec |
-| `bpmn2agent-cost` | FlowForge-Plugin | `cost-report.mjs` rechnet mit `prices.json`, ordnet zu und gleicht ab; `cost-bench.mjs` wiederholt Läufe; `render-mapping.mjs --cost` blendet die Kosten in die Mapping-Ansicht ein |
+| `flowforge-cost` | FlowForge-Plugin | `cost-report.mjs` rechnet mit `prices.json`, ordnet zu und gleicht ab; `cost-bench.mjs` wiederholt Läufe; `render-mapping.mjs --cost` blendet die Kosten in die Mapping-Ansicht ein |
 
 **Zuordnung je API-Anfrage** (erste Regel, die passt): Beschreibung des Subagents beginnt mit einer
 Element-ID → dieses Element; Agent-Typ des Orchestrators → *Orchestrierung*; `attributionSkill` ist
@@ -280,7 +280,7 @@ Zwei Arten von Wissen, zwei Orte:
 | Frage | Was tut die Rolle, welche Kriterien gelten? | Welches Muster, wie schneidet man Agenten, wo gehört ein Prüfpunkt hin? |
 | Quelle | Notebooks des Anwenders, Web, vorhandene Repo-Dokumente | NotebookLM-Notebook „Agentic Workflows“ |
 | Ablage | `generated/<workflow>/knowledge/` | `.agents/skills/agentic-workflow-kb/` |
-| Wer | `bpmn-process-design` (Entwurf), `bpmn2agent-knowledge` | design und generate über die Helfer unten |
+| Wer | `flowforge-model` (Entwurf), `flowforge-knowledge` | design und generate über die Helfer unten |
 
 Beide folgen demselben Muster in drei Schichten, billigste zuerst:
 
@@ -291,7 +291,7 @@ Beide folgen demselben Muster in drei Schichten, billigste zuerst:
 3. **Notebook** – nur für Fragen, die 1 und 2 nicht beantworten. Die neue Antwort kommt sofort ins
    FAQ, damit der nächste Lauf sie findet.
 
-`.agents/skills/bpmn2agent-knowledge/scripts/notebook-faq.py add` macht aus einem gespeicherten
+`.agents/skills/flowforge-knowledge/scripts/notebook-faq.py add` macht aus einem gespeicherten
 `notebook_query`-Ergebnis einen FAQ-Eintrag; `faq/sources.json` löst die Quellen-IDs des Notebooks
 in lesbare Titel auf. Aussagen ohne Quelle werden als `⚠ unverified` markiert und nie nachträglich
 zu „belegt“ hochgestuft.
@@ -309,7 +309,7 @@ Keine eigenen Stufen; die Stufen-Skills rufen sie an festen Stellen auf.
 | `agent-authoring` | Skill | Rolle schneiden (design 5), Agenten schreiben (generate) |
 | `skill-authoring` | Skill | Skills schreiben (generate 5) |
 | `agentic-artifact-reviewer` | Agent, nur lesend | Qualitätsprüfung der erzeugten Dateien; generate 11; bei Stores auch Tool-Listen, Cap und Write-Guard |
-| `bpmn2agent-cost` | Skill | nach einem Lauf: Kosten je Element, Lane und Phase mit Abgleich, Streuung über wiederholte Läufe (siehe [Laufkosten](#laufkosten)) |
+| `flowforge-cost` | Skill | nach einem Lauf: Kosten je Element, Lane und Phase mit Abgleich, Streuung über wiederholte Läufe (siehe [Laufkosten](#laufkosten)) |
 | `trim-the-fat` | Skill, nur auf Anforderung | kürzt Skills, ohne ihr Verhalten zu ändern; generate 11, nur wenn der Anwender zustimmt |
 
 Befunde der Prüf-Agenten tragen ein Ziel: `design` (in der Spec lösbar), `generate` (Formulierung,
@@ -323,10 +323,10 @@ die Struktur des Diagramms).
   `playwright`) liegen in `~/.cache/bpmn-authoring-tools` (`BPMN_TOOLS_CACHE`) und werden beim
   ersten Lauf dort installiert, nie im Repo.
 - Wichtige Skripte: `bpmn-authoring/scripts/validate.sh` (BPMN prüfen), `relabel.mjs` (Beschriftungen überlappungsarm setzen), `render.mjs` (BPMN als PNG),
-  `bpmn2agent-analyze/scripts/inventory.mjs` (Elementinventar und Signale),
-  `bpmn2agent-generate/scripts/render-mapping.mjs` (Mapping-Ansicht),
-  `bpmn2agent-verify/scripts/verify.mjs` (die sechs Prüfungen),
-  `bpmn2agent-knowledge/scripts/notebook-faq.py` (FAQ).
+  `flowforge-analyze/scripts/inventory.mjs` (Elementinventar und Signale),
+  `flowforge-generate/scripts/render-mapping.mjs` (Mapping-Ansicht),
+  `flowforge-verify/scripts/verify.mjs` (die sechs Prüfungen),
+  `flowforge-knowledge/scripts/notebook-faq.py` (FAQ).
 - NotebookLM über den MCP-Server `gemini-notebook-mcp`; bei Anmeldefehlern `nlm login`.
 
 ## Beispiele
@@ -343,14 +343,14 @@ die Struktur des Diagramms).
 
 | Ich will … | Datei |
 |---|---|
-| die Übersetzung eines BPMN-Elements ändern | `bpmn2agent-design/references/mapping-rubric.md` |
-| die Musterwahl ändern | `bpmn2agent-design/references/pattern-rubric.md` |
-| die Notation neu entworfener Prozesse ändern | `bpmn-process-design/SKILL.md` §4; muss zu `mapping-rubric.md` passen |
+| die Übersetzung eines BPMN-Elements ändern | `flowforge-design/references/mapping-rubric.md` |
+| die Musterwahl ändern | `flowforge-design/references/pattern-rubric.md` |
+| die Notation neu entworfener Prozesse ändern | `flowforge-model/SKILL.md` §4; muss zu `mapping-rubric.md` passen |
 | Stores (Art × Ort, Tool-Auflösung, Schreibschutz) ändern | `mapping-rubric.md` („Data stores → context sources“), dann Schema, analyze, design, generate-Vorlagen und verify nachziehen; Design in `docs/plans/kontextquellen/plan.md` |
-| die Kostenmessung ändern (Zuordnung, Preise, Abgleich) | `bpmn2agent-cost/scripts/` (`cost-report.mjs`, `prices.json`); Hook und Karte: `bpmn2agent-generate/scripts/install-cost-ledger.mjs`, `build-cost-map.mjs` und `assets/templates/hook-cost-ledger-template.mjs`; Design in `docs/plans/laufkosten/plan.md` |
+| die Kostenmessung ändern (Zuordnung, Preise, Abgleich) | `flowforge-cost/scripts/` (`cost-report.mjs`, `prices.json`); Hook und Karte: `flowforge-generate/scripts/install-cost-ledger.mjs`, `build-cost-map.mjs` und `assets/templates/hook-cost-ledger-template.mjs`; Design in `docs/plans/laufkosten/plan.md` |
 | ein Feld in der Spec ergänzen | `workflow-spec.schema.yaml`, dann analyze/design/generate/verify nachziehen |
-| Aussehen erzeugter Agenten/Skills ändern | `bpmn2agent-generate/assets/templates/` |
-| eine Prüfung ergänzen | `bpmn2agent-verify/scripts/verify.mjs` |
+| Aussehen erzeugter Agenten/Skills ändern | `flowforge-generate/assets/templates/` |
+| eine Prüfung ergänzen | `flowforge-verify/scripts/verify.mjs` |
 | Designwissen ergänzen | Notebook fragen, `notebook-faq.py add`, Destillat in `agentic-workflow-kb/references/` |
-| einen Skill kürzen | `/trim-the-fat` aufrufen; bei erzeugten Skills besser die Vorlage in `bpmn2agent-generate/assets/templates/` straffen |
+| einen Skill kürzen | `/trim-the-fat` aufrufen; bei erzeugten Skills besser die Vorlage in `flowforge-generate/assets/templates/` straffen |
 | einen Skill oder Agenten hinzufügen | echte Datei in `.agents/skills/` bzw. `.agents/agents/`, relativer Symlink aus `.claude/` |

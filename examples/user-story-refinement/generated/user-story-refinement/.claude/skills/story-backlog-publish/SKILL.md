@@ -11,7 +11,7 @@ bpmn:
 Generated from `user-story-refinement.bpmn`'s write steps "Änderungshinweis an offener Story ergänzen"
 (I4), "Feedback im Opportunity Backlog anlegen" (I6), "Mit bestehender Story zusammenführen" (P6),
 "Story im Backlog anlegen & in Ready-Spalte stellen" (P8) and "Betroffene Stories im Backlog
-markieren" (P10) (serviceTasks, lane "Product Owner / BA") by `bpmn2agent-generate`. They are the only
+markieren" (P10) (serviceTasks, lane "Product Owner / BA") by `flowforge-generate`. They are the only
 steps of the workflow that change the backlog, so they live in one skill that refuses to write
 without approval. The calling skill names the step to run.
 

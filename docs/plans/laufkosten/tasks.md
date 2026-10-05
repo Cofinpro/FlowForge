@@ -39,7 +39,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
   - Stimmen Token-Summen je `requestId` mit `cost-state.modelUsage` überein?
 - **Ergebnis:**
   - `docs/plans/laufkosten/spike.md` mit Befunden
-  - gekürzte Fixture-Transkripte unter `.agents/skills/bpmn2agent-cost/fixtures/`, nur Metadaten
+  - gekürzte Fixture-Transkripte unter `.agents/skills/flowforge-cost/fixtures/`, nur Metadaten
     und `usage`, **kein Nachrichteninhalt**
 - **Abnahme:** Jede Frage oben ist mit „ja/nein + Beleg“ beantwortet.
 
@@ -49,9 +49,9 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 
 - **Abhängig von:** T0
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-cost/scripts/read-usage.mjs`
-  - `.agents/skills/bpmn2agent-cost/scripts/prices.json`
-  - Symlink `.claude/skills/bpmn2agent-cost`
+  - `.agents/skills/flowforge-cost/scripts/read-usage.mjs`
+  - `.agents/skills/flowforge-cost/scripts/prices.json`
+  - Symlink `.claude/skills/flowforge-cost`
 - **read-usage.mjs:**
   - Eingabe: Session-ID + Projektpfad, Transkriptpfad oder `ledger.jsonl`
   - liest Hauptthread + `subagents/*.jsonl` + `meta.json`, dedupliziert je `requestId`
@@ -70,15 +70,15 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 
 - **Abhängig von:** nur plan.md (parallel zu T1)
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-generate/assets/templates/workflow-script-template.mjs`
-  - `.agents/skills/bpmn2agent-generate/assets/templates/orchestrator-agent-template.md`
-  - `.agents/skills/bpmn2agent-generate/SKILL.md` (Schritt 7)
-  - `.agents/skills/bpmn2agent-design/references/pattern-rubric.md` (ein Satz zur Konvention)
+  - `.agents/skills/flowforge-generate/assets/templates/workflow-script-template.mjs`
+  - `.agents/skills/flowforge-generate/assets/templates/orchestrator-agent-template.md`
+  - `.agents/skills/flowforge-generate/SKILL.md` (Schritt 7)
+  - `.agents/skills/flowforge-design/references/pattern-rubric.md` (ein Satz zur Konvention)
 - **Inhalt:**
   - jedes `agent()` bekommt `{ label: '<elementId> <label>', phase }`
   - der Orchestrator beginnt jede `Agent`-`description` mit der Element-ID
 - **verify:** prüft im Workflow-Script, dass jedes `agent()`-Label mit einer Element-ID aus der
-  Spec beginnt (`.agents/skills/bpmn2agent-verify/scripts/verify.mjs`).
+  Spec beginnt (`.agents/skills/flowforge-verify/scripts/verify.mjs`).
 - **Abnahme:** Die verify-Fixtures erzeugen Labels mit Element-ID; verify meldet ein Label ohne ID
   als Fehler, geroutet an generate.
 
@@ -88,13 +88,13 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 
 - **Abhängig von:** T1 (T2 für saubere Zuordnung, nicht zum Start)
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-cost/scripts/cost-report.mjs`
-  - `.agents/skills/bpmn2agent-cost/SKILL.md`
+  - `.agents/skills/flowforge-cost/scripts/cost-report.mjs`
+  - `.agents/skills/flowforge-cost/SKILL.md`
 - **Zuordnung:** Reihenfolge laut plan.md §Zuordnung, nachgeschlagen in
   `.claude/hooks/<workflow>-cost-map.json`. Im Erzeuger-Repo ersatzweise aus `workflow-spec.yaml`
   (Skill → Element über `elements.*.generatedPaths`, Phase aus `pattern.phases` bzw. den
   `phase()`-Titeln), über dieselbe Funktion, die T4 für die Kostenkarte nutzt.
-- **Aufruf im Projekt der Nutzerin:** `/bpmn2agent-cost` ohne Argumente nimmt den neuesten Lauf aus
+- **Aufruf im Projekt der Nutzerin:** `/flowforge-cost` ohne Argumente nimmt den neuesten Lauf aus
   `.claude/runs/<workflow>/ledger.jsonl`. Mehrere Workflows im Projekt → Auswahl per
   `AskUserQuestion`.
 - **Ausgabe:** `.claude/runs/<workflow>/<runId>/cost.json` + `cost.md` neben dem Ledger, oder per
@@ -117,13 +117,13 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 
 - **Abhängig von:** T0 (Hook-Felder), T1 (gleiche Dedupe-Regel), T2 (Label-Präfixe)
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-generate/assets/templates/hook-cost-ledger-template.mjs`
-  - `.agents/skills/bpmn2agent-generate/scripts/build-cost-map.mjs` (Spec →
+  - `.agents/skills/flowforge-generate/assets/templates/hook-cost-ledger-template.mjs`
+  - `.agents/skills/flowforge-generate/scripts/build-cost-map.mjs` (Spec →
     `cost-map.json`, deterministisch, kein Modell)
-  - `.agents/skills/bpmn2agent-generate/SKILL.md` (neuer Schritt 6b, Self-Check, README-Abschnitt)
-  - `.agents/skills/bpmn2agent-generate/assets/templates/README-template.md`
-  - `.agents/skills/bpmn2agent-generate/assets/templates/mapping-report-template.md`
-  - `.agents/skills/bpmn2agent-verify/scripts/verify.mjs` (Pfad wie die Kontext-Hooks erlauben)
+  - `.agents/skills/flowforge-generate/SKILL.md` (neuer Schritt 6b, Self-Check, README-Abschnitt)
+  - `.agents/skills/flowforge-generate/assets/templates/README-template.md`
+  - `.agents/skills/flowforge-generate/assets/templates/mapping-report-template.md`
+  - `.agents/skills/flowforge-verify/scripts/verify.mjs` (Pfad wie die Kontext-Hooks erlauben)
 - **Hook:**
   - `SubagentStop` + `SessionEnd`, Node-Built-ins only
   - hängt deduplizierte Usage-Zeilen an `.claude/runs/<workflow>/ledger.jsonl`
@@ -138,7 +138,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 - **README:**
   - wo Ledger und Kostenkarte liegen
   - `.gitignore`-Empfehlung für `.claude/runs/`
-  - „Kosten auswerten: FlowForge-Plugin installieren, dann `/bpmn2agent-cost`“
+  - „Kosten auswerten: FlowForge-Plugin installieren, dann `/flowforge-cost`“
 - **Abnahme:**
   - Smoke-Test mit gepipeten Payloads auf die T0-Fixtures schreibt die erwarteten Zeilen.
   - Ein zweiter Aufruf für denselben Agent dupliziert nichts.
@@ -151,10 +151,10 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 
 - **Abhängig von:** T3
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs`
-  - `.agents/skills/bpmn2agent-generate/assets/mapping-viewer/viewer.js`
-  - `.agents/skills/bpmn2agent-generate/assets/mapping-viewer/viewer.css`
-  - `.agents/skills/bpmn2agent-generate/scripts/check-mapping-view.mjs`
+  - `.agents/skills/flowforge-generate/scripts/render-mapping.mjs`
+  - `.agents/skills/flowforge-generate/assets/mapping-viewer/viewer.js`
+  - `.agents/skills/flowforge-generate/assets/mapping-viewer/viewer.css`
+  - `.agents/skills/flowforge-generate/scripts/check-mapping-view.mjs`
 - **Inhalt:**
   - optional `--cost <cost.json>`: Badge je Element (USD), Tooltip mit Tokens und Anteil
   - Lane-Summe im Lane-Kopf
@@ -167,7 +167,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 `feat(cost): benchmark repeated runs and report spread per element`
 
 - **Abhängig von:** T3
-- **Datei:** `.agents/skills/bpmn2agent-cost/scripts/cost-bench.mjs`
+- **Datei:** `.agents/skills/flowforge-cost/scripts/cost-bench.mjs`
 - **Ablauf:**
   - N Läufe (Standard 5) per `claude -p --output-format json` in frischen Kopien eines
     Arbeitsverzeichnisses, gleicher Input
@@ -188,7 +188,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
   - `ARCHITECTURE.md`: Abschnitt Laufkosten (Zuordnung, Ledger, Abgleich, Grenzen)
   - `README.md`: Kurzanleitung „Was hat der Lauf gekostet?“ mit der Verteilung aus plan.md
     (Payload trägt Daten, Plugin die Logik)
-  - `.agents/skills/bpmn-to-agentic-workflow/SKILL.md`: Verweis auf `bpmn2agent-cost` nach einem
+  - `.agents/skills/flowforge-run/SKILL.md`: Verweis auf `flowforge-cost` nach einem
     Lauf
   - OTel als Gegenprobe: Env-Variablen und welche Attribute wofür taugen
 - **Abnahme:** `npm run validate` grün. Doku auf Deutsch, Skill-Text auf Englisch.

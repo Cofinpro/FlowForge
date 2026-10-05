@@ -1,8 +1,8 @@
 # Beispiel: FlowForge als BPMN
 
 Der Ablauf dieses Repos, in seiner eigenen Notation gezeichnet: Ein Fachanwender bringt ein Ziel
-oder ein fertiges BPMN-Diagramm mit. Ohne Diagramm entwirft `bpmn-process-design` den Prozess aus
-Notebook-Wissen. Danach übersetzen die fünf Stufen `bpmn2agent-analyze`, `-knowledge`, `-design`,
+oder ein fertiges BPMN-Diagramm mit. Ohne Diagramm entwirft `flowforge-model` den Prozess aus
+Notebook-Wissen. Danach übersetzen die fünf Stufen `flowforge-analyze`, `-knowledge`, `-design`,
 `-generate` und `-verify` ihn über die `workflow-spec.yaml` in Agenten, Skills, Hooks, Skripte und
 genau eine Orchestrierungsdatei unter `generated/<workflow>/`. Am Ende steht der übergebene oder
 installierte Workflow.
@@ -19,11 +19,11 @@ ist noch nicht durch die Pipeline gelaufen; es gibt also kein `generated/`.
 | Lane | Teil von FlowForge |
 |---|---|
 | Fachanwender | Intake und alle menschlichen Entscheidungen |
-| Prozessmodellierung | `bpmn-process-design`, `bpmn-authoring` (nur ohne vorhandenes Diagramm) |
-| Analyse & Fachwissen | `bpmn2agent-analyze`, `bpmn2agent-knowledge` |
-| Agentic Design | `bpmn2agent-design` mit den Agenten `agentic-workflow-architect` und `agentic-kb-librarian` |
-| Generierung | `bpmn2agent-generate` mit dem Agenten `agentic-artifact-reviewer` |
-| Prüfung & Übergabe | `bpmn2agent-verify`, Übergabebericht, Installation |
+| Prozessmodellierung | `flowforge-model`, `bpmn-authoring` (nur ohne vorhandenes Diagramm) |
+| Analyse & Fachwissen | `flowforge-analyze`, `flowforge-knowledge` |
+| Agentic Design | `flowforge-design` mit den Agenten `agentic-workflow-architect` und `agentic-kb-librarian` |
+| Generierung | `flowforge-generate` mit dem Agenten `agentic-artifact-reviewer` |
+| Prüfung & Übergabe | `flowforge-verify`, Übergabebericht, Installation |
 
 - **Aufgabentypen**: `serviceTask` = KI-Arbeit, `userTask` = menschlicher Prüfpunkt, `scriptTask`
   = Skript (`validate.sh`/`render.mjs`, `inventory.mjs`, `render-mapping.mjs`, `verify.mjs`, die
@@ -51,11 +51,11 @@ ist noch nicht durch die Pipeline gelaufen; es gibt also kein `generated/`.
 | Fach-Notebooks: Prozessrecherche | live | `mcp:gemini-notebook-mcp` | → Prozess im Notebook recherchieren |
 | Fach-Notebooks: Wissensextraktion | live | `mcp:gemini-notebook-mcp` | → Fachwissen je Task extrahieren, Diagramm mit Fachwissen hinterfragen |
 | BPMN-Notation FlowSpec | wissen | `datei:BPMN-NOTATION.md` | → BPMN-Diagramm zeichnen |
-| Mapping- & Muster-Rubrik | wissen | `datei:.agents/skills/bpmn2agent-design/references/` | → Elemente zuordnen & Muster wählen |
+| Mapping- & Muster-Rubrik | wissen | `datei:.agents/skills/flowforge-design/references/` | → Elemente zuordnen & Muster wählen |
 | Agentic-Design-Wissensbasis | wissen | `datei:.agents/skills/agentic-workflow-kb/references/` | → Entwurf gegen Wissensbasis prüfen |
 | Notebook „Agentic Workflows“ | live | `mcp:gemini-notebook-mcp` | → Entwurf gegen Wissensbasis prüfen |
 | Agentic-Design-FAQ | gedächtnis | `datei:.agents/skills/agentic-workflow-kb/faq/` | ↔ Entwurf gegen Wissensbasis prüfen |
-| Generierungs-Vorlagen | wissen | `datei:.agents/skills/bpmn2agent-generate/assets/templates/` | → Skills, Agenten, Hooks & Skripte schreiben |
+| Generierungs-Vorlagen | wissen | `datei:.agents/skills/flowforge-generate/assets/templates/` | → Skills, Agenten, Hooks & Skripte schreiben |
 | Claude-Projekt des Anwenders | live | `datei:<projekt>/.claude/` | ← Nach Projekt-.claude/ kopieren, nach „Installation entscheiden“ |
 
 - Jede Aufgabe trägt in `<bpmn:documentation>` ein `Input: … Output: … Quelle: …`. Die Quelle ist

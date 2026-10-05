@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["S6.2.5"]}
 //
 // Generated from "Traceability-Matrix erzeugen" (scriptTask, lane "Traceability-Pruefer") in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic — no LLM.
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic — no LLM.
 //
 // Usage: node traceability-matrix.mjs <runDir>
 // Builds the matrix Vision → Goal → Impact → Epic → Story → AC (docs/dark-factory/implementation.md §6) for

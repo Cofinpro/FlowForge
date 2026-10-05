@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["P_3"]}
 //
 // Generated from "Transkript / Antworten erfassen" (scriptTask, Process_P) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic step — no LLM call
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic step — no LLM call
 // (Gedächtnis §7.4: one transcript per persona, T-<nn>_P-<nn>, with guide version and model role).
 //
 // Usage: node record-transcript.mjs <runDir> <session.json>

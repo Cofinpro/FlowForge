@@ -31,7 +31,7 @@ mit 17 Elementen. Es zeigt die Notation auf einen Blick und eignet sich als Eins
 Aus diesem Ordner, mit installiertem Plugin (siehe [Schnellstart](../../README.md#schnellstart)):
 
 ```text
-/flowforge:bpmn-to-agentic-workflow
+/flowforge:flowforge-run
 ```
 
 Das Ergebnis landet unter `generated/pr-review/`. Es ist noch nicht in diesem Repo eingecheckt.
@@ -41,7 +41,7 @@ Das Ergebnis landet unter `generated/pr-review/`. Es ist noch nicht in diesem Re
 Nach dem Erzeugen die Prüfung absichtlich brechen:
 
 1. Eine erzeugte Datei löschen, etwa den Skill für `Sicherheitsrisiken prüfen`.
-2. `/bpmn2agent-verify` laufen lassen. Es meldet das BPMN-Element ohne Umsetzung.
+2. `/flowforge-verify` laufen lassen. Es meldet das BPMN-Element ohne Umsetzung.
 3. Eine Datei anlegen, die auf kein Element verweist. Verify meldet sie als verwaist.
 
 Jede erzeugte Datei trägt `bpmn: {file, elements}`, und die Prüfung läuft in beide Richtungen.

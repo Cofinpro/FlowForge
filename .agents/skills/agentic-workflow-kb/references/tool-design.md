@@ -55,7 +55,7 @@ the server is maintained once for all clients [tool-design-1: 33–45].
 - Recurring procedures ship as ready-made scripts rather than code the model writes each time
   [tool-design-1: 67, 68].
 
-## For bpmn2agent
+## For flowforge
 
 `scriptTask` and deterministic `businessRuleTask` → scripts; this is the justification. When
 design proposes tools per role, list them explicitly (least privilege) and keep each lane's agent

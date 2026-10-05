@@ -10,7 +10,7 @@ bpmn:
 
 # Synthetische Interviews durchfuehren (step 2.1.4)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Synthetische Interviews durchfuehren" (callActivity, lane "Interviewer") by `bpmn2agent-generate`. Is the synthetic evidence base (🤖 T items) that S2.1.5 personas, S2.1.6 JTBD and S2.2.1 empathy maps are built from; its problem-ranking synthesis feeds the SP2.1 critic and gate G-P2. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Synthetische Interviews durchfuehren" (callActivity, lane "Interviewer") by `flowforge-generate`. Is the synthetic evidence base (🤖 T items) that S2.1.5 personas, S2.1.6 JTBD and S2.2.1 empathy maps are built from; its problem-ranking synthesis feeds the SP2.1 critic and gate G-P2. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-interviewer` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

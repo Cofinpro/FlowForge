@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["R_3"]}
 //
 // Generated from "Quellen normalisieren, hashen & deduplizieren" (scriptTask, Process_R) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic step — no LLM call
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic step — no LLM call
 // (Gedächtnis §8 normalization rules).
 //
 // Usage: node normalize-sources.mjs <runDir> <rawResults.json>

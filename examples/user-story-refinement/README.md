@@ -27,7 +27,7 @@ wirklich etwas unklar ist.
 | 5 Definition of Ready | DoR-Checkliste, Abgleich mit dem Domänenmodell, Prüfung auf Fake- oder Waisen-Story | *Definition of Ready erfüllt?* (Kriterien unklar → Refinement, technisches Risiko → Spike → Refinement, nicht mehr relevant → verwerfen) |
 | 6 Plausibilität gegen Backlog & Freigabe | parallel: Duplikate/Überschneidungen (PO), Konsistenz mit bestehenden Abläufen (UX), Abhängigkeiten und Reihenfolge (Entwicklung), Akzeptanzkriterien gegen andere Stories und Living Documentation (QA); Befund zusammenführen, Anpassungen an betroffenen Stories vorschlagen, priorisieren und die Übernahme freigeben, dann Story im Backlog anlegen und betroffene Stories markieren | *Konsistent mit dem übrigen Backlog?* (Widerspruch → zurück ins Refinement, Duplikat → Zusammenführung freigeben, dann mit bestehender Story zusammenführen) |
 
-- **Aufgabentypen** nach der Lesart von `bpmn2agent-analyze`: `serviceTask` = Agentenarbeit,
+- **Aufgabentypen** nach der Lesart von `flowforge-analyze`: `serviceTask` = Agentenarbeit,
   `userTask` = menschlicher Kontrollpunkt (Rückfrage beim Feedbackgeber, Auswertung von Spike oder
   Prototyp-Test, Refinement-Termin, Planning Poker, Priorisierung und Freigabe, dazu je eine Freigabe
   vor dem Änderungshinweis, dem Parken und der Zusammenführung), `businessRuleTask` = Prüfung gegen
@@ -41,7 +41,7 @@ wirklich etwas unklar ist.
   (lesen): Triage → I1, I2 · Klärung → K1, K2, K3, K4, B5 · Story formulieren → C1, C2, C3, C4 ·
   Refinement → D1, D2a, D3, D4, D5, D6 · DoR → E1, E3 · Plausibilität → E4, P1, P4, P5, P6.
   Aufgaben ohne Pfeil von einem Wissens-Store fallen auf die Lane-Zuordnung von
-  `bpmn2agent-knowledge` zurück.
+  `flowforge-knowledge` zurück.
 - **Drei Live-Stores für das Product Backlog** in GitHub (`Art: live`, `Ort: cli:gh`), nach Phase
   geschnitten: `Product Backlog & User Story Map` (gelesen von I2, geschrieben von I4 und I6),
   `Product Backlog: übrige Stories` (gelesen von P1, P2, P3) und `Product Backlog: freigegebene
@@ -74,7 +74,7 @@ Stand: XSD gültig, 0 bpmn-moddle-Warnungen, 0 bpmnlint-Befunde.
 
 ## Ergebnis der Pipeline
 
-Am 2026-09-26 mit `bpmn-to-agentic-workflow` durchgelaufen, als erstes Beispiel im neuen Aufbau, und
+Am 2026-09-26 mit `flowforge-run` durchgelaufen, als erstes Beispiel im neuen Aufbau, und
 am 2026-10-04 mit dem GitHub-Backlog erneut:
 [`generated/user-story-refinement/`](generated/user-story-refinement/). Muster Skill-Kette + Hook,
 8 Skills (ein Einstieg, sechs Phasen-Skills mit dem Notebook-Wissen als `references/`, ein
@@ -86,6 +86,6 @@ Schreib-Skill `story-backlog-publish`), ein Write-Guard-Hook und eine `settings.
 cp -R generated/user-story-refinement/.claude/. <projekt>/.claude/
 ```
 
-`bpmn2agent-verify` endet mit `RESULT: PASS`. Was aus jedem Element wurde, steht in
+`flowforge-verify` endet mit `RESULT: PASS`. Was aus jedem Element wurde, steht in
 `generated/user-story-refinement/mapping/report.md`; die sechs Notebook-Fragen dieses Laufs liegen
 in `generated/user-story-refinement/knowledge/faq/`.

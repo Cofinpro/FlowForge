@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["K_2"]}
 //
 // Claude Code PreToolUse hook, generated from "Artefakt gegen Rubric bewerten"
-// (businessRuleTask, Process_K) in product-vision-to-user-stories.bpmn by bpmn2agent-generate.
+// (businessRuleTask, Process_K) in product-vision-to-user-stories.bpmn by flowforge-generate.
 // Enforces Gedächtnis §2.2 / §4 "Kein Selbst-Abnicken — der Kritiker schreibt nie Artefakte um"
 // and §7.3 "die Persona kennt nur das eigene Profil" at the tool level:
 //   - product-kritiker may write only under runs/<id>/gates/ (evaluation files; records are written by

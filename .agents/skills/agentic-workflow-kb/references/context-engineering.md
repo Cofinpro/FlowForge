@@ -56,7 +56,7 @@ procedural (how to do things: prompts, workflows) [context-engineering-1: 47–5
 - Hand over extracted constraints and outputs, not the whole trace — unless the receiver really
   needs the reasoning behind a decision [context-engineering-1: 68–72].
 
-## For bpmn2agent
+## For flowforge
 
 Skills are procedural memory, `knowledge/*.md` and references are semantic memory, artifact files
 are the handoff channel. A generated agent's prompt should name the artifacts it reads rather than

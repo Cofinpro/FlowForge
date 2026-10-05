@@ -62,7 +62,7 @@ ToolSearch: select:mcp__gemini-notebook-mcp__notebook_query
 4. Record it:
 
    ```bash
-   python3 ${CLAUDE_SKILL_DIR}/../bpmn2agent-knowledge/scripts/notebook-faq.py add \
+   python3 ${CLAUDE_SKILL_DIR}/../flowforge-knowledge/scripts/notebook-faq.py add \
      --faq ${CLAUDE_SKILL_DIR}/faq --topic <topic-slug> \
      --title "<short question>" <result.json>
    ```

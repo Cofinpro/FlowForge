@@ -1,6 +1,6 @@
 ---
 name: agentic-workflow-architect
-description: Read-only review of a draft agentic-workflow design (workflow-spec.draft.yaml or workflow-spec.yaml + mapping plan + .bpmn) before it goes to the business user — pattern fit, role split, handoffs, checkpoints before side effects, loop caps. Returns findings routed design, bpmn or question. Use in bpmn2agent-design step 6a or on any hand-built design. Generated files → agentic-artifact-reviewer; a single design question → agentic-kb-librarian.
+description: Read-only review of a draft agentic-workflow design (workflow-spec.draft.yaml or workflow-spec.yaml + mapping plan + .bpmn) before it goes to the business user — pattern fit, role split, handoffs, checkpoints before side effects, loop caps. Returns findings routed design, bpmn or question. Use in flowforge-design step 6a or on any hand-built design. Generated files → agentic-artifact-reviewer; a single design question → agentic-kb-librarian.
 tools: Read, Grep, Glob
 skills:
   - orchestration-design

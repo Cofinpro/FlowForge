@@ -10,7 +10,7 @@ bpmn:
 
 # Story Card entwerfen (Connextra) (step 5.1.1)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Story Card entwerfen (Connextra)" (serviceTask, lane "Backlog-Autor") by `bpmn2agent-generate`. Produces the story-cards that the invest critic (SP5.1_CallK) judges and that 5.1.3 (splitting), 5.1.4 (spikes) and the per-story refinement 5.2.x consume; every later AC hangs off these ST items. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Story Card entwerfen (Connextra)" (serviceTask, lane "Backlog-Autor") by `flowforge-generate`. Produces the story-cards that the invest critic (SP5.1_CallK) judges and that 5.1.3 (splitting), 5.1.4 (spikes) and the per-story refinement 5.2.x consume; every later AC hangs off these ST items. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-backlog-autor` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

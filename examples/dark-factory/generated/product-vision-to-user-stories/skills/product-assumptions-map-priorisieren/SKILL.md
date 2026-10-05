@@ -10,7 +10,7 @@ bpmn:
 
 # Annahmen in Assumptions Map priorisieren (step 1.1.6)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "Annahmen in Assumptions Map priorisieren" (serviceTask, lane "Stratege") by `bpmn2agent-generate`. The ASM items are the risk register of the run: S1.2.5 uses them as the risk input of the impact scoring, G-P1/G-P2 check kill assumptions for No-Go, the interview guide in Phase 2 must cover them, and every story later lists the unvalidated ASM it rests on. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "Annahmen in Assumptions Map priorisieren" (serviceTask, lane "Stratege") by `flowforge-generate`. The ASM items are the risk register of the run: S1.2.5 uses them as the risk input of the impact scoring, G-P1/G-P2 check kill assumptions for No-Go, the interview guide in Phase 2 must cover them, and every story later lists the unvalidated ASM it rests on. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-stratege` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

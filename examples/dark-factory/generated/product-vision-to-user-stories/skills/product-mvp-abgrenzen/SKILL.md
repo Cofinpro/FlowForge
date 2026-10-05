@@ -10,7 +10,7 @@ bpmn:
 
 # MVP & Release-Roadmap abgrenzen (step 4.2.5)
 
-Generated from `product-vision-to-user-stories.bpmn`'s "MVP & Release-Roadmap abgrenzen" (serviceTask, lane "Stratege") by `bpmn2agent-generate`. The story map is the input S5.1.1 turns into stories; the Workflow iterates `EP[slice=1]` in SP5.1, and the MVP-candidate section is what G-P3 (rubric `gate-mvp`) and the panel vote on. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
+Generated from `product-vision-to-user-stories.bpmn`'s "MVP & Release-Roadmap abgrenzen" (serviceTask, lane "Stratege") by `flowforge-generate`. The story map is the input S5.1.1 turns into stories; the Workflow iterates `EP[slice=1]` in SP5.1, and the MVP-candidate section is what G-P3 (rubric `gate-mvp`) and the panel vote on. It is its own skill because it produces an independently versioned artifact with its own contract (body + sidecar), template and rubric (mapping-rubric.md's serviceTask rule; one skill per business step, docs/dark-factory/implementation.md §2).
 
 Executed by the `product-stratege` agent. Binding rules: `${CLAUDE_PLUGIN_ROOT}/knowledge/process-rules.md` — evidence §6, item IDs §10, artifact contract §11.2, iterations §15.
 

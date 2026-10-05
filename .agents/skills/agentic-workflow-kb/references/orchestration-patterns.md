@@ -43,9 +43,9 @@ boundaries [human-in-the-loop-1: 17, 18, 19].
 - Grow iteratively: one specialist → notice the next need → split when unwieldy → add a
   router/supervisor [orchestration-patterns-1: 20].
 
-## For bpmn2agent
+## For flowforge
 
-`bpmn2agent-design/references/pattern-rubric.md` picks one of four Claude Code shapes. Rough
+`flowforge-design/references/pattern-rubric.md` picks one of four Claude Code shapes. Rough
 correspondence: skill chain + hooks ≈ sequential pipeline with human pauses; Workflow script ≈
 deterministic fan-out/fan-in and pipelines; orchestrator agent ≈ supervisor/router with judgement;
 mixed ≈ hierarchical composition per phase. An evaluator–optimizer loop in the BPMN (rework loop

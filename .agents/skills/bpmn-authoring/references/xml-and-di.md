@@ -108,7 +108,7 @@ Ort: mcp:atlassian</bpmn:documentation>
 One `property` per input association (as with data objects). Stores are not flow nodes: no lane
 `flowNodeRef`, no sequence flow. Several stores may share one `Ort:`. A `wissen` store is only read; a
 `gedächtnis` store needs a writing `serviceTask` and a reader; every write into a `live` store needs a
-`userTask` on each path before it (`bpmn2agent-verify` reports a violation).
+`userTask` on each path before it (`flowforge-verify` reports a violation).
 
 **Process input/output**: a real, process-wide `ioSpecification` as the *first* child of `process`
 (before `laneSet`). The XSD requires at least one `inputSet` and one `outputSet`; an `outputSet`

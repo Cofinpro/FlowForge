@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["S6.2.1"]}
 //
 // Generated from "Story -> Epic-Traceability pruefen" (scriptTask, lane "Traceability-Pruefer") in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic graph traversal — no
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic graph traversal — no
 // LLM (Gedächtnis §10.2: orphans are found deterministically).
 //
 // Usage: node trace-story-epic.mjs <runDir>

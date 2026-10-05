@@ -8,7 +8,7 @@ bpmn:
 
 Generated 2026-09-26, updated 2026-10-04 (context sources, GitHub backlog) from `generated/user-story-refinement/workflow-spec.yaml`
 (source `user-story-refinement.bpmn` @ `31eafa88ad49…`). This is the
-trace target for `bpmn2agent-verify` — every row below must correspond to what's on disk.
+trace target for `flowforge-verify` — every row below must correspond to what's on disk.
 
 ## Review status
 
@@ -46,7 +46,7 @@ entry skill also carries the three phase files its five checkpoints point to.
 | **Red** | `unresolved` | Unmapped or open. None in this run. |
 | Rose | `context-source`, `workflow-input`, `workflow-output` | A data store (here: six knowledge stores and three live GitHub backlog stores) or the process-wide input/output; no file of its own. |
 
-(Full legend: `bpmn2agent-design/references/mapping-rubric.md`.)
+(Full legend: `flowforge-design/references/mapping-rubric.md`.)
 
 ## Element → artifact map
 

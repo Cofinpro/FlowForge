@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["R_1","SP_Budget"]}
 //
 // Claude Code PreToolUse hook, generated from "Fragestellung schaerfen & Tool routen"
-// (businessRuleTask, Process_R) in product-vision-to-user-stories.bpmn by bpmn2agent-generate.
+// (businessRuleTask, Process_R) in product-vision-to-user-stories.bpmn by flowforge-generate.
 // Second line of defence for the research budget (docs/dark-factory/process-rules.md §8.0, §9.4);
 // the first line is the adapter itself (lib/research-config.mjs reserves every paid call in run.json
 // before it is sent). During an active dark-factory run this hook:

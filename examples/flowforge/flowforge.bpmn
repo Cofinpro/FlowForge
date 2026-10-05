@@ -9,7 +9,7 @@
   <bpmn:dataStore id="DataStore_Vorlagen" />
   <bpmn:dataStore id="DataStore_Wissensbasis" />
   <bpmn:process id="Process_Flowforge" name="FlowForge: BPMN-Prozess in Claude-Code-Workflow übersetzen" isExecutable="false">
-    <bpmn:documentation>Der Ablauf, den dieses Repo selbst umsetzt: ein Fachanwender bringt ein Ziel oder ein BPMN-Diagramm mit; optional entwirft bpmn-process-design den Prozess aus Notebook-Wissen, dann übersetzen die fünf Stufen-Skills bpmn2agent-analyze, -knowledge, -design, -generate und -verify ihn über die workflow-spec.yaml in Agenten, Skills, Hooks, Skripte und genau eine Orchestrierungsdatei unter generated/&lt;workflow&gt;/. Einstieg und Steuerung der Schleifen: bpmn-to-agentic-workflow. Helfer: agentic-workflow-architect, agentic-kb-librarian, agentic-artifact-reviewer, orchestration-design, agent-authoring, skill-authoring, trim-the-fat. Quelle: ARCHITECTURE.md.</bpmn:documentation>
+    <bpmn:documentation>Der Ablauf, den dieses Repo selbst umsetzt: ein Fachanwender bringt ein Ziel oder ein BPMN-Diagramm mit; optional entwirft flowforge-model den Prozess aus Notebook-Wissen, dann übersetzen die fünf Stufen-Skills flowforge-analyze, -knowledge, -design, -generate und -verify ihn über die workflow-spec.yaml in Agenten, Skills, Hooks, Skripte und genau eine Orchestrierungsdatei unter generated/&lt;workflow&gt;/. Einstieg und Steuerung der Schleifen: flowforge-run. Helfer: agentic-workflow-architect, agentic-kb-librarian, agentic-artifact-reviewer, orchestration-design, agent-authoring, skill-authoring, trim-the-fat. Quelle: ARCHITECTURE.md.</bpmn:documentation>
     <bpmn:ioSpecification id="IoSpec_Flowforge">
       <bpmn:dataInput id="DataInput_Ziel" name="Prozessziel oder BPMN-Diagramm" />
       <bpmn:dataOutput id="DataOutput_Workflow" name="Generierter Workflow (generated/&lt;workflow&gt;/)" />
@@ -76,11 +76,11 @@
       </bpmn:lane>
     </bpmn:laneSet>
     <bpmn:startEvent id="Start_Anfrage" name="Prozess soll zum Claude-Workflow werden">
-      <bpmn:documentation>Ein Fachanwender hat ein Ziel oder ein gezeichnetes BPMN-Diagramm und möchte daraus prüfbare Claude-Code-Artefakte. Einstieg ist der Skill bpmn-to-agentic-workflow.</bpmn:documentation>
+      <bpmn:documentation>Ein Fachanwender hat ein Ziel oder ein gezeichnetes BPMN-Diagramm und möchte daraus prüfbare Claude-Code-Artefakte. Einstieg ist der Skill flowforge-run.</bpmn:documentation>
       <bpmn:outgoing>F01</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:userTask id="U_Intake" name="Ziel, Diagramm &amp; Wissensquellen angeben">
-      <bpmn:documentation>Input: Prozessziel oder Pfad zum .bpmn, Wunschname, Sprache. Output: Bestätigte Intake-Angaben: .bpmn (falls vorhanden), Workflow-Name in kebab-case, Sprache für Fragen und README, ob Gemini-Notebooks den Prozess abdecken. Bei vorhandenem generated/&lt;workflow&gt;/ ist es ein Folgelauf. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §1</bpmn:documentation>
+      <bpmn:documentation>Input: Prozessziel oder Pfad zum .bpmn, Wunschname, Sprache. Output: Bestätigte Intake-Angaben: .bpmn (falls vorhanden), Workflow-Name in kebab-case, Sprache für Fragen und README, ob Gemini-Notebooks den Prozess abdecken. Bei vorhandenem generated/&lt;workflow&gt;/ ist es ein Folgelauf. Quelle: datei:.agents/skills/flowforge-run/SKILL.md §1</bpmn:documentation>
       <bpmn:incoming>F01</bpmn:incoming>
       <bpmn:outgoing>F02</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Ziel_Intake" name="__targetRef_placeholder" />
@@ -92,7 +92,7 @@
       <bpmn:outgoing>F04</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="P_Recherche" name="Prozess im Notebook recherchieren">
-      <bpmn:documentation>Input: Ziel, Auslöser, Endzustände, Beteiligte; gewählte Fach-Notebooks. Output: Prozessentwurf: Lanes, Schritte je Phase mit Typ (KI/Mensch/Skript/Regel) und Quelle, Gateways, Schleifen mit Obergrenze, Datenobjekte, Store-Tabelle, Prozess-Ein-/Ausgabe; jede Notebook-Antwort im FAQ unter generated/&lt;workflow&gt;/knowledge/faq/. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §1-5</bpmn:documentation>
+      <bpmn:documentation>Input: Ziel, Auslöser, Endzustände, Beteiligte; gewählte Fach-Notebooks. Output: Prozessentwurf: Lanes, Schritte je Phase mit Typ (KI/Mensch/Skript/Regel) und Quelle, Gateways, Schleifen mit Obergrenze, Datenobjekte, Store-Tabelle, Prozess-Ein-/Ausgabe; jede Notebook-Antwort im FAQ unter generated/&lt;workflow&gt;/knowledge/faq/. Quelle: datei:.agents/skills/flowforge-model/SKILL.md §1-5</bpmn:documentation>
       <bpmn:incoming>F04</bpmn:incoming>
       <bpmn:outgoing>F05</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_FachNB_Recherche" name="__targetRef_placeholder" />
@@ -100,7 +100,7 @@
       <bpmn:dataOutputAssociation id="DataOut_Entwurf"><bpmn:targetRef>DO_Entwurf</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:userTask id="U_Entwurf" name="Prozessentwurf bestätigen">
-      <bpmn:documentation>Input: Prozessentwurf. Output: Entscheidung: so zeichnen, ändern oder Notebook weiter befragen. Nie wird ein unbestätigter Entwurf gezeichnet. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §5</bpmn:documentation>
+      <bpmn:documentation>Input: Prozessentwurf. Output: Entscheidung: so zeichnen, ändern oder Notebook weiter befragen. Nie wird ein unbestätigter Entwurf gezeichnet. Quelle: datei:.agents/skills/flowforge-model/SKILL.md §5</bpmn:documentation>
       <bpmn:incoming>F05</bpmn:incoming>
       <bpmn:outgoing>F06</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Entwurf_U" name="__targetRef_placeholder" />
@@ -120,7 +120,7 @@
       <bpmn:dataOutputAssociation id="DataOut_Bpmn"><bpmn:targetRef>DO_Bpmn</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:scriptTask id="P_Validieren" name="Diagramm validieren &amp; rendern">
-      <bpmn:documentation>Input: &lt;workflow&gt;.bpmn. Output: Ergebnis von validate.sh (XSD, bpmn-moddle, bpmnlint) und inventory.mjs (findings leer, kein untypisierter Task), PNG je Ebene via render.mjs. Quelle: datei:.agents/skills/bpmn-process-design/SKILL.md §7</bpmn:documentation>
+      <bpmn:documentation>Input: &lt;workflow&gt;.bpmn. Output: Ergebnis von validate.sh (XSD, bpmn-moddle, bpmnlint) und inventory.mjs (findings leer, kein untypisierter Task), PNG je Ebene via render.mjs. Quelle: datei:.agents/skills/flowforge-model/SKILL.md §7</bpmn:documentation>
       <bpmn:incoming>F08</bpmn:incoming>
       <bpmn:outgoing>F09</bpmn:outgoing>
     </bpmn:scriptTask>
@@ -136,7 +136,7 @@
       <bpmn:outgoing>F12</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:scriptTask id="A_Inventar" name="BPMN validieren &amp; inventarisieren">
-      <bpmn:documentation>Input: .bpmn-Diagramm. Output: Element-Inventar mit Signalen (menschliche Tasks, Parallelität, Schleifen), Data Stores und Prozess-Ein-/Ausgabe, Befunde zu nicht unterstützten Konstrukten; bei Folgeläufen Diff je Element-ID und sha256. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §1-4, scripts/inventory.mjs</bpmn:documentation>
+      <bpmn:documentation>Input: .bpmn-Diagramm. Output: Element-Inventar mit Signalen (menschliche Tasks, Parallelität, Schleifen), Data Stores und Prozess-Ein-/Ausgabe, Befunde zu nicht unterstützten Konstrukten; bei Folgeläufen Diff je Element-ID und sha256. Quelle: datei:.agents/skills/flowforge-analyze/SKILL.md §1-4, scripts/inventory.mjs</bpmn:documentation>
       <bpmn:incoming>F12</bpmn:incoming>
       <bpmn:outgoing>F13</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Bpmn_Inventar" name="__targetRef_placeholder" />
@@ -148,7 +148,7 @@
       <bpmn:outgoing>F15</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="U_Luecken" name="Lücken im Diagramm klären">
-      <bpmn:documentation>Input: Befunde aus dem Inventar: fehlende Namen, fehlende Art/Ort-Zeilen, Pools, Timer, Kompensation u. a. Output: Antworten des Fachanwenders; nicht unterstützte Elemente werden umgebaut oder bewusst not-generated. Das .bpmn wird nie von der Pipeline geändert. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §5</bpmn:documentation>
+      <bpmn:documentation>Input: Befunde aus dem Inventar: fehlende Namen, fehlende Art/Ort-Zeilen, Pools, Timer, Kompensation u. a. Output: Antworten des Fachanwenders; nicht unterstützte Elemente werden umgebaut oder bewusst not-generated. Das .bpmn wird nie von der Pipeline geändert. Quelle: datei:.agents/skills/flowforge-analyze/SKILL.md §5</bpmn:documentation>
       <bpmn:incoming>F14</bpmn:incoming>
       <bpmn:outgoing>F16</bpmn:outgoing>
     </bpmn:userTask>
@@ -158,13 +158,13 @@
       <bpmn:outgoing>F17</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="A_SpecEntwurf" name="Spec-Entwurf schreiben">
-      <bpmn:documentation>Input: Inventar, Antworten zu den Lücken. Output: generated/&lt;workflow&gt;/workflow-spec.yaml als Entwurf: jedes Element kind: unresolved, contextSources, workflowIO, meta mit sha256. Quelle: datei:.agents/skills/bpmn2agent-analyze/SKILL.md §6-7</bpmn:documentation>
+      <bpmn:documentation>Input: Inventar, Antworten zu den Lücken. Output: generated/&lt;workflow&gt;/workflow-spec.yaml als Entwurf: jedes Element kind: unresolved, contextSources, workflowIO, meta mit sha256. Quelle: datei:.agents/skills/flowforge-analyze/SKILL.md §6-7</bpmn:documentation>
       <bpmn:incoming>F17</bpmn:incoming>
       <bpmn:outgoing>F18</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_SpecEntwurf"><bpmn:targetRef>DO_SpecEntwurf</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="K_Extrahieren" name="Fachwissen je Task extrahieren">
-      <bpmn:documentation>Input: Spec-Entwurf, Wissens-Stores je lesendem Task, sonst Notebook je Lane; Fallback WebSearch, Repo-Dokumente oder Modellwissen (unverified). Output: knowledge/&lt;taskId&gt;.md mit einem belegten Abschnitt je Store, FAQ-Einträge in knowledge/faq/, knowledge.refs in der Spec. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §1-3, §5</bpmn:documentation>
+      <bpmn:documentation>Input: Spec-Entwurf, Wissens-Stores je lesendem Task, sonst Notebook je Lane; Fallback WebSearch, Repo-Dokumente oder Modellwissen (unverified). Output: knowledge/&lt;taskId&gt;.md mit einem belegten Abschnitt je Store, FAQ-Einträge in knowledge/faq/, knowledge.refs in der Spec. Quelle: datei:.agents/skills/flowforge-knowledge/SKILL.md §1-3, §5</bpmn:documentation>
       <bpmn:incoming>F18</bpmn:incoming>
       <bpmn:outgoing>F19</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_SpecEntwurf_Extr" name="__targetRef_placeholder" />
@@ -174,14 +174,14 @@
       <bpmn:dataOutputAssociation id="DataOut_Wissen"><bpmn:targetRef>DO_Wissen</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="K_Hinterfragen" name="Diagramm mit Fachwissen hinterfragen">
-      <bpmn:documentation>Input: Wissenspaket, Spec-Entwurf, Challenge-Queries an dieselben Quellen. Output: openQuestions in der Spec: was die Quelle nahelegt, das Diagramm aber nicht hat. Agentic-Design-Fragen werden für design 6a vorgemerkt. Nie stilles Umbauen. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §4</bpmn:documentation>
+      <bpmn:documentation>Input: Wissenspaket, Spec-Entwurf, Challenge-Queries an dieselben Quellen. Output: openQuestions in der Spec: was die Quelle nahelegt, das Diagramm aber nicht hat. Agentic-Design-Fragen werden für design 6a vorgemerkt. Nie stilles Umbauen. Quelle: datei:.agents/skills/flowforge-knowledge/SKILL.md §4</bpmn:documentation>
       <bpmn:incoming>F19</bpmn:incoming>
       <bpmn:outgoing>F20</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_FachNB_Hinterfragen" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_FachNB_Hinterfragen"><bpmn:sourceRef>StoreRef_FachNotebooksWissen</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_FachNB_Hinterfragen</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:userTask id="U_Fachfragen" name="Offene Fachfragen beantworten">
-      <bpmn:documentation>Input: openQuestions aus der Wissensprüfung. Output: Antwort je Frage in der Spec; verlangt eine Antwort eine Diagrammänderung, geht sie an den Modellierer zurück. Quelle: datei:.agents/skills/bpmn2agent-knowledge/SKILL.md §4</bpmn:documentation>
+      <bpmn:documentation>Input: openQuestions aus der Wissensprüfung. Output: Antwort je Frage in der Spec; verlangt eine Antwort eine Diagrammänderung, geht sie an den Modellierer zurück. Quelle: datei:.agents/skills/flowforge-knowledge/SKILL.md §4</bpmn:documentation>
       <bpmn:incoming>F20</bpmn:incoming>
       <bpmn:outgoing>F21</bpmn:outgoing>
     </bpmn:userTask>
@@ -192,7 +192,7 @@
       <bpmn:outgoing>F22</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="D_Zuordnen" name="Elemente zuordnen &amp; Muster wählen">
-      <bpmn:documentation>Input: Spec mit Wissen und Antworten, Wissenspaket, Mapping- und Muster-Rubrik. Output: kind je Element (skill, Checkliste, Checkpoint, script, hook, Steuerlogik, context-source), Live-Tools per ToolSearch aufgelöst, Orchestrierungsmuster mit Begründung und verworfenen Alternativen. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §2-4</bpmn:documentation>
+      <bpmn:documentation>Input: Spec mit Wissen und Antworten, Wissenspaket, Mapping- und Muster-Rubrik. Output: kind je Element (skill, Checkliste, Checkpoint, script, hook, Steuerlogik, context-source), Live-Tools per ToolSearch aufgelöst, Orchestrierungsmuster mit Begründung und verworfenen Alternativen. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §2-4</bpmn:documentation>
       <bpmn:incoming>F22</bpmn:incoming>
       <bpmn:outgoing>F23</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Wissen_Zuordnen" name="__targetRef_placeholder" />
@@ -201,12 +201,12 @@
       <bpmn:dataInputAssociation id="DataIn_Rubrik_Zuordnen"><bpmn:sourceRef>StoreRef_Rubrik</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Rubrik_Zuordnen</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D_Rollen" name="Rollen, Tools &amp; Artefaktverträge festlegen">
-      <bpmn:documentation>Input: Zuordnung und Muster. Output: roles (agentName, modelTier, tools) je Lane und artifacts (Pfadmuster, Frontmatter, Erzeuger, Verbraucher) je Datenobjekt; schneidet Rollen nach agent-authoring. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §5-6</bpmn:documentation>
+      <bpmn:documentation>Input: Zuordnung und Muster. Output: roles (agentName, modelTier, tools) je Lane und artifacts (Pfadmuster, Frontmatter, Erzeuger, Verbraucher) je Datenobjekt; schneidet Rollen nach agent-authoring. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §5-6</bpmn:documentation>
       <bpmn:incoming>F23</bpmn:incoming>
       <bpmn:outgoing>F24</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D_Pruefen" name="Entwurf gegen Wissensbasis prüfen">
-      <bpmn:documentation>Input: workflow-spec.draft.yaml, .bpmn, vorgemerkte Agentic-Design-Fragen. Output: Befunde des agentic-workflow-architect (geroutet design, bpmn oder Frage) gegen orchestration-design; offene Designfragen beantwortet der agentic-kb-librarian aus der Wissensbasis, sonst aus dem Notebook, und hält die neue Antwort im FAQ fest. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §6a; .agents/agents/agentic-workflow-architect.md; .agents/agents/agentic-kb-librarian.md</bpmn:documentation>
+      <bpmn:documentation>Input: workflow-spec.draft.yaml, .bpmn, vorgemerkte Agentic-Design-Fragen. Output: Befunde des agentic-workflow-architect (geroutet design, bpmn oder Frage) gegen orchestration-design; offene Designfragen beantwortet der agentic-kb-librarian aus der Wissensbasis, sonst aus dem Notebook, und hält die neue Antwort im FAQ fest. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §6a; .agents/agents/agentic-workflow-architect.md; .agents/agents/agentic-kb-librarian.md</bpmn:documentation>
       <bpmn:incoming>F24</bpmn:incoming>
       <bpmn:outgoing>F25</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Wissensbasis_Pruefen" name="__targetRef_placeholder" />
@@ -218,13 +218,13 @@
       <bpmn:dataOutputAssociation id="DataOut_AgenticFaq"><bpmn:targetRef>StoreRef_AgenticFaq</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="D_Plan" name="Mapping-Plan schreiben">
-      <bpmn:documentation>Input: Geprüfter Spec-Entwurf. Output: Mapping-Plan in Fachsprache: was aus jedem Element wird, Muster, Rollen, Prüfpunkte, Kontextquellen mit Tools. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §7</bpmn:documentation>
+      <bpmn:documentation>Input: Geprüfter Spec-Entwurf. Output: Mapping-Plan in Fachsprache: was aus jedem Element wird, Muster, Rollen, Prüfpunkte, Kontextquellen mit Tools. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §7</bpmn:documentation>
       <bpmn:incoming>F25</bpmn:incoming>
       <bpmn:outgoing>F26</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_MappingPlan"><bpmn:targetRef>DO_MappingPlan</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:userTask id="U_Mapping" name="Mapping-Plan bestätigen">
-      <bpmn:documentation>Input: Mapping-Plan. Output: Angenommen, einzelne Elemente anpassen oder Diagramm muss sich ändern. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §7; .agents/skills/bpmn-to-agentic-workflow/SKILL.md §4</bpmn:documentation>
+      <bpmn:documentation>Input: Mapping-Plan. Output: Angenommen, einzelne Elemente anpassen oder Diagramm muss sich ändern. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §7; .agents/skills/flowforge-run/SKILL.md §4</bpmn:documentation>
       <bpmn:incoming>F26</bpmn:incoming>
       <bpmn:outgoing>F27</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_MappingPlan_U" name="__targetRef_placeholder" />
@@ -241,7 +241,7 @@
       <bpmn:incoming>F30</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="D_Spec" name="Bestätigte Spec schreiben">
-      <bpmn:documentation>Input: Angenommener Mapping-Plan. Output: Bestätigte generated/&lt;workflow&gt;/workflow-spec.yaml; sicherer Punkt zum Fortsetzen in einer neuen Sitzung. Quelle: datei:.agents/skills/bpmn2agent-design/SKILL.md §8-9</bpmn:documentation>
+      <bpmn:documentation>Input: Angenommener Mapping-Plan. Output: Bestätigte generated/&lt;workflow&gt;/workflow-spec.yaml; sicherer Punkt zum Fortsetzen in einer neuen Sitzung. Quelle: datei:.agents/skills/flowforge-design/SKILL.md §8-9</bpmn:documentation>
       <bpmn:incoming>F28</bpmn:incoming>
       <bpmn:outgoing>F31</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_Spec"><bpmn:targetRef>DO_Spec</bpmn:targetRef></bpmn:dataOutputAssociation>
@@ -252,7 +252,7 @@
       <bpmn:outgoing>F32</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="G_Artefakte" name="Skills, Agenten, Hooks &amp; Skripte schreiben">
-      <bpmn:documentation>Input: Bestätigte Spec, Generierungs-Vorlagen, knowledge/*.md. Output: generated/&lt;workflow&gt;/.claude/ mit skills/, agents/, hooks/*.mjs, settings.json; jede Datei mit bpmn: {file, elements}; Write-Guard- und Memory-Cap-Hook bei Kontextquellen. Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §1-6a; skill-authoring; agent-authoring</bpmn:documentation>
+      <bpmn:documentation>Input: Bestätigte Spec, Generierungs-Vorlagen, knowledge/*.md. Output: generated/&lt;workflow&gt;/.claude/ mit skills/, agents/, hooks/*.mjs, settings.json; jede Datei mit bpmn: {file, elements}; Write-Guard- und Memory-Cap-Hook bei Kontextquellen. Quelle: datei:.agents/skills/flowforge-generate/SKILL.md §1-6a; skill-authoring; agent-authoring</bpmn:documentation>
       <bpmn:incoming>F32</bpmn:incoming>
       <bpmn:outgoing>F33</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Spec_Artefakte" name="__targetRef_placeholder" />
@@ -262,29 +262,29 @@
       <bpmn:dataOutputAssociation id="DataOut_Artefakte"><bpmn:targetRef>DO_Artefakte</bpmn:targetRef></bpmn:dataOutputAssociation>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="G_Orchestrierung" name="Orchestrierung, README &amp; Mapping-Bericht schreiben">
-      <bpmn:documentation>Input: Spec, geschriebene Artefakte. Output: Genau eine Orchestrierungsdatei (Skill-Kette, Workflow-Skript oder Orchestrator-Agent), README.md, mapping/report.md. Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §7-9</bpmn:documentation>
+      <bpmn:documentation>Input: Spec, geschriebene Artefakte. Output: Genau eine Orchestrierungsdatei (Skill-Kette, Workflow-Skript oder Orchestrator-Agent), README.md, mapping/report.md. Quelle: datei:.agents/skills/flowforge-generate/SKILL.md §7-9</bpmn:documentation>
       <bpmn:incoming>F33</bpmn:incoming>
       <bpmn:outgoing>F34</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:scriptTask id="G_Rendern" name="Mapping-Ansicht rendern">
-      <bpmn:documentation>Input: Spec, .bpmn. Output: mapping/workflow-mapped.bpmn (farbig), index.html, PNGs. Quelle: datei:.agents/skills/bpmn2agent-generate/scripts/render-mapping.mjs</bpmn:documentation>
+      <bpmn:documentation>Input: Spec, .bpmn. Output: mapping/workflow-mapped.bpmn (farbig), index.html, PNGs. Quelle: datei:.agents/skills/flowforge-generate/scripts/render-mapping.mjs</bpmn:documentation>
       <bpmn:incoming>F34</bpmn:incoming>
       <bpmn:outgoing>F35</bpmn:outgoing>
     </bpmn:scriptTask>
     <bpmn:serviceTask id="G_Review" name="Erzeugte Dateien reviewen">
-      <bpmn:documentation>Input: generated/&lt;workflow&gt;/. Output: Selbstcheck (Header, node --check, settings.json) und Befunde des agentic-artifact-reviewer; generate-Befunde sofort umgesetzt, hohe design-Befunde zurück ins Design, trim nur mit Zustimmung (trim-the-fat). Quelle: datei:.agents/skills/bpmn2agent-generate/SKILL.md §11; .agents/agents/agentic-artifact-reviewer.md</bpmn:documentation>
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/. Output: Selbstcheck (Header, node --check, settings.json) und Befunde des agentic-artifact-reviewer; generate-Befunde sofort umgesetzt, hohe design-Befunde zurück ins Design, trim nur mit Zustimmung (trim-the-fat). Quelle: datei:.agents/skills/flowforge-generate/SKILL.md §11; .agents/agents/agentic-artifact-reviewer.md</bpmn:documentation>
       <bpmn:incoming>F35</bpmn:incoming>
       <bpmn:outgoing>F36</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:scriptTask id="V_Pruefen" name="Generierten Workflow statisch prüfen">
-      <bpmn:documentation>Input: generated/&lt;workflow&gt;/, Quell-.bpmn. Output: Ergebnis von verify.mjs in den Kategorien spec-schema, source-bpmn, element-to-artifact, artifact-to-element, lint, no-red und ggf. context-sources. Quelle: datei:.agents/skills/bpmn2agent-verify/scripts/verify.mjs</bpmn:documentation>
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/, Quell-.bpmn. Output: Ergebnis von verify.mjs in den Kategorien spec-schema, source-bpmn, element-to-artifact, artifact-to-element, lint, no-red und ggf. context-sources. Quelle: datei:.agents/skills/flowforge-verify/scripts/verify.mjs</bpmn:documentation>
       <bpmn:incoming>F36</bpmn:incoming>
       <bpmn:outgoing>F37</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Artefakte_Pruefen" name="__targetRef_placeholder" />
       <bpmn:dataInputAssociation id="DataIn_Artefakte_Pruefen"><bpmn:sourceRef>DO_Artefakte</bpmn:sourceRef><bpmn:targetRef>Property_DataIn_Artefakte_Pruefen</bpmn:targetRef></bpmn:dataInputAssociation>
     </bpmn:scriptTask>
     <bpmn:serviceTask id="V_Routen" name="Befunde übersetzen &amp; routen">
-      <bpmn:documentation>Input: verify.mjs-Ergebnis. Output: Prüfbericht in Fachsprache, jeder Befund mit Ziel: analyze, design oder generate. Quelle: datei:.agents/skills/bpmn2agent-verify/SKILL.md §2</bpmn:documentation>
+      <bpmn:documentation>Input: verify.mjs-Ergebnis. Output: Prüfbericht in Fachsprache, jeder Befund mit Ziel: analyze, design oder generate. Quelle: datei:.agents/skills/flowforge-verify/SKILL.md §2</bpmn:documentation>
       <bpmn:incoming>F37</bpmn:incoming>
       <bpmn:outgoing>F38</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_Pruefbericht"><bpmn:targetRef>DO_Pruefbericht</bpmn:targetRef></bpmn:dataOutputAssociation>
@@ -298,7 +298,7 @@
       <bpmn:outgoing>F43</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="U_Befunde" name="Über offene Befunde entscheiden">
-      <bpmn:documentation>Input: Prüfbericht nach der dritten Runde oder bei unverändert wiederkehrendem Befund. Output: Entscheidung: als unverifiziert übergeben oder Diagramm ändern. Nie wird am Cap Erfolg gemeldet. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §6</bpmn:documentation>
+      <bpmn:documentation>Input: Prüfbericht nach der dritten Runde oder bei unverändert wiederkehrendem Befund. Output: Entscheidung: als unverifiziert übergeben oder Diagramm ändern. Nie wird am Cap Erfolg gemeldet. Quelle: datei:.agents/skills/flowforge-run/SKILL.md §6</bpmn:documentation>
       <bpmn:incoming>F43</bpmn:incoming>
       <bpmn:outgoing>F44</bpmn:outgoing>
     </bpmn:userTask>
@@ -317,7 +317,7 @@
       <bpmn:outgoing>F47</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="V_Uebergabe" name="Übergabe berichten">
-      <bpmn:documentation>Input: Prüfbericht, Spec, generated/&lt;workflow&gt;/. Output: Bericht in der Sprache des Anwenders: Anzahl Agenten/Skills/Skripte/Hooks, Orchestrierungsdatei und Muster, Ort, offene Punkte (rot/grau, offene Fragen), ggf. Vermerk unverifiziert, Installationshinweis. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §7</bpmn:documentation>
+      <bpmn:documentation>Input: Prüfbericht, Spec, generated/&lt;workflow&gt;/. Output: Bericht in der Sprache des Anwenders: Anzahl Agenten/Skills/Skripte/Hooks, Orchestrierungsdatei und Muster, Ort, offene Punkte (rot/grau, offene Fragen), ggf. Vermerk unverifiziert, Installationshinweis. Quelle: datei:.agents/skills/flowforge-run/SKILL.md §7</bpmn:documentation>
       <bpmn:incoming>F47</bpmn:incoming>
       <bpmn:outgoing>F48</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Pruefbericht_Uebergabe" name="__targetRef_placeholder" />
@@ -338,7 +338,7 @@
       <bpmn:incoming>F50</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:scriptTask id="V_Kopieren" name="Nach Projekt-.claude/ kopieren">
-      <bpmn:documentation>Input: generated/&lt;workflow&gt;/.claude/, Zielprojekt. Output: cp -R generated/&lt;workflow&gt;/.claude/. &lt;projekt&gt;/.claude/; hooks in einer vorhandenen settings.json von Hand zusammenführen. Quelle: datei:.agents/skills/bpmn-to-agentic-workflow/SKILL.md §7</bpmn:documentation>
+      <bpmn:documentation>Input: generated/&lt;workflow&gt;/.claude/, Zielprojekt. Output: cp -R generated/&lt;workflow&gt;/.claude/. &lt;projekt&gt;/.claude/; hooks in einer vorhandenen settings.json von Hand zusammenführen. Quelle: datei:.agents/skills/flowforge-run/SKILL.md §7</bpmn:documentation>
       <bpmn:incoming>F51</bpmn:incoming>
       <bpmn:outgoing>F52</bpmn:outgoing>
       <bpmn:dataOutputAssociation id="DataOut_Projekt"><bpmn:targetRef>StoreRef_Projekt</bpmn:targetRef></bpmn:dataOutputAssociation>
@@ -450,7 +450,7 @@ Ort: mcp:gemini-notebook-mcp</bpmn:documentation>
     </bpmn:dataStoreReference>
     <bpmn:dataStoreReference id="StoreRef_Rubrik" name="Mapping- &amp; Muster-Rubrik" dataStoreRef="DataStore_Rubrik">
       <bpmn:documentation>Art: wissen
-Ort: datei:.agents/skills/bpmn2agent-design/references/</bpmn:documentation>
+Ort: datei:.agents/skills/flowforge-design/references/</bpmn:documentation>
     </bpmn:dataStoreReference>
     <bpmn:dataStoreReference id="StoreRef_Wissensbasis" name="Agentic-Design-Wissensbasis" dataStoreRef="DataStore_Wissensbasis">
       <bpmn:documentation>Art: wissen
@@ -466,7 +466,7 @@ Ort: datei:.agents/skills/agentic-workflow-kb/faq/</bpmn:documentation>
     </bpmn:dataStoreReference>
     <bpmn:dataStoreReference id="StoreRef_Vorlagen" name="Generierungs-Vorlagen" dataStoreRef="DataStore_Vorlagen">
       <bpmn:documentation>Art: wissen
-Ort: datei:.agents/skills/bpmn2agent-generate/assets/templates/</bpmn:documentation>
+Ort: datei:.agents/skills/flowforge-generate/assets/templates/</bpmn:documentation>
     </bpmn:dataStoreReference>
     <bpmn:dataStoreReference id="StoreRef_Projekt" name="Claude-Projekt des Anwenders" dataStoreRef="DataStore_Projekt">
       <bpmn:documentation>Art: live

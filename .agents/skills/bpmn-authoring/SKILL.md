@@ -1,6 +1,6 @@
 ---
 name: bpmn-authoring
-description: Creates, extends or refines BPMN 2.0 .bpmn diagrams (process models, lanes, collapsed drill-down subprocesses) so they validate against the OMG XSD, import into bpmn.io/bpmn-moddle without warnings, pass bpmnlint:recommended with zero warnings and render tidily. Use when writing, editing or planning a .bpmn file; turning a diagram into agents is bpmn-to-agentic-workflow.
+description: Creates, extends or refines BPMN 2.0 .bpmn diagrams (process models, lanes, collapsed drill-down subprocesses) so they validate against the OMG XSD, import into bpmn.io/bpmn-moddle without warnings, pass bpmnlint:recommended with zero warnings and render tidily. Use when writing, editing or planning a .bpmn file; turning a diagram into agents is flowforge-run.
 ---
 
 # Author BPMN

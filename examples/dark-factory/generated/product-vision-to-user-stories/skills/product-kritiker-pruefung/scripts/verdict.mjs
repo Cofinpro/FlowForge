@@ -2,7 +2,7 @@
 // bpmn: {"file":"product-vision-to-user-stories.bpmn","elements":["K_4"]}
 //
 // Generated from "Verdikt bilden & Loop-Cap anwenden" (scriptTask, Process_K) in
-// product-vision-to-user-stories.bpmn by bpmn2agent-generate. Deterministic step — no LLM call
+// product-vision-to-user-stories.bpmn by flowforge-generate. Deterministic step — no LLM call
 // (Gedächtnis §9.1).
 //
 // Usage: node verdict.mjs <evaluation.json>

@@ -26,8 +26,8 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 `feat(design): add contextSources and workflowIO to the spec contract`
 
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-design/assets/workflow-spec.schema.yaml`
-  - `.agents/skills/bpmn2agent-design/references/mapping-rubric.md`
+  - `.agents/skills/flowforge-design/assets/workflow-spec.schema.yaml`
+  - `.agents/skills/flowforge-design/references/mapping-rubric.md`
 - **Schema:**
   - neue Top-Level-Abschnitte `contextSources.<id>` und `workflowIO`, Felder wie in
     plan.md §Spec-Erweiterung
@@ -53,8 +53,8 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 - **Dateien:**
   - `.agents/skills/bpmn-authoring/references/xml-and-di.md`
   - `.agents/skills/bpmn-authoring/references/layout.md`
-  - `.agents/skills/bpmn2agent-verify/fixtures/context-flow.bpmn`
-  - `.agents/skills/bpmn2agent-verify/fixtures/context-flow-unguarded.bpmn`
+  - `.agents/skills/flowforge-verify/fixtures/context-flow.bpmn`
+  - `.agents/skills/flowforge-verify/fixtures/context-flow-unguarded.bpmn`
 - **XML und DI:**
   - `dataStore` (Root) + `dataStoreReference` (sichtbar, 50×50), Dokumentation mit
     `Art:`/`Ort:`
@@ -71,11 +71,11 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 - **Abnahme:** Beide Fixtures bestehen `validate.sh` (XSD, moddle ohne Warnungen,
   bpmnlint:recommended ohne Warnungen) und rendern sauber.
 
-## T3 — bpmn-process-design: Kontext beim Modellieren abfragen
+## T3 — flowforge-model: Kontext beim Modellieren abfragen
 
-`feat(skills): ask for context sources in bpmn-process-design`
+`feat(skills): ask for context sources in flowforge-model`
 
-- **Datei:** `.agents/skills/bpmn-process-design/SKILL.md`
+- **Datei:** `.agents/skills/flowforge-model/SKILL.md`
 - **Inhalt:**
   - Notationstabelle um Data Store (drei Arten) und Prozess-I/O ergänzen
   - Regeln: Store = fachlicher Datenbestand; Pfeilrichtung = lesen/schreiben; `userTask` vor
@@ -92,9 +92,9 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 
 - **Abhängig von:** T1, T2
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-analyze/scripts/inventory.mjs`
-  - `.agents/skills/bpmn2agent-analyze/SKILL.md`
-  - `.agents/skills/bpmn2agent-analyze/references/conventions.md`
+  - `.agents/skills/flowforge-analyze/scripts/inventory.mjs`
+  - `.agents/skills/flowforge-analyze/SKILL.md`
+  - `.agents/skills/flowforge-analyze/references/conventions.md`
 - **inventory.mjs:**
   - `dataStoreReference` mit Name, Dokumentation (geparste `Art:`/`Ort:`), Scope
   - Leser und Schreiber aus den Data Associations
@@ -116,8 +116,8 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 
 - **Abhängig von:** T4
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-knowledge/SKILL.md`
-  - `.agents/skills/bpmn2agent-knowledge/references/notebook-extraction.md`
+  - `.agents/skills/flowforge-knowledge/SKILL.md`
+  - `.agents/skills/flowforge-knowledge/references/notebook-extraction.md`
 - **Inhalt:**
   - Wissens-Stores ersetzen §2 „welches Notebook für welche Lane“. Der Ort wird je nach
     Typ aufgelöst (`notebook:` über notebook_list per Titel, URL per WebFetch, `datei:` als
@@ -134,7 +134,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 
 - **Abhängig von:** T1, T4
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-design/SKILL.md`
+  - `.agents/skills/flowforge-design/SKILL.md`
   - `references/mapping-rubric.md` (Ergänzung zu T1)
   - `references/pattern-rubric.md`
 - **Tools auflösen:**
@@ -155,8 +155,8 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 
 - **Abhängig von:** T1, T4 (läuft parallel zu T5/T6, testet gegen handgeschriebene Spec)
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-verify/scripts/verify.mjs`
-  - `.agents/skills/bpmn2agent-verify/SKILL.md`
+  - `.agents/skills/flowforge-verify/scripts/verify.mjs`
+  - `.agents/skills/flowforge-verify/SKILL.md`
 - **Prüfungen:**
   - Jeder Store und jedes Prozess-I/O-Element braucht einen `elements`-Eintrag.
   - `contextSources.*.readers/writers` müssen mit den Associations übereinstimmen.
@@ -174,7 +174,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 
 - **Abhängig von:** T6 (T7 für die Prüfung)
 - **Dateien:**
-  - `.agents/skills/bpmn2agent-generate/SKILL.md`
+  - `.agents/skills/flowforge-generate/SKILL.md`
   - `assets/templates/*` (skill, agent, orchestrator, settings, hook, README, mapping-report)
   - `scripts/render-mapping.mjs`
   - `scripts/check-mapping-view.mjs`
@@ -216,7 +216,7 @@ Aufgaben in derselben Welle sind unabhängig und können parallel laufen.
 `test: run the full pipeline on the context-flow fixture`
 
 - **Abhängig von:** alle
-- **Ablauf:** `bpmn-to-agentic-workflow` auf `context-flow.bpmn` in einem Scratch-Verzeichnis
+- **Ablauf:** `flowforge-run` auf `context-flow.bpmn` in einem Scratch-Verzeichnis
   (analyze → knowledge → design → generate → verify) laufen lassen.
 - **Abnahme:**
   - verify grün, Mapping-Ansicht ohne Rot.

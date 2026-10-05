@@ -37,7 +37,7 @@
 
 Pool = organization/system with its own process; lane = a role within it.
 
-- **Agent-bound diagram** (input, now or later, to `bpmn-to-agentic-workflow`): lanes are the
+- **Agent-bound diagram** (input, now or later, to `flowforge-run`): lanes are the
   default. One process with a `laneSet`, lane = role/agent, every flow node in exactly one lane via
   `flowNodeRef` — inside each collapsed sub-process's own plane too. No pool/participant needed.
 - **Purely descriptive diagram**: no lanes; put `<bpmn:documentation>Rolle: … Input: … Output: …
