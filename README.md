@@ -1,18 +1,14 @@
-<p align="center"><img src="assets/flowforge-icon.svg" width="128" alt="FlowForge-Icon"></p>
+<p align="center"><img src="assets/lanecraft-icon.svg" width="128" alt="lanecraft-Icon"></p>
 
-# FlowForge
+# lanecraft
 
 **BPMN-2.0-Prozess rein, prüfbare Claude-Code-Artefakte raus.**
 
 Ein Fachanwender zeichnet einen Prozess als BPMN-Diagramm (Lane = Rolle) oder lässt ihn aus seinem
-Ziel und einem Notebook entwerfen. FlowForge übersetzt ihn
+Ziel und einem Notebook entwerfen. lanecraft übersetzt ihn
 mit der `bpmn2agent`-Pipeline in Agenten, Skills, Hooks, Skripte und genau einen Orchestrator
 (Skill-Kette, Workflow-Skript oder Orchestrator-Agent). Jede erzeugte Datei verweist auf das
 BPMN-Element, aus dem sie entstanden ist, und das wird in beide Richtungen geprüft.
-
-**FlowSpec und FlowForge.** FlowSpec ist die Notation: ein BPMN-2.0-Profil, in dem Lane = Rolle,
-`serviceTask` = KI, `userTask` = menschlicher Checkpoint ist ([`BPMN-NOTATION.md`](BPMN-NOTATION.md)).
-FlowForge ist das Werkzeug, das FlowSpec-Diagramme in Claude-Code-Artefakte übersetzt.
 
 - **Fachanwender führen, nicht YAML.** Jede Frage kommt als Auswahl mit Empfehlung, in der Sprache
   des Anwenders. Vor dem Erzeugen bestätigt der Anwender einen Mapping-Plan in Klartext.
@@ -34,7 +30,7 @@ Sechs Skizzen erklären die Idee in etwa 15 Minuten, in dieser Reihenfolge
 | Skizze | Frage |
 |---|---|
 | [Problem](docs/erklaerung/00-problem.png) | Welches Problem lösen wir? |
-| [Idee](docs/erklaerung/01-idee.png) | Was macht FlowForge? |
+| [Idee](docs/erklaerung/01-idee.png) | Was macht lanecraft? |
 | [Bausteine](docs/erklaerung/03-bausteine.png) | Was sind Skill, Agent, Hook, Workflow und Kontext? |
 | [Mapping](docs/erklaerung/05-mapping.png) | Was wird aus welchem BPMN-Element? |
 | [Pipeline](docs/erklaerung/02-pipeline.png) | Wie läuft die Übersetzung ab, und wo entscheidest du? |
@@ -47,25 +43,25 @@ Sechs Skizzen erklären die Idee in etwa 15 Minuten, in dieser Reihenfolge
 Das Repo ist Claude-Code-Plugin und Marketplace zugleich:
 
 ```text
-/plugin marketplace add Cofinpro/flowforge
-/plugin install flowforge@flowforge
+/plugin marketplace add Cofinpro/lanecraft
+/plugin install lanecraft@lanecraft
 ```
 
 Dann Claude Code in dem Ordner starten, in dem das `.bpmn` liegt, und die Pipeline aufrufen:
 
 ```text
-/flowforge:bpmn-to-agentic-workflow
+/lanecraft:bpmn-to-agentic-workflow
 ```
 
 oder einfach sagen: *„Mach aus meinem Prozessdiagramm einen Claude-Workflow.“* Das Ergebnis landet
 unter `generated/<workflow>/`; installiert wird erst danach, auf Wunsch, mit einer Kopie von
 `generated/<workflow>/.claude/` ins Projekt.
 
-Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-flowforge>`.
+Ohne Installation aus einem Checkout ausprobieren: `claude --plugin-dir <pfad-zu-lanecraft>`.
 
-**Noch kein Diagramm?** `/flowforge:bpmn-process-design` fragt nach deinem Ziel, recherchiert den
+**Noch kein Diagramm?** `/lanecraft:bpmn-process-design` fragt nach deinem Ziel, recherchiert den
 Prozess im Notebook, lässt dich den Entwurf bestätigen und zeichnet ein `.bpmn`, das die Pipeline
-ohne Rückfragen verarbeitet. Ein Diagramm von Hand zeichnen oder ändern: `/flowforge:bpmn-authoring`.
+ohne Rückfragen verarbeitet. Ein Diagramm von Hand zeichnen oder ändern: `/lanecraft:bpmn-authoring`.
 
 **Voraussetzungen:** `node`, `python3`, `xmllint`. Die npm-Pakete (`bpmn-moddle`, `bpmnlint`,
 `js-yaml`, `ajv`, `playwright`) installieren die Skripte beim ersten Lauf nach
@@ -80,21 +76,21 @@ Notebook-Wissen optional der `gemini-notebook-mcp`-Server.
 ```json
 {
   "extraKnownMarketplaces": {
-    "flowforge": { "source": { "source": "github", "repo": "Cofinpro/flowforge" } }
+    "lanecraft": { "source": { "source": "github", "repo": "Cofinpro/lanecraft" } }
   },
-  "enabledPlugins": { "flowforge@flowforge": true }
+  "enabledPlugins": { "lanecraft@lanecraft": true }
 }
 ```
 
 Wer das Repo klont und Claude Code startet, bekommt das Plugin angeboten. Gleiches Ergebnis per
-Kommandozeile: `claude plugin install flowforge@flowforge --scope project`. Ohne `--scope` gilt die
+Kommandozeile: `claude plugin install lanecraft@lanecraft --scope project`. Ohne `--scope` gilt die
 Installation nur für dich.
 
 **Zugriff.** Claude Code holt das Plugin mit den eigenen Git-Zugangsdaten von GitHub. Ist das Repo
-privat, braucht jeder im Team Lesezugriff auf `Cofinpro/flowforge`.
+privat, braucht jeder im Team Lesezugriff auf `Cofinpro/lanecraft`.
 
-**Aufrufen.** Skills und Agenten des Plugins tragen das Präfix `flowforge:`, z. B.
-`/flowforge:bpmn-to-agentic-workflow` oder `/flowforge:bpmn-authoring`.
+**Aufrufen.** Skills und Agenten des Plugins tragen das Präfix `lanecraft:`, z. B.
+`/lanecraft:bpmn-to-agentic-workflow` oder `/lanecraft:bpmn-authoring`.
 
 **Was im Projekt entsteht.** Ein Lauf schreibt nur nach `generated/<workflow>/`:
 
@@ -104,7 +100,7 @@ privat, braucht jeder im Team Lesezugriff auf `Cofinpro/flowforge`.
   wurde und warum. Empfehlung: `generated/` mit einchecken, dann bleiben die Entscheidungen
   nachvollziehbar, und ein neuer Lauf nach einer Diagrammänderung fragt nur nach dem Geänderten.
 
-**Aktualisieren.** Neue Versionen kommen mit `/plugin marketplace update flowforge` (oder
+**Aktualisieren.** Neue Versionen kommen mit `/plugin marketplace update lanecraft` (oder
 automatisch, wenn Auto-Update für den Marketplace an ist), danach `/reload-plugins` oder eine neue
 Sitzung. Es gibt nur dann ein Update, wenn die Version im Plugin gestiegen ist. Welche Version was
 geändert hat, steht in den GitHub-Releases.
@@ -131,7 +127,7 @@ flowchart LR
 
 | Stufe | Skill | Ergebnis |
 |---|---|---|
-| 0 | `bpmn-process-design` (optional) | `.bpmn` in FlowSpec-Notation, aus Ziel und Notebook entworfen |
+| 0 | `bpmn-process-design` (optional) | `.bpmn` in lanecraft-Notation, aus Ziel und Notebook entworfen |
 | 1 | `bpmn2agent-analyze` | `workflow-spec.yaml` als Entwurf; meldet nicht unterstützte Konstrukte mit Umbauvorschlag |
 | 2 | `bpmn2agent-knowledge` | belegtes Fachwissen je Lane/Aufgabe, offene Fragen an das Diagramm |
 | 3 | `bpmn2agent-design` | Entscheidung je Element, Orchestrierungsmuster, Rollen; Mapping-Plan zur Bestätigung |
@@ -240,7 +236,7 @@ was bewusst fehlt: [`ARCHITECTURE.md`](ARCHITECTURE.md#kontextquellen).
 
 Ein Skill ist nur so gut wie das Fachwissen darin. Schreibt das Modell eine INVEST-Checkliste oder
 die Kriterien für eine Definition of Ready aus dem Gedächtnis, klingt das plausibel, kann aber
-erfunden, veraltet oder nicht eure Praxis sein. FlowForge holt dieses Wissen deshalb aus einem
+erfunden, veraltet oder nicht eure Praxis sein. lanecraft holt dieses Wissen deshalb aus einem
 **NotebookLM-Notebook mit Quellen, die ihr selbst ausgewählt und geprüft habt**: Fachbücher,
 Handbücher, euer Fachkonzept, Prozessregeln. Das Notebook antwortet nur aus diesen Quellen und nennt
 zu jeder Aussage die Textstelle.
@@ -322,12 +318,12 @@ seiner Datei.
 
 Jeder erzeugte Workflow bringt ein Kostenprotokoll mit: Ein Hook schreibt nach jedem Lauf die
 verbrauchten Tokens in `.claude/runs/<workflow>/ledger.jsonl` (ohne Preise, ohne Netz; nimm
-`.claude/runs/` in die `.gitignore` auf). Mit dem FlowForge-Plugin rechnet der Skill
+`.claude/runs/` in die `.gitignore` auf). Mit dem lanecraft-Plugin rechnet der Skill
 `bpmn2agent-cost` daraus die Kosten je BPMN-Element, Lane und Phase und gleicht die Summe mit der
 Session ab:
 
 ```text
-/flowforge:bpmn2agent-cost
+/lanecraft:bpmn2agent-cost
 ```
 
 Das Ergebnis ist `cost.md` neben dem Protokoll. In der Mapping-Ansicht erscheinen die Kosten als
@@ -356,7 +352,7 @@ nur nach einer Freigabe direkt davor geschrieben wird.
 
 ![User-Story-Refinement als BPMN](examples/user-story-refinement/user-story-refinement.png)
 
-**[`examples/flowforge/`](examples/flowforge/)**: FlowForge selbst als BPMN. Sechs Lanes von der
+**[`examples/lanecraft/`](examples/lanecraft/)**: lanecraft selbst als BPMN. Sechs Lanes von der
 Prozessmodellierung bis zu Prüfung & Übergabe, sieben menschliche Prüfpunkte, beide Schleifen der
 Pipeline und neun Data Stores aller drei Arten. Bisher nur gezeichnet, nicht durch die Pipeline
 gelaufen.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Flowforge" targetNamespace="https://example.com/bpmn/flowforge">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Lanecraft" targetNamespace="https://example.com/bpmn/lanecraft">
   <bpmn:dataStore id="DataStore_AgenticFaq" />
   <bpmn:dataStore id="DataStore_AgenticNotebook" />
   <bpmn:dataStore id="DataStore_FachNotebooks" />
@@ -8,15 +8,15 @@
   <bpmn:dataStore id="DataStore_Rubrik" />
   <bpmn:dataStore id="DataStore_Vorlagen" />
   <bpmn:dataStore id="DataStore_Wissensbasis" />
-  <bpmn:process id="Process_Flowforge" name="FlowForge: BPMN-Prozess in Claude-Code-Workflow übersetzen" isExecutable="false">
+  <bpmn:process id="Process_Lanecraft" name="lanecraft: BPMN-Prozess in Claude-Code-Workflow übersetzen" isExecutable="false">
     <bpmn:documentation>Der Ablauf, den dieses Repo selbst umsetzt: ein Fachanwender bringt ein Ziel oder ein BPMN-Diagramm mit; optional entwirft bpmn-process-design den Prozess aus Notebook-Wissen, dann übersetzen die fünf Stufen-Skills bpmn2agent-analyze, -knowledge, -design, -generate und -verify ihn über die workflow-spec.yaml in Agenten, Skills, Hooks, Skripte und genau eine Orchestrierungsdatei unter generated/&lt;workflow&gt;/. Einstieg und Steuerung der Schleifen: bpmn-to-agentic-workflow. Helfer: agentic-workflow-architect, agentic-kb-librarian, agentic-artifact-reviewer, orchestration-design, agent-authoring, skill-authoring, trim-the-fat. Quelle: ARCHITECTURE.md.</bpmn:documentation>
-    <bpmn:ioSpecification id="IoSpec_Flowforge">
+    <bpmn:ioSpecification id="IoSpec_Lanecraft">
       <bpmn:dataInput id="DataInput_Ziel" name="Prozessziel oder BPMN-Diagramm" />
       <bpmn:dataOutput id="DataOutput_Workflow" name="Generierter Workflow (generated/&lt;workflow&gt;/)" />
-      <bpmn:inputSet id="InputSet_Flowforge"><bpmn:dataInputRefs>DataInput_Ziel</bpmn:dataInputRefs></bpmn:inputSet>
-      <bpmn:outputSet id="OutputSet_Flowforge"><bpmn:dataOutputRefs>DataOutput_Workflow</bpmn:dataOutputRefs></bpmn:outputSet>
+      <bpmn:inputSet id="InputSet_Lanecraft"><bpmn:dataInputRefs>DataInput_Ziel</bpmn:dataInputRefs></bpmn:inputSet>
+      <bpmn:outputSet id="OutputSet_Lanecraft"><bpmn:dataOutputRefs>DataOutput_Workflow</bpmn:dataOutputRefs></bpmn:outputSet>
     </bpmn:ioSpecification>
-    <bpmn:laneSet id="LaneSet_Flowforge">
+    <bpmn:laneSet id="LaneSet_Lanecraft">
       <bpmn:lane id="Lane_Fachanwender" name="Fachanwender">
         <bpmn:flowNodeRef>Start_Anfrage</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>U_Intake</bpmn:flowNodeRef>
@@ -112,7 +112,7 @@
       <bpmn:outgoing>F07</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="P_Zeichnen" name="BPMN-Diagramm zeichnen">
-      <bpmn:documentation>Input: Bestätigter Prozessentwurf, FlowSpec-Notation, Skeleton und Layout-Raster aus bpmn-authoring. Output: &lt;workflow&gt;.bpmn mit Lanes, typisierten Tasks, Datenobjekten, Data Stores (Art/Ort) und Input/Output-Dokumentation an jedem Task. Quelle: datei:.agents/skills/bpmn-authoring/SKILL.md §2-4</bpmn:documentation>
+      <bpmn:documentation>Input: Bestätigter Prozessentwurf, lanecraft-Notation, Skeleton und Layout-Raster aus bpmn-authoring. Output: &lt;workflow&gt;.bpmn mit Lanes, typisierten Tasks, Datenobjekten, Data Stores (Art/Ort) und Input/Output-Dokumentation an jedem Task. Quelle: datei:.agents/skills/bpmn-authoring/SKILL.md §2-4</bpmn:documentation>
       <bpmn:incoming>F07</bpmn:incoming>
       <bpmn:outgoing>F08</bpmn:outgoing>
       <bpmn:property id="Property_DataIn_Notation_Zeichnen" name="__targetRef_placeholder" />
@@ -440,7 +440,7 @@
       <bpmn:documentation>Art: live
 Ort: mcp:gemini-notebook-mcp</bpmn:documentation>
     </bpmn:dataStoreReference>
-    <bpmn:dataStoreReference id="StoreRef_Notation" name="BPMN-Notation FlowSpec" dataStoreRef="DataStore_Notation">
+    <bpmn:dataStoreReference id="StoreRef_Notation" name="BPMN-Notation lanecraft" dataStoreRef="DataStore_Notation">
       <bpmn:documentation>Art: wissen
 Ort: datei:BPMN-NOTATION.md</bpmn:documentation>
     </bpmn:dataStoreReference>
@@ -473,8 +473,8 @@ Ort: datei:.agents/skills/bpmn2agent-generate/assets/templates/</bpmn:documentat
 Ort: datei:&lt;projekt&gt;/.claude/</bpmn:documentation>
     </bpmn:dataStoreReference>
   </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_Flowforge">
-    <bpmndi:BPMNPlane id="BPMNPlane_Flowforge" bpmnElement="Process_Flowforge">
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Lanecraft">
+    <bpmndi:BPMNPlane id="BPMNPlane_Lanecraft" bpmnElement="Process_Lanecraft">
       <bpmndi:BPMNShape id="Lane_Fachanwender_di" bpmnElement="Lane_Fachanwender" isHorizontal="true"><dc:Bounds x="160" y="40" width="7662" height="330" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_Prozessmodellierung_di" bpmnElement="Lane_Prozessmodellierung" isHorizontal="true"><dc:Bounds x="160" y="370" width="7662" height="480" /></bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_AnalyseWissen_di" bpmnElement="Lane_AnalyseWissen" isHorizontal="true"><dc:Bounds x="160" y="850" width="7662" height="480" /></bpmndi:BPMNShape>

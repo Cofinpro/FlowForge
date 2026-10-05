@@ -138,7 +138,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
 - **README:**
   - wo Ledger und Kostenkarte liegen
   - `.gitignore`-Empfehlung für `.claude/runs/`
-  - „Kosten auswerten: FlowForge-Plugin installieren, dann `/bpmn2agent-cost`“
+  - „Kosten auswerten: lanecraft-Plugin installieren, dann `/bpmn2agent-cost`“
 - **Abnahme:**
   - Smoke-Test mit gepipeten Payloads auf die T0-Fixtures schreibt die erwarteten Zeilen.
   - Ein zweiter Aufruf für denselben Agent dupliziert nichts.
@@ -202,7 +202,7 @@ denen alles Weitere steht. Weicht ein Befund ab, wird zuerst `plan.md` angepasst
   - Pipeline auf einer verify-Fixture mit workflow-script-Muster
   - generierten Payload in ein Scratch-Projekt kopieren und einmal laufen lassen
   - `cost-report` aus dem Ledger und zum Vergleich direkt aus dem Transkript
-  - einmal im Scratch-Projekt nur mit Payload + FlowForge-Plugin, **ohne** `generated/`, also
+  - einmal im Scratch-Projekt nur mit Payload + lanecraft-Plugin, **ohne** `generated/`, also
     ausschließlich über `cost-map.json`
 - **Abnahme:**
   - Alle Wege (Ledger, Transkript, nur Kostenkarte) liefern dieselben Zahlen; Abgleich grün.

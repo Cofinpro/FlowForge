@@ -60,7 +60,7 @@ erzeugt die Pipeline weiterhin als *Ergebnis*, wenn das gezeichnete Diagramm daz
 
 | Stufe | Skill | Liest | Schreibt |
 |---|---|---|---|
-| 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in FlowSpec-Notation, `knowledge/faq/` |
+| 0 | `bpmn-process-design` (optional) | Ziel des Anwenders, NotebookLM | das `.bpmn` in lanecraft-Notation, `knowledge/faq/` |
 | 0 | `bpmn-authoring` | – | das `.bpmn` von Hand (XSD, bpmn-moddle, bpmnlint, Layout) |
 | 1 | `bpmn2agent-analyze` | `.bpmn` | `workflow-spec.yaml` als Entwurf, jedes Element `kind: unresolved`; Stores und Prozess-Ein-/Ausgabe als `contextSources` / `workflowIO` |
 | 2 | `bpmn2agent-knowledge` | Spec, NotebookLM / Web, Wissens-Stores | `knowledge:`, `openQuestions:`, `knowledge/*.md`, `knowledge/faq/` |
@@ -238,7 +238,7 @@ Preise in einer Tabelle, und die BPMN-Element-ID steckt in jedem Label. Design u
 |---|---|---|
 | `hooks/<workflow>-cost-ledger.mjs` | erzeugter Payload (generate 6b, immer) | hängt bei `SubagentStop`, `Stop` und `SessionEnd` jede abgeschlossene API-Anfrage einmal an `.claude/runs/<workflow>/ledger.jsonl` an: rohe Token-Zahlen, keine Preise, kein Netz, bricht nie einen Lauf ab |
 | `hooks/<workflow>-cost-map.json` | erzeugter Payload | schlüsselt auf, welcher Skill, Agent-Typ und welche Element-ID im Transkript zu welchem Element, welcher Lane und welcher Phase gehört; `verify` prüft sie gegen die Spec |
-| `bpmn2agent-cost` | FlowForge-Plugin | `cost-report.mjs` rechnet mit `prices.json`, ordnet zu und gleicht ab; `cost-bench.mjs` wiederholt Läufe; `render-mapping.mjs --cost` blendet die Kosten in die Mapping-Ansicht ein |
+| `bpmn2agent-cost` | lanecraft-Plugin | `cost-report.mjs` rechnet mit `prices.json`, ordnet zu und gleicht ab; `cost-bench.mjs` wiederholt Läufe; `render-mapping.mjs --cost` blendet die Kosten in die Mapping-Ansicht ein |
 
 **Zuordnung je API-Anfrage** (erste Regel, die passt): Beschreibung des Subagents beginnt mit einer
 Element-ID → dieses Element; Agent-Typ des Orchestrators → *Orchestrierung*; `attributionSkill` ist
@@ -336,7 +336,7 @@ die Struktur des Diagramms).
 - `examples/user-story-refinement/` – neue User Story aus Feedback, erstes Beispiel im `.claude/`-Aufbau,
   mit Wissens-Stores und dem Product Backlog als Live-Store (`cli:gh`) samt Freigaben und Write-Guard;
   die Notebook-Frage dahinter liegt in `notebook-faq/`.
-- `examples/flowforge/` – dieser Ablauf selbst als BPMN in FlowSpec-Notation (sechs Lanes, neun
+- `examples/lanecraft/` – dieser Ablauf selbst als BPMN in lanecraft-Notation (sechs Lanes, neun
   Stores); nur gezeichnet, noch nicht durch die Pipeline gelaufen.
 
 ## Wo ändere ich was?

@@ -6,7 +6,7 @@
 //
 // It only RECORDS: every finished API request of the session (main thread + subagents) is appended
 // once to .claude/runs/user-story-refinement/ledger.jsonl as raw token counts. No prices, no grouping, no
-// network. The FlowForge plugin's bpmn2agent-cost reads the ledger together with
+// network. The lanecraft plugin's bpmn2agent-cost reads the ledger together with
 // .claude/hooks/user-story-refinement-cost-map.json and turns it into cost per BPMN element.
 //
 // It needs nothing from the hook payload but `transcript_path`, so it does not depend on the

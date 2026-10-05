@@ -1,11 +1,11 @@
 {
-  "name": "flowforge",
+  "name": "lanecraft",
   "version": "0.4.1",
   "description": "BPMN 2.0 process diagram in, reviewable Claude Code agents, skills, hooks, scripts and orchestrator out, each file traced back to its BPMN element.",
   "author": {
     "name": "Cofinpro"
   },
-  "repository": "https://github.com/Cofinpro/flowforge",
+  "repository": "https://github.com/Cofinpro/lanecraft",
   "keywords": [
     "bpmn",
     "agentic-workflow",

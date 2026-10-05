@@ -77,7 +77,7 @@ inside your project, not in the copied `.claude/`), at most {{maxLines}} lines i
   say so.}}
 - **Kostenprotokoll** (`hooks/{{workflow}}-cost-ledger.mjs`, `hooks/{{workflow}}-cost-map.json`): schreibt
   nach jedem Lauf die verbrauchten Tokens nach `.claude/runs/{{workflow}}/ledger.jsonl` (ohne Preise,
-  ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: FlowForge-Plugin installieren,
+  ohne Netz; nimm `.claude/runs/` in die `.gitignore` auf). Auswerten: lanecraft-Plugin installieren,
   danach `/bpmn2agent-cost`. Das zeigt die Kosten je BPMN-Element, Lane und Phase.
 - **Permissions** (`settings.json` → `permissions.allow`): {{the read tools allowed without a prompt,
   for stores read by non-agent lanes; "Lesezugriff nicht pro Rolle getrennt" — every role may use
