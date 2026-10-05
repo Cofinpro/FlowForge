@@ -57,7 +57,7 @@ ToolSearch: select:mcp__gemini-notebook-mcp__notebook_query
    inline, write it to a `.json` file first (keep `question`, `answer`, `conversation_id`,
    `references`).
 3. Write only if `git -C ${CLAUDE_SKILL_DIR} rev-parse --show-toplevel` succeeds and that root's
-   `.claude-plugin/plugin.json` has `"name": "lanecraft"`. Otherwise (e.g. installed plugin) stop
+   `.claude-plugin/plugin.json` has `"name": "flowforge"`. Otherwise (e.g. installed plugin) stop
    here and return the saved result path as a follow-up for a maintainer.
 4. Record it:
 

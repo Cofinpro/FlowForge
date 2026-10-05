@@ -1,5 +1,5 @@
 {
-  "name": "lanecraft",
+  "name": "flowforge",
   "owner": {
     "name": "Cofinpro"
   },
@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "lanecraft",
+      "name": "flowforge",
       "source": "./",
       "description": "BPMN 2.0 process diagram in, reviewable Claude Code agents, skills, hooks, scripts and orchestrator out."
     }

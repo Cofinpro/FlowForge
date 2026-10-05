@@ -8,7 +8,7 @@ spec, traceability, the knowledge layer and the helper skills/agents fit togethe
 
 - Skills live in `.agents/skills/` (real files); `.claude/skills/<name>` are relative symlinks. Agents
   likewise: `.agents/agents/<name>.md`, symlinked from `.claude/agents/`. Add new ones the same way.
-- The repo is also the `lanecraft` plugin (`.claude-plugin/`). A new agent must be added to the
+- The repo is also the `flowforge` plugin (`.claude-plugin/`). A new agent must be added to the
   `agents` list in `plugin.json`. Inside a SKILL.md, point at another skill as
   `${CLAUDE_SKILL_DIR}/../<skill>/…`, never `.agents/skills/…`; agents get skills through `skills:`
   in their frontmatter. Check with `npm run validate`; release via the `Release` GitHub Action.
