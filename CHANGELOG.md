@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.0](https://github.com/Cofinpro/lanecraft/compare/v0.5.0...v1.0.0) (2026-10-05)
+
+### ⚠ BREAKING CHANGES
+
+* the plugin is now `flowforge`; reinstall as
+  `flowforge@flowforge` and use the `/flowforge:` command prefix.
+* the plugin is now `flowforge`; reinstall as
+  `flowforge@flowforge` and use the `/flowforge:` command prefix.
+
+* Reapply "refactor!: rename lanecraft to FlowForge and its notation to FlowSpec" ([2f50708](https://github.com/Cofinpro/lanecraft/commit/2f50708ea6a6afa960839822faff0c6ea3d0387e))
+
+### Reverts
+
+* undo rename of lanecraft to FlowForge/FlowSpec ([050f20e](https://github.com/Cofinpro/lanecraft/commit/050f20e7e96218b889e88c11c21455f54b33fc2f))
+
+### Code Refactoring
+
+* rename lanecraft to FlowForge and its notation to FlowSpec ([ce8dd53](https://github.com/Cofinpro/lanecraft/commit/ce8dd53cdb89aedf0901c944ae90cceb577f4f1a))
+
 ## [0.5.0](https://github.com/Cofinpro/lanecraft/compare/v0.4.1...v0.5.0) (2026-10-04)
 
 ### Features

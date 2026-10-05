@@ -1,6 +1,6 @@
 {
   "name": "flowforge",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "BPMN 2.0 process diagram in, reviewable Claude Code agents, skills, hooks, scripts and orchestrator out, each file traced back to its BPMN element.",
   "author": {
     "name": "Cofinpro"
